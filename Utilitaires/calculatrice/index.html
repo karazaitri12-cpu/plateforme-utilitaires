@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculatrice Clinique | Plateforme Utilitaires</title>
+    <meta name="description" content="Calculatrice scientifique et bureautique pour professionnels de santé. Fonctions mémoire, trigonométrie, pourcentages contextuels.">
+    <style>
+        /* --- DESIGN SYSTÈME INSTITUTIONNEL (HAS/Vidal) --- */
+        :root {
+            --primary: #1a3a5c;
+            --bg-page: #f4f7f9;
+            --bg-card: #ffffff;
+            --border: #cfd8dc;
+            --text-main: #37474f;
+            --text-light: #607d8b;
+            --btn-bg: #f5f7f9;
+            --btn-border: #e0e6ed;
+            --btn-text: #263238;
+            --btn-primary-bg: #1a3a5c;
+            --btn-primary-text: #ffffff;
+            --warning-bg: #fff3cd;
+            --warning-text: #856404;
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+        }
+
+        /* NAVIGATION */
+        .top-nav {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+        }
+        .back-link {
+            text-decoration: none;
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .back-link:hover { text-decoration: underline; }
+
+        /* CONTAINER PRINCIPAL */
+        .main-container {
+            max-width: 1100px;
+            margin: 30px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        /* SECTION CALCULATRICE */
+        .calculator-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+        }
+        .card-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+        .card-title { font-size: 18px; font-weight: 700; color: var(--primary); margin: 0; text-transform: uppercase; letter-spacing: 0.5px; }
+        .card-subtitle { font-size: 12px; color: var(--text-light); margin-top: 4px; }
+
+        /* ÉCRAN */
+        .display-wrapper {
+            margin-bottom: 20px;
+            background: #f8f9fa;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 12px;
+            position: relative;
+        }
+        #operation-history {
+            width: 100%;
+            height: 20px;
+            background: transparent;
+            color: #78909c;
+            border: none;
+            font-size: 12px;
+            text-align: right;
+            padding: 0; margin: 0; outline: none;
+        }
+        #display {
+            width: 100%;
+            height: 48px;
+            background: transparent;
+            color: var(--primary);
+            border: none;
+            font-size: 32px;
+            font-weight: 600;
+            text-align: right;
+            padding: 0; margin: 0; outline: none;
+            font-family: 'Roboto Mono', monospace;
+        }
+        .memory-indicator {
+            position: absolute;
+            top: 14px; left: 12px;
+            background: #ef5350;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            opacity: 0; transition: opacity 0.2s;
+        }
+        .memory-indicator.active { opacity: 1; }
+
+        /* BOUTONS */
+        .buttons { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+        .trigo-buttons { display: none; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 8px; }
+        .calculator-wrapper.show-trigo .trigo-buttons { display: grid; }
+
+        .calc-button {
+            height: 44px;
+            border: 1px solid var(--btn-border);
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            background: var(--btn-bg);
+            color: var(--btn-text);
+            transition: background 0.15s, border-color 0.15s;
+        }
+        .calc-button:hover { background: #eceff1; border-color: #b0bec5; }
+        .calc-button:active { transform: scale(0.98); }
+
+        .operator { background: var(--btn-primary-bg); color: var(--btn-primary-text); border-color: var(--btn-primary-bg); }
+        .operator:hover { opacity: 0.9; }
+        .function { background: #eceff1; color: #455a64; }
+        .memory { background: #e3f2fd; color: #0277bd; border-color: #bbdefb; font-size: 12px; }
+        .parenthesis { background: #f5f7f9; }
+        .special { background: #fff3e0; color: #e65100; border-color: #ffe0b2; }
+        #equals { grid-column: span 3; background: #2e7d32; color: white; border-color: #2e7d32; }
+        #equals:hover { background: #388e3c; }
+
+        /* MODE D'EMPLOI */
+        .manual-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            display: none;
+        }
+        .manual-card.active { display: block; }
+        .manual-title { font-size: 16px; font-weight: 700; color: var(--primary); margin: 0 0 15px 0; border-bottom: 2px solid var(--primary); padding-bottom: 6px; }
+        
+        .accordion { border-bottom: 1px solid var(--border); }
+        .accordion-header {
+            padding: 12px 0;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-main);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+        .accordion-header::after { content: '+'; font-size: 16px; font-weight: 300; color: var(--text-light); }
+        .accordion-header.active::after { content: '−'; }
+        .accordion-content { display: none; padding-bottom: 15px; font-size: 13px; color: #455a64; line-height: 1.6; }
+        .accordion-content.active { display: block; }
+        
+        .example { background: #f5f7f9; padding: 10px; border-left: 3px solid var(--primary); margin: 10px 0; border-radius: 0 4px 4px 0; }
+        .calculation { font-family: monospace; color: #c62828; font-weight: bold; margin: 6px 0; background: #fff; padding: 4px 8px; border-radius: 4px; display: inline-block; }
+        
+        .toggle-manual {
+            width: 100%;
+            padding: 12px;
+            background: #fff;
+            border: 1px dashed var(--border);
+            color: var(--text-light);
+            cursor: pointer;
+            font-weight: 600;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        .toggle-manual:hover { background: #f5f7f9; border-style: solid; }
+
+        /* FOOTER MÉDICO-LÉGAL */
+        .site-footer {
+            margin-top: 50px;
+            padding: 30px 20px;
+            background: #fff;
+            border-top: 1px solid var(--border);
+            text-align: center;
+        }
+        .medical-disclaimer {
+            max-width: 700px;
+            margin: 0 auto;
+            background: var(--warning-bg);
+            color: var(--warning-text);
+            padding: 14px;
+            border-radius: 6px;
+            font-size: 11px;
+            border: 1px solid #ffeeba;
+            line-height: 1.4;
+        }
+        .copyright { font-size: 12px; color: #90a4ae; margin-top: 15px; }
+
+        /* RESPONSIVE */
+        @media (max-width: 850px) {
+            .main-container { grid-template-columns: 1fr; }
+            .buttons, .trigo-buttons { grid-template-columns: repeat(4, 1fr); }
+            #equals { grid-column: span 2; }
+            .calc-button { height: 40px; font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+        <a href="../../index.html" class="back-link">← Retour aux Utilitaires</a>
+    </nav>
+
+    <div class="main-container">
+        <!-- CALCULATRICE -->
+        <section class="calculator-wrapper" id="ma-calculatrice-ultra">
+            <div class="calculator-card">
+                <div class="card-header">
+                    <h1 class="card-title">Calculatrice Clinique</h1>
+                    <p class="card-subtitle">Dr. Anouar Karazaitri © 2026</p>
+                </div>
+
+                <div class="display-wrapper">
+                    <span class="memory-indicator" id="memory-indicator">M</span>
+                    <input type="text" id="operation-history" readonly placeholder="">
+                    <input type="text" id="display" readonly placeholder="0">
+                </div>
+
+                <div id="calculator-buttons" class="buttons">
+                    <button class="calc-button memory" onclick="memoryClear()">MC</button>
+                    <button class="calc-button memory" onclick="memoryStore()">MS</button>
+                    <button class="calc-button memory" onclick="memoryAdd()">M+</button>
+                    <button class="calc-button memory" onclick="memorySubtract()">M-</button>
+                    <button class="calc-button memory" onclick="memoryRecall()">MR</button>
+
+                    <button class="calc-button operator" onclick="appendToDisplay('/')">/</button>
+                    <button class="calc-button operator" onclick="appendToDisplay('*')">×</button>
+                    <button class="calc-button operator" onclick="appendToDisplay('-')">-</button>
+                    <button class="calc-button operator" onclick="appendToDisplay('+')">+</button>
+                    <button class="calc-button operator" onclick="appendToDisplay('%')">%</button>
+
+                    <button class="calc-button" onclick="appendToDisplay('1')">1</button>
+                    <button class="calc-button" onclick="appendToDisplay('2')">2</button>
+                    <button class="calc-button" onclick="appendToDisplay('3')">3</button>
+                    <button class="calc-button parenthesis" onclick="addParenthesis('open')">(</button>
+                    <button class="calc-button parenthesis" onclick="addParenthesis('close')">)</button>
+
+                    <button class="calc-button" onclick="appendToDisplay('4')">4</button>
+                    <button class="calc-button" onclick="appendToDisplay('5')">5</button>
+                    <button class="calc-button" onclick="appendToDisplay('6')">6</button>
+                    <button class="calc-button special" onclick="backspace()">⌫</button>
+                    <button class="calc-button special" onclick="clearDisplay()">C</button>
+
+                    <button class="calc-button" onclick="appendToDisplay('7')">7</button>
+                    <button class="calc-button" onclick="appendToDisplay('8')">8</button>
+                    <button class="calc-button" onclick="appendToDisplay('9')">9</button>
+                    <button class="calc-button" onclick="appendToDisplay('.')">.</button>
+                    <button class="calc-button function" onclick="toggleTrigo()">Trigo/Sci</button>
+
+                    <button class="calc-button" onclick="appendToDisplay('0')" style="grid-column: span 2;">0</button>
+                    <button id="equals" class="calc-button" onclick="calculateResult()">=</button>
+                </div>
+
+                <div class="trigo-buttons">
+                    <button class="calc-button function" onclick="calculate('sin')">sin</button>
+                    <button class="calc-button function" onclick="calculate('cos')">cos</button>
+                    <button class="calc-button function" onclick="calculate('tan')">tan</button>
+                    <button class="calc-button function" onclick="calculate('log')">log</button>
+                    <button class="calc-button function" onclick="calculate('ln')">ln</button>
+                    <button class="calc-button function" onclick="calculate('sqrt')">√</button>
+                    <button class="calc-button function" onclick="calculate('pi')">π</button>
+                    <button class="calc-button function" onclick="calculate('e')">e</button>
+                    <button class="calc-button function" onclick="calculate('exp')">exp</button>
+                    <button class="calc-button function" onclick="appendToDisplay('**')">x^y</button>
+                    <button class="calc-button function" onclick="calculate('reciprocal')">1/x</button>
+                    <button class="calc-button function" onclick="toggleSign()">+/-</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- MODE D'EMPLOI -->
+        <aside>
+            <button class="toggle-manual" onclick="toggleManual()">📖 Afficher le mode d'emploi</button>
+            <div class="manual-card" id="manual-content">
+                <h2 class="manual-title">Mode d'emploi</h2>
+                
+                <div class="accordion">
+                    <div class="accordion-header" onclick="toggleAccordion('op-base')">Opérations de base</div>
+                    <div id="op-base" class="accordion-content">
+                        <div class="example">
+                            <strong>Exemple : 10 + 5</strong><br>
+                            Tapez <code>1</code> <code>0</code> <code>+</code> <code>5</code> puis <code>=</code>.
+                        </div>
+                        <p>Pourcentage contextuel : <code>200 + 10%</code> donne 220.</p>
+                    </div>
+                </div>
+
+                <div class="accordion">
+                    <div class="accordion-header" onclick="toggleAccordion('mem')">Mémoire (MC/MS/M+/M-)</div>
+                    <div id="mem" class="accordion-content">
+                        <p>Utilisez <strong>MS</strong> pour stocker une valeur, <strong>M+</strong> pour additionner à la mémoire, et <strong>MR</strong> pour la rappeler.</p>
+                        <div class="calculation">Ex : 50 → MS → 20 → M+ → MR affiche 70.</div>
+                    </div>
+                </div>
+
+                <div class="accordion">
+                    <div class="accordion-header" onclick="toggleAccordion('sci')">Fonctions Scientifiques</div>
+                    <div id="sci" class="accordion-content">
+                        <p>Cliquez sur <strong>Trigo/Sci</strong> pour afficher les fonctions avancées (sin, cos, log, √, etc.).</p>
+                        <p>Pour les puissances, utilisez le bouton <strong>x^y</strong> (ex: 2 <strong>x^y</strong> 3 = 8).</p>
+                        <div class="example"><strong>pH approximatif</strong> : <code>log(0.001)</code> → -3 (pH ≈ 3)</div>
+                    </div>
+                </div>
+                
+                <div class="accordion">
+                    <div class="accordion-header" onclick="toggleAccordion('med')">Exemples Médicaux</div>
+                    <div id="med" class="accordion-content">
+                        <div class="example">
+                            <strong>Dose pédiatrique (règle de Clark)</strong><br>
+                            Dose = Dose Adulte × (Poids kg / 70)<br>
+                            <code>500 * (25 / 70) =</code> 178.57 mg
+                        </div>
+                        <div class="example">
+                            <strong>Dilution</strong><br>
+                            Concentration = Quantité / Volume<br>
+                            <code>5 / 100 =</code> 0.05 (soit 5%)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <footer class="site-footer">
+        <div class="medical-disclaimer">
+            ⚠️ <strong>AVERTISSEMENT</strong> : Cet outil est fourni à titre informatif et bureautique. Il ne remplace en aucun cas le jugement clinique du praticien ni les recommandations officielles. Vérifiez toujours les résultats avant toute application thérapeutique.
+        </div>
+        <p class="copyright">© 2026 Dr. Anouar Karazaitri - Gynécologie Obstétrique</p>
+    </footer>
+
+    <script>
+        (function() {
+            const calculatorContainer = document.getElementById('ma-calculatrice-ultra');
+            if (!calculatorContainer) return;
+
+            const display = calculatorContainer.querySelector('#display');
+            const operationHistory = calculatorContainer.querySelector('#operation-history');
+            const memoryIndicator = calculatorContainer.querySelector('#memory-indicator');
+
+            let memoryValue = 0;
+            let operationComplete = false;
+
+            function showError(message = 'Erreur') {
+                display.value = message;
+                display.classList.add('error-shake');
+                setTimeout(() => display.classList.remove('error-shake'), 500);
+            }
+
+            function adjustFontSize() {
+                const length = display.value.length;
+                if (length > 12) display.style.fontSize = '22px';
+                else if (length > 8) display.style.fontSize = '26px';
+                else display.style.fontSize = '32px';
+            }
+
+            window.memoryAdd = function() {
+                try {
+                    const currentValue = parseFloat(display.value) || 0;
+                    memoryValue += currentValue;
+                    operationHistory.value = `M+ ${currentValue} → M = ${memoryValue}`;
+                } catch { showError(); }
+            };
+
+            window.memorySubtract = function() {
+                try {
+                    const currentValue = parseFloat(display.value) || 0;
+                    memoryValue -= currentValue;
+                    operationHistory.value = `M- ${currentValue} → M = ${memoryValue}`;
+                } catch { showError(); }
+            };
+
+            window.memoryRecall = function() {
+                display.value = memoryValue.toString();
+                operationHistory.value = `MR → ${memoryValue}`;
+                adjustFontSize();
+            };
+
+            window.memoryClear = function() {
+                memoryValue = 0;
+                operationHistory.value = 'MC → Mémoire effacée';
+            };
+
+            window.memoryStore = function() {
+                try {
+                    memoryValue = parseFloat(display.value) || 0;
+                    operationHistory.value = `MS → M = ${memoryValue}`;
+                } catch { showError(); }
+            };
+
+            window.appendToDisplay = function(value) {
+                if (['Erreur', 'NaN', 'Infinity'].includes(display.value)) clearDisplay();
+                if (operationComplete && /[0-9.]/.test(value)) {
+                    display.value = '';
+                    operationComplete = false;
+                }
+
+                const lastChar = display.value.slice(-1);
+                const operatorsAndPower = ['+', '-', '*', '/', '**'];
+
+                if ((operatorsAndPower.includes(lastChar) && value === '%') || (lastChar === '%' && value === '%')) return;
+                if (operatorsAndPower.includes(lastChar) && operatorsAndPower.includes(value)) {
+                    if (value === '-' && lastChar !== '-') {
+                        if (lastChar === '**') return;
+                    } else { return; }
+                }
+                if (lastChar === '.' && operatorsAndPower.includes(value)) return;
+                if (value === '.') {
+                    const parts = display.value.split(/[+\-*/()^%]/);
+                    if (parts.length > 0 && parts[parts.length - 1].includes('.')) return;
+                }
+                if (display.value === "" && ['*', '/', '**', '+', '%'].includes(value)) return;
+
+                display.value += value;
+                operationComplete = false;
+                adjustFontSize();
+            };
+
+            window.clearDisplay = function() {
+                display.value = '';
+                operationHistory.value = '';
+                display.placeholder = '0';
+                operationComplete = false;
+                adjustFontSize();
+            };
+
+            window.backspace = function() {
+                if (['Erreur', 'NaN', 'Infinity'].includes(display.value)) clearDisplay();
+                else {
+                    display.value = display.value.slice(0, -1);
+                    if (display.value === '') display.value = '0';
+                }
+                operationComplete = false;
+                adjustFontSize();
+            };
+
+            window.addParenthesis = function(type) {
+                if (type === 'open') {
+                    const lastChar = display.value.slice(-1);
+                    if (lastChar && /[0-9)]/.test(lastChar)) appendToDisplay('*(');
+                    else appendToDisplay('(');
+                } else if (type === 'close') {
+                    const openCount = (display.value.match(/\(/g) || []).length;
+                    const closeCount = (display.value.match(/\)/g) || []).length;
+                    if (openCount > closeCount) appendToDisplay(')');
+                }
+                adjustFontSize();
+            };
+
+            window.calculateResult = function() {
+                try {
+                    if (!display.value) return;
+                    const originalExpression = display.value;
+                    
+                    const openCount = (originalExpression.match(/\(/g) || []).length;
+                    const closeCount = (originalExpression.match(/\)/g) || []).length;
+                    if (openCount !== closeCount) { showError("Parenthèses"); return; }
+
+                    let expression = originalExpression;
+                    const percentagePattern = /(\d+(?:\.\d+)?)\s*([+\-])\s*(\d+(?:\.\d+)?)%|(\d+(?:\.\d+)?)([+\-])(\d+(?:\.\d+)?)%/g;
+                    expression = expression.replace(percentagePattern, function(match, b1, op1, p1, b2, op2, p2) {
+                        const base = parseFloat(b1 || b2);
+                        const percent = parseFloat(p1 || p2);
+                        const operator = op1 || op2;
+                        return operator === '+' ? `${base} + (${base} * ${percent} / 100)` : `${base} - (${base} * ${percent} / 100)`;
+                    });
+                    const isolatedPercentPattern = /^(\d+(?:\.\d+)?)%$/;
+                    if (isolatedPercentPattern.test(expression)) expression = (parseFloat(expression) / 100).toString();
+                    expression = expression.replace(/(?<![\d.])\s*(\d+(?:\.\d+)?)%/g, function(match, pv) { return (parseFloat(pv) / 100).toString(); });
+                    expression = expression.replace(/×/g, '*');
+                    
+                    const safeEval = new Function('return ' + expression);
+                    const result = safeEval();
+
+                    if (isNaN(result) || !isFinite(result)) showError();
+                    else {
+                        const displayExpression = originalExpression.replace(/\*/g, '×');
+                        const formattedResult = Number.isInteger(result) ? result : parseFloat(result.toFixed(12));
+                        operationHistory.value = `${displayExpression} = ${formattedResult}`;
+                        display.value = formattedResult.toString();
+                        operationComplete = true;
+                    }
+                } catch { showError(); }
+                adjustFontSize();
+            };
+
+            window.toggleSign = function() {
+                if (display.value && !['Erreur', 'NaN', 'Infinity'].includes(display.value)) {
+                    const match = display.value.match(/(-?\d+\.?\d*)$/);
+                    if (match && match[1]) {
+                        let lastNumberStr = match[1];
+                        let prefix = display.value.substring(0, display.value.length - lastNumberStr.length);
+                        if (lastNumberStr.startsWith('-')) display.value = prefix + lastNumberStr.substring(1);
+                        else display.value = prefix + '-' + lastNumberStr;
+                    }
+                }
+                adjustFontSize();
+            };
+
+            window.calculate = function(operation) {
+                let currentValueStr = display.value;
+                if (['Erreur', 'NaN', 'Infinity'].includes(currentValueStr)) clearDisplay();
+                let valueToOperateOn = NaN;
+                let prefixExpression = "";
+                const match = currentValueStr.match(/(-?\d*\.?\d*)$/);
+                
+                if (match && match[1] && match[1].trim() !== "") {
+                    valueToOperateOn = parseFloat(match[1]);
+                    prefixExpression = currentValueStr.substring(0, currentValueStr.length - match[1].length);
+                } else if (currentValueStr.trim() !== "" && !isNaN(parseFloat(currentValueStr))) {
+                    valueToOperateOn = parseFloat(currentValueStr);
+                }
+
+                let result;
+                switch(operation) {
+                    case 'sin': result = Math.sin(valueToOperateOn * Math.PI / 180); break;
+                    case 'cos': result = Math.cos(valueToOperateOn * Math.PI / 180); break;
+                    case 'tan': result = Math.tan(valueToOperateOn * Math.PI / 180); break;
+                    case 'log':
+                        if (valueToOperateOn <= 0) { showError(); return; }
+                        result = Math.log10(valueToOperateOn); break;
+                    case 'ln':
+                        if (valueToOperateOn <= 0) { showError(); return; }
+                        result = Math.log(valueToOperateOn); break;
+                    case 'sqrt':
+                        if (valueToOperateOn < 0) { showError(); return; }
+                        result = Math.sqrt(valueToOperateOn); break;
+                    case 'exp': result = Math.exp(valueToOperateOn); break;
+                    case 'pi': 
+                        const pi = Math.PI.toFixed(10);
+                        display.value = prefixExpression + (prefixExpression.length > 0 && /[\d.)]$/.test(prefixExpression.slice(-1)) ? '*' : '') + pi;
+                        operationHistory.value = `π = ${pi}`;
+                        operationComplete = true;
+                        adjustFontSize(); return;
+                    case 'e': 
+                        const e = Math.E.toFixed(10);
+                        display.value = prefixExpression + (prefixExpression.length > 0 && /[\d.)]$/.test(prefixExpression.slice(-1)) ? '*' : '') + e;
+                        operationHistory.value = `e = ${e}`;
+                        operationComplete = true;
+                        adjustFontSize(); return;
+                    case 'reciprocal':
+                        if (valueToOperateOn === 0) { showError(); return; }
+                        result = 1 / valueToOperateOn; break;
+                    default: return;
+                }
+
+                if (result === undefined || isNaN(result) || !isFinite(result)) showError();
+                else {
+                    const formattedResult = Number.isInteger(result) ? result.toString() : parseFloat(result.toFixed(12)).toString();
+                    display.value = prefixExpression + formattedResult;
+                    operationHistory.value = `${operation}(${valueToOperateOn}) = ${formattedResult}`;
+                    operationComplete = true;
+                }
+                adjustFontSize();
+            };
+
+            window.toggleTrigo = function() {
+                calculatorContainer.classList.toggle('show-trigo');
+            };
+
+            window.toggleManual = function() {
+                document.getElementById('manual-content').classList.toggle('active');
+            };
+
+            window.toggleAccordion = function(id) {
+                const content = document.getElementById(id);
+                const header = content.previousElementSibling;
+                content.classList.toggle('active');
+                header.classList.toggle('active');
+            };
+
+            document.addEventListener('keydown', function(event) {
+                const activeElement = document.activeElement;
+                if (activeElement.tagName === 'INPUT') return;
+                switch(event.key) {
+                    case '0': case '1': case '2': case '3': case '4':
+                    case '5': case '6': case '7': case '8': case '9': appendToDisplay(event.key); break;
+                    case '.': appendToDisplay('.'); break;
+                    case '+': appendToDisplay('+'); break;
+                    case '-': appendToDisplay('-'); break;
+                    case '*': appendToDisplay('*'); break;
+                    case '/': appendToDisplay('/'); break;
+                    case '%': appendToDisplay('%'); break;
+                    case '(': addParenthesis('open'); break;
+                    case ')': addParenthesis('close'); break;
+                    case 'Enter': case '=': calculateResult(); break;
+                    case 'Escape': case 'c': case 'C': clearDisplay(); break;
+                    case 'Backspace': backspace(); break;
+                }
+            });
+
+            operationHistory.value = 'Prêt';
+        })();
+    </script>
+</body>
+</html>
