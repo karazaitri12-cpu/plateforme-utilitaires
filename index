@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plateforme Utilitaires | Dr. A. Karazaitri</title>
+  <meta name="description" content="Utilitaires techniques bureautiques et outils de productivité pour professionnels de santé.">
+  <style>
+    :root { --primary: #1a3a5c; --bg: #f4f7f9; --text: #37474f; --card-bg: #ffffff; --border: #cfd8dc; }
+    * { box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); margin: 0; line-height: 1.5; }
+    header { background: #fff; border-bottom: 3px solid var(--primary); padding: 20px; text-align: center; }
+    h1 { font-size: 20px; color: var(--primary); margin: 0; text-transform: uppercase; letter-spacing: 0.5px; }
+    .subtitle { font-size: 13px; color: #607d8b; margin-top: 5px; }
+    .subtitle a { color: var(--primary); text-decoration: none; border-bottom: 1px dotted; }
+    main { max-width: 900px; margin: 30px auto; padding: 0 20px; }
+    .section-title { font-size: 14px; color: #546e7a; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; padding-bottom: 5px; border-bottom: 1px solid var(--border); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 15px; margin-bottom: 40px; }
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 6px; padding: 18px; text-decoration: none; color: inherit; transition: 0.2s; display: flex; align-items: center; gap: 15px; }
+    .card:hover { border-color: var(--primary); box-shadow: 0 4px 10px rgba(0,0,0,0.06); transform: translateY(-2px); }
+    .icon { width: 36px; height: 36px; background: #eceff1; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+    .info h3 { margin: 0; font-size: 15px; font-weight: 600; color: var(--primary); }
+    .info p { margin: 4px 0 0; font-size: 12px; color: #607d8b; }
+    footer { margin-top: 50px; padding: 30px 20px; background: #fff; border-top: 1px solid var(--border); text-align: center; }
+    .disclaimer { max-width: 600px; margin: 0 auto; background: #fff3cd; color: #856404; padding: 12px; border-radius: 6px; font-size: 11px; border: 1px solid #ffeeba; }
+    .copyright { font-size: 12px; color: #90a4ae; margin-top: 15px; }
+    @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Plateforme Utilitaires Techniques</h1>
+    <p class="subtitle">Outils bureautiques & productivité | Portail médical sur <a href="https://outils.dr-karazaitri-ma.net">outils.dr-karazaitri-ma.net</a></p>
+  </header>
+
+  <main>
+    <h2 class="section-title">Calcul & Conversion</h2>
+    <div class="grid">
+      <a href="outils/calculatrice/" class="card">
+        <div class="icon">🧮</div>
+        <div class="info"><h3>Calculatrice Clinique</h3><p>Opérations, mémoire, fonctions scientifiques</p></div>
+      </a>
+      <a href="outils/convertisseur/" class="card">
+        <div class="icon">🔄</div>
+        <div class="info"><h3>Convertisseur d'unités</h3><p>Poids, température, dosage, volumes</p></div>
+      </a>
+      <a href="outils/gps/" class="card">
+        <div class="icon">📍</div>
+        <div class="info"><h3>Convertisseur GPS</h3><p>DMS, décimal, plus codes</p></div>
+      </a>
+    </div>
+
+    <h2 class="section-title">Gestion de Documents</h2>
+    <div class="grid">
+      <a href="outils/pdf-manager/" class="card">
+        <div class="icon">📑</div>
+        <div class="info"><h3>PDF Manager</h3><p>Fusion, découpage, compression</p></div>
+      </a>
+      <a href="outils/ocr/" class="card">
+        <div class="icon">📷</div>
+        <div class="info"><h3>OCR & Extraction</h3><p>Texte depuis images ou scans</p></div>
+      </a>
+      <a href="outils/excel/" class="card">
+        <div class="icon">📊</div>
+        <div class="info"><h3>Éditeur Tableur</h3><p>Visualisation et modification légère</p></div>
+      </a>
+    </div>
+
+    <h2 class="section-title">Utilitaires Divers</h2>
+    <div class="grid">
+      <a href="outils/qr-code/" class="card">
+        <div class="icon">🏷️</div>
+        <div class="info"><h3>Générateur QR</h3><p>Création de liens ou textes</p></div>
+      </a>
+      <a href="outils/comparateur/" class="card">
+        <div class="icon"></div>
+        <div class="info"><h3>Comparateur de texte</h3><p>Détection de différences</p></div>
+      </a>
+    </div>
+  </main>
+
+  <footer>
+    <div class="disclaimer">
+      ⚠️ <strong>Usage technique</strong> : Ces utilitaires sont fournis "tels quels" pour faciliter la bureautique médicale. Ils ne contiennent aucune donnée patient et ne stockent rien sur serveur.
+    </div>
+    <p class="copyright">© 2026 Dr. Anouar Karazaitri - Gynécologie Obstétrique</p>
+  </footer>
+</body>
+</html>
