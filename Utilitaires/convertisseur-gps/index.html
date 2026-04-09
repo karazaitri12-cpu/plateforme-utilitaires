@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convertisseur GPS | Dr. Karazaitri</title>
+    
+    <!-- Bibliothèques externes nécessaires -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/openlocationcode/1.0.4/openlocationcode.min.js"></script>
+    
+    <style>
+        /* ==========================================
+           VARIABLES DE DESIGN (Style institutionnel)
+           ========================================== */
+        :root {
+            --primary: #1a3a5c;
+            --primary-light: #345a7a;
+            --text: #37474f;
+            --text-light: #607d8b;
+            --border: #cfd8dc;
+            --bg-page: #f4f7f9;
+            --bg-card: #ffffff;
+            --bg-input: #f8f9fa;
+            --success: #2e7d32;
+            --warning: #ed6c02;
+            --error: #c62828;
+            --city-bg: #1a3a5c;
+            --history-bg: #f5f7f9;
+        }
+
+        /* ==========================================
+           STRUCTURE GLOBALE
+           ========================================== */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            background: var(--bg-page);
+            color: var(--text);
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+
+        /* BARRE DE NAVIGATION (Fixe en haut) */
+        .nav-bar {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            padding: 12px 20px;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .back-link {
+            text-decoration: none;
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .back-link:hover { text-decoration: underline; }
+
+        /* CONTENEUR PRINCIPAL */
+        .gps-wrapper {
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+
+        .gps-header {
+            text-align: center;
+            margin-bottom: 24px;
+            padding: 20px;
+            background: var(--primary);
+            border-radius: 12px;
+            color: #fff;
+        }
+        .gps-header h1 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .gps-header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* CARTE PRINCIPALE */
+        .gps-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+
+        /* TITRES DE SECTION */
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 0 0 16px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border);
+            display: block;
+        }
+
+        /* INPUTS */
+        .gps-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            background: var(--bg-input);
+            margin-bottom: 12px;
+            transition: border-color 0.2s;
+        }
+        .gps-input:focus {
+            border-color: var(--primary);
+            outline: none;
+            background: #fff;
+        }
+        .gps-input[readonly] {
+            background: var(--bg-input);
+            cursor: default;
+            color: var(--text);
+        }
+
+        /* LABELS */
+        .gps-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+
+        /* BOUTON PRINCIPAL */
+        .gps-btn {
+            width: 100%;
+            padding: 12px 20px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 8px;
+        }
+        .gps-btn:hover { background: var(--primary-light); }
+
+        /* AIDE FORMAT */
+        .format-help {
+            background: #e3f2fd;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin: 12px 0;
+            font-size: 12px;
+            color: var(--text-light);
+        }
+        .format-help strong { color: var(--primary); display: block; margin-bottom: 6px; }
+        .format-help code { background: #fff; padding: 2px 6px; border-radius: 4px; font-family: monospace; }
+
+        /* GRILLE 2 COLONNES */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        /* INFO VILLE */
+        .city-info {
+            background: var(--city-bg);
+            color: #fff;
+            padding: 14px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .city-info-label {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .city-info-text {
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        /* CARTE LEAFLET */
+        #map {
+            height: 350px;
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin-top: 10px;
+        }
+
+        /* HISTORIQUE */
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .history-container {
+            background: var(--history-bg);
+            border-radius: 8px;
+            padding: 12px;
+            max-height: 280px;
+            overflow-y: auto;
+        }
+        .history-item {
+            background: #fff;
+            border-left: 4px solid var(--primary);
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .history-item:hover { background: #eceff1; }
+        .history-coords {
+            font-family: monospace;
+            font-size: 13px;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+        .history-time {
+            font-size: 11px;
+            color: var(--text-light);
+        }
+        .history-input {
+            font-size: 11px;
+            color: var(--primary);
+            margin-top: 4px;
+            font-style: italic;
+        }
+        .history-actions {
+            display: flex;
+            gap: 8px;
+            margin-left: auto;
+        }
+        .history-action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 4px;
+            border-radius: 4px;
+        }
+        .history-action-btn:hover { background: rgba(0,0,0,0.1); }
+
+        .clear-history-btn {
+            padding: 6px 12px;
+            background: var(--error);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .clear-history-btn:hover { background: #b71c1c; }
+
+        /* FOOTER */
+        .tool-footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+            color: var(--text-light);
+        }
+        .disclaimer {
+            background: #fff3cd;
+            color: #856404;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #ffeeba;
+            margin-top: 15px;
+            font-size: 11px;
+            line-height: 1.4;
+        }
+
+        /* NOTIFICATION ERREUR */
+        .error-notification {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            background: var(--error);
+            color: #fff;
+            padding: 12px 16px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 9999;
+            font-size: 13px;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .grid-2 { grid-template-columns: 1fr; }
+            .gps-header h1 { font-size: 18px; }
+            #map { height: 280px; }
+            .gps-card { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- BARRE DE NAVIGATION -->
+    <nav class="nav-bar">
+        <a href="https://karazaitri12-cpu.github.io/plateforme-utilitaires/" class="back-link">← Retour aux Utilitaires</a>
+    </nav>
+
+    <div class="gps-wrapper">
+        
+        <!-- EN-TÊTE -->
+        <header class="gps-header">
+            <h1>🌍 Convertisseur GPS</h1>
+            <p>Conversion Décimal / DMS / Plus Code avec carte interactive</p>
+        </header>
+
+        <!-- CARTE PRINCIPALE -->
+        <div class="gps-card">
+            
+            <!-- SECTION ENTRÉE -->
+            <label class="section-title" for="inputCoords">📍 Entrer les coordonnées</label>
+            
+            <input id="inputCoords" type="text" class="gps-input" 
+                   placeholder="Ex: 48.8566, 2.3522 ou 48°51'23.8&quot;N 2°21'7.9&quot;E">
+            
+            <div class="format-help">
+                <strong>Formats acceptés :</strong>
+                • Décimal : <code>48.8566, 2.3522</code><br>
+                • DMS : <code>48°51'23.8"N 2°21'7.9"E</code><br>
+                • Plus Code : <code>8FW4V94X+4Q</code> ou <code>V94X+4Q Paris</code>
+            </div>
+            
+            <button onclick="convertCoords()" class="gps-btn">🔄 Analyser et Convertir</button>
+
+            <!-- VILLE LA PLUS PROCHE -->
+            <div class="city-info" style="margin-top: 20px;">
+                <div class="city-info-label">🏙️ Ville la plus proche :</div>
+                <div id="cityInfo" class="city-info-text">Entrez des coordonnées pour voir la ville</div>
+            </div>
+
+            <!-- RÉSULTATS -->
+            <label class="section-title" style="margin-top: 24px;">📐 Résultats de conversion</label>
+            
+            <div class="grid-2">
+                <div>
+                    <label class="gps-label">🧭 Latitude (DD) :</label>
+                    <input id="latitude" type="text" readonly class="gps-input">
+                    
+                    <label class="gps-label" style="margin-top: 12px;">🧭 Longitude (DD) :</label>
+                    <input id="longitude" type="text" readonly class="gps-input">
+                </div>
+                <div>
+                    <label class="gps-label">📐 Format DMS :</label>
+                    <input id="dms" type="text" readonly class="gps-input">
+                    
+                    <label class="gps-label" style="margin-top: 12px;">➕ Plus Code :</label>
+                    <input id="plusCode" type="text" readonly class="gps-input">
+                </div>
+            </div>
+
+            <!-- CARTE -->
+            <label class="section-title" style="margin-top: 24px;">🗺️ Localisation</label>
+            <div id="map"></div>
+
+            <!-- HISTORIQUE -->
+            <div style="margin-top: 24px;">
+                <div class="history-header">
+                    <label class="section-title" style="margin:0; border:none; padding:0;">📋 Historique</label>
+                    <button onclick="clearHistory()" class="clear-history-btn">🗑️ Effacer</button>
+                </div>
+                <div class="history-container">
+                    <div id="historyList"></div>
+                    <p id="noHistory" style="color: var(--text-light); text-align: center; font-style: italic; font-size: 13px; margin: 10px 0;">Aucune conversion effectuée</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="tool-footer">
+            <span>Dr. Anouar Karazaitri © 2026</span>
+            <div class="disclaimer">
+                ⚠️ <strong>Usage bureautique</strong> : Géocodage via OpenStreetMap. Aucune donnée n'est stockée sur serveur.
+            </div>
+        </footer>
+
+    </div>
+
+    <script>
+        // === INITIALISATION CARTE ===
+        let map = L.map('map').setView([48.8566, 2.3522], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap',
+            maxZoom: 19,
+        }).addTo(map);
+        let marker;
+        let history = JSON.parse(localStorage.getItem('gpsHistory') || '[]');
+        let geocodeCache = {};
+
+        loadHistory();
+
+        // === GÉOCODAGE INVERSE (avec cache) ===
+        async function reverseGeocode(lat, lon) {
+            const cacheKey = `${lat.toFixed(4)},${lon.toFixed(4)}`;
+            if (geocodeCache[cacheKey]) return geocodeCache[cacheKey];
+
+            try {
+                const response = await fetch(
+                    `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10&addressdetails=1`,
+                    { headers: { 'User-Agent': 'GPS-Converter-App' } }
+                );
+                if (!response.ok) throw new Error('Erreur réseau');
+                
+                const data = await response.json();
+                let cityInfo = { city: '', region: '', country: '', fullAddress: data.display_name || 'Non trouvé' };
+
+                if (data.address) {
+                    cityInfo.city = data.address.city || data.address.town || data.address.village || data.address.suburb || '';
+                    cityInfo.region = data.address.state || data.address.province || '';
+                    cityInfo.country = data.address.country || '';
+                }
+                geocodeCache[cacheKey] = cityInfo;
+                return cityInfo;
+            } catch (error) {
+                console.error('Erreur géocodage:', error);
+                return { city: '', region: '', country: '', fullAddress: 'Erreur' };
+            }
+        }
+
+        function formatCityDisplay(info) {
+            const parts = [];
+            if (info.city) parts.push(info.city);
+            if (info.region && info.region !== info.city) parts.push(info.region);
+            if (info.country) parts.push(info.country);
+            return parts.length ? parts.join(' • ') : info.fullAddress;
+        }
+
+        async function updateCityInfo(lat, lon) {
+            const el = document.getElementById('cityInfo');
+            el.innerHTML = '<em>🔍 Recherche...</em>';
+            try {
+                const info = await reverseGeocode(lat, lon);
+                el.textContent = formatCityDisplay(info);
+            } catch {
+                el.innerHTML = '<span style="color:#ffcdd2">❌ Erreur</span>';
+            }
+        }
+
+        // === CONVERSION PRINCIPALE ===
+        async function convertCoords() {
+            let input = document.getElementById('inputCoords').value.trim();
+            if (!input) { showError("Veuillez entrer des coordonnées"); return; }
+
+            let lat, lon;
+            try {
+                // Format décimal
+                let decimalMatch = input.match(/^(-?\d+\.?\d*)[,\s]+(-?\d+\.?\d*)$/);
+                if (decimalMatch) {
+                    lat = parseFloat(decimalMatch[1]); lon = parseFloat(decimalMatch[2]);
+                }
+                // Format Plus Code
+                else if (isPlusCode(input)) {
+                    const coords = decodePlusCode(input);
+                    if (coords) { lat = coords.lat; lon = coords.lon; }
+                }
+                // Format DMS
+                else {
+                    const coords = parseDMS(input);
+                    if (coords) { lat = coords.lat; lon = coords.lon; }
+                }
+
+                if (lat !== undefined && lon !== undefined && !isNaN(lat) && !isNaN(lon) && 
+                    lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180) {
+                    
+                    displayResults(lat, lon, input);
+                    updateMap(lat, lon);
+                    await updateCityInfo(lat, lon);
+                    addToHistory(lat, lon, input);
+                } else {
+                    throw new Error("Coordonnées invalides");
+                }
+            } catch (error) {
+                showError("Format invalide. Vérifiez les exemples.");
+            }
+        }
+
+        // === PARSING DMS ===
+        function parseDMS(input) {
+            input = input.replace(/[°'"]/g, m => ({ '°':'°', "'":"'", '"':'"' })[m] || m);
+            const pattern = /(-?\d+)°(\d+)'([\d.]+)"?\s*([NSEW])/gi;
+            const matches = []; let match;
+            while ((match = pattern.exec(input)) !== null) matches.push(match);
+            
+            if (matches.length === 2) {
+                const lat = convertDMStoDD(matches[0][1], matches[0][2], matches[0][3], matches[0][4]);
+                const lon = convertDMStoDD(matches[1][1], matches[1][2], matches[1][3], matches[1][4]);
+                return { lat, lon };
+            }
+            return null;
+        }
+
+        function convertDMStoDD(deg, min, sec, dir) {
+            let dd = Math.abs(parseFloat(deg)) + (parseFloat(min)/60) + (parseFloat(sec)/3600);
+            if (dir.toUpperCase() === 'S' || dir.toUpperCase() === 'W') dd = -dd;
+            return dd;
+        }
+
+        // === FORMATAGE DD → DMS ===
+        function convertDDtoDMS(dd, isLat = true) {
+            const abs = Math.abs(dd);
+            const degrees = Math.floor(abs);
+            const minutesFloat = (abs - degrees) * 60;
+            const minutes = Math.floor(minutesFloat);
+            const seconds = ((minutesFloat - minutes) * 60);
+            const dir = isLat ? (dd >= 0 ? 'N' : 'S') : (dd >= 0 ? 'E' : 'W');
+            return `${degrees}°${String(minutes).padStart(2,'0')}'${seconds.toFixed(1).padStart(4,'0')}"${dir}`;
+        }
+
+        // === PLUS CODE ===
+        function isPlusCode(input) {
+            return /^[23456789CFGHJMPQRVWX]{2,8}\+[23456789CFGHJMPQRVWX]{2,3}([,\s]+.*)?$/i.test(input.trim());
+        }
+
+        function decodePlusCode(input) {
+            try {
+                if (typeof OpenLocationCode !== 'undefined') {
+                    let code = input.trim().split(/[,\s]+/)[0];
+                    if (code.indexOf('+') < 4 && OpenLocationCode.recoverNearest) {
+                        code = OpenLocationCode.recoverNearest(code, 35.0, 1.0);
+                    }
+                    const decoded = OpenLocationCode.decode(code);
+                    return { lat: decoded.latitudeCenter, lon: decoded.longitudeCenter };
+                }
+            } catch (e) { console.error('Plus Code error:', e); }
+            return null;
+        }
+
+        function generatePlusCode(lat, lon, original) {
+            if (original && isPlusCode(original)) return original.trim().split(/[,\s]+/)[0];
+            try {
+                if (typeof OpenLocationCode !== 'undefined') {
+                    return OpenLocationCode.encode(lat, lon);
+                }
+            } catch (e) { console.error('Encode error:', e); }
+            return 'Non disponible';
+        }
+
+        // === AFFICHAGE RÉSULTATS ===
+        function displayResults(lat, lon, original) {
+            document.getElementById('latitude').value = lat.toFixed(6);
+            document.getElementById('longitude').value = lon.toFixed(6);
+            document.getElementById('dms').value = `${convertDDtoDMS(lat, true)} ${convertDDtoDMS(lon, false)}`;
+            document.getElementById('plusCode').value = generatePlusCode(lat, lon, original);
+        }
+
+        function updateMap(lat, lon) {
+            map.flyTo([lat, lon], 15, { animate: true, duration: 1 });
+            if (marker) map.removeLayer(marker);
+            marker = L.marker([lat, lon]).addTo(map);
+            marker.bindPopup(`<div style="text-align:center"><strong>📍</strong><br><code>${lat.toFixed(6)}, ${lon.toFixed(6)}</code></div>`).openPopup();
+        }
+
+        // === HISTORIQUE ===
+        function addToHistory(lat, lon, input) {
+            const entry = { lat, lon, input, timestamp: new Date().toLocaleString('fr-FR'), id: Date.now() };
+            history = history.filter(i => Math.abs(i.lat-lat)>0.000001 || Math.abs(i.lon-lon)>0.000001);
+            history.unshift(entry);
+            if (history.length > 20) history = history.slice(0, 20);
+            localStorage.setItem('gpsHistory', JSON.stringify(history));
+            loadHistory();
+        }
+
+        function loadHistory() {
+            const list = document.getElementById('historyList');
+            const none = document.getElementById('noHistory');
+            list.innerHTML = '';
+            if (!history.length) { none.style.display = 'block'; return; }
+            none.style.display = 'none';
+            
+            history.forEach(e => {
+                const li = document.createElement('div');
+                li.className = 'history-item';
+                li.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:start">
+                        <div>
+                            <div class="history-coords">${e.lat.toFixed(6)}, ${e.lon.toFixed(6)}</div>
+                            <div class="history-time">📅 ${e.timestamp}</div>
+                            ${e.input ? `<div class="history-input">📝 ${e.input}</div>` : ''}
+                        </div>
+                        <div class="history-actions">
+                            <button class="history-action-btn" onclick="reloadCoords(${e.lat},${e.lon})" title="Recharger">🔄</button>
+                            <button class="history-action-btn" onclick="removeHistoryItem(${e.id})" title="Supprimer">✕</button>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        async function reloadCoords(lat, lon) {
+            document.getElementById('inputCoords').value = `${lat}, ${lon}`;
+            displayResults(lat, lon, null);
+            updateMap(lat, lon);
+            await updateCityInfo(lat, lon);
+        }
+
+        function removeHistoryItem(id) {
+            history = history.filter(i => i.id !== id);
+            localStorage.setItem('gpsHistory', JSON.stringify(history));
+            loadHistory();
+        }
+
+        function clearHistory() {
+            if (confirm('Effacer tout l\'historique ?')) {
+                history = [];
+                localStorage.removeItem('gpsHistory');
+                loadHistory();
+            }
+        }
+
+        // === NOTIFICATIONS ===
+        function showError(msg) {
+            const div = document.createElement('div');
+            div.className = 'error-notification';
+            div.textContent = `⚠️ ${msg}`;
+            document.body.appendChild(div);
+            setTimeout(() => div.remove(), 3000);
+        }
+
+        // === EVENTS ===
+        document.getElementById('inputCoords').addEventListener('keypress', e => {
+            if (e.key === 'Enter') convertCoords();
+        });
+    </script>
+</body>
+</html>
