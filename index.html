@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plateforme Utilitaires | Dr. Anouar Karazaitri</title>
+    <title>Plateforme Utilitaires | Dr KARA-ZAITRI M.A</title>
     <meta name="description" content="Utilitaires techniques et bureautiques pour professionnels de santé. Calculatrice, convertisseurs, gestion PDF, QR Code...">
     <style>
         /* --- BASE & DESIGN SYSTEM INSTITUTIONNEL --- */
@@ -15,23 +15,53 @@
             margin: 0 auto !important;
         }
 
-        /* HEADER & FILTRES */
+        /* EN-TÊTE PRINCIPAL */
+        #med-hub-full .main-header {
+            background: #fff !important;
+            border-bottom: 3px solid #1a3a5c !important;
+            padding: 25px 20px !important;
+            text-align: center !important;
+        }
+        #med-hub-full .main-header h1 {
+            font-size: 20px !important;
+            color: #1a3a5c !important;
+            margin: 0 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.5px !important;
+            font-weight: 700 !important;
+        }
+        #med-hub-full .main-header .subtitle {
+            font-size: 13px !important;
+            color: #607d8b !important;
+            margin: 5px 0 0 0 !important;
+        }
+        #med-hub-full .main-header .subtitle a {
+            color: #1a3a5c !important;
+            text-decoration: none !important;
+            border-bottom: 1px dotted #1a3a5c !important;
+        }
+        #med-hub-full .main-header .subtitle a:hover {
+            text-decoration: none !important;
+            border-bottom-style: solid !important;
+        }
+
+        /* BARRE DE RECHERCHE & FILTRES */
         #med-hub-full .portal-header {
             background: #f4f7f9 !important;
-            padding: 30px 20px !important;
-            border-bottom: 3px solid #1a3a5c !important;
+            padding: 20px 20px !important;
+            border-bottom: 1px solid #cfd8dc !important;
             text-align: center !important;
         }
 
         #med-hub-full .search-wrapper {
             position: relative !important;
             max-width: 500px !important;
-            margin: 0 auto 20px auto !important;
+            margin: 0 auto 15px auto !important;
         }
 
         #med-hub-full #tool-search {
             width: 100% !important;
-            height: 46px !important;
+            height: 44px !important;
             padding: 0 45px !important;
             border: 1px solid #cfd8dc !important;
             border-radius: 8px !important;
@@ -41,8 +71,8 @@
         }
 
         #med-hub-full #tool-search:focus { border-color: #1a3a5c !important; }
-        #med-hub-full .search-icon { position: absolute !important; left: 15px; top: 14px; font-size: 18px; color: #90a4ae; }
-        #med-hub-full #clear-search { position: absolute !important; right: 12px; top: 6px; font-size: 28px; color: #cfd8dc; cursor: pointer; display: none; line-height: 1 !important; }
+        #med-hub-full .search-icon { position: absolute !important; left: 15px; top: 13px; font-size: 18px; color: #90a4ae; }
+        #med-hub-full #clear-search { position: absolute !important; right: 12px; top: 5px; font-size: 28px; color: #cfd8dc; cursor: pointer; display: none; line-height: 1 !important; }
 
         #med-hub-full .filter-tags { 
             display: flex !important; 
@@ -136,18 +166,28 @@
 
         /* --- MEDIA QUERIES --- */
         @media (max-width: 600px) {
-            #med-hub-full .portal-header { padding: 20px 15px !important; }
+            #med-hub-full .main-header { padding: 20px 15px !important; }
+            #med-hub-full .portal-header { padding: 15px !important; }
             #med-hub-full .tools-grid { 
                 padding: 20px 15px !important; 
                 grid-template-columns: 1fr !important;
             }
             .filter-btn { padding: 6px 12px !important; font-size: 12px !important; }
+            #med-hub-full .main-header h1 { font-size: 18px !important; }
         }
     </style>
 </head>
 <body>
 
 <div id="med-hub-full">
+    
+    <!-- EN-TÊTE PRINCIPAL (Restauré) -->
+    <header class="main-header">
+        <h1>Plateforme Utilitaires Techniques</h1>
+        <p class="subtitle">Outils bureautiques et productivité | Portail médical sur <a href="https://outils.dr-karazaitri-ma.net">outils.dr-karazaitri-ma.net</a></p>
+    </header>
+
+    <!-- BARRE DE RECHERCHE & FILTRES -->
     <div class="portal-header">
         <div class="search-wrapper">
             <span class="search-icon">&#128269;</span>
@@ -163,6 +203,7 @@
         </div>
     </div>
 
+    <!-- GRILLE DES OUTILS -->
     <div class="tools-grid">
         
         <!-- ========== UTILITAIRES (GitHub) ========== -->
