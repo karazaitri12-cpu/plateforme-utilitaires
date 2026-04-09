@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convertisseur Universel | Dr. Karazaitri</title>
+    <style>
+        /* ==========================================
+           SYSTÈME DE THÈME (Dual Mode)
+           ========================================== */
+        :root {
+            /* Mode Design (Original) */
+            --cw-brand: #6c5ce7;
+            --cw-brand-light: #a29bfe;
+            --cw-text: #2d3436;
+            --cw-text-light: #636e72;
+            --cw-border: #dfe6e9;
+            --cw-card-bg: #f5f6fa;
+            --cw-result-bg: linear-gradient(135deg, #eaf8ff 0%, #f0f4fe 100%);
+            --cw-result-border: #74b9ff;
+            --cw-formula-bg: linear-gradient(135deg, #fdf8ff 0%, #f6f5ff 100%);
+            --cw-formula-border: #d2bcf3;
+            --cw-white: #ffffff;
+        }
+        
+        body.theme-sobre #converter-wrapper-final {
+            --cw-brand: #1a3a5c !important;
+            --cw-brand-light: #345a7a !important;
+            --cw-text: #37474f !important;
+            --cw-text-light: #607d8b !important;
+            --cw-border: #cfd8dc !important;
+            --cw-card-bg: #f4f7f9 !important;
+            --cw-result-bg: #e3f2fd !important;
+            --cw-result-border: #90caf9 !important;
+            --cw-formula-bg: #f5f7f9 !important;
+            --cw-formula-border: #b0bec5 !important;
+            --cw-white: #ffffff !important;
+        }
+
+        /* ==========================================
+           STRUCTURE GLOBALE
+           ========================================== */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: #f4f7f9;
+            color: #37474f;
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+
+        /* BARRE DE NAVIGATION (Fixe en haut) */
+        .cw-nav-bar {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: #fff;
+            border-bottom: 1px solid #cfd8dc;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .cw-back-link {
+            text-decoration: none;
+            color: #1a3a5c;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .cw-back-link:hover { text-decoration: underline; }
+        
+        #cw-theme-toggle {
+            background: #fff;
+            border: 2px solid #1a3a5c;
+            color: #1a3a5c;
+            padding: 6px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 700;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        #cw-theme-toggle:hover {
+            background: #1a3a5c;
+            color: #fff;
+            transform: translateY(-2px);
+        }
+        body.theme-sobre #cw-theme-toggle {
+            background: #1a3a5c;
+            color: #fff;
+        }
+
+        /* WRAPPER PRINCIPAL */
+        #converter-wrapper-final {
+            max-width: 480px;
+            margin: 30px auto;
+            background: var(--cw-white);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            padding: 24px;
+            border: 1px solid var(--cw-border);
+            transition: all 0.3s ease;
+        }
+
+        /* HEADER */
+        .cw-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--cw-border);
+        }
+        .cw-header-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--cw-brand);
+            border-radius: 8px;
+            flex-shrink: 0;
+        }
+        .cw-header-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--cw-brand);
+            margin: 0;
+        }
+
+        /* FORMULAIRES */
+        .cw-form-group { margin-bottom: 16px; }
+        .cw-form-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--cw-text);
+            margin-bottom: 8px;
+            display: block;
+        }
+        .cw-input-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        /* SELECTS */
+        .cw-select-container { position: relative; flex-grow: 1; }
+        .cw-main-select, .cw-unit-select {
+            width: 100%;
+            height: 44px;
+            border: 1px solid var(--cw-border);
+            border-radius: 8px;
+            background: var(--cw-white);
+            padding: 0 40px 0 12px;
+            font-size: 14px;
+            color: var(--cw-text);
+            appearance: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23636e72' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+            transition: border-color 0.2s;
+        }
+        .cw-main-select:focus, .cw-unit-select:focus, .cw-value-input:focus {
+            border-color: var(--cw-brand);
+            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
+            outline: none;
+        }
+        .cw-unit-select { width: 150px; flex-shrink: 0; }
+
+        /* INPUTS */
+        .cw-value-input, .cw-result-input {
+            flex-grow: 1;
+            height: 44px;
+            border: 1px solid var(--cw-border);
+            border-radius: 8px;
+            padding: 0 15px;
+            font-size: 14px;
+            background: var(--cw-white);
+            transition: border-color 0.2s;
+        }
+        .cw-result-input {
+            background: var(--cw-result-bg);
+            border-color: var(--cw-result-border);
+            font-weight: 600;
+            color: var(--cw-text);
+            cursor: default;
+        }
+
+        /* BOUTON SWAP */
+        .cw-swap-row { display: flex; justify-content: center; margin: 16px 0; }
+        .cw-swap-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--cw-brand);
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .cw-swap-button:hover {
+            transform: rotate(180deg) scale(1.1);
+            box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
+        }
+
+        /* FORMULE */
+        .cw-formula-box {
+            margin-top: 20px;
+            padding: 12px 15px;
+            background: var(--cw-formula-bg);
+            border-radius: 8px;
+            border-left: 4px solid var(--cw-formula-border);
+            font-size: 12px;
+            color: var(--cw-text-light);
+            font-style: italic;
+            text-align: center;
+            min-height: 20px;
+        }
+
+        /* FOOTER */
+        .cw-footer {
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid var(--cw-border);
+            text-align: center;
+            font-size: 12px;
+            color: var(--cw-text-light);
+        }
+        .cw-author-name { font-weight: 600; color: var(--cw-text); }
+
+        /* RESPONSIVE */
+        @media (max-width: 520px) {
+            .cw-input-row { flex-direction: column; }
+            .cw-unit-select { width: 100%; }
+            #converter-wrapper-final { margin: 20px 15px; padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- BARRE DE NAVIGATION -->
+    <nav class="cw-nav-bar">
+        <a href="https://karazaitri12-cpu.github.io/plateforme-utilitaires/" class="cw-back-link">← Retour aux Utilitaires</a>
+        <button id="cw-theme-toggle" onclick="cw_toggleTheme()">
+            <span>🏥</span> Mode Sobre
+        </button>
+    </nav>
+
+    <!-- CONVERTISSEUR -->
+    <div id="converter-wrapper-final">
+        <div class="cw-header">
+            <div class="cw-header-icon"></div>
+            <h4 class="cw-header-title">Convertisseur Universel</h4>
+        </div>
+
+        <div class="cw-body">
+            <div class="cw-form-group">
+                <label for="cw-category" class="cw-form-label">Catégorie :</label>
+                <div class="cw-select-container">
+                    <select id="cw-category" onchange="cw_updateUnits()" class="cw-main-select">
+                        <option value="length">📏 Longueur</option>
+                        <option value="weight">⚖️ Masse & Poids</option>
+                        <option value="temperature" selected>🌡️ Température</option>
+                        <option value="area">🗺️ Superficie</option>
+                        <option value="volume">🧪 Volume</option>
+                        <option value="speed">🚗 Vitesse</option>
+                        <option value="pressure">🔧 Pression</option>
+                        <option value="energy">⚡ Énergie</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="cw-converter-card">
+                <div class="cw-form-group">
+                    <label for="cw-input-value" class="cw-form-label">Valeur à convertir :</label>
+                    <div class="cw-input-row">
+                        <input type="number" id="cw-input-value" placeholder="Entrez la valeur" oninput="cw_convert()" class="cw-value-input">
+                        <div class="cw-select-container">
+                            <select id="cw-input-unit" onchange="cw_convert()" class="cw-unit-select"></select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cw-swap-row">
+                    <button onclick="cw_swapUnits()" class="cw-swap-button" title="Inverser les unités">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2.1l4 4-4 4"/><path d="M3 12.2v-2a4 4 0 0 1 4-4h14"/><path d="M7 21.9l-4-4 4-4"/><path d="M21 11.8v2a4 4 0 0 1-4 4H3"/></svg>
+                    </button>
+                </div>
+                
+                <div class="cw-form-group">
+                    <label for="cw-output-value" class="cw-form-label">Résultat :</label>
+                    <div class="cw-input-row">
+                        <input type="text" id="cw-output-value" placeholder="Résultat automatique" readonly class="cw-result-input">
+                        <div class="cw-select-container">
+                            <select id="cw-output-unit" onchange="cw_convert()" class="cw-unit-select"></select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cw-formula-box">
+                    <span id="cw-conversion-formula">Entrez une valeur pour voir la formule de conversion</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="cw-footer">
+            <span class="cw-author-name">Dr. Anouar Karazaitri © 2026</span>
+        </div>
+    </div>
+
+    <script>
+        // === GESTION DU THÈME ===
+        (function() {
+            const btn = document.getElementById('cw-theme-toggle');
+            if (!btn) return;
+            if (localStorage.getItem('cw-theme') === 'sobre') {
+                document.body.classList.add('theme-sobre');
+                btn.innerHTML = '<span>🎨</span> Mode Design';
+            }
+            window.cw_toggleTheme = function() {
+                document.body.classList.toggle('theme-sobre');
+                const isSobre = document.body.classList.contains('theme-sobre');
+                btn.innerHTML = isSobre ? '<span>🎨</span> Mode Design' : '<span>🏥</span> Mode Sobre';
+                localStorage.setItem('cw-theme', isSobre ? 'sobre' : 'design');
+            };
+        })();
+
+        // === LOGIQUE DU CONVERTISSEUR (Préservée) ===
+        const cw_units = {
+            length: { m: "Mètres (m)", km: "Kilomètres (km)", cm: "Centimètres (cm)", mm: "Millimètres (mm)", in: "Pouces (in)", ft: "Pieds (ft)", yd: "Yards (yd)", mi: "Miles (mi)" },
+            weight: { kg: "Kilogrammes (kg)", g: "Grammes (g)", mg: "Milligrammes (mg)", t: "Tonnes (t)", lb: "Livres (lb)", oz: "Onces (oz)" },
+            temperature: { c: "Celsius (°C)", f: "Fahrenheit (°F)", k: "Kelvin (K)", r: "Rankine (°R)" },
+            area: { m2: "Mètres carrés (m²)", km2: "Kilomètres carrés (km²)", ha: "Hectares (ha)", acre: "Acres", ft2: "Pieds carrés (ft²)" },
+            volume: { l: "Litres (L)", ml: "Millilitres (mL)", m3: "Mètres cubes (m³)", cm3: "Centimètres cubes (cm³)", gal: "Gallons US (gal)" },
+            speed: { ms: "Mètres/seconde (m/s)", kmh: "Kilomètres/heure (km/h)", mph: "Miles/heure (mph)", kt: "Nœuds (kt)" },
+            pressure: { pa: "Pascals (Pa)", kpa: "Kilopascals (kPa)", bar: "Bars", atm: "Atmosphères (atm)", psi: "PSI" },
+            energy: { j: "Joules (J)", kj: "Kilojoules (kJ)", cal: "Calories (cal)", kcal: "Kilocalories (kcal)", kwh: "Kilowatt-heures (kWh)" }
+        };
+        const cw_factors = {
+            length: { m: 1, km: 1000, cm: 0.01, mm: 0.001, in: 0.0254, ft: 0.3048, yd: 0.9144, mi: 1609.344 },
+            weight: { kg: 1, g: 0.001, mg: 1e-6, t: 1000, lb: 0.45359237, oz: 0.028349523125 },
+            area: { m2: 1, km2: 1e6, ha: 10000, acre: 4046.8564224, ft2: 0.09290304 },
+            volume: { l: 1, ml: 0.001, m3: 1000, cm3: 0.001, gal: 3.785411784 },
+            speed: { ms: 1, kmh: 0.277778, mph: 0.44704, kt: 0.514444 },
+            pressure: { pa: 1, kpa: 1000, bar: 1e5, atm: 101325, psi: 6894.76 },
+            energy: { j: 1, kj: 1000, cal: 4.184, kcal: 4184, kwh: 3.6e6 }
+        };
+        let cw_currentCategory = 'temperature';
+
+        function cw_updateUnits() {
+            cw_currentCategory = document.getElementById("cw-category").value;
+            const inputUnit = document.getElementById("cw-input-unit");
+            const outputUnit = document.getElementById("cw-output-unit");
+            [inputUnit, outputUnit].forEach(sel => sel.innerHTML = '');
+            for (const [key, label] of Object.entries(cw_units[cw_currentCategory])) {
+                [inputUnit, outputUnit].forEach(sel => sel.add(new Option(label, key)));
+            }
+            if (Object.keys(cw_units[cw_currentCategory]).length > 1) {
+                outputUnit.selectedIndex = 1;
+            }
+            cw_convert();
+        }
+
+        function cw_convert() {
+            const val = parseFloat(document.getElementById("cw-input-value").value);
+            const from = document.getElementById("cw-input-unit").value;
+            const to = document.getElementById("cw-output-unit").value;
+            const out = document.getElementById("cw-output-value");
+            if (isNaN(val)) { out.value = ""; cw_updateFormula(); return; }
+            let res;
+            if (cw_currentCategory === "temperature") {
+                res = cw_convertTemp(val, from, to);
+            } else {
+                res = val * cw_factors[cw_currentCategory][from] / cw_factors[cw_currentCategory][to];
+            }
+            out.value = cw_format(res);
+            cw_updateFormula(val, from, out.value, to);
+        }
+
+        function cw_convertTemp(v, f, t) {
+            if (f === t) return v; let c;
+            switch (f) { case "c": c = v; break; case "f": c = (v - 32) * 5 / 9; break; case "k": c = v - 273.15; break; case "r": c = (v - 491.67) * 5 / 9; break; }
+            switch (t) { case "c": return c; case "f": return c * 9 / 5 + 32; case "k": return c + 273.15; case "r": return c * 9 / 5 + 491.67; }
+        }
+
+        function cw_format(v) { if (v === 0) return 0; if (Math.abs(v) < 1e-6 || Math.abs(v) > 1e9) { return v.toExponential(4); } return parseFloat(v.toPrecision(8)); }
+
+        function cw_updateFormula(v, f, r, t) {
+            const el = document.getElementById("cw-conversion-formula");
+            if (!v && v !== 0) { el.textContent = "Entrez une valeur pour voir la formule de conversion"; return; }
+            el.textContent = `${v} ${cw_units[cw_currentCategory][f]} = ${r} ${cw_units[cw_currentCategory][t]}`;
+        }
+
+        function cw_swapUnits() {
+            const from = document.getElementById("cw-input-unit"), to = document.getElementById("cw-output-unit");
+            const val = document.getElementById("cw-input-value"), out = document.getElementById("cw-output-value");
+            [from.value, to.value] = [to.value, from.value];
+            if (out.value) { val.value = out.value; }
+            cw_convert();
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', () => {
+            if(document.getElementById('cw-category')) cw_updateUnits();
+        });
+        setTimeout(() => {
+            if(document.getElementById('cw-category') && !document.getElementById('cw-input-unit').options.length) {
+                cw_updateUnits();
+            }
+        }, 500);
+    </script>
+</body>
+</html>
