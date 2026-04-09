@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur de Tableaux HTML | Dr KARA-ZAITRI</title>
+    <style>
+        /* ==========================================
+           DESIGN INSTITUTIONNEL COMPLET
+           ========================================== */
+        :root {
+            --primary: #1a3a5c;
+            --primary-light: #345a7a;
+            --primary-dark: #0d2538;
+            --text: #37474f;
+            --text-light: #607d8b;
+            --border: #cfd8dc;
+            --bg-page: #f4f7f9;
+            --bg-card: #ffffff;
+            --bg-input: #f8f9fa;
+            --success: #2e7d32;
+            --warning: #ed6c02;
+            --error: #c62828;
+            --premium: #C9A961;
+            --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: var(--font-ui);
+            background: var(--bg-page);
+            color: var(--text);
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+
+        /* NAVIGATION */
+        .nav-bar {
+            position: sticky;
+            top: 0;
+            z-index: 2000;
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .back-link {
+            text-decoration: none;
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .back-link:hover { text-decoration: underline; }
+
+        /* HEADER */
+        .app-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            position: sticky;
+            top: 52px;
+            z-index: 100;
+        }
+        .app-header h1 {
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0 0 5px;
+        }
+        .app-header p {
+            font-size: 13px;
+            opacity: 0.9;
+            margin: 0;
+        }
+        .premium-badge {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            color: var(--premium);
+            font-size: 24px;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        /* CONTENEUR */
+        .container {
+            max-width: 1100px;
+            margin: 24px auto;
+            padding: 0 16px;
+        }
+
+        /* CARTES */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .card h2 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 0 0 16px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* PANNEAU DE CONTRÔLE */
+        .control-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .section {
+            margin-bottom: 16px;
+        }
+        .section-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 0 0 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* FORMULAIRES */
+        .form-group {
+            margin-bottom: 12px;
+        }
+        .form-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text);
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            letter-spacing: 0.03em;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            background: var(--bg-input);
+            transition: border-color 0.2s;
+        }
+        .form-input:focus, .form-select:focus {
+            border-color: var(--primary);
+            outline: none;
+            background: #fff;
+            box-shadow: 0 0 0 2px rgba(26,58,92,0.1);
+        }
+        .input-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .color-input {
+            width: 100%;
+            height: 36px;
+            padding: 2px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            cursor: pointer;
+            background: #fff;
+        }
+        .color-row {
+            display: flex;
+            gap: 6px;
+            margin-top: 6px;
+        }
+        .color-row input[type="text"] {
+            flex: 1;
+            text-transform: uppercase;
+            font-size: 12px;
+        }
+
+        /* BOUTONS */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 9px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-primary { background: var(--primary); color: #fff; }
+        .btn-primary:hover:not(:disabled) { background: var(--primary-light); }
+        .btn-danger { background: var(--error); color: #fff; }
+        .btn-danger:hover:not(:disabled) { background: #b71c1c; }
+        .btn-secondary { background: var(--bg-card); color: var(--primary); border: 1px solid var(--border); }
+        .btn-secondary:hover:not(:disabled) { background: var(--bg-input); }
+        .button-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        /* OPTIONS AVANCÉES */
+        .advanced-toggle {
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-left: auto;
+        }
+        .advanced-toggle:hover { text-decoration: underline; }
+        .advanced-options { display: none; margin-top: 12px; }
+        .advanced-options.visible { display: block; }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .checkbox {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        /* PRÉVISUALISATION TABLEAU */
+        .table-preview {
+            overflow-x: auto;
+            background: #fff;
+            border-radius: 8px;
+            padding: 16px;
+            border: 1px solid var(--border);
+        }
+        .table-preview table {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: 500px;
+        }
+        .table-preview th, .table-preview td {
+            min-width: 80px;
+            height: 40px;
+            position: relative;
+            vertical-align: middle;
+        }
+        .editable {
+            background: transparent;
+            border: none;
+            width: 100%;
+            height: 100%;
+            padding: 8px;
+            text-align: inherit;
+            font-family: inherit;
+            font-size: inherit;
+            color: inherit;
+            outline: none;
+            cursor: text;
+        }
+        .editable:focus {
+            background: rgba(26,58,92,0.08);
+            border-radius: 3px;
+        }
+
+        /* CODE GÉNÉRÉ */
+        .code-section {
+            background: #1e293b;
+            color: #f8fafc;
+            border-radius: 8px;
+            padding: 16px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            font-size: 13px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            max-height: 300px;
+        }
+
+        /* TOAST */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 16px;
+            border-radius: 6px;
+            color: #fff;
+            font-weight: 600;
+            font-size: 13px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 9999;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.3s;
+        }
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .toast.success { background: var(--success); }
+        .toast.error { background: var(--error); }
+        .toast.info { background: var(--primary); }
+
+        /* FOOTER */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 11px;
+            color: var(--text-light);
+            margin-top: 24px;
+            border-top: 1px solid var(--border);
+        }
+        .disclaimer {
+            background: #fff3cd;
+            color: #856404;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #ffeeba;
+            margin-top: 12px;
+            font-size: 10px;
+            line-height: 1.4;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .app-header { flex-direction: column; align-items: center; }
+            .premium-badge { position: static; margin-bottom: 8px; }
+            .control-panel { grid-template-columns: 1fr; }
+            .input-grid { grid-template-columns: 1fr; }
+            .button-grid { grid-template-columns: 1fr; }
+            .btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+  <!-- NAVIGATION -->
+  <nav class="nav-bar">
+    <a href="https://karazaitri12-cpu.github.io/plateforme-utilitaires/" class="back-link">← Retour aux Utilitaires</a>
+  </nav>
+
+  <!-- HEADER -->
+  <header class="app-header">
+    <span class="premium-badge">★</span>
+    <h1>Générateur de Tableaux HTML</h1>
+    <p>Créez et personnalisez vos tableaux avec prévisualisation en temps réel</p>
+  </header>
+
+  <div class="container">
+
+    <!-- PANNEAU DE CONTRÔLE -->
+    <div class="card">
+      <div class="control-panel">
+        
+        <!-- CONFIGURATION -->
+        <div>
+          <div class="section">
+            <div class="section-title">⚙️ Configuration</div>
+            <div class="form-group">
+              <label class="form-label">Dimensions</label>
+              <div class="input-grid">
+                <input type="number" id="rows" class="form-input" value="5" min="1" max="20" placeholder="Lignes">
+                <input type="number" id="columns" class="form-input" value="5" min="1" max="20" placeholder="Colonnes">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Bordures</label>
+              <div class="input-grid">
+                <input type="number" id="borderWidth" class="form-input" value="1" min="0" max="10" placeholder="px">
+                <select id="borderStyle" class="form-select">
+                  <option value="solid">Plein</option>
+                  <option value="dashed">Tirets</option>
+                  <option value="dotted">Points</option>
+                  <option value="double">Double</option>
+                  <option value="none">Aucune</option>
+                </select>
+              </div>
+              <div class="color-row">
+                <input type="color" id="borderColor" class="color-input" value="#cfd8dc">
+                <input type="text" id="borderColorHex" class="form-input" value="#CFD8DC">
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">➕ Manipulation</div>
+            <div class="button-grid">
+              <button id="addRow" class="btn btn-primary">➕ Ligne</button>
+              <button id="removeRow" class="btn btn-danger">➖ Ligne</button>
+              <button id="addColumn" class="btn btn-primary">➕ Colonne</button>
+              <button id="removeColumn" class="btn btn-danger">➖ Colonne</button>
+            </div>
+            <button id="resetTable" class="btn btn-secondary" style="width:100%">🔄 Réinitialiser</button>
+          </div>
+        </div>
+
+        <!-- STYLE TEXTE -->
+        <div>
+          <div class="section">
+            <div class="section-title">🔤 Style du texte</div>
+            <div class="form-group">
+              <label class="form-label">Couleur</label>
+              <div class="color-row">
+                <input type="color" id="textColor" class="color-input" value="#37474f">
+                <input type="text" id="textColorHex" class="form-input" value="#37474F">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Taille / Alignement</label>
+              <div class="input-grid">
+                <input type="number" id="fontSize" class="form-input" value="14" min="10" max="24" placeholder="px">
+                <select id="textAlign" class="form-select">
+                  <option value="left">Gauche</option>
+                  <option value="center">Centre</option>
+                  <option value="right">Droite</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Police</label>
+              <select id="fontFamily" class="form-select">
+                <option value="Arial, sans-serif">Arial</option>
+                <option value="'Times New Roman', serif">Times New Roman</option>
+                <option value="Verdana, sans-serif">Verdana</option>
+                <option value="'Courier New', monospace">Courier New</option>
+                <option value="Georgia, serif">Georgia</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">
+              <span>⚡ Options avancées</span>
+              <button id="toggleAdvanced" class="advanced-toggle">Afficher ▼</button>
+            </div>
+            <div id="advancedOptions" class="advanced-options">
+              <div class="form-group">
+                <label class="form-label">Espacement / Largeur</label>
+                <div class="input-grid">
+                  <input type="number" id="cellPadding" class="form-input" value="10" min="0" max="30" placeholder="px">
+                  <select id="tableWidth" class="form-select">
+                    <option value="100%">100%</option>
+                    <option value="75%">75%</option>
+                    <option value="50%">50%</option>
+                    <option value="auto">Auto</option>
+                  </select>
+                </div>
+              </div>
+              <div class="checkbox-group">
+                <input type="checkbox" id="zebraStripes" class="checkbox" checked>
+                <label class="form-label" style="margin:0">Lignes alternées</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- COULEURS FOND -->
+        <div>
+          <div class="section">
+            <div class="section-title">🎨 Arrière-plans</div>
+            <div class="form-group">
+              <label class="form-label">En-tête</label>
+              <div class="color-row">
+                <input type="color" id="headerBgColor" class="color-input" value="#e3f2fd">
+                <input type="text" id="headerBgColorHex" class="form-input" value="#E3F2FD">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Lignes</label>
+              <div class="color-row">
+                <input type="color" id="rowBgColor" class="color-input" value="#ffffff">
+                <input type="text" id="rowBgColorHex" class="form-input" value="#FFFFFF">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Survol</label>
+              <div class="color-row">
+                <input type="color" id="hoverBgColor" class="color-input" value="#eceff1">
+                <input type="text" id="hoverBgColorHex" class="form-input" value="#ECEFF1">
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- PRÉVISUALISATION -->
+    <div class="card">
+      <h2>👁️ Prévisualisation</h2>
+      <p style="font-size:12px;color:var(--text-light);margin-bottom:12px">Cliquez sur une cellule pour modifier son contenu</p>
+      <div class="table-preview" id="tablePreview"></div>
+    </div>
+
+    <!-- CODE GÉNÉRÉ -->
+    <div class="card">
+      <h2>💻 Code HTML généré</h2>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <span style="font-size:12px;color:var(--text-light)">Copiez ce code dans votre page HTML</span>
+        <button id="copyCode" class="btn btn-secondary">📋 Copier</button>
+      </div>
+      <div class="code-section"><pre id="generatedCode"></pre></div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <span>Dr KARA-ZAITRI M.A © 2026</span>
+      <div class="disclaimer">
+        ⚠️ <strong>Usage bureautique</strong> : Génération locale de code HTML. Aucun contenu n'est envoyé sur un serveur.
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <!-- LOGIQUE JAVASCRIPT -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Éléments DOM
+      const el = {
+        rows: document.getElementById('rows'),
+        columns: document.getElementById('columns'),
+        borderWidth: document.getElementById('borderWidth'),
+        borderStyle: document.getElementById('borderStyle'),
+        borderColor: document.getElementById('borderColor'),
+        borderColorHex: document.getElementById('borderColorHex'),
+        textColor: document.getElementById('textColor'),
+        textColorHex: document.getElementById('textColorHex'),
+        fontSize: document.getElementById('fontSize'),
+        fontFamily: document.getElementById('fontFamily'),
+        textAlign: document.getElementById('textAlign'),
+        headerBgColor: document.getElementById('headerBgColor'),
+        headerBgColorHex: document.getElementById('headerBgColorHex'),
+        rowBgColor: document.getElementById('rowBgColor'),
+        rowBgColorHex: document.getElementById('rowBgColorHex'),
+        hoverBgColor: document.getElementById('hoverBgColor'),
+        hoverBgColorHex: document.getElementById('hoverBgColorHex'),
+        cellPadding: document.getElementById('cellPadding'),
+        tableWidth: document.getElementById('tableWidth'),
+        zebraStripes: document.getElementById('zebraStripes'),
+        toggleAdvanced: document.getElementById('toggleAdvanced'),
+        advancedOptions: document.getElementById('advancedOptions'),
+        addRow: document.getElementById('addRow'),
+        removeRow: document.getElementById('removeRow'),
+        addColumn: document.getElementById('addColumn'),
+        removeColumn: document.getElementById('removeColumn'),
+        resetTable: document.getElementById('resetTable'),
+        tablePreview: document.getElementById('tablePreview'),
+        generatedCode: document.getElementById('generatedCode'),
+        copyCode: document.getElementById('copyCode')
+      };
+
+      // Données du tableau
+      let tableData = [];
+
+      // Synchronisation couleur picker ↔ input hex
+      function syncColor(picker, hex) {
+        picker.addEventListener('input', () => { hex.value = picker.value.toUpperCase(); renderTable(); });
+        hex.addEventListener('input', () => {
+          let v = hex.value.trim();
+          if (v && !v.startsWith('#')) v = '#' + v;
+          if (/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(v)) {
+            picker.value = v;
+            renderTable();
+          }
+          hex.value = v.toUpperCase();
+        });
+      }
+      syncColor(el.borderColor, el.borderColorHex);
+      syncColor(el.textColor, el.textColorHex);
+      syncColor(el.headerBgColor, el.headerBgColorHex);
+      syncColor(el.rowBgColor, el.rowBgColorHex);
+      syncColor(el.hoverBgColor, el.hoverBgColorHex);
+
+      // Toggle options avancées
+      el.toggleAdvanced.addEventListener('click', () => {
+        const visible = el.advancedOptions.classList.toggle('visible');
+        el.toggleAdvanced.innerHTML = visible ? 'Masquer ▲' : 'Afficher ▼';
+      });
+
+      // Initialiser le tableau
+      function initTable() {
+        const r = parseInt(el.rows.value), c = parseInt(el.columns.value);
+        tableData = [];
+        // En-tête
+        let header = [];
+        for (let j = 0; j < c; j++) header.push(`En-tête ${j+1}`);
+        tableData.push(header);
+        // Données
+        for (let i = 1; i < r; i++) {
+          let row = [];
+          for (let j = 0; j < c; j++) row.push(`Cellule ${i},${j+1}`);
+          tableData.push(row);
+        }
+        renderTable();
+      }
+
+      // Réinitialiser aux valeurs par défaut
+      function resetTable() {
+        el.rows.value = 5; el.columns.value = 5;
+        el.borderWidth.value = 1; el.borderStyle.value = 'solid';
+        el.borderColor.value = '#cfd8dc'; el.borderColorHex.value = '#CFD8DC';
+        el.textColor.value = '#37474f'; el.textColorHex.value = '#37474F';
+        el.fontSize.value = 14; el.fontFamily.value = 'Arial, sans-serif';
+        el.textAlign.value = 'left';
+        el.headerBgColor.value = '#e3f2fd'; el.headerBgColorHex.value = '#E3F2FD';
+        el.rowBgColor.value = '#ffffff'; el.rowBgColorHex.value = '#FFFFFF';
+        el.hoverBgColor.value = '#eceff1'; el.hoverBgColorHex.value = '#ECEFF1';
+        el.cellPadding.value = 10; el.tableWidth.value = '100%';
+        el.zebraStripes.checked = true;
+        initTable();
+        showToast('Tableau réinitialisé', 'info');
+      }
+
+      // Ajuster la luminosité d'une couleur hex
+      function adjustColor(hex, amt) {
+        let r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+        r = Math.max(0, Math.min(255, r+amt));
+        g = Math.max(0, Math.min(255, g+amt));
+        b = Math.max(0, Math.min(255, b+amt));
+        return '#'+[r,g,b].map(x=>x.toString(16).padStart(2,'0')).join('');
+      }
+
+      // Générer le HTML du tableau
+      function renderTable() {
+        const rows = tableData.length, cols = tableData[0].length;
+        let html = `<table style="width:${el.tableWidth.value};border-collapse:collapse">`;
+        
+        for (let i = 0; i < rows; i++) {
+          if (i === 0) {
+            // En-tête
+            html += `<thead><tr style="background:${el.headerBgColor.value}">`;
+            for (let j = 0; j < cols; j++) {
+              html += `<th style="border:${el.borderWidth.value}px ${el.borderStyle.value} ${el.borderColor.value};padding:${el.cellPadding.value}px;color:${el.textColor.value};font-size:${el.fontSize.value}px;font-family:${el.fontFamily.value};text-align:${el.textAlign.value}">
+                <div class="editable" contenteditable="true" data-r="${i}" data-c="${j}">${tableData[i][j]}</div>
+              </th>`;
+            }
+            html += `</tr></thead><tbody>`;
+          } else {
+            // Lignes données
+            let bg = el.zebraStripes.checked && i%2===0 ? adjustColor(el.rowBgColor.value, -8) : el.rowBgColor.value;
+            html += `<tr style="background:${bg}" class="trow">`;
+            for (let j = 0; j < cols; j++) {
+              html += `<td style="border:${el.borderWidth.value}px ${el.borderStyle.value} ${el.borderColor.value};padding:${el.cellPadding.value}px;color:${el.textColor.value};font-size:${el.fontSize.value}px;font-family:${el.fontFamily.value};text-align:${el.textAlign.value}">
+                <div class="editable" contenteditable="true" data-r="${i}" data-c="${j}">${tableData[i][j]}</div>
+              </td>`;
+            }
+            html += `</tr>`;
+          }
+        }
+        html += `</tbody></table>`;
+        el.tablePreview.innerHTML = html;
+
+        // Édition des cellules
+        document.querySelectorAll('.editable').forEach(cell => {
+          cell.addEventListener('input', function() {
+            tableData[+this.dataset.r][+this.dataset.c] = this.textContent;
+            generateCode();
+          });
+          cell.addEventListener('focus', () => this.closest('td,th').style.outline = '2px solid '+el.primary);
+          cell.addEventListener('blur', () => this.closest('td,th').style.outline = 'none');
+        });
+
+        // Effet survol
+        document.querySelectorAll('.trow').forEach(row => {
+          row.addEventListener('mouseenter', function() {
+            this.dataset.orig = this.style.background;
+            this.style.background = el.hoverBgColor.value;
+          });
+          row.addEventListener('mouseleave', function() {
+            this.style.background = this.dataset.orig || '';
+          });
+        });
+
+        generateCode();
+      }
+
+      // Générer le code HTML/CSS à exporter
+      function generateCode() {
+        const rows = tableData.length, cols = tableData[0].length;
+        let code = `<!-- Tableau HTML généré -->\n<table style="width:${el.tableWidth.value};border-collapse:collapse">\n`;
+        
+        for (let i = 0; i < rows; i++) {
+          if (i === 0) {
+            code += `  <thead>\n    <tr style="background:${el.headerBgColor.value}">\n`;
+            for (let j = 0; j < cols; j++) {
+              code += `      <th style="border:${el.borderWidth.value}px ${el.borderStyle.value} ${el.borderColor.value};padding:${el.cellPadding.value}px;color:${el.textColor.value};font-size:${el.fontSize.value}px;font-family:${el.fontFamily.value};text-align:${el.textAlign.value}">${tableData[i][j]}</th>\n`;
+            }
+            code += `    </tr>\n  </thead>\n  <tbody>\n`;
+          } else {
+            let bg = el.zebraStripes.checked && i%2===0 ? adjustColor(el.rowBgColor.value, -8) : el.rowBgColor.value;
+            code += `    <tr style="background:${bg}">\n`;
+            for (let j = 0; j < cols; j++) {
+              code += `      <td style="border:${el.borderWidth.value}px ${el.borderStyle.value} ${el.borderColor.value};padding:${el.cellPadding.value}px;color:${el.textColor.value};font-size:${el.fontSize.value}px;font-family:${el.fontFamily.value};text-align:${el.textAlign.value}">${tableData[i][j]}</td>\n`;
+            }
+            code += `    </tr>\n`;
+          }
+        }
+        code += `  </tbody>\n</table>\n\n/* Effet survol */\n.trow:hover{background:${el.hoverBgColor.value}!important}`;
+        el.generatedCode.textContent = code;
+      }
+
+      // Manipulation du tableau
+      function addRow() {
+        const cols = tableData[0].length;
+        let row = [];
+        for (let j = 0; j < cols; j++) row.push(`Nouvelle ${j+1}`);
+        tableData.push(row);
+        renderTable();
+      }
+      function removeRow() {
+        if (tableData.length > 2) { tableData.pop(); renderTable(); }
+        else showToast('Au moins 2 lignes requises', 'error');
+      }
+      function addColumn() {
+        tableData.forEach((row, i) => row.push(i===0 ? `En-tête ${row.length+1}` : `Cellule ${row.length+1}`));
+        renderTable();
+      }
+      function removeColumn() {
+        if (tableData[0].length > 1) { tableData.forEach(row => row.pop()); renderTable(); }
+        else showToast('Au moins 1 colonne requise', 'error');
+      }
+
+      // Copier le code
+      el.copyCode.addEventListener('click', () => {
+        navigator.clipboard.writeText(el.generatedCode.textContent).then(() => {
+          showToast('Code copié !', 'success');
+          const btn = el.copyCode;
+          const orig = btn.innerHTML;
+          btn.innerHTML = '✓ Copié';
+          setTimeout(() => btn.innerHTML = orig, 2000);
+        }).catch(() => showToast('Erreur de copie', 'error'));
+      });
+
+      // Écouteurs
+      el.addRow.onclick = addRow;
+      el.removeRow.onclick = removeRow;
+      el.addColumn.onclick = addColumn;
+      el.removeColumn.onclick = removeColumn;
+      el.resetTable.onclick = resetTable;
+      [el.rows, el.columns, el.borderWidth, el.borderStyle, el.borderColor, el.textColor, 
+       el.fontSize, el.fontFamily, el.textAlign, el.headerBgColor, el.rowBgColor, 
+       el.hoverBgColor, el.cellPadding, el.tableWidth, el.zebraStripes].forEach(ctrl => {
+        ctrl.addEventListener('input', renderTable);
+        ctrl.addEventListener('change', renderTable);
+      });
+
+      // Toast notification
+      function showToast(msg, type='success') {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.className = `toast ${type} show`;
+        setTimeout(() => t.classList.remove('show'), 3000);
+      }
+
+      // Démarrage
+      initTable();
+    });
+  </script>
+</body>
+</html>
