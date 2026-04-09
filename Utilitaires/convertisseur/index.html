@@ -6,10 +6,9 @@
     <title>Convertisseur Universel | Dr. Karazaitri</title>
     <style>
         /* ==========================================
-           SYSTÈME DE THÈME (Dual Mode)
+           VARIABLES DE DESIGN
            ========================================== */
         :root {
-            /* Mode Design (Original) */
             --cw-brand: #6c5ce7;
             --cw-brand-light: #a29bfe;
             --cw-text: #2d3436;
@@ -21,20 +20,6 @@
             --cw-formula-bg: linear-gradient(135deg, #fdf8ff 0%, #f6f5ff 100%);
             --cw-formula-border: #d2bcf3;
             --cw-white: #ffffff;
-        }
-        
-        body.theme-sobre #converter-wrapper-final {
-            --cw-brand: #1a3a5c !important;
-            --cw-brand-light: #345a7a !important;
-            --cw-text: #37474f !important;
-            --cw-text-light: #607d8b !important;
-            --cw-border: #cfd8dc !important;
-            --cw-card-bg: #f4f7f9 !important;
-            --cw-result-bg: #e3f2fd !important;
-            --cw-result-border: #90caf9 !important;
-            --cw-formula-bg: #f5f7f9 !important;
-            --cw-formula-border: #b0bec5 !important;
-            --cw-white: #ffffff !important;
         }
 
         /* ==========================================
@@ -59,7 +44,7 @@
             border-bottom: 1px solid #cfd8dc;
             padding: 12px 20px;
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start;
             align-items: center;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
@@ -73,31 +58,6 @@
             gap: 8px;
         }
         .cw-back-link:hover { text-decoration: underline; }
-        
-        #cw-theme-toggle {
-            background: #fff;
-            border: 2px solid #1a3a5c;
-            color: #1a3a5c;
-            padding: 6px 14px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 700;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        #cw-theme-toggle:hover {
-            background: #1a3a5c;
-            color: #fff;
-            transform: translateY(-2px);
-        }
-        body.theme-sobre #cw-theme-toggle {
-            background: #1a3a5c;
-            color: #fff;
-        }
 
         /* WRAPPER PRINCIPAL */
         #converter-wrapper-final {
@@ -253,9 +213,6 @@
     <!-- BARRE DE NAVIGATION -->
     <nav class="cw-nav-bar">
         <a href="https://karazaitri12-cpu.github.io/plateforme-utilitaires/" class="cw-back-link">← Retour aux Utilitaires</a>
-        <button id="cw-theme-toggle" onclick="cw_toggleTheme()">
-            <span>🏥</span> Mode Sobre
-        </button>
     </nav>
 
     <!-- CONVERTISSEUR -->
@@ -321,22 +278,6 @@
     </div>
 
     <script>
-        // === GESTION DU THÈME ===
-        (function() {
-            const btn = document.getElementById('cw-theme-toggle');
-            if (!btn) return;
-            if (localStorage.getItem('cw-theme') === 'sobre') {
-                document.body.classList.add('theme-sobre');
-                btn.innerHTML = '<span>🎨</span> Mode Design';
-            }
-            window.cw_toggleTheme = function() {
-                document.body.classList.toggle('theme-sobre');
-                const isSobre = document.body.classList.contains('theme-sobre');
-                btn.innerHTML = isSobre ? '<span>🎨</span> Mode Design' : '<span>🏥</span> Mode Sobre';
-                localStorage.setItem('cw-theme', isSobre ? 'sobre' : 'design');
-            };
-        })();
-
         // === LOGIQUE DU CONVERTISSEUR (Préservée) ===
         const cw_units = {
             length: { m: "Mètres (m)", km: "Kilomètres (km)", cm: "Centimètres (cm)", mm: "Millimètres (mm)", in: "Pouces (in)", ft: "Pieds (ft)", yd: "Yards (yd)", mi: "Miles (mi)" },
