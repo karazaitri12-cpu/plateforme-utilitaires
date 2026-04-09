@@ -231,6 +231,19 @@ body.theme-sobre .tips li::before {
 </head>
 
 <body>
+
+<!-- BARRE DE NAVIGATION (en haut) -->
+    <div style="background: #fff; border-bottom: 1px solid #cfd8dc; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000;">
+        <a href="https://karazaitri12-cpu.github.io/plateforme-utilitaires/" style="text-decoration: none; color: #1a3a5c; font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+            <span>←</span> Retour aux Utilitaires
+        </a>
+        
+        <!-- BOUTON DE SWITCH DE THÈME -->
+        <button id="theme-toggle" onclick="toggleTheme()" style="background: #fff; border: 2px solid #1a3a5c; color: #1a3a5c; padding: 6px 14px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: 700; box-shadow: 0 2px 6px rgba(0,0,0,0.1); transition: all 0.3s ease;">
+            <span>🏥</span> Mode Sobre
+        </button>
+    </div>
+    
     <!-- BOUTON DE SWITCH DE THÈME (en haut à gauche, visible) -->
     <div class="theme-switch-wrapper">
         <button id="theme-toggle" onclick="toggleTheme()">
