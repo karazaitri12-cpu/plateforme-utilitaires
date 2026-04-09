@@ -3,47 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculatrice Clinique | Plateforme Utilitaires</title>
-    <meta name="description" content="Calculatrice scientifique et bureautique pour professionnels de santé. Fonctions mémoire, trigonométrie, pourcentages contextuels.">
+    <title>Calculatrice Ultra-Complète | Dr. Karazaitri</title>
     <style>
-        /* --- DESIGN SYSTÈME INSTITUTIONNEL (HAS/Vidal) --- */
-        :root {
-            --primary: #1a3a5c;
-            --bg-page: #f4f7f9;
-            --bg-card: #ffffff;
-            --border: #cfd8dc;
-            --text-main: #37474f;
-            --text-light: #607d8b;
-            --btn-bg: #f5f7f9;
-            --btn-border: #e0e6ed;
-            --btn-text: #263238;
-            --btn-primary-bg: #1a3a5c;
-            --btn-primary-text: #ffffff;
-            --warning-bg: #fff3cd;
-            --warning-text: #856404;
-        }
-
-        * { box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-page);
-            color: var(--text-main);
+        * {
             margin: 0;
             padding: 0;
-            line-height: 1.5;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
         }
 
-        /* NAVIGATION */
         .top-nav {
-            background: var(--bg-card);
-            border-bottom: 1px solid var(--border);
+            background: #fff;
+            border-bottom: 1px solid #cfd8dc;
             padding: 12px 20px;
             display: flex;
             align-items: center;
         }
         .back-link {
             text-decoration: none;
-            color: var(--primary);
+            color: #1a3a5c;
             font-weight: 600;
             font-size: 14px;
             display: flex;
@@ -52,312 +37,979 @@
         }
         .back-link:hover { text-decoration: underline; }
 
-        /* CONTAINER PRINCIPAL */
-        .main-container {
-            max-width: 1100px;
-            margin: 30px auto;
-            padding: 0 20px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            align-items: start;
+        .calculator-container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
         }
 
-        /* SECTION CALCULATRICE */
-        .calculator-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 24px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+        .calculator {
+            background: rgba(148, 180, 168);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto 40px auto;
+            transition: all 0.3s ease;
         }
-        .card-header {
+
+        .calculator:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+        }
+
+        .calculator-title {
             text-align: center;
+            color: white;
+            font-size: 18px;
+            font-weight: 700;
             margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid var(--border);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
-        .card-title { font-size: 18px; font-weight: 700; color: var(--primary); margin: 0; text-transform: uppercase; letter-spacing: 0.5px; }
-        .card-subtitle { font-size: 12px; color: var(--text-light); margin-top: 4px; }
 
-        /* ÉCRAN */
-        .display-wrapper {
+        .display-container {
             margin-bottom: 20px;
-            background: #f8f9fa;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 12px;
             position: relative;
         }
+
         #operation-history {
             width: 100%;
-            height: 20px;
-            background: transparent;
-            color: #78909c;
+            height: 40px;
+            background: #d6f7d6;
+            color: #000;
             border: none;
-            font-size: 12px;
+            border-radius: 10px 10px 0 0;
+            font-size: 16px;
+            font-weight: 400;
             text-align: right;
-            padding: 0; margin: 0; outline: none;
+            padding: 0 15px;
+            font-family: 'Courier New', monospace;
+            box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.2);
+            letter-spacing: 0.5px;
         }
+
         #display {
             width: 100%;
-            height: 48px;
-            background: transparent;
-            color: var(--primary);
+            height: 80px;
+            background: #d6f7d6;
+            color: #000;
             border: none;
-            font-size: 32px;
-            font-weight: 600;
+            border-radius: 0 0 15px 15px;
+            font-size: 35px;
+            font-weight: 700;
             text-align: right;
-            padding: 0; margin: 0; outline: none;
-            font-family: 'Roboto Mono', monospace;
+            padding: 0 20px;
+            font-family: 'Courier New', monospace;
+            box-shadow: inset 0 5px 15px rgba(0, 0, 0, 0.3);
+            letter-spacing: 1px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: font-size 0.2s ease;
         }
+
+        #display:focus {
+            outline: none;
+            box-shadow: inset 0 5px 15px rgba(0, 0, 0, 0.3), 
+                        0 0 0 2px rgba(255, 255, 255, 0.3);
+        }
+
         .memory-indicator {
             position: absolute;
-            top: 14px; left: 12px;
-            background: #ef5350;
+            top: 10px;
+            left: 20px;
+            background: #ff6b6b;
             color: white;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
-            opacity: 0; transition: opacity 0.2s;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
-        .memory-indicator.active { opacity: 1; }
 
-        /* BOUTONS */
-        .buttons { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
-        .trigo-buttons { display: none; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 8px; }
-        .calculator-wrapper.show-trigo .trigo-buttons { display: grid; }
+        .memory-indicator.active {
+            opacity: 1;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .trigo-buttons {
+            display: none;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .calculator.show-trigo .trigo-buttons {
+            display: grid;
+        }
 
         .calc-button {
-            height: 44px;
-            border: 1px solid var(--btn-border);
-            border-radius: 6px;
-            font-size: 15px;
+            height: 40px;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
             font-weight: 600;
             cursor: pointer;
-            background: var(--btn-bg);
-            color: var(--btn-text);
-            transition: background 0.15s, border-color 0.15s;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
-        .calc-button:hover { background: #eceff1; border-color: #b0bec5; }
-        .calc-button:active { transform: scale(0.98); }
 
-        .operator { background: var(--btn-primary-bg); color: var(--btn-primary-text); border-color: var(--btn-primary-bg); }
-        .operator:hover { opacity: 0.9; }
-        .function { background: #eceff1; color: #455a64; }
-        .memory { background: #e3f2fd; color: #0277bd; border-color: #bbdefb; font-size: 12px; }
-        .parenthesis { background: #f5f7f9; }
-        .special { background: #fff3e0; color: #e65100; border-color: #ffe0b2; }
-        #equals { grid-column: span 3; background: #2e7d32; color: white; border-color: #2e7d32; }
-        #equals:hover { background: #388e3c; }
+        .calc-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            transition: left 0.5s;
+        }
 
-        /* MODE D'EMPLOI */
-        .manual-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 20px;
+        .calc-button:hover::before {
+            left: 100%;
+        }
+
+        .number {
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            color: #2c3e50;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .number:hover {
+            background: linear-gradient(145deg, #ffffff, #f8f9fa);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .operator {
+            background: linear-gradient(145deg, #3498db, #2980b9);
+            color: white;
+            box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+        }
+
+        .operator:hover {
+            background: linear-gradient(145deg, #5dade2, #3498db);
+            box-shadow: 0 6px 12px rgba(52, 152, 219, 0.4);
+        }
+
+        .memory {
+            background: linear-gradient(145deg, #16a085, #138d75);
+            color: white;
+            font-size: 14px;
+            box-shadow: 0 4px 8px rgba(22, 160, 133, 0.3);
+        }
+
+        .memory:hover {
+            background: linear-gradient(145deg, #48c9b0, #16a085);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(22, 160, 133, 0.4);
+        }
+
+        .function {
+            background: linear-gradient(145deg, #9b59b6, #8e44ad);
+            color: white;
+            font-size: 14px;
+            box-shadow: 0 4px 8px rgba(155, 89, 182, 0.3);
+        }
+
+        .function:hover {
+            background: linear-gradient(145deg, #bb7cb6, #9b59b6);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(155, 89, 182, 0.4);
+        }
+
+        #equals {
+            background: linear-gradient(145deg, #e74c3c, #c0392b);
+            color: white;
+            grid-column: span 3;
+            box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
+        }
+
+        #equals:hover {
+            background: linear-gradient(145deg, #ec7063, #e74c3c);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(231, 76, 60, 0.4);
+        }
+
+        .special {
+            background: linear-gradient(145deg, #f39c12, #e67e22);
+            color: white;
+            box-shadow: 0 4px 8px rgba(243, 156, 18, 0.3);
+        }
+
+        .special:hover {
+            background: linear-gradient(145deg, #f7b733, #f39c12);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(243, 156, 18, 0.4);
+        }
+
+        .parenthesis {
+            background: linear-gradient(145deg, #34495e, #2c3e50);
+            color: white;
+            box-shadow: 0 4px 8px rgba(52, 73, 94, 0.3);
+        }
+
+        .parenthesis:hover {
+            background: linear-gradient(145deg, #5d6d7e, #34495e);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(52, 73, 94, 0.4);
+        }
+
+        .calc-button:active {
+            transform: translateY(0) scale(0.95);
+        }
+
+        .manual-container {
+            width: 95%;
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .manual {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            color: #2c3e50;
             display: none;
         }
-        .manual-card.active { display: block; }
-        .manual-title { font-size: 16px; font-weight: 700; color: var(--primary); margin: 0 0 15px 0; border-bottom: 2px solid var(--primary); padding-bottom: 6px; }
-        
-        .accordion { border-bottom: 1px solid var(--border); }
-        .accordion-header {
-            padding: 12px 0;
-            cursor: pointer;
-            font-weight: 600;
-            color: var(--text-main);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            user-select: none;
-        }
-        .accordion-header::after { content: '+'; font-size: 16px; font-weight: 300; color: var(--text-light); }
-        .accordion-header.active::after { content: '−'; }
-        .accordion-content { display: none; padding-bottom: 15px; font-size: 13px; color: #455a64; line-height: 1.6; }
-        .accordion-content.active { display: block; }
-        
-        .example { background: #f5f7f9; padding: 10px; border-left: 3px solid var(--primary); margin: 10px 0; border-radius: 0 4px 4px 0; }
-        .calculation { font-family: monospace; color: #c62828; font-weight: bold; margin: 6px 0; background: #fff; padding: 4px 8px; border-radius: 4px; display: inline-block; }
-        
-        .toggle-manual {
-            width: 100%;
-            padding: 12px;
-            background: #fff;
-            border: 1px dashed var(--border);
-            color: var(--text-light);
-            cursor: pointer;
-            font-weight: 600;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-        .toggle-manual:hover { background: #f5f7f9; border-style: solid; }
 
-        /* FOOTER MÉDICO-LÉGAL */
-        .site-footer {
-            margin-top: 50px;
-            padding: 30px 20px;
+        .manual.active {
+            display: block;
+        }
+
+        .toggle-manual {
+            background: linear-gradient(145deg, #bdc3c7, #ecf0f1);
+            color: #2c3e50;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            padding: 15px 30px;
+            margin: 0 auto 20px auto;
+            display: block;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .toggle-manual:hover {
+            background: linear-gradient(145deg, #ecf0f1, #ffffff);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .toggle-manual:active {
+            transform: translateY(0) scale(0.95);
+        }
+
+        .manual h1 {
+            color: #667eea;
+            font-size: 28px;
+            margin-bottom: 25px;
+            text-align: center;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .manual h2 {
+            color: #2c3e50;
+            margin: 20px 0 15px 0;
+            font-size: 22px;
+        }
+
+        .accordion {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        .accordion-header {
+            background: #f9f9f9;
+            padding: 15px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 600;
+            color: #34495e;
+            border-bottom: 1px solid #ddd;
+            position: relative;
+        }
+
+        .accordion-header:hover {
+            background: #f1f1f1;
+        }
+
+        .accordion-header::after {
+            content: '\25BC';
+            position: absolute;
+            right: 15px;
+            transition: transform 0.3s ease;
+        }
+
+        .accordion-header.active::after {
+            transform: rotate(180deg);
+        }
+
+        .accordion-content {
+            padding: 15px;
+            display: none;
             background: #fff;
-            border-top: 1px solid var(--border);
+        }
+
+        .accordion-content.active {
+            display: block;
+        }
+
+        .example {
+            background: #f8f9fa;
+            border-left: 4px solid #16a085;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .example-title {
+            font-weight: bold;
+            color: #16a085;
+            margin-bottom: 8px;
+        }
+
+        .calculation {
+            background: #2c3e50;
+            color: #ffffff;
+            padding: 8px 12px;
+            border-radius: 5px;
+            margin: 5px 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .keyboard-shortcuts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .shortcut {
+            background: #ecf0f1;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #bdc3c7;
+        }
+
+        .shortcut-key {
+            background: #34495e;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+        }
+
+        .error-types {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .error-types h3 {
+            color: #e74c3c;
+        }
+
+        .tips {
+            background: #e8f5e8;
+            border: 2px solid #27ae60;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .tips h3 {
+            color: #27ae60;
+        }
+
+        .tips ul {
+            margin-left: 20px;
+        }
+
+        .tips li {
+            margin-bottom: 8px;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .error-shake {
+            animation: shake 0.5s ease-in-out;
+        }
+
+        .menu-container {
+            max-width: 1200px;
+            margin: 20px auto;
             text-align: center;
         }
-        .medical-disclaimer {
-            max-width: 700px;
-            margin: 0 auto;
-            background: var(--warning-bg);
-            color: var(--warning-text);
-            padding: 14px;
-            border-radius: 6px;
-            font-size: 11px;
-            border: 1px solid #ffeeba;
-            line-height: 1.4;
-        }
-        .copyright { font-size: 12px; color: #90a4ae; margin-top: 15px; }
 
-        /* RESPONSIVE */
-        @media (max-width: 850px) {
-            .main-container { grid-template-columns: 1fr; }
-            .buttons, .trigo-buttons { grid-template-columns: repeat(4, 1fr); }
-            #equals { grid-column: span 2; }
-            .calc-button { height: 40px; font-size: 14px; }
+        .calculator-menu ul {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .calculator-menu li {
+            margin: 0;
+        }
+
+        .calculator-menu a {
+            text-decoration: none;
+            color: #3498db;
+            font-size: 16px;
+            font-weight: 600;
+            padding: 8px 15px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .calculator-menu a:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .top-button {
+            background: linear-gradient(145deg, #34495e, #2c3e50);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-size: 16px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(52, 73, 94, 0.3);
+            margin-right: 10px;
+        }
+
+        .top-button:hover {
+            background: linear-gradient(145deg, #5d6d7e, #34495e);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(52, 73, 94, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .calculator {
+                padding: 15px;
+                margin: 5px auto;
+                max-width: 90vw;
+            }
+
+            .buttons {
+                grid-template-columns: repeat(5, 1fr);
+                gap: 8px;
+            }
+
+            .trigo-buttons {
+                grid-template-columns: repeat(5, 1fr);
+                gap: 8px;
+                margin-top: 8px;
+            }
+           
+            .manual-container {
+                width: 95%;
+                padding: 0 10px;
+            }
+            
+            .manual {
+                padding: 20px;
+            }
+            
+            .toggle-manual {
+                max-width: none;
+            }
+
+            .calculator-menu ul {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+
+        .calc-button.special:where(#calculator-buttons button:nth-child(5)) {
+            font-size: 14px;
         }
     </style>
 </head>
-<body>
 
+<body>
     <nav class="top-nav">
-        <a href="../../index.html" class="back-link">← Retour aux Utilitaires</a>
+        <a href="https://karazaitri12-cpu.github.io/plateforme-utilitaires/" class="back-link">← Retour aux Utilitaires</a>
     </nav>
 
-    <div class="main-container">
-        <!-- CALCULATRICE -->
-        <section class="calculator-wrapper" id="ma-calculatrice-ultra">
-            <div class="calculator-card">
-                <div class="card-header">
-                    <h1 class="card-title">Calculatrice Clinique</h1>
-                    <p class="card-subtitle">Dr. Anouar Karazaitri © 2026</p>
-                </div>
-
-                <div class="display-wrapper">
-                    <span class="memory-indicator" id="memory-indicator">M</span>
-                    <input type="text" id="operation-history" readonly placeholder="">
-                    <input type="text" id="display" readonly placeholder="0">
-                </div>
-
-                <div id="calculator-buttons" class="buttons">
-                    <button class="calc-button memory" onclick="memoryClear()">MC</button>
-                    <button class="calc-button memory" onclick="memoryStore()">MS</button>
-                    <button class="calc-button memory" onclick="memoryAdd()">M+</button>
-                    <button class="calc-button memory" onclick="memorySubtract()">M-</button>
-                    <button class="calc-button memory" onclick="memoryRecall()">MR</button>
-
-                    <button class="calc-button operator" onclick="appendToDisplay('/')">/</button>
-                    <button class="calc-button operator" onclick="appendToDisplay('*')">×</button>
-                    <button class="calc-button operator" onclick="appendToDisplay('-')">-</button>
-                    <button class="calc-button operator" onclick="appendToDisplay('+')">+</button>
-                    <button class="calc-button operator" onclick="appendToDisplay('%')">%</button>
-
-                    <button class="calc-button" onclick="appendToDisplay('1')">1</button>
-                    <button class="calc-button" onclick="appendToDisplay('2')">2</button>
-                    <button class="calc-button" onclick="appendToDisplay('3')">3</button>
-                    <button class="calc-button parenthesis" onclick="addParenthesis('open')">(</button>
-                    <button class="calc-button parenthesis" onclick="addParenthesis('close')">)</button>
-
-                    <button class="calc-button" onclick="appendToDisplay('4')">4</button>
-                    <button class="calc-button" onclick="appendToDisplay('5')">5</button>
-                    <button class="calc-button" onclick="appendToDisplay('6')">6</button>
-                    <button class="calc-button special" onclick="backspace()">⌫</button>
-                    <button class="calc-button special" onclick="clearDisplay()">C</button>
-
-                    <button class="calc-button" onclick="appendToDisplay('7')">7</button>
-                    <button class="calc-button" onclick="appendToDisplay('8')">8</button>
-                    <button class="calc-button" onclick="appendToDisplay('9')">9</button>
-                    <button class="calc-button" onclick="appendToDisplay('.')">.</button>
-                    <button class="calc-button function" onclick="toggleTrigo()">Trigo/Sci</button>
-
-                    <button class="calc-button" onclick="appendToDisplay('0')" style="grid-column: span 2;">0</button>
-                    <button id="equals" class="calc-button" onclick="calculateResult()">=</button>
-                </div>
-
-                <div class="trigo-buttons">
-                    <button class="calc-button function" onclick="calculate('sin')">sin</button>
-                    <button class="calc-button function" onclick="calculate('cos')">cos</button>
-                    <button class="calc-button function" onclick="calculate('tan')">tan</button>
-                    <button class="calc-button function" onclick="calculate('log')">log</button>
-                    <button class="calc-button function" onclick="calculate('ln')">ln</button>
-                    <button class="calc-button function" onclick="calculate('sqrt')">√</button>
-                    <button class="calc-button function" onclick="calculate('pi')">π</button>
-                    <button class="calc-button function" onclick="calculate('e')">e</button>
-                    <button class="calc-button function" onclick="calculate('exp')">exp</button>
-                    <button class="calc-button function" onclick="appendToDisplay('**')">x^y</button>
-                    <button class="calc-button function" onclick="calculate('reciprocal')">1/x</button>
-                    <button class="calc-button function" onclick="toggleSign()">+/-</button>
-                </div>
+    <div class="calculator-container">
+        <div id="ma-calculatrice-ultra" class="calculator">
+            <div class="calculator-title">Calculatrice<br>DR KARA-ZAITRI M.A ©</div>
+            <div class="memory-indicator" id="memory-indicator">M</div>
+            
+            <div class="display-container">
+                <input type="text" id="operation-history" readonly placeholder="">
+                <input type="text" id="display" readonly placeholder="0">
             </div>
-        </section>
+            
+            <div id="calculator-buttons" class="buttons">
+                <button class="calc-button memory" onclick="memoryClear()">MC</button>
+                <button class="calc-button memory" onclick="memoryStore()">MS</button>
+                <button class="calc-button memory" onclick="memoryAdd()">M+</button>
+                <button class="calc-button memory" onclick="memorySubtract()">M-</button>
+                <button class="calc-button memory" onclick="memoryRecall()">MR</button>
 
-        <!-- MODE D'EMPLOI -->
-        <aside>
-            <button class="toggle-manual" onclick="toggleManual()">📖 Afficher le mode d'emploi</button>
-            <div class="manual-card" id="manual-content">
-                <h2 class="manual-title">Mode d'emploi</h2>
-                
-                <div class="accordion">
-                    <div class="accordion-header" onclick="toggleAccordion('op-base')">Opérations de base</div>
-                    <div id="op-base" class="accordion-content">
-                        <div class="example">
-                            <strong>Exemple : 10 + 5</strong><br>
-                            Tapez <code>1</code> <code>0</code> <code>+</code> <code>5</code> puis <code>=</code>.
-                        </div>
-                        <p>Pourcentage contextuel : <code>200 + 10%</code> donne 220.</p>
-                    </div>
-                </div>
+                <button class="calc-button operator" onclick="appendToDisplay('/')">/</button>
+                <button class="calc-button operator" onclick="appendToDisplay('*')">×</button>
+                <button class="calc-button operator" onclick="appendToDisplay('-')">-</button>
+                <button class="calc-button operator" onclick="appendToDisplay('+')">+</button>
+                <button class="calc-button operator" onclick="appendToDisplay('%')">%</button>
 
-                <div class="accordion">
-                    <div class="accordion-header" onclick="toggleAccordion('mem')">Mémoire (MC/MS/M+/M-)</div>
-                    <div id="mem" class="accordion-content">
-                        <p>Utilisez <strong>MS</strong> pour stocker une valeur, <strong>M+</strong> pour additionner à la mémoire, et <strong>MR</strong> pour la rappeler.</p>
-                        <div class="calculation">Ex : 50 → MS → 20 → M+ → MR affiche 70.</div>
-                    </div>
-                </div>
+                <button class="calc-button number" onclick="appendToDisplay('1')">1</button>
+                <button class="calc-button number" onclick="appendToDisplay('2')">2</button>
+                <button class="calc-button number" onclick="appendToDisplay('3')">3</button>
+                <button class="calc-button parenthesis" onclick="addParenthesis('open')">(</button>
+                <button class="calc-button parenthesis" onclick="addParenthesis('close')">)</button>
 
-                <div class="accordion">
-                    <div class="accordion-header" onclick="toggleAccordion('sci')">Fonctions Scientifiques</div>
-                    <div id="sci" class="accordion-content">
-                        <p>Cliquez sur <strong>Trigo/Sci</strong> pour afficher les fonctions avancées (sin, cos, log, √, etc.).</p>
-                        <p>Pour les puissances, utilisez le bouton <strong>x^y</strong> (ex: 2 <strong>x^y</strong> 3 = 8).</p>
-                        <div class="example"><strong>pH approximatif</strong> : <code>log(0.001)</code> → -3 (pH ≈ 3)</div>
-                    </div>
-                </div>
-                
-                <div class="accordion">
-                    <div class="accordion-header" onclick="toggleAccordion('med')">Exemples Médicaux</div>
-                    <div id="med" class="accordion-content">
-                        <div class="example">
-                            <strong>Dose pédiatrique (règle de Clark)</strong><br>
-                            Dose = Dose Adulte × (Poids kg / 70)<br>
-                            <code>500 * (25 / 70) =</code> 178.57 mg
-                        </div>
-                        <div class="example">
-                            <strong>Dilution</strong><br>
-                            Concentration = Quantité / Volume<br>
-                            <code>5 / 100 =</code> 0.05 (soit 5%)
-                        </div>
-                    </div>
-                </div>
+                <button class="calc-button number" onclick="appendToDisplay('4')">4</button>
+                <button class="calc-button number" onclick="appendToDisplay('5')">5</button>
+                <button class="calc-button number" onclick="appendToDisplay('6')">6</button>
+                <button class="calc-button special" onclick="backspace()">←</button>
+                <button class="calc-button special" onclick="clearDisplay()">C</button>
+
+                <button class="calc-button number" onclick="appendToDisplay('7')">7</button>
+                <button class="calc-button number" onclick="appendToDisplay('8')">8</button>
+                <button class="calc-button number" onclick="appendToDisplay('9')">9</button>
+                <button class="calc-button number" onclick="appendToDisplay('.')">.</button>
+                <button class="calc-button special" onclick="toggleTrigo()">Trigo</button>
+
+                <button class="calc-button number" onclick="appendToDisplay('0')" style="grid-column: span 2;">0</button>
+                <button id="equals" class="calc-button" onclick="calculateResult()" style="grid-column: span 3;">=</button>
             </div>
-        </aside>
+            <div class="trigo-buttons">
+                <button class="calc-button function" onclick="calculate('sin')">sin</button>
+                <button class="calc-button function" onclick="calculate('cos')">cos</button>
+                <button class="calc-button function" onclick="calculate('tan')">tan</button>
+                <button class="calc-button function" onclick="calculate('log')">log</button>
+                <button class="calc-button function" onclick="calculate('ln')">ln</button>
+                <button class="calc-button function" onclick="calculate('sqrt')">√</button>
+                <button class="calc-button function" onclick="calculate('pi')">π</button>
+                <button class="calc-button function" onclick="calculate('e')">e</button>
+                <button class="calc-button function" onclick="calculate('exp')">exp</button>
+                <button class="calc-button function" onclick="appendToDisplay('**')">x^y</button>
+                <button class="calc-button function" onclick="calculate('reciprocal')">1/x</button>
+                <button class="calc-button function" onclick="toggleSign()">+/-</button>
+            </div>
+        </div>
     </div>
 
-    <footer class="site-footer">
-        <div class="medical-disclaimer">
-            ⚠️ <strong>AVERTISSEMENT</strong> : Cet outil est fourni à titre informatif et bureautique. Il ne remplace en aucun cas le jugement clinique du praticien ni les recommandations officielles. Vérifiez toujours les résultats avant toute application thérapeutique.
+    <div class="manual-container">
+        <button class="toggle-manual" onclick="toggleManual()">Afficher le mode d'emploi</button>
+
+        <div class="manual">
+            <h1>Mode d'emploi - Calculatrice</h1>
+
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion('vue-densemble')">Vue d'ensemble de l'interface</div>
+                <div id="vue-densemble" class="accordion-content">
+                    <p>La calculatrice dispose de deux zones d'affichage :</p>
+                    <ul>
+                        <li><strong>Zone supérieure</strong> : Affiche l'historique et le récapitulatif des opérations</li>
+                        <li><strong>Zone principale</strong> : Affiche les nombres et calculs en cours</li>
+                        <li><strong>Indicateur M</strong> : S'affiche en rouge quand une valeur est en mémoire</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion('operations-de-base')">Opérations de base</div>
+                <div id="operations-de-base" class="accordion-content">
+                    <div class="accordion">
+                        <div class="accordion-header" onclick="toggleAccordion('fractions')">Calcul des fractions</div>
+                        <div id="fractions" class="accordion-content">
+                            <div class="example">
+                                <div class="example-title">Exemple : Additionner deux fractions (1/2 + 1/3)</div>
+                                <p>Cette calculatrice ne possède pas de mode fraction dédié, mais vous pouvez effectuer des calculs de fractions manuellement en utilisant les opérateurs et les parenthèses :</p>
+                                <div class="calculation">Calcul : (1 / 2) + (1 / 3)</div>
+                                <p><strong>Étapes :</strong></p>
+                                <p>1. Tapez : <code>(1 / 2) + (1 / 3)</code></p>
+                                <p>2. Cliquez <strong>=</strong></p>
+                                <div class="calculation">Affichage : "(1 / 2) + (1 / 3) = 0.833333333333"</div>
+                                <p><strong>Résultat :</strong> 0.833... (approximation décimale de 5/6). Pour une fraction exacte, vous pouvez simplifier manuellement 5/6.</p>
+                            </div>
+                            <div class="example">
+                                <div class="example-title">Exemple : Soustraire et simplifier (3/4 - 1/8)</div>
+                                <div class="calculation">Calcul : (3 / 4) - (1 / 8)</div>
+                                <p><strong>Étapes :</strong></p>
+                                <p>1. Tapez : <code>(3 / 4) - (1 / 8)</code></p>
+                                <p>2. Cliquez <strong>=</strong></p>
+                                <div class="calculation">Affichage : "(3 / 4) - (1 / 8) = 0.625"</div>
+                                <p><strong>Résultat :</strong> 0.625 (équivalent à 5/8 après simplification manuelle).</p>
+                            </div>
+                            <p><strong>Conseil :</strong> Pour des fractions plus complexes, utilisez les parenthèses pour grouper les numérateurs et dénominateurs, puis appliquez le dénominateur commun si nécessaire (par exemple, (a/b) + (c/d) = (ad + bc)/(bd)). Le résultat sera affiché en décimal, mais vous pouvez le convertir en fraction simplifiée manuellement.</p>
+                        </div>
+                    </div>
+                    <div class="accordion">
+                        <div class="accordion-header" onclick="toggleAccordion('puissances')">Calcul des puissances</div>
+                        <div id="puissances" class="accordion-content">
+                            <div class="example">
+                                <div class="example-title">Exemple : Calculer 2 élevé à la puissance 3 (2³)</div>
+                                <p>Utilisez l'opérateur de puissance <strong>x^y</strong> pour élever un nombre à une puissance :</p>
+                                <div class="calculation">Calcul : 2 ** 3</div>
+                                <p><strong>Étapes :</strong></p>
+                                <p>1. Tapez : <code>2</code></p>
+                                <p>2. Cliquez <strong>x^y</strong></p>
+                                <p>3. Tapez : <code>3</code></p>
+                                <p>4. Cliquez <strong>=</strong></p>
+                                <div class="calculation">Affichage : "2 ** 3 = 8"</div>
+                                <p><strong>Résultat :</strong> 8 (car 2 × 2 × 2 = 8).</p>
+                            </div>
+                            <div class="example">
+                                <div class="example-title">Exemple : Calculer une puissance avec un exposant décimal (4^0.5)</div>
+                                <div class="calculation">Calcul : 4 ** 0.5</div>
+                                <p><strong>Étapes :</strong></p>
+                                <p>1. Tapez : <code>4</code></p>
+                                <p>2. Cliquez <strong>x^y</strong></p>
+                                <p>3. Tapez : <code>0.5</code></p>
+                                <p>4. Cliquez <strong>=</strong></p>
+                                <div class="calculation">Affichage : "4 ** 0.5 = 2"</div>
+                                <p><strong>Résultat :</strong> 2 (car la racine carrée de 4 est 2).</p>
+                            </div>
+                            <p><strong>Conseil :</strong> Pour des puissances complexes, utilisez les parenthèses pour prioriser les calculs (par exemple, (2 + 3) ^ 2). Notez que des exposants négatifs (par exemple, 2 ^ -1) donneront un résultat décimal (0.5 pour 1/2).</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion('fonctions-memoire')">Fonctions mémoire</div>
+                <div id="fonctions-memoire" class="accordion-content">
+                    <h3>MS (Memory Store) - Sauvegarder en mémoire</h3>
+                    <div class="example">
+                        <div class="example-title">Étapes :</div>
+                        <p>1. Tapez un nombre : <code>25</code></p>
+                        <p>2. Cliquez <strong>MS</strong></p>
+                        <p>3. Affichage : "MS → M = 25"</p>
+                        <p>4. L'indicateur <strong>M</strong> devient rouge</p>
+                    </div>
+
+                    <h3>M+ (Memory Add) - Ajouter à la mémoire</h3>
+                    <div class="example">
+                        <div class="example-title">Exemple : Additionner plusieurs doses</div>
+                        <div class="calculation">Étape 1 : 10 puis MS → Mémoire = 10</div>
+                        <div class="calculation">Étape 2 : 15 puis M+ → "M+ 15 → M = 25"</div>
+                        <div class="calculation">Étape 3 : 5 puis M+ → "M+ 5 → M = 30"</div>
+                    </div>
+
+                    <h3>M- (Memory Subtract) - Soustraire de la mémoire</h3>
+                    <div class="example">
+                        <div class="example-title">Si mémoire = 30 :</div>
+                        <div class="calculation">Tapez : 8 puis M-</div>
+                        <div class="calculation">Affichage : "M- 8 → M = 22"</div>
+                    </div>
+
+                    <h3>MR (Memory Recall) - Rappeler la mémoire</h3>
+                    <div class="example">
+                        <div class="calculation">Cliquez MR</div>
+                        <div class="calculation">Affichage : "MR → 22"</div>
+                        <p>Le nombre 22 apparaît dans la zone principale</p>
+                    </div>
+
+                    <h3>MC (Memory Clear) - Effacer la mémoire</h3>
+                    <div class="example">
+                        <div class="calculation">Cliquez MC</div>
+                        <div class="calculation">Affichage : "MC → Mémoire effacée"</div>
+                        <p>L'indicateur M disparaît</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion('pourcentages')">Pourcentages</div>
+                <div id="pourcentages" class="accordion-content">
+                    <h3>Calculs de pourcentages contextuels</h3>
+                    <div class="example">
+                        <div class="example-title">Exemple : Augmentation de dosage de 15%</div>
+                        <div class="calculation">Dose actuelle : 100mg</div>
+                        <div class="calculation">Calcul : 100 + 15%</div>
+                        <div class="calculation">Affichage : "100 + 15% = 115"</div>
+                        <div class="calculation">Résultat : 115mg</div>
+                    </div>
+
+                    <div class="example">
+                        <div class="example-title">Exemple : Réduction de 5%</div>
+                        <div class="calculation">Calcul : 40 - 5%</div>
+                        <div class="calculation">Affichage : "40 - 5% = 38"</div>
+                    </div>
+
+                    <div class="example">
+                        <div class="example-title">Exemple : Pourcentage simple</div>
+                        <div class="calculation">Calcul : 15%</div>
+                        <div class="calculation">Affichage : "15% = 0.15"</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion('fonctions-scientifiques')">Fonctions scientifiques</div>
+                <div id="fonctions-scientifiques" class="accordion-content">
+                    <h3>Fonctions trigonométriques</h3>
+                    <div class="example">
+                        <div class="example-title">Exemple : Angle pour positionnement médical</div>
+                        <div class="calculation">sin(45) → "sin(45°) = 0.7071067812"</div>
+                        <div class="calculation">cos(45) → "cos(45°) = 0.7071067812"</div>
+                        <div class="calculation">tan(45) → "tan(45°) = 1"</div>
+                    </div>
+
+                    <div class="accordion">
+                        <div class="accordion-header" onclick="toggleAccordion('racines-carrees')">Racine carrée</div>
+                        <div id="racines-carrees" class="accordion-content">
+                            <div class="example">
+                                <div class="example-title">Exemple : Calculer la racine carrée d'un nombre (√144)</div>
+                                <p>Utilisez la fonction <strong>√</strong> pour calculer la racine carrée d'un nombre positif :</p>
+                                <div class="calculation">Calcul : √144</div>
+                                <p><strong>Étapes :</strong></p>
+                                <p>1. Tapez : <code>144</code></p>
+                                <p>2. Cliquez <strong>√</strong></p>
+                                <p>3. Cliquez <strong>=</strong></p>
+                                <div class="calculation">Affichage : "√(144) = 12"</div>
+                                <p><strong>Résultat :</strong> 12 (car 12 × 12 = 144).</p>
+                            </div>
+                            
+                            <p><strong>Remarque :</strong> La calculatrice affiche une erreur si vous tentez de calculer la racine carrée d'un nombre négatif (par exemple, √(-4)), car cela n'est pas défini dans les nombres réels. Assurez-vous que la valeur entrée est positive.</p>
+                        </div>
+                    </div>
+                    <div class="accordion">
+                        <div class="accordion-header" onclick="toggleAccordion('logarithmes')">Logarithmes</div>
+                        <div id="logarithmes" class="accordion-content">
+                            <div class="example">
+                                <div class="example-title">Exemple : Calculer le logarithme décimal (log₁₀ de 100)</div>
+                                <p>Utilisez la fonction <strong>log</strong> pour calculer le logarithme en base 10 :</p>
+                                <div class="calculation">Calcul : log(100)</div>
+                                <p><strong>Étapes :</strong></p>
+                                <p>1. Tapez : <code>100</code></p>
+                                <p>2. Cliquez <strong>log</strong></p>
+                                <p>3. Cliquez <strong>=</strong></p>
+                                <div class="calculation">Affichage : "log(100) = 2"</div>
+                                <p><strong>Résultat :</strong> 2 (car 10² = 100).</p>
+                            </div>
+                            <div class="example">
+                                <div class="example-title">Exemple : Calculer le logarithme naturel (ln de 2.718)</div>
+                                <p>Utilisez la fonction <strong>ln</strong> pour calculer le logarithme en base e (environ 2.718) :</p>
+                                <div class="calculation">Calcul : ln(2.718)</div>
+                                <p><strong>Étapes :</strong></p>
+                                <p>1. Tapez : <code>2.718</code></p>
+                                <p>2. Cliquez <strong>ln</strong></p>
+                                <p>3. Cliquez <strong>=</strong></p>
+                                <div class="calculation">Affichage : "ln(2.718) = 0.999896315729"</div>
+                                <p><strong>Résultat :</strong> Environ 1 (car ln(e) ≈ 1, et 2.718 est une approximation de e).</p>
+                            </div>
+                            <div class="example">
+                                <div class="example-title">Exemple : Application médicale (pH approximatif)</div>
+                                <p>Le logarithme est utile pour calculer le pH à partir de la concentration en ions H⁺ (pH = -log₁₀[H⁺]). Si [H⁺] = 0.001 mol/L :</p>
+                                <div class="calculation">Calcul : log(0.001)</div>
+                                <p><strong>Étapes :</strong></p>
+                                <p>1. Tapez : <code>0.001</code></p>
+                                <p>2. Cliquez <strong>log</strong></p>
+                                <p>3. Cliquez <strong>=</strong></p>
+                                <div class="calculation">Affichage : "log(0.001) = -3"</div>
+                                <p><strong>Résultat :</strong> pH ≈ -(-3) = 3 (valeur typique pour une solution acide).</p>
+                            </div>
+                            <p><strong>Remarque :</strong> La calculatrice affiche une erreur si vous entrez une valeur négative ou nulle (par exemple, log(-1) ou ln(0)), car les logarithmes ne sont définis que pour les nombres positifs. Assurez-vous que la valeur entrée est strictement positive.</p>
+                        </div>
+                    </div>
+                    <div class="accordion">
+                        <div class="accordion-header" onclick="toggleAccordion('constantes')">Constantes mathématiques</div>
+                        <div id="constantes" class="accordion-content">
+                            <div class="example">
+                                <div class="calculation">π → "π = 3.1415926536"</div>
+                                <div class="calculation">e → "e = 2.7182818285"</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion">
+                        <div class="accordion-header" onclick="toggleAccordion('reciproque')">Réciproque (1/x)</div>
+                        <div id="reciproque" class="accordion-content">
+                            <div class="example">
+                                <div class="example-title">Exemple : Calculer le réciproque de 2 (1/2)</div>
+                                <p>Utilisez la fonction <strong>1/x</strong> pour calculer l'inverse d'un nombre (1 divisé par ce nombre) :</p>
+                                <div class="calculation">Calcul : 1/2</div>
+                                <p><strong>Étapes :</strong></p>
+                                <p>1. Tapez : <code>2</code></p>
+                                <p>2. Cliquez <strong>1/x</strong></p>
+                                <p>3. Cliquez <strong>=</strong></p>
+                                <div class="calculation">Affichage : "1/2 = 0.5"</div>
+                                <p><strong>Résultat :</strong> 0.5 (car 1 ÷ 2 = 0.5).</p>
+                            </div>
+                            <div class="example">
+                                <div class="example-title">Exemple : Application médicale (dilution)</div>
+                                <p>En pharmacie, le réciproque peut aider à calculer la concentration inverse. Si une solution est diluée à 1/4 :</p>
+                                <div class="calculation">Calcul : 1/4</div>
+                                <p><strong>Étapes :</strong></p>
+                                <p>1. Tapez : <code>4</code></p>
+                                <p>2. Cliquez <strong>1/x</strong></p>
+                                <p>3. Cliquez <strong>=</strong></p>
+                                <div class="calculation">Affichage : "1/4 = 0.25"</div>
+                                <p><strong>Résultat :</strong> 0.25, représentant une dilution de 25%.</p>
+                            </div>
+                            <p><strong>Remarque :</strong> La calculatrice affiche une erreur si vous entrez 0, car la division par zéro n'est pas définie. Assurez-vous que la valeur entrée est différente de zéro.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion('parentheses')">Parenthèses et calculs complexes</div>
+                <div id="parentheses" class="accordion-content">
+                    <h3>Calculs avec priorités</h3>
+                    <div class="example">
+                        <div class="example-title">Exemple : Calcul de surface corporelle (formule de Boyd)</div>
+                        <div class="calculation">Calcul : (0.0003207 * (70 ** 0.7285)) * (175 ** 0.3)</div>
+                        <p><strong>Étapes :</strong></p>
+                        <p>1. Tapez : 0.0003207 * (70 ** 0.7285) * (175 ** 0.3)</p>
+                        <p>2. Cliquez =</p>
+                        <p>3. Résultat avec historique complet</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion('raccourcis')">Raccourcis clavier</div>
+                <div id="raccourcis" class="accordion-content">
+                    <div class="keyboard-shortcuts">
+                        <div class="shortcut">
+                            <div class="shortcut-key">0-9</div>
+                            <div>Chiffres</div>
+                        </div>
+                        <div class="shortcut">
+                            <div class="shortcut-key">+ - * / %</div>
+                            <div>Opérateurs</div>
+                        </div>
+                        <div class="shortcut">
+                            <div class="shortcut-key">.</div>
+                            <div>Point décimal</div>
+                        </div>
+                        <div class="shortcut">
+                            <div class="shortcut-key">( )</div>
+                            <div>Parenthèses</div>
+                        </div>
+                        <div class="shortcut">
+                            <div class="shortcut-key">Enter ou =</div>
+                            <div>Calculer</div>
+                        </div>
+                        <div class="shortcut">
+                            <div class="shortcut-key">Escape ou C</div>
+                            <div>Effacer tout</div>
+                        </div>
+                        <div class="shortcut">
+                            <div class="shortcut-key">Backspace</div>
+                            <div>Effacer dernier</div>
+                        </div>
+                        <div class="shortcut">
+                            <div class="shortcut-key">M</div>
+                            <div>Sauvegarder (MS)</div>
+                        </div>
+                        <div class="shortcut">
+                            <div class="shortcut-key">Shift + M</div>
+                            <div>Ajouter (M+)</div>
+                        </div>
+                        <div class="shortcut">
+                            <div class="shortcut-key">R</div>
+                            <div>Rappeler (MR)</div>
+                        </div>
+                        <div class="shortcut">
+                            <div class="shortcut-key">Delete</div>
+                            <div>Effacer mémoire (MC)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion('exemples-medicaux')">Exemples pratiques médicaux</div>
+                <div id="exemples-medicaux" class="accordion-content">
+                    <h3>Calcul de dose pédiatrique</h3>
+                    <div class="example">
+                        <div class="example-title">Formule : Dose adulte × (poids enfant / 70kg)</div>
+                        <div class="calculation">Dose adulte : 500mg, Enfant : 25kg</div>
+                        <div class="calculation">Calcul : 500 * (25 / 70)</div>
+                        <div class="calculation">Affichage : "500 × (25 / 70) = 178.571428571429"</div>
+                        <div class="calculation">Résultat : ~179mg</div>
+                    </div>
+
+                    <h3>Conversion d'unités avec pourcentages</h3>
+                    <div class="example">
+                        <div class="example-title">Exemple : Concentration médicamenteuse</div>
+                        <div class="calculation">Solution à 5% dans 200ml :</div>
+                        <div class="calculation">Calcul : 200 * 5%</div>
+                        <div class="calculation">Affichage : "200 × 5% = 10"</div>
+                        <div class="calculation">Résultat : 10ml de principe actif</div>
+                    </div>
+
+                    <div class="error-types">
+                        <h4>Messages d'erreur :</h4>
+                        <ul>
+                            <li><strong>"Parenthèses"</strong> : Parenthèses non équilibrées</li>
+                            <li><strong>"Erreur de calcul"</strong> : Expression invalide</li>
+                            <li><strong>"Erreur (valeur ≤ 0)"</strong> : Pour log/ln avec valeur négative</li>
+                            <li><strong>"Erreur (valeur < 0)"</strong> : Pour racine carrée négative</li>
+                            <li><strong>"Erreur (division par zéro)"</strong> : Pour 1/x avec valeur 0</li>
+                        </ul>
+                    </div>
+
+                    <div class="tips">
+                        <h4>Conseils d'utilisation :</h4>
+                        <ul>
+                            <li><strong>Vérifiez toujours</strong> l'historique affiché en haut pour confirmer votre calcul</li>
+                            <li><strong>Utilisez les parenthèses</strong> pour les calculs complexes</li>
+                            <li><strong>Sauvegardez en mémoire</strong> les valeurs intermédiaires importantes</li>
+                            <li><strong>Les pourcentages</strong> se calculent automatiquement selon le contexte</li>
+                            <li><strong>Utilisez Auto ()</strong> si vous oubliez de fermer des parenthèses</li>
+                        </ul>
+                        <p><strong>Cette calculatrice est conçue pour être intuitive tout en offrant la précision nécessaire pour vos calculs médicaux professionnels.</strong></p>
+                    </div>
+                </div>
+            </div>
         </div>
-        <p class="copyright">© 2026 Dr. Anouar Karazaitri - Gynécologie Obstétrique</p>
-    </footer>
+    </div>
 
     <script>
         (function() {
@@ -368,8 +1020,14 @@
             const operationHistory = calculatorContainer.querySelector('#operation-history');
             const memoryIndicator = calculatorContainer.querySelector('#memory-indicator');
 
+            if (!display || !operationHistory) return;
+
             let memoryValue = 0;
             let operationComplete = false;
+
+            function updateMemoryIndicator() {
+                memoryIndicator.classList.toggle('active', memoryValue !== 0);
+            }
 
             function showError(message = 'Erreur') {
                 display.value = message;
@@ -378,26 +1036,38 @@
             }
 
             function adjustFontSize() {
+                const display = document.getElementById('display');
                 const length = display.value.length;
-                if (length > 12) display.style.fontSize = '22px';
-                else if (length > 8) display.style.fontSize = '26px';
-                else display.style.fontSize = '32px';
+                
+                if (length > 12) {
+                    display.style.fontSize = '25px';
+                } else if (length > 8) {
+                    display.style.fontSize = '30px';
+                } else {
+                    display.style.fontSize = '35px';
+                }
             }
 
             window.memoryAdd = function() {
                 try {
                     const currentValue = parseFloat(display.value) || 0;
                     memoryValue += currentValue;
+                    updateMemoryIndicator();
                     operationHistory.value = `M+ ${currentValue} → M = ${memoryValue}`;
-                } catch { showError(); }
+                } catch {
+                    showError();
+                }
             };
 
             window.memorySubtract = function() {
                 try {
                     const currentValue = parseFloat(display.value) || 0;
                     memoryValue -= currentValue;
+                    updateMemoryIndicator();
                     operationHistory.value = `M- ${currentValue} → M = ${memoryValue}`;
-                } catch { showError(); }
+                } catch {
+                    showError();
+                }
             };
 
             window.memoryRecall = function() {
@@ -408,18 +1078,25 @@
 
             window.memoryClear = function() {
                 memoryValue = 0;
+                updateMemoryIndicator();
                 operationHistory.value = 'MC → Mémoire effacée';
             };
 
             window.memoryStore = function() {
                 try {
                     memoryValue = parseFloat(display.value) || 0;
+                    updateMemoryIndicator();
                     operationHistory.value = `MS → M = ${memoryValue}`;
-                } catch { showError(); }
+                } catch {
+                    showError();
+                }
             };
 
             window.appendToDisplay = function(value) {
-                if (['Erreur', 'NaN', 'Infinity'].includes(display.value)) clearDisplay();
+                if (['Erreur', 'NaN', 'Infinity'].includes(display.value)) {
+                    clearDisplay();
+                }
+
                 if (operationComplete && /[0-9.]/.test(value)) {
                     display.value = '';
                     operationComplete = false;
@@ -428,18 +1105,30 @@
                 const lastChar = display.value.slice(-1);
                 const operatorsAndPower = ['+', '-', '*', '/', '**'];
 
-                if ((operatorsAndPower.includes(lastChar) && value === '%') || (lastChar === '%' && value === '%')) return;
+                if ((operatorsAndPower.includes(lastChar) && value === '%') || (lastChar === '%' && value === '%')) {
+                    return;
+                }
+
                 if (operatorsAndPower.includes(lastChar) && operatorsAndPower.includes(value)) {
                     if (value === '-' && lastChar !== '-') {
                         if (lastChar === '**') return;
-                    } else { return; }
+                    } else {
+                        return;
+                    }
                 }
+
                 if (lastChar === '.' && operatorsAndPower.includes(value)) return;
+
                 if (value === '.') {
                     const parts = display.value.split(/[+\-*/()^%]/);
-                    if (parts.length > 0 && parts[parts.length - 1].includes('.')) return;
+                    if (parts.length > 0 && parts[parts.length - 1].includes('.')) {
+                        return;
+                    }
                 }
-                if (display.value === "" && ['*', '/', '**', '+', '%'].includes(value)) return;
+
+                if (display.value === "" && ['*', '/', '**', '+', '%'].includes(value)) {
+                    return;
+                }
 
                 display.value += value;
                 operationComplete = false;
@@ -455,10 +1144,13 @@
             };
 
             window.backspace = function() {
-                if (['Erreur', 'NaN', 'Infinity'].includes(display.value)) clearDisplay();
-                else {
+                if (['Erreur', 'NaN', 'Infinity'].includes(display.value)) {
+                    clearDisplay();
+                } else {
                     display.value = display.value.slice(0, -1);
-                    if (display.value === '') display.value = '0';
+                    if (display.value === '') {
+                        display.value = '0';
+                    }
                 }
                 operationComplete = false;
                 adjustFontSize();
@@ -467,12 +1159,21 @@
             window.addParenthesis = function(type) {
                 if (type === 'open') {
                     const lastChar = display.value.slice(-1);
-                    if (lastChar && /[0-9)]/.test(lastChar)) appendToDisplay('*(');
-                    else appendToDisplay('(');
+                    if (lastChar && /[0-9)]/.test(lastChar)) {
+                        appendToDisplay('*(');
+                    } else {
+                        appendToDisplay('(');
+                    }
+                    operationHistory.value = 'Parenthèse ouvrante ajoutée';
                 } else if (type === 'close') {
                     const openCount = (display.value.match(/\(/g) || []).length;
                     const closeCount = (display.value.match(/\)/g) || []).length;
-                    if (openCount > closeCount) appendToDisplay(')');
+                    if (openCount > closeCount) {
+                        appendToDisplay(')');
+                        operationHistory.value = 'Parenthèse fermante ajoutée';
+                    } else {
+                        operationHistory.value = 'Aucune parenthèse à fermer';
+                    }
                 }
                 adjustFontSize();
             };
@@ -480,37 +1181,57 @@
             window.calculateResult = function() {
                 try {
                     if (!display.value) return;
+
                     const originalExpression = display.value;
-                    
+
                     const openCount = (originalExpression.match(/\(/g) || []).length;
                     const closeCount = (originalExpression.match(/\)/g) || []).length;
-                    if (openCount !== closeCount) { showError("Parenthèses"); return; }
+                    if (openCount !== closeCount) {
+                        operationHistory.value = "Erreur: Parenthèses non équilibrées";
+                        showError("Parenthèses");
+                        return;
+                    }
 
                     let expression = originalExpression;
+
                     const percentagePattern = /(\d+(?:\.\d+)?)\s*([+\-])\s*(\d+(?:\.\d+)?)%|(\d+(?:\.\d+)?)([+\-])(\d+(?:\.\d+)?)%/g;
-                    expression = expression.replace(percentagePattern, function(match, b1, op1, p1, b2, op2, p2) {
-                        const base = parseFloat(b1 || b2);
-                        const percent = parseFloat(p1 || p2);
-                        const operator = op1 || op2;
+                    expression = expression.replace(percentagePattern, function(match, baseNumber1, operator1, percentValue1, baseNumber2, operator2, percentValue2) {
+                        const base = parseFloat(baseNumber1 || baseNumber2);
+                        const percent = parseFloat(percentValue1 || percentValue2);
+                        const operator = operator1 || operator2;
                         return operator === '+' ? `${base} + (${base} * ${percent} / 100)` : `${base} - (${base} * ${percent} / 100)`;
                     });
+
                     const isolatedPercentPattern = /^(\d+(?:\.\d+)?)%$/;
-                    if (isolatedPercentPattern.test(expression)) expression = (parseFloat(expression) / 100).toString();
-                    expression = expression.replace(/(?<![\d.])\s*(\d+(?:\.\d+)?)%/g, function(match, pv) { return (parseFloat(pv) / 100).toString(); });
+                    const isolatedMatch = expression.match(isolatedPercentPattern);
+                    if (isolatedMatch) {
+                        const percentValue = parseFloat(isolatedMatch[1]);
+                        expression = (percentValue / 100).toString();
+                    }
+
+                    expression = expression.replace(/(?<![\d.])\s*(\d+(?:\.\d+)?)%/g, function(match, percentValue) {
+                        return (parseFloat(percentValue) / 100).toString();
+                    });
+
                     expression = expression.replace(/×/g, '*');
-                    
+
                     const safeEval = new Function('return ' + expression);
                     const result = safeEval();
 
-                    if (isNaN(result) || !isFinite(result)) showError();
-                    else {
+                    if (isNaN(result) || !isFinite(result)) {
+                        operationHistory.value = "Erreur de calcul";
+                        showError();
+                    } else {
                         const displayExpression = originalExpression.replace(/\*/g, '×');
                         const formattedResult = Number.isInteger(result) ? result : parseFloat(result.toFixed(12));
                         operationHistory.value = `${displayExpression} = ${formattedResult}`;
                         display.value = formattedResult.toString();
                         operationComplete = true;
                     }
-                } catch { showError(); }
+                } catch {
+                    operationHistory.value = "Erreur de calcul";
+                    showError();
+                }
                 adjustFontSize();
             };
 
@@ -520,106 +1241,223 @@
                     if (match && match[1]) {
                         let lastNumberStr = match[1];
                         let prefix = display.value.substring(0, display.value.length - lastNumberStr.length);
-                        if (lastNumberStr.startsWith('-')) display.value = prefix + lastNumberStr.substring(1);
-                        else display.value = prefix + '-' + lastNumberStr;
+                        if (lastNumberStr.startsWith('-')) {
+                            display.value = prefix + lastNumberStr.substring(1);
+                        } else {
+                            if (prefix.length > 0 && /[\d.)]$/.test(prefix.slice(-1))) {
+                                display.value = prefix + (parseFloat(lastNumberStr) * -1).toString();
+                            } else {
+                                display.value = prefix + '-' + lastNumberStr;
+                            }
+                        }
+                        operationHistory.value = 'Signe inversé';
+                    } else if (!isNaN(parseFloat(display.value))) {
+                        display.value = (parseFloat(display.value) * -1).toString();
+                        operationHistory.value = 'Signe inversé';
                     }
                 }
                 adjustFontSize();
             };
 
             window.calculate = function(operation) {
+                const activeElement = document.activeElement;
+                if (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') {
+                    return;
+                }
+
                 let currentValueStr = display.value;
-                if (['Erreur', 'NaN', 'Infinity'].includes(currentValueStr)) clearDisplay();
+
+                if (['Erreur', 'NaN', 'Infinity'].includes(currentValueStr)) {
+                    clearDisplay();
+                    currentValueStr = "";
+                }
+
+                let result;
                 let valueToOperateOn = NaN;
                 let prefixExpression = "";
+
                 const match = currentValueStr.match(/(-?\d*\.?\d*)$/);
-                
                 if (match && match[1] && match[1].trim() !== "") {
                     valueToOperateOn = parseFloat(match[1]);
                     prefixExpression = currentValueStr.substring(0, currentValueStr.length - match[1].length);
                 } else if (currentValueStr.trim() !== "" && !isNaN(parseFloat(currentValueStr))) {
                     valueToOperateOn = parseFloat(currentValueStr);
+                    prefixExpression = "";
                 }
 
-                let result;
                 switch(operation) {
-                    case 'sin': result = Math.sin(valueToOperateOn * Math.PI / 180); break;
-                    case 'cos': result = Math.cos(valueToOperateOn * Math.PI / 180); break;
-                    case 'tan': result = Math.tan(valueToOperateOn * Math.PI / 180); break;
+                    case 'sin':
+                        result = Math.sin(valueToOperateOn * Math.PI / 180);
+                        operationHistory.value = `sin(${valueToOperateOn}°) = ${Number.isInteger(result) ? result : parseFloat(result.toFixed(12))}`;
+                        break;
+                    case 'cos':
+                        result = Math.cos(valueToOperateOn * Math.PI / 180);
+                        operationHistory.value = `cos(${valueToOperateOn}°) = ${Number.isInteger(result) ? result : parseFloat(result.toFixed(12))}`;
+                        break;
+                    case 'tan':
+                        result = Math.tan(valueToOperateOn * Math.PI / 180);
+                        operationHistory.value = `tan(${valueToOperateOn}°) = ${Number.isInteger(result) ? result : parseFloat(result.toFixed(12))}`;
+                        break;
                     case 'log':
-                        if (valueToOperateOn <= 0) { showError(); return; }
-                        result = Math.log10(valueToOperateOn); break;
+                        if (valueToOperateOn <= 0) {
+                            operationHistory.value = `log(${valueToOperateOn}) = Erreur (valeur ≤ 0)`;
+                            showError();
+                            return;
+                        }
+                        result = Math.log10(valueToOperateOn);
+                        operationHistory.value = `log(${valueToOperateOn}) = ${Number.isInteger(result) ? result : parseFloat(result.toFixed(12))}`;
+                        break;
                     case 'ln':
-                        if (valueToOperateOn <= 0) { showError(); return; }
-                        result = Math.log(valueToOperateOn); break;
+                        if (valueToOperateOn <= 0) {
+                            operationHistory.value = `ln(${valueToOperateOn}) = Erreur (valeur ≤ 0)`;
+                            showError();
+                            return;
+                        }
+                        result = Math.log(valueToOperateOn);
+                        operationHistory.value = `ln(${valueToOperateOn}) = ${Number.isInteger(result) ? result : parseFloat(result.toFixed(12))}`;
+                        break;
                     case 'sqrt':
-                        if (valueToOperateOn < 0) { showError(); return; }
-                        result = Math.sqrt(valueToOperateOn); break;
-                    case 'exp': result = Math.exp(valueToOperateOn); break;
-                    case 'pi': 
-                        const pi = Math.PI.toFixed(10);
-                        display.value = prefixExpression + (prefixExpression.length > 0 && /[\d.)]$/.test(prefixExpression.slice(-1)) ? '*' : '') + pi;
-                        operationHistory.value = `π = ${pi}`;
+                        if (valueToOperateOn < 0) {
+                            operationHistory.value = `√(${valueToOperateOn}) = Erreur (valeur < 0)`;
+                            showError();
+                            return;
+                        }
+                        result = Math.sqrt(valueToOperateOn);
+                        operationHistory.value = `√(${valueToOperateOn}) = ${Number.isInteger(result) ? result : parseFloat(result.toFixed(12))}`;
+                        break;
+                    case 'exp':
+                        result = Math.exp(valueToOperateOn);
+                        operationHistory.value = `exp(${valueToOperateOn}) = ${Number.isInteger(result) ? result : parseFloat(result.toFixed(12))}`;
+                        break;
+                    case 'pi':
+                        const piValue = Math.PI.toFixed(10);
+                        operationHistory.value = `π = ${piValue}`;
+                        display.value = prefixExpression +
+                            (prefixExpression.length > 0 && /[\d.)]$/.test(prefixExpression.slice(-1)) ? '*' : '') +
+                            piValue;
                         operationComplete = true;
-                        adjustFontSize(); return;
-                    case 'e': 
-                        const e = Math.E.toFixed(10);
-                        display.value = prefixExpression + (prefixExpression.length > 0 && /[\d.)]$/.test(prefixExpression.slice(-1)) ? '*' : '') + e;
-                        operationHistory.value = `e = ${e}`;
+                        adjustFontSize();
+                        return;
+                    case 'e':
+                        const eValue = Math.E.toFixed(10);
+                        operationHistory.value = `e = ${eValue}`;
+                        display.value = prefixExpression +
+                            (prefixExpression.length > 0 && /[\d.)]$/.test(prefixExpression.slice(-1)) ? '*' : '') +
+                            eValue;
                         operationComplete = true;
-                        adjustFontSize(); return;
+                        adjustFontSize();
+                        return;
                     case 'reciprocal':
-                        if (valueToOperateOn === 0) { showError(); return; }
-                        result = 1 / valueToOperateOn; break;
-                    default: return;
+                        if (valueToOperateOn === 0) {
+                            operationHistory.value = `1/${valueToOperateOn} = Erreur (division par zéro)`;
+                            showError();
+                            return;
+                        }
+                        result = 1 / valueToOperateOn;
+                        operationHistory.value = `1/${valueToOperateOn} = ${Number.isInteger(result) ? result : parseFloat(result.toFixed(12))}`;
+                        break;
+                    default:
+                        return;
                 }
 
-                if (result === undefined || isNaN(result) || !isFinite(result)) showError();
-                else {
-                    const formattedResult = Number.isInteger(result) ? result.toString() : parseFloat(result.toFixed(12)).toString();
+                if (result === undefined || isNaN(result) || !isFinite(result)) {
+                    showError();
+                } else {
+                    const formattedResult = Number.isInteger(result) ?
+                        result.toString() :
+                        parseFloat(result.toFixed(12)).toString();
                     display.value = prefixExpression + formattedResult;
-                    operationHistory.value = `${operation}(${valueToOperateOn}) = ${formattedResult}`;
                     operationComplete = true;
                 }
                 adjustFontSize();
             };
 
             window.toggleTrigo = function() {
-                calculatorContainer.classList.toggle('show-trigo');
+                const calculator = document.getElementById('ma-calculatrice-ultra');
+                calculator.classList.toggle('show-trigo');
             };
 
             window.toggleManual = function() {
-                document.getElementById('manual-content').classList.toggle('active');
+                const manual = document.querySelector('.manual');
+                manual.classList.toggle('active');
             };
 
             window.toggleAccordion = function(id) {
-                const content = document.getElementById(id);
-                const header = content.previousElementSibling;
-                content.classList.toggle('active');
-                header.classList.toggle('active');
+                const accordionContent = document.getElementById(id);
+                const accordionHeader = accordionContent.previousElementSibling;
+                accordionContent.classList.toggle('active');
+                accordionHeader.classList.toggle('active');
             };
 
             document.addEventListener('keydown', function(event) {
                 const activeElement = document.activeElement;
-                if (activeElement.tagName === 'INPUT') return;
+                if (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') {
+                    return;
+                }
+
+                event.preventDefault();
+
                 switch(event.key) {
                     case '0': case '1': case '2': case '3': case '4':
-                    case '5': case '6': case '7': case '8': case '9': appendToDisplay(event.key); break;
-                    case '.': appendToDisplay('.'); break;
-                    case '+': appendToDisplay('+'); break;
-                    case '-': appendToDisplay('-'); break;
-                    case '*': appendToDisplay('*'); break;
-                    case '/': appendToDisplay('/'); break;
-                    case '%': appendToDisplay('%'); break;
-                    case '(': addParenthesis('open'); break;
-                    case ')': addParenthesis('close'); break;
-                    case 'Enter': case '=': calculateResult(); break;
-                    case 'Escape': case 'c': case 'C': clearDisplay(); break;
-                    case 'Backspace': backspace(); break;
+                    case '5': case '6': case '7': case '8': case '9':
+                        appendToDisplay(event.key);
+                        break;
+                    case '.':
+                        appendToDisplay('.');
+                        break;
+                    case '+':
+                        appendToDisplay('+');
+                        break;
+                    case '-':
+                        appendToDisplay('-');
+                        break;
+                    case '*':
+                        appendToDisplay('*');
+                        break;
+                    case '/':
+                        appendToDisplay('/');
+                        break;
+                    case '%':
+                        appendToDisplay('%');
+                        break;
+                    case '(':
+                        addParenthesis('open');
+                        break;
+                    case ')':
+                        addParenthesis('close');
+                        break;
+                    case 'Enter':
+                    case '=':
+                        calculateResult();
+                        break;
+                    case 'Escape':
+                    case 'c':
+                    case 'C':
+                        clearDisplay();
+                        break;
+                    case 'Backspace':
+                        backspace();
+                        break;
+                    case 'm':
+                    case 'M':
+                        if (event.shiftKey) {
+                            memoryAdd();
+                        } else {
+                            memoryStore();
+                        }
+                        break;
+                    case 'r':
+                    case 'R':
+                        memoryRecall();
+                        break;
+                    case 'Delete':
+                        memoryClear();
+                        break;
                 }
             });
 
-            operationHistory.value = 'Prêt';
+            updateMemoryIndicator();
+            operationHistory.value = 'Calculatrice Ultra-Complète';
         })();
     </script>
 </body>
