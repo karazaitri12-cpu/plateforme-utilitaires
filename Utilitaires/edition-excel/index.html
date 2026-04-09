@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Éditeur Excel | Dr. Karazaitri</title>
+  
+  <!-- Bibliothèque SheetJS pour Excel -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  
+  <style>
+    /* ==========================================
+       VARIABLES DE DESIGN (Style institutionnel)
+       ========================================== */
+    :root {
+      --primary: #1a3a5c;
+      --primary-light: #345a7a;
+      --primary-dark: #0d2538;
+      --text: #37474f;
+      --text-light: #607d8b;
+      --border: #cfd8dc;
+      --bg-page: #f4f7f9;
+      --bg-card: #ffffff;
+      --bg-input: #f8f9fa;
+      --bg-header: #2c6fb3;
+      --bg-header-hover: #1c4370;
+      --success: #2e7d32;
+      --warning: #ed6c02;
+      --error: #c62828;
+      --highlight: #ffeb3b;
+    }
+
+    /* ==========================================
+       STRUCTURE GLOBALE
+       ========================================== */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background: var(--bg-page);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    /* BARRE DE NAVIGATION (Fixe en haut) */
+    .nav-bar {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      padding: 12px 20px;
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .back-link {
+      text-decoration: none;
+      color: var(--primary);
+      font-weight: 600;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .back-link:hover { text-decoration: underline; }
+
+    /* CONTENEUR PRINCIPAL */
+    #excel-wrap {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 0 15px;
+    }
+
+    /* EN-TÊTE */
+    #excel-wrap h1 {
+      text-align: center;
+      color: var(--primary);
+      font-size: 20px;
+      font-weight: 700;
+      margin: 0 0 20px 0;
+      padding: 16px;
+      background: var(--bg-card);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    /* INPUT FICHIER */
+    #excel-wrap input[type='file'] {
+      width: 100%;
+      max-width: 500px;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg-input);
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+    #fileLabel {
+      display: block;
+      margin-bottom: 15px;
+      padding: 10px 14px;
+      background: #e3f2fd;
+      border-radius: 6px;
+      color: var(--primary);
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    /* COMPTEURS */
+    .counters-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 15px;
+      padding: 10px;
+      background: var(--bg-card);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    .counter-badge {
+      font-weight: 600;
+      background: #e3f2fd;
+      color: var(--primary);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 13px;
+    }
+    .page-size-sel {
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 13px;
+      background: #fff;
+      color: var(--text);
+    }
+
+    /* TOOLBAR */
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 15px 0;
+      padding: 12px;
+      background: var(--bg-card);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      align-items: center;
+    }
+    #searchInput {
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 14px;
+      width: 220px;
+      max-width: 100%;
+      background: var(--bg-input);
+    }
+    #searchInput:focus { border-color: var(--primary); outline: none; }
+
+    /* BOUTONS */
+    .btn {
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 6px;
+      border: none;
+      padding: 8px 14px;
+      white-space: nowrap;
+      transition: opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.9; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    .btn-green  { background: var(--success); color: #fff; }
+    .btn-blue   { background: var(--primary); color: #fff; }
+    .btn-red    { background: var(--error); color: #fff; }
+    .btn-yellow { background: var(--warning); color: #000; }
+    .btn-grey   { background: var(--text-light); color: #fff; }
+
+    /* PANNEAU FILTRES */
+    #filterPanel {
+      display: none;
+      background: #e3f2fd;
+      border: 2px solid var(--primary);
+      border-radius: 8px;
+      padding: 16px;
+      margin: 10px 0;
+    }
+    #filterPanel.open { display: block; }
+    #filterPanel h3 {
+      color: var(--primary);
+      font-size: 15px;
+      font-weight: 700;
+      margin: 0 0 12px 0;
+    }
+    #colSelect {
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 14px;
+      min-width: 200px;
+      background: #fff;
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+    #filterValues {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 10px 0;
+      max-height: 200px;
+      overflow-y: auto;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px;
+    }
+    .filter-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-size: 13px;
+      user-select: none;
+    }
+    .filter-chip.selected {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+    .filter-chip input[type=checkbox] {
+      width: 14px;
+      height: 14px;
+      margin: 0;
+      cursor: pointer;
+      accent-color: #fff;
+    }
+
+    /* TAGS FILTRES ACTIFS */
+    #activeFiltersList {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 10px 0;
+    }
+    .active-filter-tag {
+      background: var(--primary);
+      color: #fff;
+      border-radius: 14px;
+      padding: 4px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .active-filter-tag .remove-tag {
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+      background: none;
+      border: none;
+      padding: 0;
+      line-height: 1;
+    }
+
+    /* TABLEAU */
+    .table-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      margin-top: 10px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      min-width: 400px;
+      background: #fff;
+    }
+    thead { position: sticky; top: 0; z-index: 10; }
+    th {
+      background: var(--bg-header);
+      color: #fff;
+      border: 1px solid var(--primary-dark);
+      padding: 10px 8px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      white-space: nowrap;
+      position: sticky;
+      top: 0;
+    }
+    th:hover { background: var(--bg-header-hover); }
+    th.th-actions {
+      cursor: default;
+      text-align: center;
+      width: 60px;
+      min-width: 60px;
+      background: var(--bg-header-hover);
+      position: sticky;
+      right: 0;
+      z-index: 11;
+    }
+    td {
+      border: 1px solid var(--border);
+      padding: 8px 10px;
+      font-size: 14px;
+      vertical-align: middle;
+      max-width: 250px;
+      word-wrap: break-word;
+    }
+    td.td-actions {
+      text-align: center;
+      background: #f5f7f9;
+      border-left: 2px solid var(--border);
+      position: sticky;
+      right: 0;
+      z-index: 5;
+    }
+    tr:nth-child(even) td { background: #fafbfc; }
+    tr:nth-child(even) td.td-actions { background: #eef1f4; }
+    tr:hover td { background: #e3f2fd; }
+
+    /* SURLIGNAGE RECHERCHE */
+    .highlight {
+      background: var(--highlight);
+      color: #000;
+      border-radius: 3px;
+      padding: 0 3px;
+      font-weight: 600;
+    }
+
+    /* ÉDITION CELLULE */
+    td.editable { cursor: text; }
+    td.editable:hover { background: #fffde7; }
+    td.editing { outline: 2px solid var(--primary); background: #fff; }
+    input.cell-input {
+      width: 100%;
+      border: none;
+      padding: 4px;
+      font-size: 14px;
+      background: #fff;
+      outline: none;
+      font-family: inherit;
+    }
+
+    /* INDICATEUR TRI */
+    .sort-ind { color: #ffd700; margin-left: 4px; font-size: 11px; }
+
+    /* PAGINATION */
+    .pagination {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 15px;
+      align-items: center;
+    }
+    .page-btn {
+      background: var(--primary);
+      color: #fff;
+      padding: 6px 12px;
+      min-width: 36px;
+      text-align: center;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+    }
+    .page-btn.cur { background: var(--warning); color: #000; }
+    .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .page-info {
+      color: var(--primary);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 6px 5px;
+    }
+
+    /* TOAST NOTIFICATION */
+    #excel-toast {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: var(--success);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      z-index: 9999;
+      opacity: 0;
+      transform: translateY(15px);
+      transition: opacity 0.3s, transform 0.3s;
+      pointer-events: none;
+    }
+    #excel-toast.show { opacity: 1; transform: translateY(0); }
+    #excel-toast.err  { background: var(--error); }
+    #excel-toast.info { background: var(--primary); }
+
+    /* FOOTER */
+    .tool-footer {
+      margin-top: 30px;
+      padding: 20px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-light);
+    }
+    .disclaimer {
+      background: #fff3cd;
+      color: #856404;
+      padding: 12px;
+      border-radius: 6px;
+      border: 1px solid #ffeeba;
+      margin-top: 15px;
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .toolbar { flex-direction: column; align-items: stretch; }
+      .btn { width: 100%; text-align: center; }
+      #searchInput { width: 100%; }
+      #colSelect { width: 100%; margin-right: 0; }
+      #excel-wrap h1 { font-size: 18px; padding: 14px; }
+      th, td { padding: 7px 6px; font-size: 13px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- BARRE DE NAVIGATION -->
+  <nav class="nav-bar">
+    <a href="https://karazaitri12-cpu.github.io/plateforme-utilitaires/" class="back-link">← Retour aux Utilitaires</a>
+  </nav>
+
+  <!-- CONTENEUR PRINCIPAL -->
+  <div id="excel-wrap">
+    <h1>📊 Éditeur Excel — Dr. Karazaitri</h1>
+
+    <input type="file" id="fileInput" accept=".xlsx,.xls">
+    <div id="fileLabel"></div>
+
+    <div class="counters-bar">
+      <span class="counter-badge" id="rowCount">Lignes : 0</span>
+      <span class="counter-badge" id="colCount">Colonnes : 0</span>
+      <span style="margin-left:auto; display:inline-flex; align-items:center; gap:8px; white-space:nowrap;">
+        <span style="font-size:13px; font-weight:600; color:var(--primary);">Lignes/page :</span>
+        <select class="page-size-sel" id="pageSizeSel">
+          <option value="25">25</option>
+          <option value="50" selected>50</option>
+          <option value="100">100</option>
+          <option value="0">Tout</option>
+        </select>
+      </span>
+    </div>
+
+    <div class="toolbar">
+      <input type="text" id="searchInput" placeholder="🔍 Rechercher...">
+      <button class="btn btn-green" id="btnToggleFilter">🔎 Filtres par colonne</button>
+      <button class="btn btn-green" id="btnAddRow">➕ Ajouter ligne</button>
+      <button class="btn btn-green" id="btnAddCol">➕ Ajouter colonne</button>
+      <button class="btn btn-blue" id="btnUndo" disabled>↩ Annuler</button>
+      <button class="btn btn-blue" id="btnRedo" disabled>↪ Refaire</button>
+      <button class="btn btn-green" id="btnExport">💾 Télécharger Excel</button>
+      <button class="btn btn-red" id="btnReset">🗑️ Réinitialiser</button>
+    </div>
+
+    <!-- PANNEAU FILTRES -->
+    <div id="filterPanel">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h3 style="margin:0;">🔎 Filtrer par colonne</h3>
+        <button id="btnCloseFilter" class="btn btn-grey" title="Fermer" style="padding:3px 12px; font-size:18px; line-height:1;">✕</button>
+      </div>
+      <div style="margin-bottom:10px;">
+        <label style="font-weight:600; margin-right:8px;">Colonne :</label>
+        <select id="colSelect"></select>
+        <button class="btn btn-red btn-sm" id="btnClearAllFilters" style="font-size:12px; padding:6px 12px;">Effacer tous les filtres</button>
+      </div>
+      <div id="filterValues"></div>
+      <div style="margin-top:10px; display:flex; gap:8px;">
+        <button class="btn btn-green" id="btnApplyFilter">✓ Appliquer</button>
+        <button class="btn btn-red" id="btnClearFilter">Effacer ce filtre</button>
+      </div>
+    </div>
+
+    <!-- TAGS FILTRES ACTIFS -->
+    <div id="activeFiltersList"></div>
+
+    <div class="table-wrapper">
+      <div id="tableContainer"></div>
+    </div>
+
+    <div class="pagination" id="paginationBar"></div>
+
+    <!-- FOOTER -->
+    <footer class="tool-footer">
+      <span>Dr. Anouar Karazaitri © 2026</span>
+      <div class="disclaimer">
+        ⚠️ <strong>Usage bureautique</strong> : Traitement local dans votre navigateur. Aucun fichier n'est envoyé sur un serveur.
+      </div>
+    </footer>
+  </div>
+
+  <!-- TOAST -->
+  <div id="excel-toast"></div>
+
+  <!-- LOGIQUE JAVASCRIPT (Préservée) -->
+  <script>
+  (function () {
+    'use strict';
+
+    /* ============================================================
+       ÉTAT
+       ============================================================ */
+    var allData      = [];
+    var history      = [];
+    var histIdx      = -1;
+    var nextId       = 0;
+    var origName     = 'fichier.xlsx';
+    var sortCol      = -1;
+    var sortAsc      = true;
+    var activeFilters = {};
+    var pendingFilter = {};
+    var currentPage  = 1;
+    var pageSize     = 50;
+    var editingCell  = null;
+
+    /* ============================================================
+       TOAST
+       ============================================================ */
+    function toast(msg, type) {
+      var t = document.getElementById('excel-toast');
+      t.textContent = msg;
+      t.className   = type || '';
+      t.classList.add('show');
+      setTimeout(function () { t.classList.remove('show'); }, 3000);
+    }
+
+    /* ============================================================
+       HISTORIQUE
+       ============================================================ */
+    function saveState() {
+      if (histIdx < history.length - 1) history = history.slice(0, histIdx + 1);
+      history.push(JSON.parse(JSON.stringify(allData)));
+      if (history.length > 60) history.shift(); else histIdx++;
+      refreshUndoRedo();
+    }
+    function refreshUndoRedo() {
+      document.getElementById('btnUndo').disabled = histIdx <= 0;
+      document.getElementById('btnRedo').disabled = histIdx >= history.length - 1;
+    }
+
+    /* ============================================================
+       CHARGEMENT FICHIER
+       ============================================================ */
+    document.getElementById('fileInput').addEventListener('change', function (e) {
+      var file = e.target.files[0];
+      if (!file) return;
+      if (file.size > 20 * 1024 * 1024) {
+        toast('Fichier trop volumineux (max 20 Mo)', 'err'); e.target.value = ''; return;
+      }
+      origName = file.name;
+      document.getElementById('fileLabel').textContent =
+        '📄 Chargé : ' + file.name + ' (' + (file.size / 1024).toFixed(0) + ' Ko)';
+
+      var reader = new FileReader();
+      reader.onload = function (ev) {
+        try {
+          var wb   = XLSX.read(new Uint8Array(ev.target.result), { type: 'array' });
+          var rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: '' });
+          allData  = dedupe(rows);
+          allData.forEach(function (r) { r.__id = nextId++; });
+          history = []; histIdx = -1; activeFilters = {}; currentPage = 1; sortCol = -1;
+          saveState();
+          render();
+          populateColSelect();
+          toast('Chargé : ' + allData.length + ' ligne(s)');
+        } catch (ex) { toast('Erreur lecture Excel', 'err'); }
+      };
+      reader.readAsArrayBuffer(file);
+    });
+
+    function dedupe(data) {
+      var seen = new Set();
+      return data.filter(function (r) {
+        var k = JSON.stringify(r);
+        if (seen.has(k)) return false;
+        seen.add(k); return true;
+      });
+    }
+
+    /* ============================================================
+       FILTRAGE
+       ============================================================ */
+    function getFilteredData() {
+      var data   = allData.slice();
+      var search = document.getElementById('searchInput').value.trim().toUpperCase();
+
+      Object.keys(activeFilters).forEach(function (col) {
+        var vals = activeFilters[col];
+        if (vals && vals.length) {
+          data = data.filter(function (row) {
+            return vals.indexOf(String(row[col] !== undefined ? row[col] : '')) >= 0;
+          });
+        }
+      });
+
+      if (search) {
+        data = data.filter(function (row) {
+          return getKeys().some(function (k) {
+            return String(row[k] !== undefined ? row[k] : '').toUpperCase().indexOf(search) >= 0;
+          });
+        });
+      }
+
+      if (sortCol >= 0) {
+        var key = getKeys()[sortCol];
+        data.sort(function (a, b) {
+          var v1 = String(a[key] !== undefined ? a[key] : '').toUpperCase();
+          var v2 = String(b[key] !== undefined ? b[key] : '').toUpperCase();
+          if (v1 < v2) return sortAsc ? -1 : 1;
+          if (v1 > v2) return sortAsc ? 1 : -1;
+          return 0;
+        });
+      }
+      return data;
+    }
+
+    function getKeys() {
+      if (!allData.length) return [];
+      return Object.keys(allData[0]).filter(function (k) { return k !== '__id'; });
+    }
+
+    /* ============================================================
+       PANNEAU FILTRES
+       ============================================================ */
+    function populateColSelect() {
+      var sel  = document.getElementById('colSelect');
+      var keys = getKeys();
+      sel.innerHTML = '';
+      keys.forEach(function (k) {
+        var opt = document.createElement('option');
+        opt.value       = k;
+        opt.textContent = k;
+        sel.appendChild(opt);
+      });
+      buildFilterValues();
+    }
+
+    function buildFilterValues() {
+      var col      = document.getElementById('colSelect').value;
+      var container = document.getElementById('filterValues');
+      container.innerHTML = '';
+
+      if (!col || !allData.length) return;
+
+      var unique = [];
+      var seen   = {};
+      allData.forEach(function (row) {
+        var v = String(row[col] !== undefined ? row[col] : '');
+        if (!seen[v]) { seen[v] = true; unique.push(v); }
+      });
+      unique.sort(function (a, b) { return a.localeCompare(b); });
+
+      pendingFilter[col] = (activeFilters[col] || []).slice();
+
+      unique.forEach(function (val) {
+        var chip = document.createElement('label');
+        chip.className = 'filter-chip' + (pendingFilter[col].indexOf(val) >= 0 ? ' selected' : '');
+        chip.style.cssText = 'display:inline-flex!important;align-items:center!important;gap:4px!important;';
+
+        var cb  = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.checked = pendingFilter[col].indexOf(val) >= 0;
+
+        var txt = document.createTextNode(val || '(vide)');
+        chip.appendChild(cb);
+        chip.appendChild(txt);
+
+        cb.addEventListener('change', function () {
+          var col2 = document.getElementById('colSelect').value;
+          if (!pendingFilter[col2]) pendingFilter[col2] = [];
+          if (cb.checked) {
+            if (pendingFilter[col2].indexOf(val) < 0) pendingFilter[col2].push(val);
+            chip.classList.add('selected');
+          } else {
+            pendingFilter[col2] = pendingFilter[col2].filter(function (v) { return v !== val; });
+            chip.classList.remove('selected');
+          }
+        });
+
+        container.appendChild(chip);
+      });
+    }
+
+    document.getElementById('btnApplyFilter').addEventListener('click', function () {
+      var col = document.getElementById('colSelect').value;
+      if (!col) return;
+      activeFilters[col] = (pendingFilter[col] || []).slice();
+      currentPage = 1;
+      render();
+      renderActiveFilterTags();
+      var n = activeFilters[col].length;
+      toast(n ? n + ' valeur(s) filtrée(s) sur "' + col + '"' : 'Filtre effacé pour "' + col + '"', 'info');
+    });
+
+    document.getElementById('btnClearFilter').addEventListener('click', function () {
+      var col = document.getElementById('colSelect').value;
+      if (!col) return;
+      activeFilters[col] = [];
+      pendingFilter[col] = [];
+      buildFilterValues();
+      currentPage = 1;
+      render();
+      renderActiveFilterTags();
+      toast('Filtre effacé pour "' + col + '"', 'info');
+    });
+
+    document.getElementById('btnClearAllFilters').addEventListener('click', function () {
+      activeFilters = {}; pendingFilter = {};
+      buildFilterValues();
+      currentPage = 1;
+      render();
+      renderActiveFilterTags();
+      toast('Tous les filtres effacés', 'info');
+    });
+
+    document.getElementById('colSelect').addEventListener('change', buildFilterValues);
+
+    document.getElementById('btnToggleFilter').addEventListener('click', function () {
+      var panel = document.getElementById('filterPanel');
+      if (panel.classList.contains('open')) {
+        panel.classList.remove('open');
+      } else {
+        panel.classList.add('open');
+        buildFilterValues();
+      }
+    });
+
+    document.getElementById('btnCloseFilter').addEventListener('click', function () {
+      document.getElementById('filterPanel').classList.remove('open');
+    });
+
+    function renderActiveFilterTags() {
+      var container = document.getElementById('activeFiltersList');
+      container.innerHTML = '';
+      Object.keys(activeFilters).forEach(function (col) {
+        var vals = activeFilters[col];
+        if (!vals || !vals.length) return;
+        var tag = document.createElement('span');
+        tag.className = 'active-filter-tag';
+        tag.appendChild(document.createTextNode(col + ': ' + vals.join(', ') + ' '));
+
+        var rm = document.createElement('button');
+        rm.className   = 'remove-tag';
+        rm.textContent = '×';
+        rm.title       = 'Retirer ce filtre';
+        (function (c) {
+          rm.addEventListener('click', function () {
+            activeFilters[c] = []; pendingFilter[c] = [];
+            currentPage = 1; render(); renderActiveFilterTags();
+            toast('Filtre retiré : ' + c, 'info');
+          });
+        })(col);
+
+        tag.appendChild(rm);
+        container.appendChild(tag);
+      });
+    }
+
+    /* ============================================================
+       RENDU TABLEAU
+       ============================================================ */
+    function render() {
+      var data = getFilteredData();
+      var keys = getKeys();
+      var tc   = document.getElementById('tableContainer');
+
+      document.getElementById('rowCount').textContent = 'Lignes : ' + data.length;
+      document.getElementById('colCount').textContent = 'Colonnes : ' + keys.length;
+
+      if (!data.length) {
+        tc.innerHTML = '<p style="padding:16px;text-align:center;color:#666;">Aucune donnée à afficher.</p>';
+        document.getElementById('paginationBar').innerHTML = '';
+        return;
+      }
+
+      var ps    = parseInt(pageSize) || 0;
+      var total = data.length;
+      var tpages = ps > 0 ? Math.ceil(total / ps) : 1;
+      if (currentPage > tpages) currentPage = tpages;
+      if (currentPage < 1) currentPage = 1;
+      var pageData = ps > 0 ? data.slice((currentPage - 1) * ps, currentPage * ps) : data;
+
+      document.getElementById('rowCount').textContent =
+        'Lignes : ' + total + (ps > 0 ? ' (page ' + currentPage + '/' + tpages + ')' : '');
+
+      var table = document.createElement('table');
+      var thead = document.createElement('thead');
+      var hrow  = document.createElement('tr');
+
+      keys.forEach(function (k, i) {
+        var th = document.createElement('th');
+        th.appendChild(document.createTextNode(k));
+        if (sortCol === i) {
+          var ind = document.createElement('span');
+          ind.className   = 'sort-ind';
+          ind.textContent = sortAsc ? ' ▲' : ' ▼';
+          th.appendChild(ind);
+        }
+        th.style.cssText = 'background:var(--bg-header)!important;color:#fff!important;border:1px solid var(--primary-dark)!important;padding:10px 8px!important;font-weight:600!important;font-size:13px!important;cursor:pointer!important;white-space:nowrap!important;position:sticky!important;top:0!important;z-index:10!important;';
+        (function (idx) {
+          th.addEventListener('click', function () {
+            if (sortCol === idx) sortAsc = !sortAsc; else { sortCol = idx; sortAsc = true; }
+            currentPage = 1; render();
+          });
+        })(i);
+        hrow.appendChild(th);
+      });
+
+      var thA = document.createElement('th');
+      thA.textContent = 'Actions';
+      thA.style.cssText = 'background:var(--bg-header-hover)!important;color:#fff!important;border:1px solid var(--primary-dark)!important;padding:10px 8px!important;font-weight:600!important;font-size:13px!important;text-align:center!important;width:60px!important;min-width:60px!important;position:sticky!important;top:0!important;right:0!important;z-index:11!important;cursor:default!important;';
+      hrow.appendChild(thA);
+      thead.appendChild(hrow);
+      table.appendChild(thead);
+
+      var tbody = document.createElement('tbody');
+      var search = document.getElementById('searchInput').value.trim().toUpperCase();
+
+      pageData.forEach(function (row) {
+        var tr = document.createElement('tr');
+        keys.forEach(function (k) {
+          var td  = document.createElement('td');
+          td.className = 'editable';
+          td.dataset.id  = row.__id;
+          td.dataset.col = k;
+          td.title = 'Double-cliquez pour modifier';
+
+          var raw = String(row[k] !== undefined ? row[k] : '');
+          if (search && raw.toUpperCase().indexOf(search) >= 0) {
+            var parts = raw.split(new RegExp('(' + escRe(search) + ')', 'gi'));
+            parts.forEach(function (part) {
+              if (part.toUpperCase() === search) {
+                var mark = document.createElement('span');
+                mark.className   = 'highlight';
+                mark.textContent = part;
+                td.appendChild(mark);
+              } else {
+                td.appendChild(document.createTextNode(part));
+              }
+            });
+          } else {
+            td.textContent = raw;
+          }
+
+          td.addEventListener('dblclick', function () { startEdit(td); });
+          tr.appendChild(td);
+        });
+
+        var tdA = document.createElement('td');
+        tdA.className = 'td-actions';
+        tdA.style.cssText = 'background:#f5f7f9!important;border-left:2px solid var(--border)!important;text-align:center!important;position:sticky!important;right:0!important;z-index:5!important;';
+        var btnDel = document.createElement('button');
+        btnDel.className   = 'btn btn-yellow';
+        btnDel.textContent = '🗑️';
+        btnDel.style.cssText = 'padding:4px 8px!important;font-size:13px!important;';
+        (function (rid) {
+          btnDel.addEventListener('click', function () { deleteRow(rid); });
+        })(row.__id);
+        tdA.appendChild(btnDel);
+        tr.appendChild(tdA);
+        tbody.appendChild(tr);
+      });
+
+      table.appendChild(tbody);
+      tc.innerHTML = '';
+      tc.appendChild(table);
+
+      renderPagination(tpages);
+    }
+
+    /* ============================================================
+       PAGINATION
+       ============================================================ */
+    function renderPagination(tpages) {
+      var bar = document.getElementById('paginationBar');
+      bar.innerHTML = '';
+      if (tpages <= 1) return;
+
+      function btn(label, page, disabled, active) {
+        var b = document.createElement('button');
+        b.className   = 'page-btn' + (active ? ' cur' : '');
+        b.textContent = label;
+        b.disabled    = disabled;
+        b.style.cssText = 'background:' + (active ? 'var(--warning)' : 'var(--primary)') + '!important;color:' + (active ? '#000' : '#fff') + '!important;border:none!important;padding:6px 12px!important;border-radius:6px!important;cursor:' + (disabled ? 'not-allowed' : 'pointer') + '!important;font-weight:600!important;font-size:13px!important;';
+        if (!disabled) b.addEventListener('click', function () { currentPage = page; render(); });
+        return b;
+      }
+
+      bar.appendChild(btn('«', currentPage - 1, currentPage <= 1, false));
+
+      var start = Math.max(1, currentPage - 3);
+      var end   = Math.min(tpages, start + 6);
+      if (end - start < 6) start = Math.max(1, end - 6);
+
+      if (start > 1) { bar.appendChild(btn('1', 1, false, false)); bar.appendChild(infoSpan('…')); }
+      for (var p = start; p <= end; p++) bar.appendChild(btn(String(p), p, false, p === currentPage));
+      if (end < tpages) { bar.appendChild(infoSpan('…')); bar.appendChild(btn(String(tpages), tpages, false, false)); }
+
+      bar.appendChild(btn('»', currentPage + 1, currentPage >= tpages, false));
+      bar.appendChild(infoSpan('Page ' + currentPage + ' / ' + tpages));
+    }
+
+    function infoSpan(t) {
+      var s = document.createElement('span');
+      s.className   = 'page-info';
+      s.textContent = t;
+      s.style.cssText = 'color:var(--primary)!important;font-size:13px!important;font-weight:600!important;padding:6px 5px!important;';
+      return s;
+    }
+
+    /* ============================================================
+       ÉDITION CELLULE
+       ============================================================ */
+    function startEdit(cell) {
+      if (editingCell) return;
+      editingCell = cell;
+      var rowId  = parseInt(cell.dataset.id);
+      var colKey = cell.dataset.col;
+      var row    = allData.find(function (r) { return r.__id === rowId; });
+      if (!row) return;
+      var prev = String(row[colKey] !== undefined ? row[colKey] : '');
+      cell.classList.add('editing');
+      var inp = document.createElement('input');
+      inp.className = 'cell-input'; inp.type = 'text'; inp.value = prev;
+      cell.textContent = ''; cell.appendChild(inp);
+      inp.focus(); inp.select();
+      function done() {
+        var nv = inp.value;
+        if (nv !== prev) { saveState(); row[colKey] = nv; }
+        cell.classList.remove('editing'); editingCell = null; render();
+      }
+      inp.addEventListener('blur', done);
+      inp.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') done();
+        else if (e.key === 'Escape') { cell.classList.remove('editing'); editingCell = null; render(); }
+      });
+    }
+
+    /* ============================================================
+       CRUD
+       ============================================================ */
+    function deleteRow(rowId) {
+      if (!confirm('Supprimer cette ligne ?')) return;
+      saveState();
+      allData = allData.filter(function (r) { return r.__id !== rowId; });
+      render(); toast('Ligne supprimée');
+    }
+
+    document.getElementById('btnAddRow').addEventListener('click', function () {
+      if (!allData.length) { toast('Chargez d\'abord un fichier', 'err'); return; }
+      saveState();
+      var nr = { __id: nextId++ };
+      getKeys().forEach(function (k) { nr[k] = ''; });
+      allData.push(nr);
+      var ps = parseInt(pageSize) || 0;
+      currentPage = ps > 0 ? Math.ceil(allData.length / ps) : 1;
+      render(); toast('Ligne ajoutée');
+    });
+
+    document.getElementById('btnAddCol').addEventListener('click', function () {
+      if (!allData.length) { toast('Chargez d\'abord un fichier', 'err'); return; }
+      var name = prompt('Nom de la nouvelle colonne :');
+      if (!name || !name.trim()) return;
+      name = name.trim();
+      if (getKeys().indexOf(name) >= 0) { alert('Cette colonne existe déjà.'); return; }
+      saveState();
+      allData.forEach(function (r) { r[name] = ''; });
+      render(); populateColSelect(); toast('Colonne "' + name + '" ajoutée');
+    });
+
+    document.getElementById('btnUndo').addEventListener('click', function () {
+      if (histIdx > 0) { histIdx--; allData = JSON.parse(JSON.stringify(history[histIdx])); currentPage = 1; render(); refreshUndoRedo(); toast('Annulé', 'info'); }
+    });
+    document.getElementById('btnRedo').addEventListener('click', function () {
+      if (histIdx < history.length - 1) { histIdx++; allData = JSON.parse(JSON.stringify(history[histIdx])); currentPage = 1; render(); refreshUndoRedo(); toast('Refait', 'info'); }
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.ctrlKey && e.key === 'z' && !e.shiftKey) { e.preventDefault(); document.getElementById('btnUndo').click(); }
+      if ((e.ctrlKey && e.key === 'y') || (e.ctrlKey && e.shiftKey && e.key === 'Z')) { e.preventDefault(); document.getElementById('btnRedo').click(); }
+    });
+
+    document.getElementById('btnExport').addEventListener('click', function () {
+      if (!allData.length) { toast('Aucune donnée', 'err'); return; }
+      var rows = allData.map(function (r) {
+        var o = {}; getKeys().forEach(function (k) { o[k] = r[k]; }); return o;
+      });
+      var ws  = XLSX.utils.json_to_sheet(rows);
+      var wb  = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Données');
+      XLSX.writeFile(wb, origName.replace(/\.[^.]+$/, '') + '_modifie.xlsx');
+      toast('✅ Fichier téléchargé');
+    });
+
+    document.getElementById('btnReset').addEventListener('click', function () {
+      if (!confirm('Réinitialiser ? Toutes les données non exportées seront perdues.')) return;
+      allData = []; history = []; histIdx = -1; nextId = 0; activeFilters = {}; pendingFilter = {};
+      sortCol = -1; sortAsc = true; currentPage = 1; pageSize = 50;
+      document.getElementById('fileInput').value = '';
+      document.getElementById('fileLabel').textContent = '';
+      document.getElementById('searchInput').value = '';
+      document.getElementById('tableContainer').innerHTML = '';
+      document.getElementById('paginationBar').innerHTML = '';
+      document.getElementById('activeFiltersList').innerHTML = '';
+      document.getElementById('colSelect').innerHTML = '';
+      document.getElementById('filterValues').innerHTML = '';
+      document.getElementById('filterPanel').classList.remove('open');
+      document.getElementById('rowCount').textContent = 'Lignes : 0';
+      document.getElementById('colCount').textContent = 'Colonnes : 0';
+      refreshUndoRedo(); toast('Réinitialisé', 'info');
+    });
+
+    document.getElementById('searchInput').addEventListener('input', function () { currentPage = 1; render(); });
+    document.getElementById('pageSizeSel').addEventListener('change', function () {
+      pageSize = this.value; currentPage = 1; render();
+    });
+
+    function escRe(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+  })();
+  </script>
+</body>
+</html>
