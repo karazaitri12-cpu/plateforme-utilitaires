@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plateforme Utilitaires | Dr KARA-ZAITRI M.A</title>
-    <meta name="description" content="Utilitaires techniques et bureautiques pour professionnels de santé. Calculatrice, convertisseurs, gestion PDF, QR Code...">
+    <title>Plateforme Utilitaires | Dr. Anouar Karazaitri</title>
+    <meta name="description" content="Utilitaires techniques et bureautiques pour professionnels de santé.">
     <style>
-        /* --- BASE & DESIGN SYSTEM INSTITUTIONNEL --- */
+        /* --- BASE & DESIGN SYSTEM --- */
         #med-hub-full {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif !important;
             color: #4a6977 !important;
@@ -40,25 +40,18 @@
             text-decoration: none !important;
             border-bottom: 1px dotted #1a3a5c !important;
         }
-        #med-hub-full .main-header .subtitle a:hover {
-            text-decoration: none !important;
-            border-bottom-style: solid !important;
-        }
 
-        /* BARRE DE RECHERCHE & FILTRES */
-        #med-hub-full .portal-header {
+        /* BARRE DE RECHERCHE */
+        #med-hub-full .search-section {
             background: #f4f7f9 !important;
-            padding: 20px 20px !important;
+            padding: 20px !important;
             border-bottom: 1px solid #cfd8dc !important;
-            text-align: center !important;
         }
-
         #med-hub-full .search-wrapper {
             position: relative !important;
             max-width: 500px !important;
-            margin: 0 auto 15px auto !important;
+            margin: 0 auto !important;
         }
-
         #med-hub-full #tool-search {
             width: 100% !important;
             height: 44px !important;
@@ -67,41 +60,37 @@
             border-radius: 8px !important;
             outline: none !important;
             font-size: 16px !important;
-            transition: border-color 0.2s !important;
         }
-
         #med-hub-full #tool-search:focus { border-color: #1a3a5c !important; }
         #med-hub-full .search-icon { position: absolute !important; left: 15px; top: 13px; font-size: 18px; color: #90a4ae; }
-        #med-hub-full #clear-search { position: absolute !important; right: 12px; top: 5px; font-size: 28px; color: #cfd8dc; cursor: pointer; display: none; line-height: 1 !important; }
+        #med-hub-full #clear-search { position: absolute !important; right: 12px; top: 5px; font-size: 28px; color: #cfd8dc; cursor: pointer; display: none; }
 
-        #med-hub-full .filter-tags { 
-            display: flex !important; 
-            gap: 8px !important; 
-            flex-wrap: wrap !important; 
-            justify-content: center !important;
+        /* SECTIONS PAR CATÉGORIE */
+        .category-section {
+            padding: 25px 20px !important;
+            border-bottom: 1px solid #f0f0f0 !important;
         }
-
-        .filter-btn {
-            padding: 8px 16px !important;
-            background: #ffffff !important;
-            border: 1px solid #cfd8dc !important;
-            border-radius: 25px !important;
-            font-size: 13px !important;
-            font-weight: 600 !important;
+        .category-section:last-child { border-bottom: none !important; }
+        
+        .category-title {
+            font-size: 16px !important;
+            font-weight: 700 !important;
             color: #546e7a !important;
-            cursor: pointer !important;
-            transition: all 0.2s !important;
+            margin: 0 0 20px 0 !important;
+            padding-bottom: 8px !important;
+            border-bottom: 2px solid #cfd8dc !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.5px !important;
         }
 
-        .filter-btn:hover { border-color: #1a3a5c !important; color: #1a3a5c !important; }
-        .filter-btn.active { background: #1a3a5c !important; color: #ffffff !important; border-color: #1a3a5c !important; }
-
-        /* GRILLE RESPONSIVE */
+        /* GRILLE */
         #med-hub-full .tools-grid {
             display: grid !important;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
             gap: 15px !important;
-            padding: 30px 20px !important;
         }
 
         .tool-card-med {
@@ -129,18 +118,14 @@
         .tool-name-med { font-size: 16px !important; font-weight: 700 !important; color: #1a3a5c !important; margin: 0 !important; line-height: 1.2 !important; }
         .tool-desc-med { font-size: 13.5px !important; color: #546e7a !important; font-weight: 400; margin: 0 !important; line-height: 1.4 !important; }
 
-        /* ÉTOILE PREMIUM */
+        /* BADGES */
         .premium-ribbon {
             position: absolute !important;
             top: 8px !important;
             right: 10px !important;
             color: #C9A961 !important;
             font-size: 20px !important;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.1) !important;
-            z-index: 5 !important;
         }
-
-        /* BADGE "Bientôt" */
         .badge-coming {
             position: absolute !important;
             top: 12px !important;
@@ -164,16 +149,9 @@
             text-align: center !important;
         }
 
-        /* --- MEDIA QUERIES --- */
         @media (max-width: 600px) {
             #med-hub-full .main-header { padding: 20px 15px !important; }
-            #med-hub-full .portal-header { padding: 15px !important; }
-            #med-hub-full .tools-grid { 
-                padding: 20px 15px !important; 
-                grid-template-columns: 1fr !important;
-            }
-            .filter-btn { padding: 6px 12px !important; font-size: 12px !important; }
-            #med-hub-full .main-header h1 { font-size: 18px !important; }
+            #med-hub-full .tools-grid { grid-template-columns: 1fr !important; }
         }
     </style>
 </head>
@@ -181,161 +159,122 @@
 
 <div id="med-hub-full">
     
-    <!-- EN-TÊTE PRINCIPAL (Restauré) -->
+    <!-- EN-TÊTE -->
     <header class="main-header">
         <h1>Plateforme Utilitaires Techniques</h1>
         <p class="subtitle">Outils bureautiques et productivité | Portail médical sur <a href="https://outils.dr-karazaitri-ma.net">outils.dr-karazaitri-ma.net</a></p>
     </header>
 
-    <!-- BARRE DE RECHERCHE & FILTRES -->
-    <div class="portal-header">
+    <!-- RECHERCHE -->
+    <div class="search-section">
         <div class="search-wrapper">
             <span class="search-icon">&#128269;</span>
             <input type="text" id="tool-search" placeholder="Rechercher un utilitaire...">
             <span id="clear-search">&times;</span>
         </div>
-        <div class="filter-tags">
-            <button class="filter-btn active" data-filter="all">Tous</button>
-            <button class="filter-btn" data-filter="medical">Médical</button>
-            <button class="filter-btn" data-filter="gestion">Gestion & PDF</button>
-            <button class="filter-btn" data-filter="util">Utilitaires</button>
-            <button class="filter-btn" data-filter="loisir">Loisirs</button>
+    </div>
+
+    <!-- SECTION 1: CALCUL & CONVERSION -->
+    <section class="category-section">
+        <h2 class="category-title">📊 CALCUL & CONVERSION</h2>
+        <div class="tools-grid">
+            
+            <a href="Utilitaires/calculatrice/" class="tool-card-med" data-cat="util" data-search="calculatrice mémoire trigonométrie scientifique">
+                <div class="tool-header-flex">
+                    <span class="tool-icon-small" style="font-size:28px">🧮</span>
+                    <h3 class="tool-name-med">Calculatrice Clinique</h3>
+                </div>
+                <p class="tool-desc-med">Opérations avancées, mémoire, fonctions scientifiques, pourcentages.</p>
+            </a>
+
+            <a href="Utilitaires/convertisseur/" class="tool-card-med" data-cat="util" data-search="convertisseur unités température poids volume">
+                <div class="tool-header-flex">
+                    <span class="tool-icon-small" style="font-size:28px">🔄</span>
+                    <h3 class="tool-name-med">Convertisseur d'unités</h3>
+                </div>
+                <p class="tool-desc-med">Conversion de poids, température, volumes, dosages médicamenteux.</p>
+            </a>
+
+            <a href="Utilitaires/convertisseur-images/" class="tool-card-med" data-cat="util" data-search="convertisseur images jpeg png webp">
+                <div class="tool-header-flex">
+                    <span class="tool-icon-small" style="font-size:28px">🖼️</span>
+                    <h3 class="tool-name-med">Convertisseur d'Images</h3>
+                </div>
+                <p class="tool-desc-med">Conversion JPEG/PNG ⇄ WebP avec compression et ZIP.</p>
+            </a>
+
+            <a href="#" class="tool-card-med" data-cat="util" data-search="gps coordonnées dms">
+                <span class="badge-coming">Bientôt</span>
+                <div class="tool-header-flex">
+                    <span class="tool-icon-small" style="font-size:28px">📍</span>
+                    <h3 class="tool-name-med">Convertisseur GPS</h3>
+                </div>
+                <p class="tool-desc-med">Conversion coordonnées DMS, décimal, Plus Codes.</p>
+            </a>
         </div>
-    </div>
+    </section>
 
-    <!-- GRILLE DES OUTILS -->
-    <div class="tools-grid">
-        
-        <!-- ========== UTILITAIRES (GitHub) ========== -->
-        
-        <!-- Calculatrice Clinique -->
-        <a href="Utilitaires/calculatrice/" class="tool-card-med" data-cat="util" data-search="calculatrice mémoire trigonométrie scientifique pourcentage">
-            <div class="tool-header-flex">
-                <span class="tool-icon-small" style="font-size:28px">🧮</span>
-                <h3 class="tool-name-med">Calculatrice Clinique</h3>
-            </div>
-            <p class="tool-desc-med">Opérations avancées, mémoire, fonctions scientifiques, pourcentages contextuels.</p>
-        </a>
+    <!-- SECTION 2: GESTION DE DOCUMENTS -->
+    <section class="category-section">
+        <h2 class="category-title">📄 GESTION DE DOCUMENTS</h2>
+        <div class="tools-grid">
+            
+            <a href="#" class="tool-card-med" data-cat="gestion" data-search="pdf manager fusion découpage">
+                <span class="badge-coming">Bientôt</span>
+                <div class="tool-header-flex">
+                    <span class="tool-icon-small" style="font-size:28px">📑</span>
+                    <h3 class="tool-name-med">PDF Manager</h3>
+                </div>
+                <p class="tool-desc-med">Fusion, découpage, compression et édition de PDF.</p>
+            </a>
 
-        <!-- Convertisseur Universel -->
-        <a href="Utilitaires/convertisseur/" class="tool-card-med" data-cat="util" data-search="convertisseur unités température poids volume vitesse pression énergie">
-            <div class="tool-header-flex">
-                <span class="tool-icon-small" style="font-size:28px">🔄</span>
-                <h3 class="tool-name-med">Convertisseur Universel</h3>
-            </div>
-            <p class="tool-desc-med">Conversion de poids, température, volumes, dosages, vitesses, pressions, énergies.</p>
-        </a>
+            <a href="#" class="tool-card-med" data-cat="gestion" data-search="ocr extraction texte images">
+                <span class="badge-coming">Bientôt</span>
+                <div class="tool-header-flex">
+                    <span class="tool-icon-small" style="font-size:28px">📷</span>
+                    <h3 class="tool-name-med">OCR & Extraction</h3>
+                </div>
+                <p class="tool-desc-med">Reconnaissance de texte depuis images ou scans.</p>
+            </a>
 
-        <!-- Convertisseur d'Images -->
-        <a href="Utilitaires/convertisseur-images/" class="tool-card-med" data-cat="util" data-search="convertisseur images jpeg png webp compression zip">
-            <div class="tool-header-flex">
-                <span class="tool-icon-small" style="font-size:28px">🖼️</span>
-                <h3 class="tool-name-med">Convertisseur d'Images</h3>
-            </div>
-            <p class="tool-desc-med">Conversion JPEG/PNG ⇄ WebP avec compression et export ZIP.</p>
-        </a>
+            <a href="#" class="tool-card-med" data-cat="gestion" data-search="excel tableur édition">
+                <span class="badge-coming">Bientôt</span>
+                <div class="tool-header-flex">
+                    <span class="tool-icon-small" style="font-size:28px">📊</span>
+                    <h3 class="tool-name-med">Éditeur Tableur</h3>
+                </div>
+                <p class="tool-desc-med">Visualisation et modification de fichiers Excel.</p>
+            </a>
+        </div>
+    </section>
 
-        <!-- Convertisseur GPS (Bientôt) -->
-        <a href="#" class="tool-card-med" data-cat="util" data-search="gps coordonnées dms plus codes">
-            <span class="badge-coming">Bientôt</span>
-            <div class="tool-header-flex">
-                <span class="tool-icon-small" style="font-size:28px">📍</span>
-                <h3 class="tool-name-med">Convertisseur GPS</h3>
-            </div>
-            <p class="tool-desc-med">Conversion coordonnées DMS, décimal, Plus Codes Google.</p>
-        </a>
+    <!-- SECTION 3: UTILITAIRES DIVERS -->
+    <section class="category-section">
+        <h2 class="category-title">🛠️ UTILITAIRES DIVERS</h2>
+        <div class="tools-grid">
+            
+            <a href="#" class="tool-card-med" data-cat="util" data-search="qr code générateur">
+                <span class="badge-coming">Bientôt</span>
+                <div class="tool-header-flex">
+                    <span class="tool-icon-small" style="font-size:28px">🏷️</span>
+                    <h3 class="tool-name-med">Générateur QR Code</h3>
+                </div>
+                <p class="tool-desc-med">Création de QR codes pour liens, textes, contacts.</p>
+            </a>
 
-        <!-- QR Code Generator (Bientôt) -->
-        <a href="#" class="tool-card-med" data-cat="util" data-search="qr code generateur lien texte">
-            <span class="badge-coming">Bientôt</span>
-            <div class="tool-header-flex">
-                <span class="tool-icon-small" style="font-size:28px">🏷️</span>
-                <h3 class="tool-name-med">Générateur QR Code</h3>
-            </div>
-            <p class="tool-desc-med">Création de QR codes pour liens, textes, contacts.</p>
-        </a>
-
-        <!-- ========== MÉDICAL (WordPress) ========== -->
-        
-        <a href="https://www.dr-karazaitri-ma.net/suivi-de-la-tension-arterielle/" class="tool-card-med" data-cat="medical" data-search="tension hta suivi auto-mesure">
-            <div class="tool-header-flex"><img src="https://www.dr-karazaitri-ma.net/wp-content/uploads/2025/06/Courbe.png" class="tool-icon-small"><h3 class="tool-name-med">Suivi Tensionnel</h3></div>
-            <p class="tool-desc-med">Journal d'auto-mesure tensionnelle.</p>
-        </a>
-        
-        <!-- ========== GESTION & PDF (WordPress) ========== -->
-        
-        <a href="https://www.dr-karazaitri-ma.net/ocr/" class="tool-card-med" data-cat="gestion" data-search="ocr photos texte extraction">
-            <div class="premium-ribbon">★</div>
-            <div class="tool-header-flex"><img src="https://www.dr-karazaitri-ma.net/wp-content/uploads/2025/06/paper.png" class="tool-icon-small"><h3 class="tool-name-med">OCR Photos</h3></div>
-            <p class="tool-desc-med">Extraction de texte depuis images.</p>
-        </a>
-        <a href="https://www.dr-karazaitri-ma.net/pdf-ocr/" class="tool-card-med" data-cat="gestion" data-search="pdf ocr document numérisation">
-            <div class="premium-ribbon">★</div>
-            <div class="tool-header-flex"><img src="https://www.dr-karazaitri-ma.net/wp-content/uploads/2025/06/pdf2.png" class="tool-icon-small"><h3 class="tool-name-med">PDF OCR</h3></div>
-            <p class="tool-desc-med">Numérisation de PDF scannés.</p>
-        </a>
-        <a href="https://www.dr-karazaitri-ma.net/pdf-manager/" class="tool-card-med" data-cat="gestion" data-search="pdf manager fusion édition">
-            <div class="premium-ribbon">★</div>
-            <div class="tool-header-flex"><img src="https://www.dr-karazaitri-ma.net/wp-content/uploads/2025/06/pdf1.png" class="tool-icon-small"><h3 class="tool-name-med">PDF Manager</h3></div>
-            <p class="tool-desc-med">Fusion et édition de documents.</p>
-        </a>
-        <a href="https://www.dr-karazaitri-ma.net/edition-fichiers-excel/" class="tool-card-med" data-cat="gestion" data-search="excel xls édition tableur">
-            <div class="tool-header-flex"><img src="https://www.dr-karazaitri-ma.net/wp-content/uploads/2026/03/xls.png" class="tool-icon-small"><h3 class="tool-name-med">Édition Excel</h3></div>
-            <p class="tool-desc-med">Modification de tableurs en ligne.</p>
-        </a>
-        <a href="https://www.dr-karazaitri-ma.net/creation-dun-ebook-outil/" class="tool-card-med" data-cat="gestion" data-search="ebook word chapitres assemblage">
-            <div class="premium-ribbon">★</div>
-            <div class="tool-header-flex"><img src="https://www.dr-karazaitri-ma.net/wp-content/uploads/2026/02/ebook-1.png" class="tool-icon-small"><h3 class="tool-name-med">Création Ebook</h3></div>
-            <p class="tool-desc-med">Assemblage de fichiers Word.</p>
-        </a>
-        <a href="https://www.dr-karazaitri-ma.net/generateur-de-tableaux-html/" class="tool-card-med" data-cat="gestion" data-search="tableau html générateur structure">
-            <div class="tool-header-flex"><img src="https://www.dr-karazaitri-ma.net/wp-content/uploads/2025/09/Tableau.png" class="tool-icon-small"><h3 class="tool-name-med">Tableaux HTML</h3></div>
-            <p class="tool-desc-med">Générateur de structures HTML.</p>
-        </a>
-
-        <!-- ========== AUTRES UTILITAIRES (WordPress) ========== -->
-        
-        <a href="https://www.dr-karazaitri-ma.net/generateur-de-qr-code/" class="tool-card-med" data-cat="util" data-search="qr code générateur lien">
-            <div class="premium-ribbon">★</div>
-            <div class="tool-header-flex"><img src="https://www.dr-karazaitri-ma.net/wp-content/uploads/2025/06/qrcode.png" class="tool-icon-small"><h3 class="tool-name-med">QR-Code</h3></div>
-            <p class="tool-desc-med">Générateur de liens scannables.</p>
-        </a>
-        <a href="https://www.dr-karazaitri-ma.net/convertisseur-gps/" class="tool-card-med" data-cat="util" data-search="gps coordonnées convertisseur dms">
-            <div class="tool-header-flex"><img src="https://www.dr-karazaitri-ma.net/wp-content/uploads/2025/06/gps.png" class="tool-icon-small"><h3 class="tool-name-med">Convertisseur GPS</h3></div>
-            <p class="tool-desc-med">DMS et Plus Codes.</p>
-        </a>
-        <a href="https://www.dr-karazaitri-ma.net/comparateur-de-texte/" class="tool-card-med" data-cat="util" data-search="comparateur texte différence analyse">
-            <div class="tool-header-flex"><img src="https://www.dr-karazaitri-ma.net/wp-content/uploads/2025/06/text-mining.png" class="tool-icon-small"><h3 class="tool-name-med">Comparateur Texte</h3></div>
-            <p class="tool-desc-med">Analyse de différences textuelles.</p>
-        </a>
-        <a href="https://www.dr-karazaitri-ma.net/analyseur-de-texte-avance/" class="tool-card-med" data-cat="util" data-search="analyseur texte statistiques docx pdf">
-            <div class="tool-header-flex"><img src="https://www.dr-karazaitri-ma.net/wp-content/uploads/2025/06/text-format-1.png" class="tool-icon-small"><h3 class="tool-name-med">Analyseur Texte</h3></div>
-            <p class="tool-desc-med">Statistiques de fichiers docx/pdf.</p>
-        </a>
-        <a href="https://www.dr-karazaitri-ma.net/repertoire-telephonique/" class="tool-card-med" data-cat="util" data-search="répertoire téléphone contacts professionnels">
-            <div class="tool-header-flex"><img src="https://www.dr-karazaitri-ma.net/wp-content/uploads/2025/07/telephone.png" class="tool-icon-small"><h3 class="tool-name-med">Répertoire</h3></div>
-            <p class="tool-desc-med">Contacts professionnels sécurisés.</p>
-        </a>
-        <a href="https://www.dr-karazaitri-ma.net/calendrier-lunaire/" class="tool-card-med" data-cat="util" data-search="calendrier lunaire hégirien dates">
-            <div class="tool-header-flex"><img src="https://www.dr-karazaitri-ma.net/wp-content/uploads/2026/02/calendrier.png" class="tool-icon-small"><h3 class="tool-name-med">Calendrier Lunaire</h3></div>
-            <p class="tool-desc-med">Dates hégiriennes et lunaires.</p>
-        </a>
-
-        <!-- ========== LOISIRS (WordPress) ========== -->
-        
-        <a href="https://www.dr-karazaitri-ma.net/jeu-de-memoire/" class="tool-card-med" data-cat="loisir" data-search="jeu mémoire cognitif entraînement">
-            <div class="tool-header-flex"><img src="https://www.dr-karazaitri-ma.net/wp-content/uploads/2025/06/Jeu_de_memoire.png" class="tool-icon-small"><h3 class="tool-name-med">Jeu de Mémoire</h3></div>
-            <p class="tool-desc-med">Entraînement cognitif.</p>
-        </a>
-        <a href="https://www.dr-karazaitri-ma.net/mastermind-classique/" class="tool-card-med" data-cat="loisir" data-search="mastermind jeu couleurs déduction">
-            <div class="tool-header-flex"><img src="https://www.dr-karazaitri-ma.net/wp-content/uploads/2025/06/Mastermind.png" class="tool-icon-small"><h3 class="tool-name-med">Mastermind</h3></div>
-            <p class="tool-desc-med">Déduction logique.</p>
-        </a>
-
-    </div>
+            <a href="#" class="tool-card-med" data-cat="util" data-search="comparateur texte différence">
+                <span class="badge-coming">Bientôt</span>
+                <div class="tool-header-flex">
+                    <span class="tool-icon-small" style="font-size:28px">📝</span>
+                    <h3 class="tool-name-med">Comparateur de texte</h3>
+                </div>
+                <p class="tool-desc-med">Détection de différences entre deux documents.</p>
+            </a>
+        </div>
+    </section>
 
     <div class="portal-disclaimer">
-        ⚠️ <strong>Usage bureautique</strong> : Ces utilitaires sont fournis à titre informatif. Aucun fichier n'est envoyé sur un serveur. Les outils médicaux restent sur <em>outils.dr-karazaitri-ma.net</em>.
+        ⚠️ <strong>Usage bureautique</strong> : Ces utilitaires sont fournis à titre informatif. Aucun fichier n'est envoyé sur un serveur.
     </div>
 </div>
 
@@ -343,9 +282,7 @@
 (function() {
     const input = document.getElementById('tool-search');
     const clearBtn = document.getElementById('clear-search');
-    const filterBtns = document.querySelectorAll('.filter-btn');
     const cards = document.querySelectorAll('.tool-card-med');
-    let currentCat = 'all';
 
     const filterAll = () => {
         const query = input.value.toLowerCase().trim();
@@ -354,22 +291,12 @@
         cards.forEach(card => {
             const searchData = card.getAttribute('data-search').toLowerCase();
             const matchSearch = searchData.includes(query);
-            const matchCat = currentCat === 'all' || card.getAttribute('data-cat') === currentCat;
-            card.classList.toggle('hidden', !(matchSearch && matchCat));
+            card.classList.toggle('hidden', !matchSearch);
         });
     };
 
     input.addEventListener('input', filterAll);
     clearBtn.addEventListener('click', () => { input.value = ''; filterAll(); input.focus(); });
-
-    filterBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            filterBtns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            currentCat = btn.getAttribute('data-filter');
-            filterAll();
-        });
-    });
 })();
 </script>
 
