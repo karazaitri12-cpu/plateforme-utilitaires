@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analyseur de Texte | Dr KARA-ZAITRI</title>
+    
+    <!-- Bibliothèques externes pour import fichiers -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    </script>
+    
+    <style>
+        /* ==========================================
+           DESIGN INSTITUTIONNEL COMPLET
+           ========================================== */
+        :root {
+            --primary: #1a3a5c;
+            --primary-light: #345a7a;
+            --primary-dark: #0d2538;
+            --text: #37474f;
+            --text-light: #607d8b;
+            --border: #cfd8dc;
+            --bg-page: #f4f7f9;
+            --bg-card: #ffffff;
+            --bg-input: #f8f9fa;
+            --success: #2e7d32;
+            --warning: #ed6c02;
+            --error: #c62828;
+            --premium: #C9A961;
+            --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: var(--font-ui);
+            background: var(--bg-page);
+            color: var(--text);
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+
+        /* NAVIGATION */
+        .nav-bar {
+            position: sticky;
+            top: 0;
+            z-index: 2000;
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .back-link {
+            text-decoration: none;
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .back-link:hover { text-decoration: underline; }
+
+        /* HEADER */
+        .app-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            position: sticky;
+            top: 52px;
+            z-index: 100;
+        }
+        .app-header h1 {
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0 0 5px;
+        }
+        .app-header p {
+            font-size: 13px;
+            opacity: 0.9;
+            margin: 0;
+        }
+        .premium-badge {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            color: var(--premium);
+            font-size: 24px;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        /* CONTENEUR */
+        .container {
+            max-width: 900px;
+            margin: 24px auto;
+            padding: 0 16px;
+        }
+
+        /* CARTES */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .card h2 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 0 0 16px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        /* ZONE DE TEXTE */
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            background: var(--bg-input);
+            resize: vertical;
+            transition: border-color 0.2s;
+        }
+        textarea:focus {
+            border-color: var(--primary);
+            outline: none;
+            background: #fff;
+            box-shadow: 0 0 0 2px rgba(26,58,92,0.1);
+        }
+
+        /* CONTRÔLES */
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 16px 0;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            min-width: 110px;
+        }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-primary { background: var(--primary); color: #fff; }
+        .btn-primary:hover:not(:disabled) { background: var(--primary-light); }
+        .btn-secondary { background: var(--bg-card); color: var(--primary); border: 1px solid var(--border); }
+        .btn-secondary:hover:not(:disabled) { background: var(--bg-input); }
+        .btn-success { background: var(--success); color: #fff; }
+        #fileInput { display: none; }
+
+        /* RÉSULTATS */
+        .results {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+        .result-card {
+            background: var(--bg-input);
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 4px solid var(--primary);
+            transition: transform 0.2s;
+        }
+        .result-card:hover {
+            transform: translateY(-2px);
+            background: #e3f2fd;
+        }
+        .result-card h4 {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 8px;
+        }
+        .result-card .value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        .result-card .unit {
+            font-size: 11px;
+            color: var(--text-light);
+            margin-top: 4px;
+        }
+
+        /* MODE D'EMPLOI */
+        .help-section {
+            margin-top: 24px;
+            border-top: 1px solid var(--border);
+            padding-top: 20px;
+        }
+        .help-toggle {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--success);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: background 0.2s;
+        }
+        .help-toggle:hover { background: #388e3c; }
+        .help-toggle::after {
+            content: '▼';
+            font-size: 12px;
+            transition: transform 0.3s;
+        }
+        .help-toggle.active::after { transform: rotate(180deg); }
+        
+        .help-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            background: var(--bg-input);
+            border-radius: 0 0 8px 8px;
+        }
+        .help-content.show {
+            border: 1px solid var(--border);
+            border-top: none;
+        }
+        .help-inner {
+            padding: 16px;
+            font-size: 13px;
+            color: var(--text);
+        }
+        .help-inner h3 {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 12px 0 8px;
+        }
+        .help-inner h4 {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+            margin: 10px 0 6px;
+        }
+        .help-inner ul {
+            padding-left: 20px;
+            margin: 6px 0;
+        }
+        .help-inner li {
+            margin: 4px 0;
+            color: var(--text-light);
+        }
+        .highlight {
+            background: #fff3cd;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: 600;
+            color: #856404;
+        }
+
+        /* FOOTER */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 11px;
+            color: var(--text-light);
+            margin-top: 24px;
+            border-top: 1px solid var(--border);
+        }
+        .disclaimer {
+            background: #fff3cd;
+            color: #856404;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #ffeeba;
+            margin-top: 12px;
+            font-size: 10px;
+            line-height: 1.4;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 600px) {
+            .controls { flex-direction: column; }
+            .btn { width: 100%; }
+            .results { grid-template-columns: 1fr; }
+            .app-header h1 { font-size: 18px; }
+        }
+    </style>
+</head>
+<body>
+
+  <!-- NAVIGATION -->
+  <nav class="nav-bar">
+    <a href="https://karazaitri12-cpu.github.io/plateforme-utilitaires/" class="back-link">← Retour aux Utilitaires</a>
+  </nav>
+
+  <!-- HEADER -->
+  <header class="app-header">
+    <span class="premium-badge">★</span>
+    <h1>Analyseur de Texte Avancé</h1>
+    <p>Analysez vos documents en temps réel : mots, caractères, phrases</p>
+  </header>
+
+  <div class="container">
+
+    <!-- ZONE DE SAISIE -->
+    <div class="card">
+      <h2>📝 Saisir votre texte</h2>
+      
+      <textarea id="textInput" placeholder="Collez ou saisissez votre texte ici pour l'analyser instantanément..."></textarea>
+      
+      <div class="controls">
+        <button class="btn btn-primary" onclick="pasteText()">📋 Coller</button>
+        <button class="btn btn-secondary" onclick="clearText()">🗑️ Effacer</button>
+        <button class="btn btn-secondary" onclick="document.getElementById('fileInput').click()">📁 Importer</button>
+        <input type="file" id="fileInput" accept=".txt,.docx,.pdf" onchange="importFile(event)">
+      </div>
+    </div>
+
+    <!-- RÉSULTATS -->
+    <div class="card">
+      <h2>📊 Résultats de l'analyse</h2>
+      
+      <div class="results">
+        <div class="result-card">
+          <h4>Nombre de mots</h4>
+          <div class="value" id="wordCount">0</div>
+          <div class="unit">mots</div>
+        </div>
+        <div class="result-card">
+          <h4>Nombre de caractères</h4>
+          <div class="value" id="charCount">0</div>
+          <div class="unit">caractères</div>
+        </div>
+        <div class="result-card">
+          <h4>Nombre de phrases</h4>
+          <div class="value" id="sentenceCount">0</div>
+          <div class="unit">phrases</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODE D'EMPLOI -->
+    <div class="card help-section">
+      <button class="help-toggle" id="helpToggle" onclick="toggleHelp()">
+        📖 Mode d'emploi <span></span>
+      </button>
+      <div class="help-content" id="helpContent">
+        <div class="help-inner">
+          <h3>🔢 Comment sont comptés les éléments ?</h3>
+          
+          <h4><span class="highlight">Comptage des mots :</span></h4>
+          <ul>
+            <li>Supprime les espaces en début et fin de texte</li>
+            <li>Divise sur tous types d'espaces (espaces, tabulations, retours)</li>
+            <li>Filtre les chaînes vides pour un comptage précis</li>
+          </ul>
+
+          <h4><span class="highlight">Comptage des caractères :</span></h4>
+          <ul>
+            <li>Compte <strong>tous</strong> les caractères sans exception</li>
+            <li>Inclut lettres, chiffres, espaces, ponctuations, accents</li>
+          </ul>
+
+          <h4><span class="highlight">Comptage des phrases :</span></h4>
+          <ul>
+            <li>Divise sur les terminateurs : <strong>. ! ?</strong></li>
+            <li>Gère les ponctuations multiples ("!!!", "...")</li>
+            <li>Compte uniquement les phrases avec du contenu</li>
+          </ul>
+
+          <h3>📁 Formats de fichiers supportés</h3>
+          <ul>
+            <li><strong>.txt</strong> : Texte brut</li>
+            <li><strong>.docx</strong> : Word moderne (via Mammoth.js)</li>
+            <li><strong>.pdf</strong> : PDF texte (via PDF.js)</li>
+          </ul>
+
+          <h3>💡 Conseils d'utilisation</h3>
+          <ul>
+            <li>Analyse en temps réel pendant la saisie</li>
+            <li>Compatible avec textes longs (plusieurs milliers de mots)</li>
+            <li>Usage médical : parfait pour articles, rapports, contenus web</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <span>Dr KARA-ZAITRI M.A © 2026</span>
+      <div class="disclaimer">
+        ⚠️ <strong>Usage bureautique</strong> : Analyse locale dans votre navigateur. Aucun texte n'est envoyé sur un serveur.
+      </div>
+    </footer>
+
+  </div>
+
+  <script>
+    // Analyse du texte
+    function analyzeText() {
+      const text = document.getElementById('textInput').value;
+      
+      // Mots
+      const words = text.trim().split(/\s+/).filter(w => w.length > 0);
+      const wordCount = text.trim() === '' ? 0 : words.length;
+      
+      // Caractères
+      const charCount = text.length;
+      
+      // Phrases
+      const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+      const sentenceCount = sentences.length;
+      
+      // Affichage
+      document.getElementById('wordCount').textContent = wordCount.toLocaleString('fr');
+      document.getElementById('charCount').textContent = charCount.toLocaleString('fr');
+      document.getElementById('sentenceCount').textContent = sentenceCount.toLocaleString('fr');
+    }
+
+    // Coller depuis presse-papiers
+    async function pasteText() {
+      try {
+        const text = await navigator.clipboard.readText();
+        document.getElementById('textInput').value = text;
+        analyzeText();
+      } catch (err) {
+        alert('Impossible de coller. Utilisez Ctrl+V manuellement.');
+      }
+    }
+
+    // Effacer
+    function clearText() {
+      document.getElementById('textInput').value = '';
+      analyzeText();
+    }
+
+    // Import fichier
+    async function importFile(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      const ext = file.name.split('.').pop().toLowerCase();
+      
+      try {
+        if (ext === 'txt') {
+          const text = await file.text();
+          document.getElementById('textInput').value = text;
+          
+        } else if (ext === 'docx') {
+          const arrayBuffer = await file.arrayBuffer();
+          const result = await mammoth.extractRawText({ arrayBuffer });
+          document.getElementById('textInput').value = result.value;
+          
+        } else if (ext === 'pdf') {
+          const arrayBuffer = await file.arrayBuffer();
+          const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+          let fullText = '';
+          for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const content = await page.getTextContent();
+            fullText += content.items.map(item => item.str).join(' ') + '\n';
+          }
+          document.getElementById('textInput').value = fullText;
+          
+        } else {
+          alert('Format non supporté. Utilisez : TXT, DOCX ou PDF');
+          return;
+        }
+        analyzeText();
+      } catch (err) {
+        console.error('Erreur import:', err);
+        alert('Erreur lors de la lecture du fichier : ' + err.message);
+      }
+      // Reset input pour permettre ré-import du même fichier
+      event.target.value = '';
+    }
+
+    // Toggle mode d'emploi
+    function toggleHelp() {
+      const content = document.getElementById('helpContent');
+      const toggle = document.getElementById('helpToggle');
+      const isShown = content.classList.toggle('show');
+      toggle.classList.toggle('active', isShown);
+      content.style.maxHeight = isShown ? content.scrollHeight + 'px' : '0';
+    }
+
+    // Événements
+    document.getElementById('textInput').addEventListener('input', analyzeText);
+    
+    // Initialisation
+    analyzeText();
+  </script>
+</body>
+</html>
