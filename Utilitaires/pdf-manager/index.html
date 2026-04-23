@@ -1,651 +1,701 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PDF Manager | Dr. Karazaitri</title>
-  
-  <!-- Bibliothèques externes nécessaires -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.min.js"></script>
-  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-  
-  <script>
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.worker.min.js';
-  </script>
-  
-  <style>
-    /* ==========================================
-       VARIABLES DE DESIGN (Style institutionnel)
-       ========================================== */
-    :root {
-      --primary: #1a3a5c;
-      --primary-light: #345a7a;
-      --primary-dark: #0d2538;
-      --text: #37474f;
-      --text-light: #607d8b;
-      --border: #cfd8dc;
-      --bg-page: #f4f7f9;
-      --bg-card: #ffffff;
-      --bg-input: #f8f9fa;
-      --success: #2e7d32;
-      --warning: #ed6c02;
-      --error: #c62828;
-      --premium: #C9A961;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Manager | Dr. KARA-ZAITRI</title>
+    
+    <!-- Bibliothèques externes indispensables -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.min.js"></script>
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    
+    <script>
+        // Configuration du worker PDF.js
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.worker.min.js';
+    </script>
+    
+    <style>
+        /* ============================================================
+           VARIABLES DE DESIGN INSTITUTIONNEL
+           ============================================================ */
+        :root {
+            --primary: #1a3a5c;
+            --primary-light: #345a7a;
+            --primary-dark: #0d2538;
+            --text: #37474f;
+            --text-light: #607d8b;
+            --border: #cfd8dc;
+            --bg-page: #f4f7f9;
+            --bg-card: #ffffff;
+            --bg-input: #f8f9fa;
+            --success: #2e7d32;
+            --warning: #ed6c02;
+            --error: #c62828;
+            --premium: #C9A961;
+            --shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
 
-    /* ==========================================
-       STRUCTURE GLOBALE
-       ========================================== */
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-      background: var(--bg-page);
-      color: var(--text);
-      line-height: 1.5;
-      min-height: 100vh;
-    }
+        /* ============================================================
+           RESET & STRUCTURE
+           ============================================================ */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            background: var(--bg-page);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding-bottom: 50px;
+        }
 
-    /* BARRE DE NAVIGATION (Fixe en haut) */
-    .nav-bar {
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      background: #fff;
-      border-bottom: 1px solid var(--border);
-      padding: 12px 20px;
-      display: flex;
-      justify-content: flex-start;
-      align-items: center;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-    .back-link {
-      text-decoration: none;
-      color: var(--primary);
-      font-weight: 600;
-      font-size: 14px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .back-link:hover { text-decoration: underline; }
+        /* BARRE DE NAVIGATION */
+        .nav-bar {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            padding: 12px 25px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .back-link {
+            text-decoration: none;
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: var(--primary-light); text-decoration: underline; }
 
-    /* CONTENEUR PRINCIPAL */
-    .pdf-wrapper {
-      max-width: 800px;
-      margin: 20px auto;
-      padding: 0 15px;
-    }
+        /* CONTENEUR PRINCIPAL */
+        .pdf-wrapper {
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
 
-    /* EN-TÊTE */
-    .pdf-header {
-      text-align: center;
-      margin-bottom: 24px;
-      padding: 20px;
-      background: var(--primary);
-      border-radius: 12px;
-      color: #fff;
-      position: relative;
-    }
-    .pdf-header h1 {
-      font-size: 22px;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-    .pdf-header p {
-      font-size: 14px;
-      opacity: 0.9;
-    }
-    .premium-badge {
-      position: absolute;
-      top: 12px;
-      right: 16px;
-      color: var(--premium);
-      font-size: 24px;
-      text-shadow: 0 1px 3px rgba(0,0,0,0.3);
-    }
+        /* EN-TÊTE */
+        .pdf-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 35px;
+            background: var(--primary);
+            border-radius: 15px;
+            color: #fff;
+            position: relative;
+            box-shadow: var(--shadow);
+        }
+        .pdf-header h1 {
+            font-size: 26px;
+            font-weight: 800;
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+        }
+        .pdf-header p {
+            font-size: 15px;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+        .premium-badge {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            color: var(--premium);
+            font-size: 28px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
 
-    /* CARTES MODULES */
-    .module-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 24px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-      margin-bottom: 20px;
-    }
-    .module-card h2 {
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--primary);
-      margin: 0 0 20px 0;
-      padding-bottom: 12px;
-      border-bottom: 2px solid var(--border);
-    }
+        /* CARTES MODULES */
+        .module-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+            transition: transform 0.2s;
+        }
+        .module-card h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 2px solid var(--bg-page);
+            padding-bottom: 15px;
+        }
 
-    /* INPUT FICHIER */
-    .file-input {
-      display: block;
-      width: 100%;
-      padding: 14px 20px;
-      background: var(--bg-input);
-      border: 2px dashed var(--border);
-      border-radius: 8px;
-      text-align: center;
-      cursor: pointer;
-      font-weight: 600;
-      color: var(--primary);
-      transition: all 0.2s;
-      margin-bottom: 12px;
-    }
-    .file-input:hover {
-      border-color: var(--primary);
-      background: #e3f2fd;
-    }
-    .file-input i { margin-right: 8px; }
-    
-    input[type="file"] { display: none; }
+        /* INPUTS FICHIERS */
+        .file-input-wrapper {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .file-label {
+            display: block;
+            width: 100%;
+            padding: 25px;
+            background: var(--bg-input);
+            border: 2px dashed var(--border);
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--primary);
+            transition: all 0.3s ease;
+        }
+        .file-label:hover {
+            border-color: var(--primary);
+            background: #eef2f7;
+            transform: translateY(-2px);
+        }
+        .file-label i { font-size: 24px; display: block; margin-bottom: 10px; }
+        
+        input[type="file"] { display: none; }
 
-    /* LISTE FICHIERS */
-    .file-list {
-      margin: 12px 0;
-      background: var(--bg-input);
-      border-radius: 8px;
-      padding: 12px;
-      max-height: 150px;
-      overflow-y: auto;
-    }
-    .file-item {
-      padding: 8px 12px;
-      background: #fff;
-      border-radius: 6px;
-      margin-bottom: 8px;
-      font-size: 13px;
-      border-left: 3px solid var(--primary);
-    }
-    .file-info strong { color: var(--text); }
+        /* LISTE DES FICHIERS (FUSION) */
+        .file-list {
+            margin: 20px 0;
+            background: var(--bg-input);
+            border-radius: 10px;
+            padding: 15px;
+        }
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 15px;
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .file-info-text { display: flex; flex-direction: column; }
+        .file-name { font-weight: 700; color: var(--primary); }
+        .file-meta { font-size: 12px; color: var(--text-light); }
+        
+        .file-actions { display: flex; gap: 10px; }
+        .action-btn {
+            background: none; border: none; cursor: pointer; color: var(--text-light); transition: color 0.2s;
+        }
+        .action-btn:hover { color: var(--error); }
+        .drag-handle { cursor: grab; color: var(--border); }
 
-    /* OPTIONS DE DIVISION */
-    .split-options {
-      margin-top: 16px;
-      padding: 16px;
-      background: #f5f7f9;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-    }
-    .split-option {
-      margin: 10px 0;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 14px;
-    }
-    .split-option input[type="radio"] {
-      width: 16px;
-      height: 16px;
-      cursor: pointer;
-    }
-    #equal-options {
-      margin-left: 24px;
-      margin-top: 8px;
-      padding: 10px;
-      background: #fff;
-      border-radius: 6px;
-      border: 1px solid var(--border);
-    }
-    #equal-options select {
-      padding: 6px 10px;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      font-size: 13px;
-      background: #fff;
-    }
+        /* OPTIONS DE DIVISION */
+        .split-settings {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            display: none;
+        }
+        .settings-title {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+        .option-group {
+            display: grid;
+            gap: 15px;
+        }
+        .radio-card {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .radio-card:hover { border-color: var(--primary); }
+        .radio-card input { width: 18px; height: 18px; }
+        
+        .sub-options {
+            margin-left: 33px;
+            padding: 10px;
+            border-left: 2px solid var(--border);
+            margin-top: 5px;
+        }
+        .input-num {
+            padding: 8px;
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            width: 80px;
+        }
 
-    /* BOUTONS */
-    .button-group {
-      display: flex;
-      gap: 10px;
-      margin-top: 16px;
-      flex-wrap: wrap;
-    }
-    .btn {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    
-    .btn-primary { background: var(--primary); color: #fff; }
-    .btn-primary:hover:not(:disabled) { background: var(--primary-light); }
-    
-    .btn-reset { background: var(--text-light); color: #fff; }
-    .btn-reset:hover:not(:disabled) { background: #546e7a; }
+        /* BOUTONS D'ACTION */
+        .btn-container {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s;
+            min-width: 160px;
+        }
+        .btn-primary { background: var(--primary); color: #fff; box-shadow: 0 4px 10px rgba(26, 58, 92, 0.2); }
+        .btn-primary:hover:not(:disabled) { background: var(--primary-light); transform: translateY(-1px); }
+        
+        .btn-outline { background: #fff; border: 1px solid var(--border); color: var(--text); }
+        .btn-outline:hover:not(:disabled) { background: #f1f5f9; }
+        
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(1); }
 
-    /* BARRE DE PROGRESSION */
-    .progress-container {
-      display: none;
-      margin-top: 16px;
-      background: var(--bg-input);
-      border-radius: 8px;
-      overflow: hidden;
-      height: 24px;
-      position: relative;
-    }
-    .progress-bar {
-      height: 100%;
-      background: linear-gradient(90deg, var(--primary), var(--primary-light));
-      width: 0%;
-      transition: width 0.3s ease;
-    }
-    .progress-text {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 12px;
-      font-weight: 600;
-      color: #fff;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-    }
+        /* BARRE DE PROGRESSION */
+        .progress-box {
+            display: none;
+            margin-top: 25px;
+            background: #eee;
+            border-radius: 20px;
+            height: 22px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--primary-light));
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .progress-label {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--primary-dark);
+            line-height: 22px;
+            text-transform: uppercase;
+        }
 
-    /* FOOTER */
-    .tool-footer {
-      margin-top: 30px;
-      padding: 20px;
-      text-align: center;
-      font-size: 12px;
-      color: var(--text-light);
-    }
-    .disclaimer {
-      background: #fff3cd;
-      color: #856404;
-      padding: 12px;
-      border-radius: 6px;
-      border: 1px solid #ffeeba;
-      margin-top: 15px;
-      font-size: 11px;
-      line-height: 1.4;
-    }
+        /* FOOTER */
+        .tool-footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 13px;
+            color: var(--text-light);
+        }
+        .disclaimer {
+            background: #fff9e6;
+            color: #7a5f00;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ffeeba;
+            margin-top: 20px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.5;
+        }
 
-    /* RESPONSIVE */
-    @media (max-width: 600px) {
-      .button-group { flex-direction: column; }
-      .btn { width: 100%; justify-content: center; }
-      .pdf-header h1 { font-size: 18px; }
-      .module-card { padding: 20px; }
-    }
-  </style>
+        /* ANIMATIONS RÉUSSITE */
+        .success-msg { color: var(--success); font-weight: bold; margin-top: 10px; display: none; text-align: center; }
+
+        @media (max-width: 768px) {
+            .btn-container { flex-direction: column; }
+            .btn { width: 100%; }
+            .pdf-header { padding: 25px 15px; }
+        }
+    </style>
 </head>
 <body>
 
-  <!-- BARRE DE NAVIGATION -->
-  <nav class="nav-bar">
-    <a href="https://karazaitri12-cpu.github.io/plateforme-utilitaires/" class="back-link">← Retour aux Utilitaires</a>
-  </nav>
+    <!-- NAVIGATION -->
+    <nav class="nav-bar">
+        <a href="https://karazaitri12-cpu.github.io/plateforme-utilitaires/" class="back-link">
+            <i class="fas fa-arrow-left"></i> Retour aux Utilitaires
+        </a>
+    </nav>
 
-  <div class="pdf-wrapper">
-    
-    <!-- EN-TÊTE AVEC BADGE PREMIUM -->
-    <header class="pdf-header">
-      <span class="premium-badge">★</span>
-      <h1>📄 PDF Manager</h1>
-      <p>Fusionnez et divisez vos documents PDF en toute sécurité</p>
-    </header>
+    <div class="pdf-wrapper">
+        
+        <!-- HEADER -->
+        <header class="pdf-header">
+            <span class="premium-badge">★</span>
+            <h1><i class="fas fa-file-pdf"></i> PDF Manager Pro</h1>
+            <p>Outil professionnel de fusion et division de documents PDF</p>
+        </header>
 
-    <!-- MODULE: FUSIONNER DES PDF -->
-    <div class="module-card" id="merge">
-      <h2>🔗 Fusionner des PDF</h2>
-      
-      <label for="merge-file-input" class="file-input">
-        <i class="fas fa-file-pdf"></i> Sélectionner des fichiers PDF
-      </label>
-      <input type="file" id="merge-file-input" multiple accept=".pdf" onchange="handleMergeFileSelection(event)">
-      
-      <div id="merge-file-list" class="file-list"></div>
-      
-      <div class="button-group">
-        <button onclick="mergePDFs()" id="merge-button" class="btn btn-primary" style="display:none;">
-          <i class="fas fa-link"></i> Fusionner
-        </button>
-        <button onclick="resetMerge()" id="reset-merge" class="btn btn-reset" style="display:none;">
-          <i class="fas fa-undo"></i> Réinitialiser
-        </button>
-      </div>
-      
-      <div id="merge-progress-container" class="progress-container">
-        <div id="merge-progress-bar" class="progress-bar"></div>
-        <div id="merge-progress-text" class="progress-text">0%</div>
-      </div>
-    </div>
+        <!-- MODULE 1: FUSION -->
+        <section class="module-card" id="merge-section">
+            <h2><i class="fas fa-layer-group"></i> Fusionner des PDF</h2>
+            
+            <div class="file-input-wrapper">
+                <label for="merge-input" class="file-label">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    Cliquez pour ajouter plusieurs fichiers PDF
+                </label>
+                <input type="file" id="merge-input" multiple accept=".pdf">
+            </div>
 
-    <!-- MODULE: DIVISER UN PDF -->
-    <div class="module-card" id="split">
-      <h2>✂️ Diviser un PDF</h2>
-      
-      <label for="split-file-input" class="file-input">
-        <i class="fas fa-file-pdf"></i> Sélectionner un fichier PDF
-      </label>
-      <input type="file" id="split-file-input" accept=".pdf" onchange="handleSplitFileSelection(event)">
-      
-      <div id="split-file-info" class="file-list"></div>
-      
-      <div id="split-options" style="display:none;">
-        <h3 style="font-size:15px; font-weight:600; color:var(--primary); margin:16px 0 12px 0;">Options de division :</h3>
-        
-        <div class="split-option">
-          <input type="radio" id="split-all" name="split-type" value="all" checked>
-          <label for="split-all">Extraire toutes les pages individuellement</label>
-        </div>
-        
-        <div class="split-option">
-          <input type="radio" id="split-equal" name="split-type" value="equal">
-          <label for="split-equal">Diviser en parties égales</label>
-          <div id="equal-options" style="display:none;">
-            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-              <label for="equal-parts" style="font-size:13px;">Nombre de parties :</label>
-              <select id="equal-parts">
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-                <option value="10">10</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="button-group">
-        <button onclick="splitPDF()" id="split-button" class="btn btn-primary" style="display:none;">
-          <i class="fas fa-cut"></i> Diviser
-        </button>
-        <button onclick="resetSplit()" id="reset-split" class="btn btn-reset" style="display:none;">
-          <i class="fas fa-undo"></i> Réinitialiser
-        </button>
-      </div>
-      
-      <div id="split-progress-container" class="progress-container">
-        <div id="split-progress-bar" class="progress-bar"></div>
-        <div id="split-progress-text" class="progress-text">0%</div>
-      </div>
-    </div>
+            <div id="merge-list-container" class="file-list" style="display:none;">
+                <!-- Les fichiers apparaîtront ici -->
+            </div>
 
-    <!-- FOOTER -->
-    <footer class="tool-footer">
-      <span>Dr KARA-ZAITRI M.A © 2026</span>
-      <div class="disclaimer">
-        ⚠️ <strong>Usage bureautique</strong> : Traitement local dans votre navigateur. Aucun fichier PDF n'est envoyé sur un serveur.
-      </div>
-    </footer>
+            <div class="btn-container">
+                <button id="merge-run-btn" class="btn btn-primary" disabled>
+                    <i class="fas fa-object-group"></i> Fusionner les fichiers
+                </button>
+                <button id="merge-reset-btn" class="btn btn-outline" style="display:none;">
+                    <i class="fas fa-trash-alt"></i> Tout effacer
+                </button>
+            </div>
 
-  </div>
+            <div id="merge-progress" class="progress-box">
+                <div class="progress-fill" id="merge-bar"></div>
+                <div class="progress-label" id="merge-text">0%</div>
+            </div>
+            <p id="merge-success" class="success-msg">✓ Document fusionné téléchargé !</p>
+        </section>
 
-  <!-- LOGIQUE JAVASCRIPT (Préservée et adaptée) -->
-  <script>
-    let mergeFiles = [];
-    let splitFile = null;
-    const { PDFDocument } = PDFLib;
+        <!-- MODULE 2: DIVISION -->
+        <section class="module-card" id="split-section">
+            <h2><i class="fas fa-cut"></i> Diviser un PDF</h2>
+            
+            <div class="file-input-wrapper">
+                <label for="split-input" class="file-label">
+                    <i class="fas fa-file-import"></i>
+                    Sélectionner le document à diviser
+                </label>
+                <input type="file" id="split-input" accept=".pdf">
+            </div>
 
-    function showProgress(moduleId) {
-      const progressContainer = document.getElementById(`${moduleId}-progress-container`);
-      progressContainer.style.display = 'block';
-      updateProgress(moduleId, 0);
-    }
+            <div id="split-info-container" class="file-list" style="display:none;"></div>
 
-    function updateProgress(moduleId, percentage) {
-      const progressBar = document.getElementById(`${moduleId}-progress-bar`);
-      const progressText = document.getElementById(`${moduleId}-progress-text`);
-      percentage = Math.min(Math.max(percentage, 0), 100);
-      progressBar.style.width = percentage + '%';
-      progressText.textContent = Math.round(percentage) + '%';
-    }
+            <div id="split-config" class="split-settings">
+                <p class="settings-title">Configuration de la division :</p>
+                
+                <div class="option-group">
+                    <label class="radio-card">
+                        <input type="radio" name="split-mode" value="individual" checked>
+                        <span>Extraire <strong>chaque page</strong> (1 PDF par page)</span>
+                    </label>
 
-    function hideProgress(moduleId) {
-      const progressContainer = document.getElementById(`${moduleId}-progress-container`);
-      progressContainer.style.display = 'none';
-    }
+                    <label class="radio-card">
+                        <input type="radio" name="split-mode" value="parts">
+                        <span>Diviser en <strong>parties égales</strong></span>
+                    </label>
+                    <div class="sub-options" id="parts-options" style="display:none;">
+                        Nombre de fichiers souhaités : 
+                        <input type="number" id="split-parts-qty" class="input-num" value="2" min="2" max="50">
+                    </div>
 
-    function disableButton(buttonId) {
-      const button = document.getElementById(buttonId);
-      if (button) button.disabled = true;
-    }
+                    <label class="radio-card">
+                        <input type="radio" name="split-mode" value="range">
+                        <span>Définir un <strong>intervalle fixe</strong></span>
+                    </label>
+                    <div class="sub-options" id="range-options" style="display:none;">
+                        Toutes les <input type="number" id="split-range-qty" class="input-num" value="5" min="1"> pages.
+                    </div>
+                </div>
+            </div>
 
-    function enableButton(buttonId) {
-      const button = document.getElementById(buttonId);
-      if (button) button.disabled = false;
-    }
+            <div class="btn-container">
+                <button id="split-run-btn" class="btn btn-primary" disabled>
+                    <i class="fas fa-scissors"></i> Lancer la division
+                </button>
+                <button id="split-reset-btn" class="btn btn-outline" style="display:none;">
+                    <i class="fas fa-undo"></i> Réinitialiser
+                </button>
+            </div>
 
-    function handleMergeFileSelection(event) {
-      const files = Array.from(event.target.files);
-      mergeFiles = files;
-      updateMergeFileList();
-    }
+            <div id="split-progress" class="progress-box">
+                <div class="progress-fill" id="split-bar"></div>
+                <div class="progress-label" id="split-text">0%</div>
+            </div>
+            <p id="split-success" class="success-msg">✓ Archive ZIP prête et téléchargée !</p>
+        </section>
 
-    function updateMergeFileList() {
-      const fileList = document.getElementById('merge-file-list');
-      fileList.innerHTML = '';
-      mergeFiles.forEach(file => {
-        const fileItem = document.createElement('div');
-        fileItem.className = 'file-item';
-        fileItem.innerHTML = `<div class="file-info"><strong>${file.name}</strong> (${formatFileSize(file.size)})</div>`;
-        fileList.appendChild(fileItem);
-      });
-      showElement('merge-button', mergeFiles.length > 1);
-      showElement('reset-merge', mergeFiles.length > 0);
-    }
+        <!-- FOOTER -->
+        <footer class="tool-footer">
+            <p><strong>Dr KARA-ZAITRI M.A © 2026</strong></p>
+            <div class="disclaimer">
+                🛡️ <strong>SÉCURITÉ LOCALE</strong> : Vos documents ne quittent jamais votre ordinateur. Le traitement est réalisé par votre navigateur via les bibliothèques <em>pdf-lib</em> et <em>JSZip</em>.
+            </div>
+        </footer>
+    </div>
 
-    async function getPdfPageCount(file) {
-      try {
-        const pdfBytes = await file.arrayBuffer();
-        const pdf = await pdfjsLib.getDocument({ data: pdfBytes }).promise;
-        return pdf.numPages;
-      } catch (error) {
-        console.error('Error getting PDF page count:', error);
-        return 0;
-      }
-    }
+    <!-- LOGIQUE JAVASCRIPT COMPLETE -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // --- VARIABLES ET ETATS ---
+            let mergeFiles = [];
+            let splitFile = null;
+            const { PDFDocument } = PDFLib;
 
-    function handleSplitFileSelection(event) {
-      splitFile = event.target.files[0];
-      updateSplitFileInfo();
-      if (splitFile) {
-        document.getElementById('split-options').style.display = 'block';
-        getPdfPageCount(splitFile).then(pageCount => {
-          // Mettre à jour les max des inputs range si ils existaient dans l'original
-        });
-      } else {
-        document.getElementById('split-options').style.display = 'none';
-      }
-    }
+            // --- SECTEURS DOM ---
+            const dom = {
+                mergeIn: document.getElementById('merge-input'),
+                mergeList: document.getElementById('merge-list-container'),
+                mergeRun: document.getElementById('merge-run-btn'),
+                mergeReset: document.getElementById('merge-reset-btn'),
+                mergeBar: document.getElementById('merge-bar'),
+                mergeProgress: document.getElementById('merge-progress'),
+                mergeText: document.getElementById('merge-text'),
+                mergeSuccess: document.getElementById('merge-success'),
 
-    function updateSplitFileInfo() {
-      const fileInfo = document.getElementById('split-file-info');
-      if (splitFile) {
-        fileInfo.innerHTML = `<div class="file-item"><div class="file-info"><strong>${splitFile.name}</strong> (${formatFileSize(splitFile.size)})</div></div>`;
-        showElement('split-button', true);
-        showElement('reset-split', true);
-      } else {
-        fileInfo.innerHTML = '';
-        hideElement('split-button');
-        hideElement('reset-split');
-      }
-    }
+                splitIn: document.getElementById('split-input'),
+                splitInfo: document.getElementById('split-info-container'),
+                splitConfig: document.getElementById('split-config'),
+                splitRun: document.getElementById('split-run-btn'),
+                splitReset: document.getElementById('split-reset-btn'),
+                splitBar: document.getElementById('split-bar'),
+                splitProgress: document.getElementById('split-progress'),
+                splitText: document.getElementById('split-text'),
+                splitSuccess: document.getElementById('split-success'),
+                splitModes: document.getElementsByName('split-mode')
+            };
 
-    function formatFileSize(bytes) {
-      if (bytes === 0) return '0 Bytes';
-      const k = 1024;
-      const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-      const i = Math.floor(Math.log(bytes) / Math.log(k));
-      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    }
+            // --- UTILITAIRES ---
+            const formatSize = (bytes) => {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024, sizes = ['Bytes', 'KB', 'MB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            };
 
-    async function mergePDFs() {
-      try {
-        showProgress('merge');
-        disableButton('merge-button');
-        disableButton('reset-merge');
-        
-        const mergedPdf = await PDFDocument.create();
-        
-        for (let i = 0; i < mergeFiles.length; i++) {
-          updateProgress('merge', (i / mergeFiles.length) * 70);
-          const file = mergeFiles[i];
-          const pdfBytes = await file.arrayBuffer();
-          const pdf = await PDFDocument.load(pdfBytes);
-          const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
-          copiedPages.forEach((page) => mergedPdf.addPage(page));
-        }
-        
-        updateProgress('merge', 80);
-        const pdfBytes = await mergedPdf.save();
-        updateProgress('merge', 90);
-        
-        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-        saveAs(blob, 'merged.pdf');
-        
-        updateProgress('merge', 100);
-        setTimeout(() => {
-          hideProgress('merge');
-          enableButton('merge-button');
-          enableButton('reset-merge');
-        }, 1000);
-      } catch (error) {
-        console.error('Error merging PDFs:', error);
-        alert('Une erreur est survenue lors de la fusion des PDFs. Veuillez réessayer.');
-        hideProgress('merge');
-        enableButton('merge-button');
-        enableButton('reset-merge');
-      }
-    }
+            const updateBar = (bar, label, percent) => {
+                bar.style.width = percent + '%';
+                label.textContent = Math.round(percent) + '%';
+            };
 
-    async function splitPDF() {
-      try {
-        showProgress('split');
-        disableButton('split-button');
-        disableButton('reset-split');
-        
-        const splitType = document.querySelector('input[name="split-type"]:checked').value;
-        updateProgress('split', 10);
-        
-        const pdfBytes = await splitFile.arrayBuffer();
-        updateProgress('split', 20);
-        
-        const pdf = await PDFDocument.load(pdfBytes);
-        const pageCount = pdf.getPageCount();
-        updateProgress('split', 30);
-        
-        const zip = new JSZip();
-        
-        if (splitType === 'all') {
-          for (let i = 0; i < pageCount; i++) {
-            updateProgress('split', 30 + ((i / pageCount) * 50));
-            const newPdf = await PDFDocument.create();
-            const [copiedPage] = await newPdf.copyPages(pdf, [i]);
-            newPdf.addPage(copiedPage);
-            const newPdfBytes = await newPdf.save();
-            zip.file(`page_${i + 1}.pdf`, newPdfBytes);
-          }
-        } else if (splitType === 'equal') {
-          const parts = parseInt(document.getElementById('equal-parts').value);
-          const pagesPerPart = Math.ceil(pageCount / parts);
-          for (let part = 0; part < parts; part++) {
-            updateProgress('split', 30 + ((part / parts) * 50));
-            const start = part * pagesPerPart;
-            const end = Math.min((part + 1) * pagesPerPart - 1, pageCount - 1);
-            if (start <= end) {
-              const newPdf = await PDFDocument.create();
-              const pageIndexes = Array.from({ length: end - start + 1 }, (_, idx) => start + idx);
-              for (const pageIndex of pageIndexes) {
-                const [copiedPage] = await newPdf.copyPages(pdf, [pageIndex]);
-                newPdf.addPage(copiedPage);
-              }
-              const newPdfBytes = await newPdf.save();
-              zip.file(`part_${part + 1}_pages_${start + 1}_to_${end + 1}.pdf`, newPdfBytes);
-            }
-          }
-        }
-        
-        updateProgress('split', 85);
-        const zipBlob = await zip.generateAsync({ 
-          type: 'blob',
-          compression: "DEFLATE",
-          compressionOptions: { level: 9 }
-        });
-        updateProgress('split', 95);
-        
-        saveAs(zipBlob, 'split_pdfs.zip');
-        updateProgress('split', 100);
-        
-        setTimeout(() => {
-          hideProgress('split');
-          enableButton('split-button');
-          enableButton('reset-split');
-        }, 1000);
-      } catch (error) {
-        console.error('Error splitting PDF:', error);
-        alert('Une erreur est survenue lors de la division du PDF: ' + error.message);
-        hideProgress('split');
-        enableButton('split-button');
-        enableButton('reset-split');
-      }
-    }
+            // ============================================================
+            // LOGIQUE DE FUSION (MERGE)
+            // ============================================================
+            
+            dom.mergeIn.onchange = (e) => {
+                const newFiles = Array.from(e.target.files);
+                mergeFiles = [...mergeFiles, ...newFiles];
+                renderMergeList();
+            };
 
-    function resetMerge() {
-      mergeFiles = [];
-      document.getElementById('merge-file-input').value = '';
-      updateMergeFileList();
-      hideProgress('merge');
-    }
+            function renderMergeList() {
+                if (mergeFiles.length === 0) {
+                    dom.mergeList.style.display = 'none';
+                    dom.mergeRun.disabled = true;
+                    dom.mergeReset.style.display = 'none';
+                    return;
+                }
 
-    function resetSplit() {
-      splitFile = null;
-      document.getElementById('split-file-input').value = '';
-      updateSplitFileInfo();
-      hideProgress('split');
-    }
+                dom.mergeList.style.display = 'block';
+                dom.mergeList.innerHTML = '';
+                
+                mergeFiles.forEach((file, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'file-item';
+                    item.innerHTML = `
+                        <div class="file-info-text">
+                            <span class="file-name">${file.name}</span>
+                            <span class="file-meta">Ordre: ${index + 1} | Taille: ${formatSize(file.size)}</span>
+                        </div>
+                        <div class="file-actions">
+                            <button class="action-btn" onclick="removeMergeFile(${index})"><i class="fas fa-times-circle"></i></button>
+                        </div>
+                    `;
+                    dom.mergeList.appendChild(item);
+                });
 
-    function showElement(elementId, condition) {
-      const element = document.getElementById(elementId);
-      if (!element) return;
-      if (condition) {
-        element.style.opacity = '0';
-        element.style.display = 'inline-block';
-        setTimeout(() => {
-          element.style.opacity = '1';
-          element.style.transition = 'opacity 0.3s ease';
-        }, 10);
-      } else {
-        element.style.display = 'none';
-      }
-    }
+                dom.mergeRun.disabled = (mergeFiles.length < 2);
+                dom.mergeReset.style.display = 'inline-flex';
+            }
 
-    function hideElement(elementId) {
-      const element = document.getElementById(elementId);
-      if (!element) return;
-      element.style.opacity = '0';
-      element.style.transition = 'opacity 0.3s ease';
-      setTimeout(() => {
-        element.style.display = 'none';
-      }, 300);
-    }
+            window.removeMergeFile = (index) => {
+                mergeFiles.splice(index, 1);
+                renderMergeList();
+            };
 
-    // Gestion de l'option "Diviser en parties égales"
-    document.getElementById('split-equal').addEventListener('change', function() {
-      document.getElementById('equal-options').style.display = this.checked ? 'block' : 'none';
-    });
-    document.getElementById('split-all').addEventListener('change', function() {
-      document.getElementById('equal-options').style.display = this.checked ? 'none' : 'block';
-    });
-  </script>
+            dom.mergeReset.onclick = () => {
+                mergeFiles = [];
+                dom.mergeIn.value = '';
+                renderMergeList();
+                dom.mergeSuccess.style.display = 'none';
+            };
+
+            dom.mergeRun.onclick = async () => {
+                try {
+                    dom.mergeRun.disabled = true;
+                    dom.mergeProgress.style.display = 'block';
+                    dom.mergeSuccess.style.display = 'none';
+                    updateBar(dom.mergeBar, dom.mergeText, 5);
+
+                    const finalPdf = await PDFDocument.create();
+                    
+                    for (let i = 0; i < mergeFiles.length; i++) {
+                        const progressBase = 10 + (i / mergeFiles.length) * 80;
+                        updateBar(dom.mergeBar, dom.mergeText, progressBase);
+
+                        const bytes = await mergeFiles[i].arrayBuffer();
+                        const pdf = await PDFDocument.load(bytes);
+                        const pages = await finalPdf.copyPages(pdf, pdf.getPageIndices());
+                        pages.forEach(p => finalPdf.addPage(p));
+                    }
+
+                    updateBar(dom.mergeBar, dom.mergeText, 95);
+                    const pdfBytes = await finalPdf.save();
+                    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+                    saveAs(blob, `Fusion_${new Date().getTime()}.pdf`);
+
+                    updateBar(dom.mergeBar, dom.mergeText, 100);
+                    dom.mergeSuccess.style.display = 'block';
+                    setTimeout(() => { dom.mergeProgress.style.display = 'none'; dom.mergeRun.disabled = false; }, 2000);
+
+                } catch (err) {
+                    console.error(err);
+                    alert("Erreur lors de la fusion : " + err.message);
+                    dom.mergeRun.disabled = false;
+                }
+            };
+
+            // ============================================================
+            // LOGIQUE DE DIVISION (SPLIT)
+            // ============================================================
+
+            dom.splitIn.onchange = async (e) => {
+                splitFile = e.target.files[0];
+                if (!splitFile) return;
+
+                dom.splitInfo.innerHTML = `
+                    <div class="file-item" style="border-left-color: var(--success)">
+                        <div class="file-info-text">
+                            <span class="file-name">${splitFile.name}</span>
+                            <span class="file-meta">Analyse en cours...</span>
+                        </div>
+                    </div>
+                `;
+                dom.splitInfo.style.display = 'block';
+                
+                try {
+                    const bytes = await splitFile.arrayBuffer();
+                    const pdf = await PDFDocument.load(bytes);
+                    const pages = pdf.getPageCount();
+                    
+                    dom.splitInfo.querySelector('.file-meta').textContent = `Document de ${pages} pages | Taille: ${formatSize(splitFile.size)}`;
+                    dom.splitConfig.style.display = 'block';
+                    dom.splitRun.disabled = false;
+                    dom.splitReset.style.display = 'inline-flex';
+                } catch (err) {
+                    alert("Le PDF semble corrompu ou protégé.");
+                }
+            };
+
+            // Gestion des radios pour afficher/masquer les options
+            dom.splitModes.forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    document.getElementById('parts-options').style.display = (e.target.value === 'parts') ? 'block' : 'none';
+                    document.getElementById('range-options').style.display = (e.target.value === 'range') ? 'block' : 'none';
+                });
+            });
+
+            dom.splitReset.onclick = () => {
+                splitFile = null;
+                dom.splitIn.value = '';
+                dom.splitInfo.style.display = 'none';
+                dom.splitConfig.style.display = 'none';
+                dom.splitRun.disabled = true;
+                dom.splitReset.style.display = 'none';
+                dom.splitSuccess.style.display = 'none';
+            };
+
+            dom.splitRun.onclick = async () => {
+                try {
+                    dom.splitRun.disabled = true;
+                    dom.splitProgress.style.display = 'block';
+                    updateBar(dom.splitBar, dom.splitText, 5);
+
+                    const mode = document.querySelector('input[name="split-mode"]:checked').value;
+                    const bytes = await splitFile.arrayBuffer();
+                    const pdf = await PDFDocument.load(bytes);
+                    const totalPages = pdf.getPageCount();
+                    const zip = new JSZip();
+
+                    if (mode === 'individual') {
+                        for (let i = 0; i < totalPages; i++) {
+                            const newDoc = await PDFDocument.create();
+                            const [page] = await newDoc.copyPages(pdf, [i]);
+                            newDoc.addPage(page);
+                            const saveBytes = await newDoc.save();
+                            zip.file(`page_${i + 1}.pdf`, saveBytes);
+                            updateBar(dom.splitBar, dom.splitText, 10 + (i / totalPages) * 70);
+                        }
+                    } 
+                    else if (mode === 'parts') {
+                        const qty = parseInt(document.getElementById('split-parts-qty').value);
+                        const perPart = Math.ceil(totalPages / qty);
+                        for (let i = 0; i < qty; i++) {
+                            const start = i * perPart;
+                            const end = Math.min(start + perPart, totalPages);
+                            if (start >= totalPages) break;
+                            
+                            const newDoc = await PDFDocument.create();
+                            const indices = Array.from({length: end - start}, (_, k) => start + k);
+                            const pages = await newDoc.copyPages(pdf, indices);
+                            pages.forEach(p => newDoc.addPage(p));
+                            const saveBytes = await newDoc.save();
+                            zip.file(`partie_${i + 1}_pages_${start + 1}-${end}.pdf`, saveBytes);
+                            updateBar(dom.splitBar, dom.splitText, 10 + (i / qty) * 70);
+                        }
+                    }
+                    else if (mode === 'range') {
+                        const range = parseInt(document.getElementById('split-range-qty').value);
+                        let counter = 1;
+                        for (let i = 0; i < totalPages; i += range) {
+                            const end = Math.min(i + range, totalPages);
+                            const newDoc = await PDFDocument.create();
+                            const indices = Array.from({length: end - i}, (_, k) => i + k);
+                            const pages = await newDoc.copyPages(pdf, indices);
+                            pages.forEach(p => newDoc.addPage(p));
+                            const saveBytes = await newDoc.save();
+                            zip.file(`bloc_${counter}_pages_${i + 1}-${end}.pdf`, saveBytes);
+                            updateBar(dom.splitBar, dom.splitText, 10 + (i / totalPages) * 70);
+                            counter++;
+                        }
+                    }
+
+                    updateBar(dom.splitBar, dom.splitText, 90);
+                    const content = await zip.generateAsync({ type: "blob" });
+                    saveAs(content, `Split_${splitFile.name.replace('.pdf', '')}.zip`);
+                    
+                    updateBar(dom.splitBar, dom.splitText, 100);
+                    dom.splitSuccess.style.display = 'block';
+                    setTimeout(() => { dom.splitProgress.style.display = 'none'; dom.splitRun.disabled = false; }, 2000);
+
+                } catch (err) {
+                    alert("Erreur lors de la division : " + err.message);
+                    dom.splitRun.disabled = false;
+                }
+            };
+        });
+    </script>
 </body>
 </html>
