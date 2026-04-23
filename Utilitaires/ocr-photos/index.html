@@ -1,322 +1,181 @@
 <!DOCTYPE html>
-
 <html lang="fr">
-
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>OCR Photos | Dr KARA-ZAITRI</title>
-
-    
+   
 
     <!-- Bibliothèque Tesseract.js pour OCR -->
-
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@v4.0.2/dist/tesseract.min.js"></script>
 
-    
-
     <style>
-
         /* ==========================================
-
            VARIABLES DE DESIGN (Style institutionnel)
-
            ========================================== */
-
         :root {
-
             --primary: #1a3a5c;
-
             --primary-light: #345a7a;
-
             --primary-dark: #0d2538;
-
             --text: #37474f;
-
             --text-light: #607d8b;
-
             --border: #cfd8dc;
-
             --bg-page: #f4f7f9;
-
             --bg-card: #ffffff;
-
             --bg-input: #f8f9fa;
-
             --success: #2e7d32;
-
             --warning: #ed6c02;
-
             --error: #c62828;
-
             --premium: #C9A961;
-
         }
 
-
-
         /* ==========================================
-
            STRUCTURE GLOBALE
-
            ========================================== */
-
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        
-
         body {
-
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-
             background: var(--bg-page);
-
             color: var(--text);
-
             line-height: 1.5;
-
             min-height: 100vh;
-
         }
 
-
-
         /* BARRE DE NAVIGATION (Fixe en haut) */
-
         .nav-bar {
-
             position: sticky;
-
             top: 0;
-
             z-index: 1000;
-
             background: #fff;
-
             border-bottom: 1px solid var(--border);
-
             padding: 12px 20px;
-
             display: flex;
-
             justify-content: flex-start;
-
             align-items: center;
-
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-
         }
 
         .back-link {
-
             text-decoration: none;
-
             color: var(--primary);
-
             font-weight: 600;
-
             font-size: 14px;
-
             display: flex;
-
             align-items: center;
-
             gap: 8px;
-
         }
 
         .back-link:hover { text-decoration: underline; }
 
 
-
         /* CONTENEUR PRINCIPAL */
-
         .ocr-wrapper {
-
             max-width: 800px;
-
             margin: 20px auto;
-
             padding: 0 15px;
-
         }
-
 
 
         /* EN-TÊTE AVEC BADGE PREMIUM */
-
         .ocr-header {
-
             text-align: center;
-
             margin-bottom: 24px;
-
             padding: 20px;
-
             background: var(--primary);
-
             border-radius: 12px;
-
             color: #fff;
-
             position: relative;
-
         }
 
         .ocr-header h1 {
-
             font-size: 20px;
-
             font-weight: 700;
-
             margin: 0 0 8px 0;
-
         }
 
         .ocr-header p {
-
             font-size: 14px;
-
             opacity: 0.9;
-
             margin: 0;
-
         }
 
         .premium-badge {
-
             position: absolute;
-
             top: 12px;
-
             right: 16px;
-
             color: var(--premium);
-
             font-size: 24px;
-
             text-shadow: 0 1px 3px rgba(0,0,0,0.3);
-
         }
 
-
-
         /* SECTION CONTRÔLES */
-
         .controls-section {
-
             background: var(--bg-card);
-
             border: 1px solid var(--border);
-
             border-radius: 12px;
-
             padding: 20px;
-
             margin-bottom: 20px;
-
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-
         }
 
         .controls-section h2 {
-
             font-size: 16px;
-
             font-weight: 700;
-
             color: var(--primary);
-
             margin: 0 0 16px 0;
-
             padding-bottom: 10px;
-
             border-bottom: 2px solid var(--border);
-
         }
-
 
 
         /* UPLOAD FICHIER */
 
         .file-upload-container {
-
             display: flex;
-
             flex-wrap: wrap;
-
             align-items: center;
-
             gap: 10px;
-
             margin-bottom: 15px;
-
         }
 
         #imageInput { display: none; }
-
-        
+      
 
         .btn {
-
             display: inline-flex;
-
             align-items: center;
-
             justify-content: center;
-
             gap: 6px;
-
             padding: 10px 16px;
-
             border-radius: 8px;
-
             cursor: pointer;
-
             transition: all 0.2s;
-
             font-weight: 600;
-
             font-size: 13px;
-
             border: none;
-
             white-space: nowrap;
-
         }
 
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-        
 
         .btn-primary { background: var(--primary); color: #fff; }
 
         .btn-primary:hover:not(:disabled) { background: var(--primary-light); }
 
-        
-
         .btn-secondary { background: var(--text-light); color: #fff; }
 
         .btn-secondary:hover:not(:disabled) { background: #546e7a; }
-
-        
 
         .btn-success { background: var(--success); color: #fff; }
 
         .btn-success:hover:not(:disabled) { background: #388e3c; }
 
-        
-
         .btn-danger { background: var(--error); color: #fff; }
 
         .btn-danger:hover:not(:disabled) { background: #b71c1c; }
 
-        
-
-        .btn-info { background: var(--primary); color: #fff; }
+         .btn-info { background: var(--primary); color: #fff; }
 
         .btn-info:hover:not(:disabled) { background: var(--primary-light); }
 
@@ -325,543 +184,298 @@
         /* APERÇU IMAGE */
 
         .image-preview-section {
-
             display: flex;
-
             flex-direction: column;
-
             align-items: center;
-
             gap: 10px;
-
             margin: 15px 0;
-
         }
 
         #imageThumbnail {
-
             width: 120px;
-
             height: 120px;
-
             object-fit: cover;
-
             border-radius: 8px;
-
             border: 3px solid var(--primary);
-
             display: none;
-
         }
 
-
-
         /* ROTATION */
-
         .rotation-controls {
-
             display: none;
-
             gap: 12px;
-
             align-items: center;
-
         }
 
         .rotate-btn {
-
             background: none;
-
             border: none;
-
             font-size: 24px;
-
             color: var(--success);
-
             cursor: pointer;
-
             padding: 6px;
-
             border-radius: 50%;
-
             transition: all 0.2s;
-
         }
-
         .rotate-btn:hover {
-
             background: var(--success);
-
             color: #fff;
-
             transform: rotate(15deg);
-
         }
-
-
 
         /* ZONE DE TEXTE */
-
         .text-section {
-
             margin-top: 20px;
-
         }
 
         .text-section h2 {
-
             font-size: 16px;
-
             font-weight: 700;
-
             color: var(--primary);
-
             margin: 0 0 12px 0;
-
             padding-bottom: 10px;
-
             border-bottom: 2px solid var(--border);
-
         }
 
         #extractedText {
-
             width: 100%;
-
             min-height: 200px;
-
             padding: 12px;
-
             border: 1px solid var(--border);
-
             border-radius: 8px;
-
             font-family: monospace;
-
             font-size: 14px;
-
             resize: vertical;
-
             background: var(--bg-input);
-
             transition: border-color 0.2s;
-
         }
 
         #extractedText:focus {
-
             border-color: var(--primary);
-
             outline: none;
-
             background: #fff;
-
         }
 
-
-
         /* BARRE DE PROGRESSION */
-
         .progress-bar {
-
             width: 100%;
-
             height: 6px;
-
             background: var(--bg-input);
-
             border-radius: 3px;
-
             overflow: hidden;
-
             margin-top: 8px;
-
         }
 
         .progress-fill {
-
             height: 100%;
-
             background: linear-gradient(90deg, var(--primary), var(--primary-light));
-
             width: 0%;
-
             transition: width 0.3s ease;
-
         }
 
-
-
         /* MESSAGE DE STATUT */
-
         .status-message {
-
             padding: 12px 16px;
-
             border-radius: 8px;
-
             margin: 15px 0;
-
             font-size: 13px;
-
             display: none;
-
             align-items: center;
-
             gap: 10px;
-
         }
 
         .status-message.loading {
-
             background: #e3f2fd;
-
             color: var(--primary);
-
             border-left: 4px solid var(--primary);
-
             display: flex;
-
         }
 
         .status-message.success {
-
             background: #e8f5e9;
-
             color: var(--success);
-
             border-left: 4px solid var(--success);
-
             display: flex;
-
         }
 
         .status-message.error {
-
             background: #ffebee;
-
             color: var(--error);
-
             border-left: 4px solid var(--error);
-
             display: flex;
-
         }
 
         .spinner {
-
             width: 18px;
-
             height: 18px;
-
             border: 2px solid var(--border);
-
             border-top-color: var(--primary);
-
             border-radius: 50%;
-
             animation: spin 1s linear infinite;
-
         }
 
         @keyframes spin { to { transform: rotate(360deg); } }
 
-
-
         /* IMAGE SOURCE */
-
         .source-image-section {
-
             margin-top: 20px;
-
             text-align: center;
-
         }
 
         #sourceImage {
-
             max-width: 100%;
-
             height: auto;
-
             border-radius: 8px;
-
             display: none;
-
             margin-top: 15px;
-
             border: 1px solid var(--border);
-
         }
 
 
-
         /* NOTIFICATION TOAST */
-
         .notification {
-
             position: fixed;
-
             top: 70px;
-
             right: 20px;
-
             padding: 12px 20px;
-
             border-radius: 8px;
-
             font-size: 13px;
-
             font-weight: 600;
-
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-
             z-index: 9999;
-
             opacity: 0;
-
             transform: translateY(15px);
-
             transition: opacity 0.3s, transform 0.3s;
-
             pointer-events: none;
 
         }
 
         .notification.show { opacity: 1; transform: translateY(0); }
-
         .notification.success { background: var(--success); color: #fff; }
-
         .notification.error { background: var(--error); color: #fff; }
-
         .notification.warning { background: var(--warning); color: #000; }
 
-
-
         /* FOOTER */
-
         .tool-footer {
-
             margin-top: 30px;
-
             padding: 20px;
-
             text-align: center;
-
             font-size: 12px;
-
             color: var(--text-light);
-
         }
 
         .disclaimer {
-
-            background: #fff3cd;
-
+           background: #fff3cd;
             color: #856404;
-
             padding: 12px;
-
             border-radius: 6px;
-
             border: 1px solid #ffeeba;
-
             margin-top: 15px;
-
             font-size: 11px;
-
             line-height: 1.4;
-
         }
 
-
-
         /* RESPONSIVE */
-
         @media (max-width: 768px) {
-
             .file-upload-container { flex-direction: column; align-items: stretch; }
-
             .btn { width: 100%; justify-content: center; }
-
             #pasteBtn { display: none !important; }
-
             .ocr-header h1 { font-size: 18px; }
-
             .controls-section { padding: 16px; }
-
         }
 
     </style>
-
 </head>
-
 <body>
 
-
-
   <!-- BARRE DE NAVIGATION -->
-
   <nav class="nav-bar">
-
     <a href="https://karazaitri12-cpu.github.io/plateforme-utilitaires/" class="back-link">← Retour aux Utilitaires</a>
-
   </nav>
-
 
 
   <div class="ocr-wrapper">
 
-    
-
     <!-- EN-TÊTE AVEC BADGE PREMIUM -->
-
     <header class="ocr-header">
-
       <span class="premium-badge">★</span>
-
       <h1>🔍 Extraction de texte OCR</h1>
-
       <p>Reconnaissance de texte depuis photos et captures d'écran</p>
-
     </header>
 
-
-
     <!-- SECTION CONTRÔLES -->
-
     <div class="controls-section">
-
       <h2>📤 Charger une image</h2>
-
       <div class="file-upload-container">
-
         <label for="imageInput" class="btn btn-primary" id="fileLabel">
-
           📁 Choisir fichier
-
         </label>
 
         <input type="file" id="imageInput" accept="image/*">
-
         <button id="pasteBtn" class="btn btn-secondary">
-
           📋 Coller capture
-
         </button>
-
-        
-
+       
         <div class="image-preview-section">
-
           <img id="imageThumbnail" alt="Aperçu">
-
           <div id="rotationControls" class="rotation-controls">
-
             <button id="rotateLeft" class="rotate-btn" title="Rotation gauche">↺</button>
-
             <span style="font-size:12px; color:var(--text-light);">Rotation</span>
-
             <button id="rotateRight" class="rotate-btn" title="Rotation droite">↻</button>
-
           </div>
-
         </div>
 
-        
 
         <button id="resetBtn" class="btn btn-danger">
-
           🗑️ Réinitialiser
-
         </button>
 
       </div>
 
     </div>
-
-
 
     <!-- MESSAGE DE STATUT -->
-
     <div id="statusMessage" class="status-message">
-
       <div class="spinner"></div>
-
       <span id="statusText">Traitement en cours...</span>
-
       <div class="progress-bar">
-
         <div id="progressFill" class="progress-fill"></div>
-
       </div>
-
     </div>
-
-
 
     <!-- SECTION TEXTE -->
-
     <div class="text-section">
-
       <h2>📝 Texte extrait</h2>
-
       <textarea id="extractedText" placeholder="Le texte extrait apparaîtra ici..."></textarea>
-
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
-
         <button id="copyBtn" class="btn btn-success" style="display:none;">
-
           📋 Copier le texte
-
         </button>
-
         <button id="downloadBtn" class="btn btn-info" style="display:none;">
-
           💾 Télécharger .txt
-
         </button>
-
       </div>
-
     </div>
 
-
-
     <!-- IMAGE SOURCE -->
-
     <div class="source-image-section">
-
       <button id="toggleSourceBtn" class="btn btn-info" style="display:none;">
-
         👁️ Afficher image source
 
       </button>
-
       <img id="sourceImage" alt="Image source">
-
     </div>
-
-
 
     <!-- FOOTER -->
 
     <footer class="tool-footer">
-
       <span>Dr KARA-ZAITRI M.A © 2026</span>
-
       <div class="disclaimer">
-
         ⚠️ <strong>Usage bureautique</strong> : Reconnaissance OCR via Tesseract.js. Traitement local dans votre navigateur. Résultats à vérifier manuellement.
-
       </div>
-
     </footer>
 
-
-
   </div>
-
 
 
   <!-- NOTIFICATION TOAST -->
@@ -869,665 +483,355 @@
   <div id="notification" class="notification"></div>
 
 
-
   <!-- LOGIQUE JAVASCRIPT (Préservée et adaptée) -->
 
   <script>
-
     class OCRApp {
-
         constructor() {
-
             this.elements = this.initElements();
-
             this.state = {
-
                 currentImage: null,
-
                 rotation: 0,
-
                 isProcessing: false,
-
                 objectUrls: new Set()
-
             };
-
             this.initEventListeners();
-
         }
 
-
-
-        initElements() {
+       initElements() {
 
             const ids = [
-
                 'imageInput', 'imageThumbnail', 'extractedText', 'statusMessage', 
-
                 'statusText', 'progressFill', 'resetBtn', 'copyBtn', 'downloadBtn',
-
                 'pasteBtn', 'rotateLeft', 'rotateRight', 'rotationControls',
-
                 'toggleSourceBtn', 'sourceImage', 'notification', 'fileLabel'
 
             ];
 
             const elements = {};
-
             ids.forEach(id => {
-
                 elements[id] = document.getElementById(id);
-
             });
-
             return elements;
-
         }
-
-
 
         initEventListeners() {
-
             this.elements.imageInput?.addEventListener('change', (e) => this.handleFileSelect(e));
-
             this.elements.pasteBtn?.addEventListener('click', () => this.handlePaste());
-
             this.elements.resetBtn?.addEventListener('click', () => this.reset());
-
             this.elements.copyBtn?.addEventListener('click', () => this.copyText());
-
             this.elements.downloadBtn?.addEventListener('click', () => this.downloadText());
-
             this.elements.rotateLeft?.addEventListener('click', () => this.rotateImage(-90));
-
             this.elements.rotateRight?.addEventListener('click', () => this.rotateImage(90));
-
             this.elements.toggleSourceBtn?.addEventListener('click', () => this.toggleSourceImage());
-
             this.elements.extractedText?.addEventListener('input', () => this.updateButtons());
-
             window.addEventListener('beforeunload', () => this.cleanup());
-
         }
 
-
-
         async handleFileSelect(event) {
-
             const file = event.target.files?.[0];
-
             if (!file) return;
-
             if (!file.type.startsWith('image/')) {
-
                 this.showNotification('Veuillez sélectionner un fichier image valide', 'error');
-
                 return;
-
             }
 
             this.state.rotation = 0;
-
             await this.processImage(file);
-
         }
 
-
-
         async handlePaste() {
-
             if (!navigator.clipboard?.read) {
-
                 this.showNotification('Fonction de collage non supportée dans ce navigateur', 'error');
-
                 return;
-
             }
 
             this.showStatus('Lecture du presse-papiers...', 'loading');
 
             try {
-
                 const clipboardItems = await navigator.clipboard.read();
-
                 let imageBlob = null;
-
                 for (const item of clipboardItems) {
-
                     const imageType = item.types.find(type => type.startsWith('image/'));
-
                     if (imageType) {
-
                         imageBlob = await item.getType(imageType);
-
                         break;
-
                     }
-
                 }
 
                 if (!imageBlob) {
-
                     this.showNotification('Aucune image trouvée dans le presse-papiers', 'error');
-
                     this.hideStatus();
-
                     return;
-
                 }
 
                 const file = new File([imageBlob], `clipboard-${Date.now()}.png`, { type: imageBlob.type });
-
                 this.state.rotation = 0;
-
                 await this.processImage(file);
 
             } catch (error) {
-
                 console.error('Erreur presse-papiers:', error);
-
                 this.showNotification('Erreur lors de la lecture du presse-papiers', 'error');
-
                 this.hideStatus();
-
             }
-
         }
 
-
-
         async processImage(imageFile) {
-
             if (this.state.isProcessing) return;
-
             this.state.isProcessing = true;
-
             this.state.currentImage = imageFile;
-
             this.cleanup();
-
-            
-
+           
             const imageUrl = URL.createObjectURL(imageFile);
-
             this.state.objectUrls.add(imageUrl);
-
-            
-
             this.updateImagePreview(imageUrl);
-
             this.showStatus('Initialisation de l\'OCR...', 'loading', 0);
-
             this.elements.extractedText.value = '';
-
             this.hideButtons();
 
-
-
             try {
-
                 const result = await Tesseract.recognize(imageFile, 'fra', {
-
                     logger: (m) => this.handleOCRProgress(m)
-
                 });
 
                 const extractedText = result.data.text.trim();
-
                 this.elements.extractedText.value = extractedText;
 
-                
-
                 if (extractedText) {
-
                     this.showStatus('✅ Extraction terminée avec succès!', 'success');
-
                     this.showButtons();
-
                     this.showNotification('Texte extrait avec succès!', 'success');
 
                 } else {
-
                     this.showStatus('⚠️ Aucun texte détecté dans l\'image', 'error');
-
                     this.showNotification('Aucun texte détecté', 'warning');
-
                 }
 
             } catch (error) {
-
                 console.error('Erreur OCR:', error);
-
                 this.elements.extractedText.value = 'Erreur lors de l\'extraction du texte.';
-
                 this.showStatus('❌ Erreur lors de l\'extraction', 'error');
-
                 this.showNotification('Erreur OCR', 'error');
 
             } finally {
-
                 this.state.isProcessing = false;
-
                 setTimeout(() => this.hideStatus(), 3000);
-
             }
-
         }
-
-
 
         handleOCRProgress(m) {
-
             if (m.status === 'recognizing text') {
-
                 const progress = Math.round(m.progress * 100);
-
                 this.showStatus(`🔍 Reconnaissance: ${progress}%`, 'loading', progress);
-
             } else if (m.status) {
-
                 this.showStatus(`📊 ${m.status}...`, 'loading');
-
             }
-
         }
-
-
 
         updateImagePreview(imageUrl) {
-
             if (this.elements.imageThumbnail && this.elements.sourceImage) {
-
                 this.elements.imageThumbnail.src = imageUrl;
-
                 this.elements.imageThumbnail.style.display = 'block';
-
                 this.elements.sourceImage.src = imageUrl;
-
                 this.elements.rotationControls.style.display = 'flex';
-
                 this.elements.toggleSourceBtn.style.display = 'inline-flex';
-
             }
-
         }
-
-
 
         async rotateImage(degrees) {
-
             if (!this.state.currentImage || this.state.isProcessing) return;
-
             this.state.rotation += degrees;
-
             this.state.rotation = ((this.state.rotation % 360) + 360) % 360;
-
             this.showStatus('🔄 Rotation de l\'image...', 'loading');
-
-            
-
             try {
-
                 const rotatedBlob = await this.createRotatedImage(this.state.currentImage, this.state.rotation);
-
                 const rotatedFile = new File([rotatedBlob], `rotated-${Date.now()}.png`, { type: 'image/png' });
-
                 await this.processImage(rotatedFile);
-
             } catch (error) {
-
                 console.error('Erreur rotation:', error);
-
                 this.showNotification('Erreur lors de la rotation', 'error');
-
                 this.hideStatus();
-
             }
-
         }
 
-
-
         createRotatedImage(file, rotation) {
-
             return new Promise((resolve, reject) => {
-
                 const canvas = document.createElement('canvas');
-
                 const ctx = canvas.getContext('2d');
-
                 const img = new Image();
-
                 const objectUrl = URL.createObjectURL(file);
-
                 this.state.objectUrls.add(objectUrl);
 
-                
-
                 img.onload = () => {
-
                     const isRotated90 = rotation === 90 || rotation === 270;
-
                     canvas.width = isRotated90 ? img.height : img.width;
-
                     canvas.height = isRotated90 ? img.width : img.height;
-
-                    
-
+                   
                     ctx.translate(canvas.width / 2, canvas.height / 2);
-
                     ctx.rotate((rotation * Math.PI) / 180);
-
                     ctx.drawImage(img, -img.width / 2, -img.height / 2);
 
-                    
-
                     canvas.toBlob(resolve, 'image/png', 0.95);
-
                     URL.revokeObjectURL(objectUrl);
-
                     this.state.objectUrls.delete(objectUrl);
-
                 };
 
                 img.onerror = () => {
-
                     URL.revokeObjectURL(objectUrl);
-
                     this.state.objectUrls.delete(objectUrl);
-
                     reject(new Error('Erreur chargement image'));
-
                 };
-
                 img.src = objectUrl;
-
             });
-
         }
 
-
-
         async copyText() {
-
             const text = this.elements.extractedText?.value?.trim();
-
             if (!text) {
-
                 this.showNotification('Aucun texte à copier', 'warning');
-
                 return;
-
             }
 
             try {
-
                 if (navigator.clipboard?.writeText) {
-
                     await navigator.clipboard.writeText(text);
-
                 } else {
-
                     this.elements.extractedText.select();
-
                     document.execCommand('copy');
-
                 }
 
                 this.showNotification('Texte copié dans le presse-papiers!', 'success');
-
                 this.animateButton(this.elements.copyBtn, '📋 Copié!');
 
             } catch (error) {
-
                 console.error('Erreur copie:', error);
-
                 this.showNotification('Erreur lors de la copie', 'error');
-
             }
-
         }
 
-
-
         downloadText() {
-
             const text = this.elements.extractedText?.value?.trim();
-
             if (!text) {
-
                 this.showNotification('Aucun texte à télécharger', 'warning');
-
                 return;
-
             }
 
             const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-
             const url = URL.createObjectURL(blob);
-
             const a = document.createElement('a');
-
             a.href = url;
-
             a.download = `texte-extrait-${Date.now()}.txt`;
-
             document.body.appendChild(a);
-
             a.click();
-
             document.body.removeChild(a);
-
             URL.revokeObjectURL(url);
-
             this.showNotification('Fichier téléchargé!', 'success');
-
         }
-
-
 
         toggleSourceImage() {
-
             const isVisible = this.elements.sourceImage?.style.display !== 'none';
-
             if (this.elements.sourceImage && this.elements.toggleSourceBtn) {
-
                 this.elements.sourceImage.style.display = isVisible ? 'none' : 'block';
-
                 this.elements.toggleSourceBtn.textContent = isVisible ? 
-
                     '👁️ Afficher image source' : '🙈 Masquer image source';
-
             }
-
         }
 
-
-
         reset() {
-
             this.state.currentImage = null;
-
             this.state.rotation = 0;
-
             this.state.isProcessing = false;
 
-            
-
             if (this.elements.imageInput) this.elements.imageInput.value = '';
-
             if (this.elements.extractedText) this.elements.extractedText.value = '';
-
             if (this.elements.imageThumbnail) {
-
                 this.elements.imageThumbnail.style.display = 'none';
-
                 this.elements.imageThumbnail.src = '';
-
             }
 
             if (this.elements.sourceImage) {
-
                 this.elements.sourceImage.style.display = 'none';
-
                 this.elements.sourceImage.src = '';
-
             }
 
             this.hideButtons();
-
             this.hideStatus();
-
             this.elements.rotationControls.style.display = 'none';
-
             this.elements.toggleSourceBtn.style.display = 'none';
-
             this.cleanup();
-
             this.showNotification('Application réinitialisée', 'success');
-
         }
-
-
 
         showStatus(message, type, progress = 0) {
-
             if (!this.elements.statusMessage || !this.elements.statusText) return;
-
             this.elements.statusText.textContent = message;
-
             this.elements.statusMessage.className = `status-message ${type}`;
-
             this.elements.statusMessage.style.display = 'flex';
-
             if (this.elements.progressFill) {
-
                 this.elements.progressFill.style.width = `${progress}%`;
-
             }
-
         }
-
-
 
         hideStatus() {
-
             if (this.elements.statusMessage) {
-
                 this.elements.statusMessage.style.display = 'none';
-
             }
-
         }
-
-
 
         showButtons() {
-
             if (this.elements.copyBtn) this.elements.copyBtn.style.display = 'inline-flex';
-
             if (this.elements.downloadBtn) this.elements.downloadBtn.style.display = 'inline-flex';
-
         }
 
-
-
-        hideButtons() {
-
+       hideButtons() {
             if (this.elements.copyBtn) this.elements.copyBtn.style.display = 'none';
-
             if (this.elements.downloadBtn) this.elements.downloadBtn.style.display = 'none';
+       }
 
-        }
-
-
-
-        updateButtons() {
-
+       updateButtons() {
             const hasText = this.elements.extractedText?.value?.trim();
-
             if (hasText) { this.showButtons(); } else { this.hideButtons(); }
-
         }
-
-
 
         showNotification(message, type = 'success') {
-
             if (!this.elements.notification) return;
-
             this.elements.notification.textContent = message;
-
             this.elements.notification.className = `notification ${type} show`;
-
             setTimeout(() => {
-
                 this.elements.notification.classList.remove('show');
-
             }, 3000);
-
         }
-
-
 
         animateButton(button, text) {
-
             if (!button) return;
-
             const originalText = button.textContent;
-
             button.textContent = text;
-
             button.style.transform = 'scale(0.95)';
-
             setTimeout(() => {
-
                 button.textContent = originalText;
-
                 button.style.transform = 'scale(1)';
-
             }, 1500);
-
         }
-
-
 
         cleanup() {
-
             this.state.objectUrls.forEach(url => URL.revokeObjectURL(url));
-
             this.state.objectUrls.clear();
-
         }
-
     }
 
-
-
-    // Initialisation
-
+   // Initialisation
     document.addEventListener('DOMContentLoaded', () => {
-
         window.ocrApp = new OCRApp();
-
     });
 
-
-
     // Gestion des erreurs globales
-
     window.addEventListener('unhandledrejection', (event) => {
-
         console.error('Promesse non gérée:', event.reason);
-
         if (window.ocrApp) {
-
             window.ocrApp.showNotification('Une erreur inattendue s\'est produite', 'error');
-
             window.ocrApp.hideStatus();
 
-        }
-
+       }
     });
 
   </script>
