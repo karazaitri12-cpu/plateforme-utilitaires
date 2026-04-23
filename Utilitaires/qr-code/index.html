@@ -170,21 +170,31 @@ body {
   </div>
 
   <script>
-    async function checkAccess() {
-      const lock = document.getElementById('premium-lock');
-      if (location.hostname === "localhost" || location.hostname === "127.0.0.1") return;
-      try {
-       const resp = await fetch('https://www.dr-karazaitri-ma.net/wp-json/drk/v1/check-premium', { 
-    credentials: 'include' 
-});
-const data = await resp.json();
-if (data.access === true) {
-    lock.style.display = 'none'; 
-} else {
-    lock.style.display = 'flex';
-}
-    }
 
+async function checkAccess() {
+    const lock = document.getElementById('premium-lock');
+    // Bypass pour vos tests en local
+    if (location.hostname === "localhost" || location.hostname === "127.0.0.1") return;
+
+    try {
+        // On appelle la nouvelle route dédiée
+        const resp = await fetch('https://www.dr-karazaitri-ma.net/wp-json/drk/v1/check-premium', { 
+            credentials: 'include' 
+        });
+        const data = await resp.json();
+
+        if (data.access === true) {
+            lock.style.display = 'none'; // Accès autorisé : on cache le mur
+            console.log("Vérification Premium : OK");
+        } else {
+            lock.style.display = 'flex'; // Accès refusé : on affiche le mur
+        }
+    } catch (e) {
+        console.error("Erreur de connexion à l'API", e);
+        lock.style.display = 'flex';
+    }
+}
+     
     function generateQR() {
       const val = document.getElementById('textInput').value.trim();
       if (!val) return alert("Veuillez saisir un contenu.");
