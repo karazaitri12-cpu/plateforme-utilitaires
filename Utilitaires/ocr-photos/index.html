@@ -8,6 +8,9 @@
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@v4.0.2/dist/tesseract.min.js"></script>
     
     <style>
+        /* ==========================================
+            VARIABLES DE DESIGN (Style institutionnel)
+            ========================================== */
         :root {
             --primary: #1a3a5c;
             --primary-light: #345a7a;
@@ -24,6 +27,9 @@
             --premium: #C9A961;
         }
 
+        /* ==========================================
+            STRUCTURE GLOBALE
+            ========================================== */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
         body {
@@ -34,136 +40,210 @@
             min-height: 100vh;
         }
 
-        /* ==========================================
-           SYSTÈME DE VERROUILLAGE PREMIUM
-           ========================================== */
-        #premium-lock {
-            display: none; /* Masqué par défaut, activé par JS */
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(26, 58, 92, 0.98); 
-            z-index: 10000;
-            backdrop-filter: blur(10px);
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: #fff;
-            text-align: center;
-            padding: 20px;
-        }
-
-        .lock-card {
-            background: #fff;
-            padding: 40px;
-            border-radius: 16px;
-            max-width: 500px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            color: #333;
-        }
-
-        .lock-card h2 { color: var(--primary); margin: 15px 0; font-size: 1.6rem; }
-        .lock-card p { font-size: 1.1rem; margin-bottom: 30px; color: #5a6b7c; line-height: 1.6; }
-
-        .btn-upgrade {
-            background: linear-gradient(180deg, #fcf6ba 0%, #d4af37 100%);
-            color: #2a1f00 !important;
-            padding: 18px 35px;
-            text-decoration: none;
-            font-weight: 800;
-            border-radius: 8px;
-            display: inline-block;
-            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4);
-            transition: transform 0.2s;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .btn-upgrade:hover { transform: scale(1.05); }
-
-        /* ==========================================
-           INTERFACE DE L'OUTIL
-           ========================================== */
+        /* BARRE DE NAVIGATION */
         .nav-bar {
-            position: sticky; top: 0; z-index: 1000;
-            background: #fff; border-bottom: 1px solid var(--border);
-            padding: 12px 20px; display: flex; align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            padding: 12px 20px;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
         .back-link {
-            text-decoration: none; color: var(--primary);
-            font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 8px;
+            text-decoration: none;
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .back-link:hover { text-decoration: underline; }
+
+        /* CONTENEUR PRINCIPAL */
+        .ocr-wrapper {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 15px;
         }
 
-        .ocr-wrapper { max-width: 800px; margin: 20px auto; padding: 0 15px; }
-
+        /* EN-TÊTE */
         .ocr-header {
-            text-align: center; margin-bottom: 24px; padding: 25px;
-            background: var(--primary); border-radius: 12px; color: #fff; position: relative;
+            text-align: center;
+            margin-bottom: 24px;
+            padding: 20px;
+            background: var(--primary);
+            border-radius: 12px;
+            color: #fff;
+            position: relative;
         }
-        .ocr-header h1 { font-size: 22px; font-weight: 700; margin: 0 0 8px 0; }
-        .premium-badge { position: absolute; top: 12px; right: 20px; color: var(--premium); font-size: 28px; }
+        .ocr-header h1 {
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0 0 8px 0;
+        }
+        .ocr-header p {
+            font-size: 14px;
+            opacity: 0.9;
+            margin: 0;
+        }
 
+        /* SECTION CONTRÔLES */
         .controls-section {
-            background: var(--bg-card); border: 1px solid var(--border);
-            border-radius: 12px; padding: 20px; margin-bottom: 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .controls-section h2 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 0 0 16px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border);
         }
 
-        .file-upload-container { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 15px; }
+        /* UPLOAD FICHIER */
+        .file-upload-container {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
         #imageInput { display: none; }
         
         .btn {
-            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-            padding: 12px 20px; border-radius: 8px; cursor: pointer;
-            transition: all 0.2s; font-weight: 600; font-size: 14px; border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+            font-size: 13px;
+            border: none;
+            white-space: nowrap;
         }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        
         .btn-primary { background: var(--primary); color: #fff; }
+        .btn-primary:hover:not(:disabled) { background: var(--primary-light); }
         .btn-secondary { background: var(--text-light); color: #fff; }
         .btn-success { background: var(--success); color: #fff; }
         .btn-danger { background: var(--error); color: #fff; }
-        .btn-info { background: var(--primary-light); color: #fff; }
+        .btn-info { background: var(--primary); color: #fff; }
 
+        /* APERÇU IMAGE */
+        .image-preview-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin: 15px 0;
+        }
         #imageThumbnail {
-            width: 120px; height: 120px; object-fit: cover;
-            border-radius: 8px; border: 3px solid var(--primary); display: none; margin-top: 10px;
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 3px solid var(--primary);
+            display: none;
         }
 
+        /* ROTATION */
+        .rotation-controls {
+            display: none;
+            gap: 12px;
+            align-items: center;
+        }
+        .rotate-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--success);
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+        .rotate-btn:hover { background: var(--success); color: #fff; transform: rotate(15deg); }
+
+        /* ZONE DE TEXTE */
+        .text-section { margin-top: 20px; }
+        .text-section h2 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 0 0 12px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border);
+        }
         #extractedText {
-            width: 100%; min-height: 250px; padding: 15px;
-            border: 1px solid var(--border); border-radius: 8px;
-            font-family: 'Courier New', monospace; font-size: 14px;
-            background: var(--bg-input); resize: vertical;
+            width: 100%;
+            min-height: 200px;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 14px;
+            resize: vertical;
+            background: var(--bg-input);
         }
 
+        /* BARRE DE PROGRESSION */
+        .progress-bar { width: 100%; height: 6px; background: var(--bg-input); border-radius: 3px; overflow: hidden; margin-top: 8px; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--primary-light)); width: 0%; transition: width 0.3s ease; }
+
+        /* STATUS */
         .status-message {
-            padding: 15px; border-radius: 8px; margin: 15px 0;
-            font-size: 14px; display: none; align-items: center; gap: 15px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-size: 13px;
+            display: none;
+            align-items: center;
+            gap: 10px;
         }
-        .status-message.loading { background: #e3f2fd; color: var(--primary); border-left: 5px solid var(--primary); }
+        .status-message.loading { background: #e3f2fd; color: var(--primary); border-left: 4px solid var(--primary); display: flex; }
+        .status-message.success { background: #e8f5e9; color: var(--success); border-left: 4px solid var(--success); display: flex; }
         
-        .progress-bar { width: 100%; height: 8px; background: #ddd; border-radius: 4px; overflow: hidden; margin-top: 10px; }
-        .progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.3s; }
+        .spinner { width: 18px; height: 18px; border: 2px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        .tool-footer { margin-top: 40px; padding: 20px; text-align: center; font-size: 12px; color: var(--text-light); }
-        .disclaimer { background: #fff3cd; color: #856404; padding: 12px; border-radius: 6px; border: 1px solid #ffeeba; margin-top: 15px; }
+        /* IMAGE SOURCE */
+        .source-image-section { margin-top: 20px; text-align: center; }
+        #sourceImage { max-width: 100%; height: auto; border-radius: 8px; display: none; margin-top: 15px; border: 1px solid var(--border); }
 
-        @media (max-width: 600px) {
+        /* NOTIFICATION TOAST */
+        .notification {
+            position: fixed; top: 70px; right: 20px; padding: 12px 20px; border-radius: 8px;
+            font-size: 13px; font-weight: 600; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 9999; opacity: 0; transform: translateY(15px); transition: all 0.3s; pointer-events: none;
+        }
+        .notification.show { opacity: 1; transform: translateY(0); }
+        .notification.success { background: var(--success); color: #fff; }
+
+        /* FOOTER */
+        .tool-footer { margin-top: 30px; padding: 20px; text-align: center; font-size: 12px; color: var(--text-light); }
+        .disclaimer { background: #fff3cd; color: #856404; padding: 12px; border-radius: 6px; border: 1px solid #ffeeba; margin-top: 15px; font-size: 11px; }
+
+        @media (max-width: 768px) {
+            .file-upload-container { flex-direction: column; align-items: stretch; }
             .btn { width: 100%; }
         }
     </style>
 </head>
 <body>
-
-    <div id="premium-lock">
-        <div class="lock-card">
-            <span style="font-size: 60px;">⭐</span>
-            <h2>Espace Partenaire Premium</h2>
-            <p>Cet utilitaire professionnel est réservé aux membres abonnés de la plateforme du <strong>Dr KARA-ZAITRI</strong>.</p>
-            <a href="https://www.dr-karazaitri-ma.net/compte-dadherent/paiement-dadhesion/" class="btn-upgrade">Activer mon accès Premium</a>
-            <div style="margin-top: 25px;">
-                <a href="https://www.dr-karazaitri-ma.net/connexion-membres/" style="color: var(--primary); font-weight: 600; text-decoration: none;">Déjà membre ? Se connecter</a>
-            </div>
-        </div>
-    </div>
 
     <nav class="nav-bar">
         <a href="https://karazaitri12-cpu.github.io/plateforme-utilitaires/" class="back-link">← Retour aux Utilitaires</a>
@@ -171,60 +251,59 @@
 
     <div class="ocr-wrapper">
         <header class="ocr-header">
-            <span class="premium-badge">★</span>
             <h1>🔍 Extraction de texte OCR</h1>
-            <p>Reconnaissance de texte médicale et bureautique</p>
+            <p>Reconnaissance de texte depuis photos et captures d'écran</p>
         </header>
 
         <div class="controls-section">
+            <h2>📤 Charger une image</h2>
             <div class="file-upload-container">
-                <label for="imageInput" class="btn btn-primary">📁 Choisir une image</label>
+                <label for="imageInput" class="btn btn-primary">📁 Choisir fichier</label>
                 <input type="file" id="imageInput" accept="image/*">
                 <button id="pasteBtn" class="btn btn-secondary">📋 Coller capture</button>
-                <button id="resetBtn" class="btn btn-danger">🗑️ Reset</button>
+                
+                <div class="image-preview-section">
+                    <img id="imageThumbnail" alt="Aperçu">
+                    <div id="rotationControls" class="rotation-controls">
+                        <button id="rotateLeft" class="rotate-btn">↺</button>
+                        <span style="font-size:12px; color:var(--text-light);">Rotation</span>
+                        <button id="rotateRight" class="rotate-btn">↻</button>
+                    </div>
+                </div>
+                
+                <button id="resetBtn" class="btn btn-danger">🗑️ Réinitialiser</button>
             </div>
-            <img id="imageThumbnail">
         </div>
 
         <div id="statusMessage" class="status-message">
-            <span id="statusText">Initialisation...</span>
+            <div class="spinner"></div>
+            <span id="statusText">Traitement en cours...</span>
             <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
         </div>
 
         <div class="text-section">
-            <textarea id="extractedText" placeholder="Le texte apparaîtra ici après analyse..."></textarea>
-            <div style="display:flex; gap:10px; margin-top:15px;">
-                <button id="copyBtn" class="btn btn-success" style="display:none;">📋 Copier</button>
+            <h2>📝 Texte extrait</h2>
+            <textarea id="extractedText" placeholder="Le texte extrait apparaîtra ici..."></textarea>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top: 15px;">
+                <button id="copyBtn" class="btn btn-success" style="display:none;">📋 Copier le texte</button>
                 <button id="downloadBtn" class="btn btn-info" style="display:none;">💾 Télécharger .txt</button>
             </div>
         </div>
 
+        <div class="source-image-section">
+            <button id="toggleSourceBtn" class="btn btn-info" style="display:none;">👁️ Afficher image source</button>
+            <img id="sourceImage" alt="Image source">
+        </div>
+
         <footer class="tool-footer">
             <span>Dr KARA-ZAITRI M.A © 2026</span>
-            <div class="disclaimer">
-                ⚠️ <strong>Note légale</strong> : Traitement local 100% privé. Aucune image n'est envoyée vers un serveur externe.
-            </div>
+            <div class="disclaimer">⚠️ Usage bureautique : Traitement local 100% privé via Tesseract.js.</div>
         </footer>
     </div>
 
+    <div id="notification" class="notification"></div>
+
     <script>
-        // --- LOGIQUE DE SÉCURITÉ PREMIUM ---
-        async function checkAccess() {
-            const lock = document.getElementById('premium-lock');
-            
-            // Bypass pour vos tests locaux
-            if (location.hostname === "localhost" || location.hostname === "127.0.0.1") return;
-
-            try {
-                // On tente d'appeler l'API WordPress pour voir si l'utilisateur est connecté
-                const resp = await fetch('https://www.dr-karazaitri-ma.net/wp-json/wp/v2/users/me', { credentials: 'include' });
-                if (!resp.ok) lock.style.display = 'flex';
-            } catch (e) {
-                lock.style.display = 'flex';
-            }
-        }
-
-        // --- LOGIQUE OCR ---
         class OCRApp {
             constructor() {
                 this.elements = {
@@ -234,68 +313,133 @@
                     status: document.getElementById('statusMessage'),
                     statusText: document.getElementById('statusText'),
                     progress: document.getElementById('progressFill'),
+                    reset: document.getElementById('resetBtn'),
                     copy: document.getElementById('copyBtn'),
                     down: document.getElementById('downloadBtn'),
                     paste: document.getElementById('pasteBtn'),
-                    reset: document.getElementById('resetBtn')
+                    rotL: document.getElementById('rotateLeft'),
+                    rotR: document.getElementById('rotateRight'),
+                    rotC: document.getElementById('rotationControls'),
+                    toggleSrc: document.getElementById('toggleSourceBtn'),
+                    srcImg: document.getElementById('sourceImage'),
+                    notif: document.getElementById('notification')
                 };
+                this.state = { currentImage: null, rotation: 0, isProcessing: false };
                 this.init();
             }
 
             init() {
-                this.elements.input.onchange = (e) => this.process(e.target.files[0]);
+                this.elements.input.onchange = (e) => this.handleFile(e.target.files[0]);
                 this.elements.paste.onclick = () => this.handlePaste();
-                this.elements.reset.onclick = () => location.reload();
-                this.elements.copy.onclick = () => {
-                    navigator.clipboard.writeText(this.elements.text.value);
-                    alert('Texte copié !');
-                };
+                this.elements.reset.onclick = () => this.reset();
+                this.elements.copy.onclick = () => this.copyText();
+                this.elements.down.onclick = () => this.downloadText();
+                this.elements.rotL.onclick = () => this.rotate(-90);
+                this.elements.rotR.onclick = () => this.rotate(90);
+                this.elements.toggleSrc.onclick = () => this.toggleSource();
+            }
+
+            async handleFile(file) {
+                if (!file || !file.type.startsWith('image/')) return;
+                this.state.rotation = 0;
+                await this.process(file);
             }
 
             async handlePaste() {
                 try {
                     const items = await navigator.clipboard.read();
                     for (const item of items) {
-                        const imageType = item.types.find(t => t.startsWith('image/'));
-                        if (imageType) {
-                            const blob = await item.getType(imageType);
-                            this.process(blob);
+                        const type = item.types.find(t => t.startsWith('image/'));
+                        if (type) {
+                            const blob = await item.getType(type);
+                            this.handleFile(new File([blob], "pasted.png", {type}));
                         }
                     }
-                } catch (e) { alert("Le collage n'est pas supporté ou autorisé."); }
+                } catch (e) { this.showNotif("Collage non supporté", "error"); }
             }
 
             async process(file) {
-                if (!file) return;
-                this.elements.thumb.src = URL.createObjectURL(file);
+                if (this.state.isProcessing) return;
+                this.state.isProcessing = true;
+                this.state.currentImage = file;
+                const url = URL.createObjectURL(file);
+                
+                this.elements.thumb.src = url;
                 this.elements.thumb.style.display = 'block';
-                this.elements.status.style.display = 'block';
-                this.elements.text.value = "Analyse en cours...";
+                this.elements.srcImg.src = url;
+                this.elements.rotC.style.display = 'flex';
+                this.elements.toggleSrc.style.display = 'inline-flex';
+                this.elements.status.style.display = 'flex';
+                this.elements.text.value = '';
 
                 try {
-                    const { data: { text } } = await Tesseract.recognize(file, 'fra', {
+                    const result = await Tesseract.recognize(file, 'fra', {
                         logger: m => {
                             if (m.status === 'recognizing text') {
                                 const p = Math.round(m.progress * 100);
-                                this.elements.statusText.innerText = `Analyse : ${p}%`;
+                                this.elements.statusText.innerText = `Analyse: ${p}%`;
                                 this.elements.progress.style.width = `${p}%`;
                             }
                         }
                     });
-                    this.elements.text.value = text.trim();
+                    this.elements.text.value = result.data.text.trim();
                     this.elements.copy.style.display = 'inline-flex';
                     this.elements.down.style.display = 'inline-flex';
-                    this.elements.statusText.innerText = "Analyse terminée !";
+                    this.showNotif("Succès !");
                 } catch (e) {
                     this.elements.text.value = "Erreur lors de l'analyse.";
+                } finally {
+                    this.state.isProcessing = false;
+                    setTimeout(() => this.elements.status.style.display = 'none', 2000);
                 }
             }
-        }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            checkAccess();
-            new OCRApp();
-        });
+            async rotate(deg) {
+                if (!this.state.currentImage || this.state.isProcessing) return;
+                this.state.rotation = (this.state.rotation + deg) % 360;
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const img = new Image();
+                img.src = URL.createObjectURL(this.state.currentImage);
+                img.onload = () => {
+                    const is90 = Math.abs(this.state.rotation) % 180 !== 0;
+                    canvas.width = is90 ? img.height : img.width;
+                    canvas.height = is90 ? img.width : img.height;
+                    ctx.translate(canvas.width/2, canvas.height/2);
+                    ctx.rotate(this.state.rotation * Math.PI / 180);
+                    ctx.drawImage(img, -img.width/2, -img.height/2);
+                    canvas.toBlob(blob => this.process(new File([blob], "rotated.png", {type:"image/png"})));
+                };
+            }
+
+            copyText() {
+                navigator.clipboard.writeText(this.elements.text.value);
+                this.showNotif("Copié !");
+            }
+
+            downloadText() {
+                const blob = new Blob([this.elements.text.value], {type:'text/plain'});
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = `ocr-${Date.now()}.txt`;
+                a.click();
+            }
+
+            toggleSource() {
+                const vis = this.elements.srcImg.style.display === 'block';
+                this.elements.srcImg.style.display = vis ? 'none' : 'block';
+                this.elements.toggleSrc.innerText = vis ? '👁️ Afficher image' : '🙈 Masquer image';
+            }
+
+            reset() { location.reload(); }
+
+            showNotif(msg, type='success') {
+                this.elements.notif.innerText = msg;
+                this.elements.notif.className = `notification ${type} show`;
+                setTimeout(() => this.elements.notif.classList.remove('show'), 3000);
+            }
+        }
+        new OCRApp();
     </script>
 </body>
 </html>
