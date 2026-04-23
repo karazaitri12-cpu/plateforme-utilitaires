@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PDF OCR | Dr KARA-ZAITRI</title>
     
-    <!-- Bibliothèques externes -->
+    <!-- Bibliothèques externes nécessaires -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.1.1/dist/tesseract.min.js"></script>
@@ -51,6 +51,7 @@
             padding: 12px 20px;
             display: flex;
             align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
         .back-link {
             text-decoration: none;
@@ -71,24 +72,25 @@
         .ocr-header {
             text-align: center;
             margin-bottom: 24px;
-            padding: 30px;
+            padding: 20px;
             background: var(--primary);
             border-radius: 12px;
             color: #fff;
             position: relative;
         }
         .ocr-header h1 {
-            font-size: 24px;
-            margin-bottom: 8px;
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0 0 8px 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
+            gap: 10px;
         }
         .premium-badge {
             position: absolute;
-            top: 15px;
-            right: 20px;
+            top: 12px;
+            right: 16px;
             color: var(--premium);
             font-size: 24px;
         }
@@ -96,11 +98,11 @@
         #dropzone {
             border: 3px dashed var(--border);
             border-radius: 12px;
-            padding: 50px 20px;
+            padding: 40px 20px;
             text-align: center;
             background: var(--bg-card);
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.2s;
             font-weight: 600;
             color: var(--primary);
             margin-bottom: 20px;
@@ -122,16 +124,19 @@
         #button-container {
             display: flex;
             justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
             gap: 10px;
             margin-bottom: 20px;
             padding: 12px;
             background: var(--bg-card);
             border-radius: 8px;
             border: 1px solid var(--border);
-            flex-wrap: wrap;
         }
+        .left-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+        
         .btn {
-            padding: 10px 16px;
+            padding: 8px 14px;
             border: none;
             border-radius: 6px;
             font-size: 13px;
@@ -139,91 +144,106 @@
             cursor: pointer;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            transition: opacity 0.2s;
+            gap: 6px;
+            white-space: nowrap;
         }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .btn-primary { background: var(--primary); color: #fff; }
         .btn-success { background: var(--success); color: #fff; }
+        .btn-warning { background: var(--warning); color: #000; }
         .btn-danger { background: var(--error); color: #fff; }
         .btn-secondary { background: var(--text-light); color: #fff; }
 
-        #progress-bar {
-            display: none;
-            height: 10px;
-            background: var(--border);
-            border-radius: 5px;
-            margin: 20px 0;
-            overflow: hidden;
+        #search-container {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: var(--bg-input);
+            border-radius: 8px;
+            flex-wrap: wrap;
         }
-        #progress {
-            height: 100%;
-            background: var(--primary);
-            width: 0%;
-            transition: width 0.3s;
+        #search-text {
+            flex: 1;
+            min-width: 200px;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
         }
 
         .tabs {
             display: flex;
-            gap: 5px;
-            margin-bottom: 10px;
+            gap: 4px;
             overflow-x: auto;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 15px;
         }
         .tab-button {
-            padding: 8px 15px;
-            background: #ddd;
+            padding: 8px 16px;
+            background: var(--bg-input);
             border: none;
+            border-radius: 6px 6px 0 0;
             cursor: pointer;
-            border-radius: 5px 5px 0 0;
         }
         .tab-button.active {
             background: var(--primary);
-            color: white;
+            color: #fff;
+            font-weight: 600;
         }
         .tab-content {
             display: none;
-            background: white;
+            background: #fff;
             border: 1px solid var(--border);
-            padding: 20px;
-            min-height: 200px;
+            padding: 16px;
+            min-height: 300px;
+            max-height: 500px;
+            overflow-y: auto;
             white-space: pre-wrap;
             font-family: monospace;
+            font-size: 14px;
         }
         .tab-content.active { display: block; }
+        .tab-content[contenteditable="true"]:focus { outline: 2px solid var(--primary); background: #fffde7; }
 
-        #error-message {
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            display: none;
-        }
-        .error { background: #fdecea; color: var(--error); border: 1px solid #f5c6cb; }
-        .success { background: #edf7ed; color: var(--success); border: 1px solid #c3e6cb; }
+        /* Surlignage Recherche */
+        .search-highlight { background: var(--highlight); color: #000; padding: 0 2px; border-radius: 2px; font-weight: 600; }
+        .search-highlight.first-highlight { animation: pulse 1s ease-in-out; }
+        @keyframes pulse { 0%, 100% { background: var(--highlight); } 50% { background: #ffc107; } }
 
-        #loading { display: none; text-align: center; margin: 20px; }
-        .spinner {
-            width: 40px; height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* Tableaux */
+        .table-container { overflow-x: auto; margin: 10px 0; }
+        .table-container table { border-collapse: collapse; width: 100%; font-size: 13px; }
+        .table-container th, .table-container td { border: 1px solid var(--border); padding: 6px 8px; text-align: left; }
+        .table-container th { background: var(--bg-input); font-weight: 600; }
 
-        .tool-footer {
-            margin-top: 40px;
-            text-align: center;
-            font-size: 12px;
-            color: var(--text-light);
-            padding-bottom: 30px;
-        }
-        .disclaimer {
-            background: #fff3cd;
-            padding: 15px;
-            border-radius: 6px;
-            margin-top: 10px;
-            color: #856404;
+        #progress-bar { display: none; height: 8px; background: var(--bg-input); border-radius: 4px; overflow: hidden; margin: 15px 0; }
+        #progress { height: 100%; background: linear-gradient(90deg, var(--primary), var(--primary-light)); width: 0%; transition: width 0.3s ease; }
+
+        #loading { display: none; text-align: center; padding: 20px; color: var(--text-light); }
+        .spinner { width: 30px; height: 30px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 10px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        #pdf-viewer { width: 100%; height: 500px; border: 1px solid var(--border); border-radius: 8px; display: none; margin-bottom: 20px; background: #fff; }
+
+        /* Modale Aperçu */
+        #preview-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background: #fff; border-radius: 12px; padding: 24px; max-width: 800px; max-height: 80vh; overflow-y: auto; position: relative; }
+        .close-modal { position: absolute; top: 12px; right: 16px; font-size: 24px; cursor: pointer; color: var(--text-light); }
+        #preview-content { white-space: pre-wrap; font-family: monospace; font-size: 14px; }
+
+        /* Historique */
+        #recent-files-panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 20px; display: none; }
+        #recent-files-list { list-style: none; margin-top: 10px; }
+        #recent-files-list li { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: var(--bg-input); border-radius: 6px; margin-bottom: 8px; font-size: 13px; }
+        .open-recent { background: none; border: none; color: var(--primary); cursor: pointer; font-size: 14px; }
+
+        .tool-footer { margin-top: 30px; padding: 20px; text-align: center; font-size: 12px; color: var(--text-light); }
+        .disclaimer { background: #fff3cd; color: #856404; padding: 12px; border-radius: 6px; border: 1px solid #ffeeba; margin-top: 15px; font-size: 11px; }
+
+        @media (max-width: 768px) {
+            #button-container { flex-direction: column; align-items: stretch; }
+            .btn { width: 100%; justify-content: center; }
         }
     </style>
 </head>
@@ -237,202 +257,368 @@
     <header class="ocr-header">
         <span class="premium-badge">★</span>
         <h1><i class="fa fa-file-pdf"></i> PDF OCR</h1>
-        <p>Conversion locale haute précision (Tesseract.js)</p>
+        <p>Conversion de PDF scannés en texte éditable</p>
     </header>
 
     <div id="dropzone">
-        <i class="fas fa-cloud-upload-alt" style="font-size: 2em; display: block; margin-bottom: 10px;"></i>
-        Glissez-déposez un PDF ici ou cliquez pour sélectionner
+        <i class="fas fa-cloud-upload-alt"></i> Glissez et déposez votre fichier PDF ici ou cliquez pour sélectionner
     </div>
 
-    <div class="file-info" id="file-info">
-        <strong>Fichier :</strong> <span id="file-path"></span> | <strong>Taille :</strong> <span id="file-size"></span>
+    <div class="file-info" id="file-info-box">
+        <p><strong>Nom :</strong> <span id="file-path"></span> | <strong>Taille :</strong> <span id="file-size"></span></p>
     </div>
 
     <div id="button-container">
-        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <div class="left-buttons">
             <button id="convert-btn" class="btn btn-primary"><i class="fas fa-sync-alt"></i> Convertir tout</button>
-            <button id="stop-btn" class="btn btn-danger" style="display:none;"><i class="fas fa-stop"></i> Arrêter</button>
+            <button id="view-pdf-btn" class="btn btn-secondary" style="display:none;"><i class="fas fa-eye"></i> Visualiser</button>
+            <button id="stop-btn" class="btn btn-danger" style="display:none;"><i class="fas fa-stop-circle"></i> Arrêter</button>
             <button id="copy-btn" class="btn btn-success" style="display:none;"><i class="fas fa-copy"></i> Copier</button>
-            <button id="export-btn" class="btn btn-success" style="display:none;"><i class="fas fa-file-download"></i> TXT</button>
+            <button id="export-btn" class="btn btn-success" style="display:none;"><i class="fas fa-file-export"></i> TXT</button>
+            <button id="export-docx-btn" class="btn btn-success" style="display:none;"><i class="fas fa-file-word"></i> DOCX</button>
+            <button id="show-history-btn" class="btn btn-secondary"><i class="fas fa-history"></i> Historique</button>
         </div>
-        <button id="reset-btn" class="btn btn-danger"><i class="fas fa-trash"></i> Reset</button>
+        <button id="reset-btn" class="btn btn-danger"><i class="fas fa-trash"></i> Réinitialiser</button>
     </div>
 
-    <div id="page-count" style="text-align: center; margin-bottom: 10px; font-weight: bold;"></div>
+    <div id="page-count" style="text-align: center; font-size: 13px; font-weight: 600; color: var(--primary); margin-bottom: 15px;"></div>
+
+    <div id="recent-files-panel">
+        <h3><i class="fas fa-history"></i> Fichiers récents</h3>
+        <ul id="recent-files-list"></ul>
+    </div>
+
+    <div id="search-container" style="display:none;">
+        <input type="text" id="search-text" placeholder="🔍 Rechercher dans le document...">
+        <button id="clear-search" style="background:none; border:none; cursor:pointer;"><i class="fas fa-times"></i></button>
+        <span id="search-count" style="font-size: 12px; color: var(--text-light); margin-left: auto;"></span>
+    </div>
+
+    <div id="editor-toolbar" style="display:none;">
+        <select id="format-style" style="padding: 6px; border: 1px solid var(--border); border-radius: 6px;">
+            <option value="plain">Texte brut</option>
+            <option value="markdown">Markdown</option>
+            <option value="html">HTML</option>
+        </select>
+        <button id="preview-btn" class="btn btn-secondary"><i class="fas fa-search"></i> Aperçu</button>
+    </div>
 
     <div id="error-message"></div>
 
     <div id="loading">
         <div class="spinner"></div>
-        <p id="loading-text" style="margin-top: 10px;">Initialisation...</p>
+        <p id="loading-status">Conversion en cours...</p>
     </div>
 
     <div id="progress-bar"><div id="progress"></div></div>
 
-    <div id="tabs" class="tabs"></div>
-    <div id="tab-contents"></div>
+    <div id="tabs" class="tabs" style="display: none;"></div>
+    <div id="tab-contents" style="display: none;"></div>
+
+    <iframe id="pdf-viewer" title="Visualiseur PDF"></iframe>
 
     <footer class="tool-footer">
-        <p>Dr KARA-ZAITRI M.A © 2026</p>
+        <span>Dr KARA-ZAITRI M.A © 2026</span>
         <div class="disclaimer">
-            <strong>Usage privé :</strong> Le traitement est effectué 100% localement dans votre navigateur.
+            ⚠️ <strong>Usage bureautique</strong> : Traitement OCR local via Tesseract.js. Aucun fichier n'est envoyé sur un serveur.
         </div>
     </footer>
 </div>
 
+<div id="preview-modal">
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <div id="preview-content"></div>
+    </div>
+</div>
+
 <script>
-    let pdfFile = null;
-    let stopConversion = false;
-    let totalPages = 0;
+    document.addEventListener('DOMContentLoaded', function() {
+        let pdfFile = null;
+        let fileURL = null;
+        let stopConversion = false;
+        let totalPages = 0;
+        let conversionErrors = [];
 
-    const elements = {
-        dropzone: document.getElementById('dropzone'),
-        convertBtn: document.getElementById('convert-btn'),
-        stopBtn: document.getElementById('stop-btn'),
-        resetBtn: document.getElementById('reset-btn'),
-        copyBtn: document.getElementById('copy-btn'),
-        exportBtn: document.getElementById('export-btn'),
-        fileInfo: document.getElementById('file-info'),
-        filePath: document.getElementById('file-path'),
-        fileSize: document.getElementById('file-size'),
-        loading: document.getElementById('loading'),
-        loadingText: document.getElementById('loading-text'),
-        progress: document.getElementById('progress'),
-        progressBar: document.getElementById('progress-bar'),
-        tabs: document.getElementById('tabs'),
-        tabContents: document.getElementById('tab-contents'),
-        errorMsg: document.getElementById('error-message'),
-        pageCount: document.getElementById('page-count')
-    };
+        const elements = {
+            dropzone: document.getElementById('dropzone'),
+            convertBtn: document.getElementById('convert-btn'),
+            viewPdfBtn: document.getElementById('view-pdf-btn'),
+            stopBtn: document.getElementById('stop-btn'),
+            copyBtn: document.getElementById('copy-btn'),
+            exportBtn: document.getElementById('export-btn'),
+            exportDocxBtn: document.getElementById('export-docx-btn'),
+            resetBtn: document.getElementById('reset-btn'),
+            tabs: document.getElementById('tabs'),
+            tabContents: document.getElementById('tab-contents'),
+            loading: document.getElementById('loading'),
+            loadingStatus: document.getElementById('loading-status'),
+            progress: document.getElementById('progress'),
+            progressBar: document.getElementById('progress-bar'),
+            errorMsg: document.getElementById('error-message'),
+            pdfViewer: document.getElementById('pdf-viewer'),
+            searchText: document.getElementById('search-text'),
+            searchCount: document.getElementById('search-count'),
+            clearSearch: document.getElementById('clear-search'),
+            previewModal: document.getElementById('preview-modal'),
+            previewContent: document.getElementById('preview-content'),
+            formatStyle: document.getElementById('format-style'),
+            previewBtn: document.getElementById('preview-btn'),
+            recentFilesPanel: document.getElementById('recent-files-panel'),
+            recentFilesList: document.getElementById('recent-files-list'),
+            showHistoryBtn: document.getElementById('show-history-btn')
+        };
 
-    // Gestion Fichiers
-    elements.dropzone.onclick = () => {
-        let input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'application/pdf';
-        input.onchange = e => handleFile(e.target.files[0]);
-        input.click();
-    };
-
-    elements.dropzone.ondragover = e => { e.preventDefault(); elements.dropzone.classList.add('dragover'); };
-    elements.dropzone.ondragleave = () => elements.dropzone.classList.remove('dragover');
-    elements.dropzone.ondrop = e => { e.preventDefault(); handleFile(e.dataTransfer.files[0]); };
-
-    async function handleFile(file) {
-        if (!file || file.type !== 'application/pdf') {
-            showMsg("Veuillez choisir un fichier PDF valide.", "error");
-            return;
-        }
-        pdfFile = file;
-        elements.fileInfo.style.display = 'block';
-        elements.filePath.textContent = file.name;
-        elements.fileSize.textContent = (file.size / 1024 / 1024).toFixed(2) + " MB";
-        
-        const loadingTask = pdfjsLib.getDocument(URL.createObjectURL(file));
-        const pdf = await loadingTask.promise;
-        totalPages = pdf.numPages;
-        elements.pageCount.textContent = totalPages + " page(s) détectée(s)";
-    }
-
-    // OCR
-    elements.convertBtn.onclick = async () => {
-        if (!pdfFile) return showMsg("Sélectionnez un PDF", "error");
-        
-        resetUI();
-        stopConversion = false;
-        elements.convertBtn.disabled = true;
-        elements.stopBtn.style.display = 'inline-flex';
-        elements.loading.style.display = 'block';
-        elements.progressBar.style.display = 'block';
-
-        const arrayBuffer = await pdfFile.arrayBuffer();
-        const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
-
-        for (let i = 1; i <= totalPages; i++) {
-            if (stopConversion) break;
-            elements.loadingText.textContent = `Traitement Page ${i} / ${totalPages}...`;
-            
-            const page = await pdf.getPage(i);
-            const text = await performOCR(page);
-            
-            addTabPage(i, text);
-            elements.progress.style.width = (i / totalPages * 100) + "%";
+        function showMessage(m, type='info') {
+            elements.errorMsg.textContent = m;
+            elements.errorMsg.className = type;
+            elements.errorMsg.style.display = m ? 'block' : 'none';
         }
 
-        elements.loading.style.display = 'none';
-        elements.convertBtn.disabled = false;
-        elements.stopBtn.style.display = 'none';
-        elements.copyBtn.style.display = 'inline-flex';
-        elements.exportBtn.style.display = 'inline-flex';
-        showMsg("Conversion terminée avec succès !", "success");
-    };
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
 
-    async function performOCR(page) {
-        const viewport = page.getViewport({ scale: 2.0 });
-        const canvas = document.createElement('canvas');
-        const context = canvas.getContext('2d');
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
-        await page.render({ canvasContext: context, viewport }).promise;
+        // --- GESTION FICHIERS ---
+        elements.dropzone.onclick = () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'application/pdf';
+            input.onchange = e => { if(e.target.files[0]) handleFileUpload(e.target.files[0]); };
+            input.click();
+        };
 
-        const { data: { text } } = await Tesseract.recognize(canvas, 'fra');
-        return text;
-    }
+        async function handleFileUpload(file) {
+            if (!file || file.type !== 'application/pdf') return showMessage("Fichier non valide", "error");
+            pdfFile = file;
+            if (fileURL) URL.revokeObjectURL(fileURL);
+            fileURL = URL.createObjectURL(file);
+            
+            document.getElementById('file-info-box').style.display = 'block';
+            document.getElementById('file-path').textContent = file.name;
+            document.getElementById('file-size').textContent = formatFileSize(file.size);
+            elements.viewPdfBtn.style.display = 'inline-flex';
 
-    function addTabPage(num, text) {
-        const btn = document.createElement('button');
-        btn.className = 'tab-button' + (num === 1 ? ' active' : '');
-        btn.textContent = "Page " + num;
-        btn.onclick = () => switchTab(num);
-        elements.tabs.appendChild(btn);
+            const pdf = await pdfjsLib.getDocument(fileURL).promise;
+            totalPages = pdf.numPages;
+            document.getElementById('page-count').textContent = `📄 ${totalPages} page(s)`;
+            
+            updateHistory(file);
+        }
 
-        const content = document.createElement('div');
-        content.id = 'tab-' + num;
-        content.className = 'tab-content' + (num === 1 ? ' active' : '');
-        content.textContent = text;
-        elements.tabContents.appendChild(content);
-    }
+        // --- OCR ---
+        elements.convertBtn.onclick = async () => {
+            if (!pdfFile) return;
+            stopConversion = false;
+            conversionErrors = [];
+            elements.convertBtn.disabled = true;
+            elements.stopBtn.style.display = 'inline-flex';
+            elements.loading.style.display = 'block';
+            elements.progressBar.style.display = 'block';
+            elements.tabs.style.display = 'flex';
+            elements.tabContents.style.display = 'block';
+            elements.tabs.innerHTML = '';
+            elements.tabContents.innerHTML = '';
 
-    function switchTab(num) {
-        document.querySelectorAll('.tab-button').forEach((b, i) => b.classList.toggle('active', i === num - 1));
-        document.querySelectorAll('.tab-content').forEach((c, i) => c.classList.toggle('active', i === num - 1));
-    }
+            const arrayBuffer = await pdfFile.arrayBuffer();
+            const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
 
-    elements.stopBtn.onclick = () => { stopConversion = true; };
+            for (let i = 1; i <= totalPages; i++) {
+                if (stopConversion) break;
+                elements.loadingStatus.innerHTML = `<div class="spinner"></div><p>Page ${i}/${totalPages}</p>`;
+                
+                try {
+                    const page = await pdf.getPage(i);
+                    const viewport = page.getViewport({ scale: 2.0 });
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+                    await page.render({ canvasContext: context, viewport }).promise;
 
-    elements.resetBtn.onclick = () => location.reload();
+                    const { data: { text } } = await Tesseract.recognize(canvas, 'fra');
+                    createTab(i, text);
+                    elements.progress.style.width = (i / totalPages * 100) + "%";
+                } catch (e) {
+                    conversionErrors.push(`Erreur Page ${i}`);
+                }
+            }
 
-    elements.copyBtn.onclick = () => {
-        let fullText = "";
-        document.querySelectorAll('.tab-content').forEach(c => fullText += c.textContent + "\n\n");
-        navigator.clipboard.writeText(fullText);
-        alert("Texte copié !");
-    };
+            elements.loading.style.display = 'none';
+            elements.convertBtn.disabled = false;
+            elements.stopBtn.style.display = 'none';
+            [elements.copyBtn, elements.exportBtn, elements.exportDocxBtn, document.getElementById('search-container'), document.getElementById('editor-toolbar')].forEach(el => el.style.display = 'flex');
+            showMessage(conversionErrors.length ? `Terminé avec ${conversionErrors.length} erreur(s)` : "Conversion réussie !", "success");
+        };
 
-    elements.exportBtn.onclick = () => {
-        let fullText = "";
-        document.querySelectorAll('.tab-content').forEach(c => fullText += c.textContent + "\n\n");
-        const blob = new Blob([fullText], {type: 'text/plain'});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = "ocr_resultat.txt";
-        a.click();
-    };
+        function createTab(num, text) {
+            const btn = document.createElement('button');
+            btn.className = 'tab-button' + (num === 1 ? ' active' : '');
+            btn.textContent = "Page " + num;
+            btn.onclick = () => switchTab(num);
+            elements.tabs.appendChild(btn);
 
-    function showMsg(m, type) {
-        elements.errorMsg.textContent = m;
-        elements.errorMsg.className = type;
-        elements.errorMsg.style.display = 'block';
-    }
+            const content = document.createElement('div');
+            content.id = 'tab-' + num;
+            content.className = 'tab-content' + (num === 1 ? ' active' : '');
+            content.contentEditable = true;
+            content.textContent = text;
+            
+            enhanceTables(content);
+            elements.tabContents.appendChild(content);
+        }
 
-    function resetUI() {
-        elements.tabs.innerHTML = "";
-        elements.tabContents.innerHTML = "";
-        elements.errorMsg.style.display = 'none';
-        elements.progress.style.width = "0%";
-    }
+        function switchTab(num) {
+            document.querySelectorAll('.tab-button').forEach((b, i) => b.classList.toggle('active', i === num-1));
+            document.querySelectorAll('.tab-content').forEach((c, i) => c.classList.toggle('active', i === num-1));
+        }
+
+        // --- LOGIQUE TABLEAUX (ORIGINALE) ---
+        function enhanceTables(tabContent) {
+            const text = tabContent.textContent;
+            const tables = detectTables(text);
+            if (tables.length > 0) {
+                let newContent = text;
+                tables.forEach(table => {
+                    const htmlTable = convertTableToHTML(table);
+                    newContent = newContent.replace(table.join('\n'), htmlTable);
+                });
+                tabContent.innerHTML = newContent;
+            }
+        }
+
+        function detectTables(text) {
+            const lines = text.split('\n');
+            const tables = [];
+            let currentTable = [];
+            let inTable = false;
+            lines.forEach(line => {
+                const isTableLine = line.trim().match(/^(\+|-|_|\|).*[\+|\||-|_]$/) || (line.includes('|') && line.split('|').length > 2);
+                if (isTableLine) {
+                    if (!inTable && currentTable.length > 0) { tables.push([...currentTable]); currentTable = []; }
+                    currentTable.push(line);
+                    inTable = true;
+                } else {
+                    if (inTable && currentTable.length > 1) tables.push([...currentTable]);
+                    currentTable = [];
+                    inTable = false;
+                }
+            });
+            return tables;
+        }
+
+        function convertTableToHTML(tableLines) {
+            const isPrettyTable = tableLines[0]?.trim().startsWith('+');
+            let html = '<div class="table-container"><table>';
+            if (isPrettyTable) {
+                const headers = tableLines[0].split('|').map(c => c.trim()).filter(Boolean);
+                html += '<thead><tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr></thead><tbody>';
+                for (let i = 2; i < tableLines.length; i++) {
+                    if (!tableLines[i].includes('|')) continue;
+                    const cells = tableLines[i].split('|').map(c => c.trim()).filter(Boolean);
+                    html += '<tr>' + cells.map(c => `<td>${c}</td>`).join('') + '</tr>';
+                }
+            } else {
+                tableLines.forEach(line => {
+                    if (line.trim().startsWith('|')) {
+                        const cells = line.split('|').map(c => c.trim()).filter(Boolean);
+                        if (cells.length) html += '<tr>' + cells.map(c => `<td>${c}</td>`).join('') + '</tr>';
+                    }
+                });
+            }
+            return html + '</tbody></table></div>';
+        }
+
+        // --- RECHERCHE ET FORMATS ---
+        elements.searchText.oninput = () => {
+            const term = elements.searchText.value.trim();
+            if (!term) return clearSearch();
+            let matchCount = 0;
+            const regex = new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                const content = tab.textContent;
+                tab.innerHTML = content.replace(regex, match => { matchCount++; return `<span class="search-highlight">${match}</span>`; });
+            });
+            elements.searchCount.textContent = matchCount > 0 ? `${matchCount} résultat(s)` : 'Aucun résultat';
+            const first = document.querySelector('.search-highlight');
+            if (first) { first.scrollIntoView({ behavior: 'smooth', block: 'center' }); first.classList.add('first-highlight'); }
+        };
+
+        function clearSearch() {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.innerHTML = tab.textContent);
+            elements.searchCount.textContent = "";
+        }
+
+        elements.copyBtn.onclick = () => {
+            const txt = Array.from(document.querySelectorAll('.tab-content')).map(t => t.textContent).join('\n\n--- Page ---\n\n');
+            navigator.clipboard.writeText(txt).then(() => showMessage("Copié !", "success"));
+        };
+
+        elements.exportBtn.onclick = () => {
+            const blob = new Blob([Array.from(document.querySelectorAll('.tab-content')).map(t => t.textContent).join('\n\n')], { type: 'text/plain' });
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = "ocr_export.txt"; a.click();
+        };
+
+        elements.exportDocxBtn.onclick = async () => {
+            try {
+                const { Document, Packer, Paragraph, TextRun } = await import('https://unpkg.com/docx@7.1.0/build/index.js');
+                const children = Array.from(document.querySelectorAll('.tab-content')).map((t, i) => [
+                    new Paragraph({ children: [new TextRun({ text: `Page ${i+1}`, bold: true, size: 24 })] }),
+                    new Paragraph({ children: [new TextRun({ text: t.textContent, size: 20 })] }),
+                    new Paragraph({ children: [new TextRun({ text: "" , break: 1})] })
+                ]).flat();
+                const doc = new Document({ sections: [{ children }] });
+                const blob = await Packer.toBlob(doc);
+                const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = "ocr_export.docx"; a.click();
+            } catch(e) { showMessage("Erreur DOCX", "error"); }
+        };
+
+        // --- APERÇU MODAL ---
+        function convertToMarkdown(t) { return t.replace(/\n\s*\n/g, '\n\n').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'); }
+        function convertToHTML(t) { return t.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'); }
+
+        elements.previewBtn.onclick = () => {
+            const format = elements.formatStyle.value;
+            const content = Array.from(document.querySelectorAll('.tab-content')).map(t => t.textContent).join('\n\n');
+            if (format === 'markdown') elements.previewContent.innerHTML = convertToMarkdown(content);
+            else if (format === 'html') elements.previewContent.innerHTML = convertToHTML(content);
+            else elements.previewContent.textContent = content;
+            elements.previewModal.style.display = 'flex';
+        };
+
+        // --- HISTORIQUE ---
+        function updateHistory(file) {
+            let history = JSON.parse(localStorage.getItem('ocr_files') || '[]');
+            history = history.filter(h => h.name !== file.name);
+            history.unshift({name: file.name, size: file.size, date: new Date().toLocaleDateString()});
+            localStorage.setItem('ocr_files', JSON.stringify(history.slice(0,5)));
+        }
+
+        elements.showHistoryBtn.onclick = () => {
+            const isVisible = elements.recentFilesPanel.style.display === 'block';
+            elements.recentFilesPanel.style.display = isVisible ? 'none' : 'block';
+            const history = JSON.parse(localStorage.getItem('ocr_files') || '[]');
+            elements.recentFilesList.innerHTML = history.map(h => `<li><span>${h.name}</span><button class="open-recent"><i class="fas fa-folder-open"></i></button></li>`).join('');
+        };
+
+        // --- UI ACTIONS ---
+        elements.viewPdfBtn.onclick = () => {
+            const isVisible = elements.pdfViewer.style.display === 'block';
+            elements.pdfViewer.style.display = isVisible ? 'none' : 'block';
+            if (!isVisible) elements.pdfViewer.src = fileURL;
+            elements.viewPdfBtn.innerHTML = isVisible ? '<i class="fas fa-eye"></i> Visualiser' : '<i class="fas fa-eye-slash"></i> Cacher';
+        };
+
+        elements.clearSearch.onclick = clearSearch;
+        elements.resetBtn.onclick = () => location.reload();
+        elements.stopBtn.onclick = () => stopConversion = true;
+        document.querySelector('.close-modal').onclick = () => elements.previewModal.style.display = 'none';
+        window.onclick = e => { if(e.target === elements.previewModal) elements.previewModal.style.display = 'none'; };
+    });
 </script>
 
 </body>
