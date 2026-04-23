@@ -5,223 +5,753 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Générateur QR Code | Dr KARA-ZAITRI</title>
 
+<!-- Bibliothèques externes -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
 <style>
 /* ==========================================
-   DESIGN INSTITUTIONNEL COMPLET
-   ========================================== */
+   DESIGN INSTITUTIONNEL COMPLET
+   ========================================== */
 :root {
-  --primary: #1a3a5c;
-  --primary-light: #345a7a;
-  --text: #37474f;
-  --border: #cfd8dc;
-  --bg-page: #f4f7f9;
-  --bg-card: #ffffff;
-  --bg-input: #f8f9fa;
-  --success: #2e7d32;
-  --premium: #C9A961;
-  --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  --primary: #1a3a5c;
+  --primary-light: #345a7a;
+  --primary-dark: #0d2538;
+  --text: #37474f;
+  --text-light: #607d8b;
+  --border: #cfd8dc;
+  --bg-page: #f4f7f9;
+  --bg-card: #ffffff;
+  --bg-input: #f8f9fa;
+  --success: #2e7d32;
+  --warning: #ed6c02;
+  --error: #c62828;
+  --premium: #C9A961;
+  --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
-  font-family: var(--font-ui);
-  background: var(--bg-page);
-  color: var(--text);
-  line-height: 1.5;
-  min-height: 100vh;
+  font-family: var(--font-ui);
+  background: var(--bg-page);
+  color: var(--text);
+  line-height: 1.5;
+  min-height: 100vh;
 }
 
-/* ==========================================
-   SYSTÈME DE VERROUILLAGE PREMIUM
-   ========================================== */
-#premium-lock {
-  display: none;
-  position: fixed;
-  top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(26, 58, 92, 0.98); 
-  z-index: 10000;
-  backdrop-filter: blur(10px);
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  color: #fff;
-  text-align: center;
-  padding: 20px;
-}
-
-.lock-card {
-  background: #fff;
-  padding: 40px;
-  border-radius: 16px;
-  max-width: 500px;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-  color: #333;
-}
-
-.lock-card h2 { color: var(--primary); margin: 15px 0; font-size: 1.6rem; }
-.lock-card p { font-size: 1.1rem; margin-bottom: 30px; color: #5a6b7c; line-height: 1.6; }
-
-.btn-upgrade {
-  background: linear-gradient(180deg, #fcf6ba 0%, #d4af37 100%);
-  color: #2a1f00 !important;
-  padding: 18px 35px;
-  text-decoration: none;
-  font-weight: 800;
-  border-radius: 8px;
-  display: inline-block;
-  text-transform: uppercase;
-}
-
-/* ==========================================
-   INTERFACE DE L'OUTIL
-   ========================================== */
+/* NAVIGATION */
 .nav-bar {
-  position: sticky; top: 0; z-index: 2000;
-  background: #fff; border-bottom: 1px solid var(--border);
-  padding: 12px 20px; display: flex; align-items: center;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  position: sticky;
+  top: 0;
+  z-index: 2000;
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
-.back-link { text-decoration: none; color: var(--primary); font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+.back-link {
+  text-decoration: none;
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.back-link:hover { text-decoration: underline; }
 
+/* HEADER */
 .app-header {
-  background: linear-gradient(135deg, var(--primary), var(--primary-light));
-  color: #fff; padding: 20px; text-align: center;
-  position: sticky; top: 52px; z-index: 100;
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  color: #fff;
+  padding: 20px;
+  text-align: center;
+  position: sticky;
+  top: 52px;
+  z-index: 100;
 }
-.app-header h1 { font-size: 20px; font-weight: 700; }
-.premium-badge { position: absolute; top: 12px; right: 16px; color: var(--premium); font-size: 24px; }
+.app-header h1 {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 5px;
+}
+.app-header p {
+  font-size: 13px;
+  opacity: 0.9;
+  margin: 0;
+}
+.premium-badge {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  color: var(--premium);
+  font-size: 24px;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
 
-.container { max-width: 700px; margin: 24px auto; padding: 0 16px; }
+/* CONTENEUR */
+.container {
+  max-width: 700px;
+  margin: 24px auto;
+  padding: 0 16px;
+}
 
+/* CARTES */
 .card {
-  background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: 10px; padding: 20px; margin-bottom: 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
-.card h2 { font-size: 16px; font-weight: 700; color: var(--primary); margin-bottom: 16px; border-bottom: 2px solid var(--border); padding-bottom: 10px; }
+.card h2 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--primary);
+  margin: 0 0 16px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--border);
+}
 
-.form-input { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; background: var(--bg-input); }
+/* FORMULAIRES */
+.form-group {
+  margin-bottom: 16px;
+}
+.form-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  letter-spacing: 0.03em;
+}
+.form-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
+  background: var(--bg-input);
+  transition: border-color 0.2s;
+}
+.form-input:focus {
+  border-color: var(--primary);
+  outline: none;
+  background: #fff;
+  box-shadow: 0 0 0 2px rgba(26,58,92,0.1);
+}
 
-.btn { display: inline-flex; align-items: center; justify-content: center; padding: 12px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; border: none; }
-.btn-primary { background: var(--primary); color: #fff; width: 100%; }
-.btn-success { background: var(--success); color: #fff; flex: 1; margin-top: 20px; }
+/* TAILLE */
+.size-options {
+  margin-bottom: 16px;
+}
+.size-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.size-btn {
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-card);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.size-btn:hover, .size-btn.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+.size-slider {
+  width: 100%;
+  margin: 8px 0;
+}
+.size-display {
+  font-size: 12px;
+  color: var(--text-light);
+  text-align: center;
+  font-weight: 600;
+}
 
+/* CADRE */
+.frame-options {
+  margin-bottom: 16px;
+  padding: 12px;
+  background: var(--bg-input);
+  border-radius: 6px;
+}
+.frame-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.frame-toggle input {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+.frame-color {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.frame-color input[type="color"] {
+  width: 40px;
+  height: 30px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  background: #fff;
+  padding: 2px;
+}
+.frame-color input[type="text"] {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+/* BOUTONS */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+  width: 100%;
+}
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover:not(:disabled) { background: var(--primary-light); }
+.btn-success { background: var(--success); color: #fff; }
+.btn-success:hover:not(:disabled) { background: #388e3c; }
+.btn-secondary { background: var(--bg-card); color: var(--primary); border: 1px solid var(--border); }
+.btn-secondary:hover:not(:disabled) { background: var(--bg-input); }
+.btn-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* QR DISPLAY */
 .qr-display {
-  display: flex; justify-content: center; align-items: center;
-  padding: 40px; background: var(--bg-input); border-radius: 8px;
-  border: 2px dashed var(--border); min-height: 250px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  background: var(--bg-input);
+  border-radius: 8px;
+  border: 2px dashed var(--border);
+  min-height: 200px;
+}
+.qr-display:empty::before {
+  content: "Le QR code apparaîtra ici";
+  color: var(--text-light);
+  font-size: 14px;
+}
+#qrcode {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  background: #fff;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.frame {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  font-weight: 600;
+  font-size: 12px;
+  color: #000;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+.frame-text {
+  padding: 4px 8px;
+  background: rgba(255,255,255,0.9);
+  border-radius: 4px;
 }
 
-#qrcode { background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+/* HISTORIQUE */
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.history-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  background: var(--bg-input);
+  border-radius: 6px;
+  border-left: 3px solid var(--primary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.history-item:hover {
+  background: #e3f2fd;
+  border-left-color: var(--success);
+}
+.history-qr {
+  width: 50px;
+  height: 50px;
+  background: #fff;
+  padding: 4px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+.history-qr img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.history-info {
+  flex: 1;
+  min-width: 0;
+}
+.history-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.history-meta {
+  font-size: 11px;
+  color: var(--text-light);
+}
+.history-actions {
+  display: flex;
+  gap: 4px;
+}
+.history-actions button {
+  padding: 4px 8px;
+  font-size: 11px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background: var(--bg-card);
+  color: var(--text);
+}
+.history-actions button:hover {
+  background: var(--primary);
+  color: #fff;
+}
 
-.footer { text-align: center; padding: 20px; font-size: 11px; color: var(--text-light); border-top: 1px solid var(--border); }
-.disclaimer { background: #fff3cd; color: #856404; padding: 10px; border-radius: 6px; margin-top: 12px; font-size: 10px; }
+/* STATUS */
+#status {
+  margin-top: 12px;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  display: none;
+}
+#status.success {
+  background: #e8f5e9;
+  color: var(--success);
+  display: block;
+}
+#status.error {
+  background: #ffebee;
+  color: var(--error);
+  display: block;
+}
+
+/* FOOTER */
+.footer {
+  text-align: center;
+  padding: 20px;
+  font-size: 11px;
+  color: var(--text-light);
+  margin-top: 24px;
+  border-top: 1px solid var(--border);
+}
+.disclaimer {
+  background: #fff3cd;
+  color: #856404;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ffeeba;
+  margin-top: 12px;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+/* RESPONSIVE */
+@media (max-width: 600px) {
+  .size-buttons { grid-template-columns: 1fr; }
+  .btn-row { grid-template-columns: 1fr; }
+  .history-item { flex-direction: column; text-align: center; }
+  .history-actions { justify-content: center; }
+}
 </style>
 </head>
 <body>
 
-  <div id="premium-lock">
-    <div class="lock-card">
-      <span style="font-size: 60px;">⭐</span>
-      <h2>Outil de Création Premium</h2>
-      <p>Le générateur de QR Codes est réservé aux membres abonnés de la plateforme du <strong>Dr KARA-ZAITRI</strong>.</p>
-      <a href="https://www.dr-karazaitri-ma.net/compte-dadherent/paiement-dadhesion/" class="btn-upgrade">Activer mon accès Premium</a>
-      <div style="margin-top: 25px;">
-        <a href="https://www.dr-karazaitri-ma.net/connexion-membres/" style="color: var(--primary); font-weight: 600; text-decoration: none;">Déjà membre ? Se connecter</a>
-      </div>
-    </div>
-  </div>
+  <!-- NAVIGATION -->
+  <nav class="nav-bar">
+    <a href="https://karazaitri12-cpu.github.io/plateforme-utilitaires/" class="back-link">← Retour aux Utilitaires</a>
+  </nav>
 
-  <nav class="nav-bar">
-    <a href="https://karazaitri12-cpu.github.io/plateforme-utilitaires/" class="back-link">← Retour aux Utilitaires</a>
-  </nav>
+  <!-- HEADER -->
+  <header class="app-header">
+    <span class="premium-badge">★</span>
+    <h1>Générateur de QR Code</h1>
+    <p>Créez des QR codes personnalisés pour liens, textes, contacts</p>
+  </header>
 
-  <header class="app-header">
-    <span class="premium-badge">★</span>
-    <h1>Générateur de QR Code</h1>
-    <p>Création instantanée de codes QR institutionnels</p>
-  </header>
+  <div class="container">
 
-  <div class="container">
-    <div class="card">
-      <h2>📱 Configuration</h2>
-      <div style="margin-bottom: 15px;">
-        <label style="font-size:12px; font-weight:700; display:block; margin-bottom:5px;">CONTENU (URL OU TEXTE)</label>
-        <input type="text" id="textInput" class="form-input" placeholder="https://www.dr-karazaitri-ma.net/...">
-      </div>
-      <button class="btn btn-primary" onclick="generateQR()">🎨 Générer le QR Code</button>
-    </div>
+    <!-- GÉNÉRATEUR -->
+    <div class="card">
+      <h2>📱 Créer un QR Code</h2>
+      
+      <div class="form-group">
+        <label class="form-label" for="text">Contenu <span style="color:var(--error)">*</span></label>
+        <input type="text" id="text" class="form-input" placeholder="https://exemple.com ou votre texte">
+      </div>
 
-    <div class="card">
-      <h2>📲 Résultat</h2>
-      <div class="qr-display">
-        <div id="qrcode"></div>
-      </div>
-      <div id="downloadSection" style="display:none; justify-content:center;">
-        <button class="btn btn-success" onclick="downloadPNG()">📄 Télécharger l'image (PNG)</button>
-      </div>
-    </div>
+      <!-- TAILLE -->
+      <div class="size-options">
+        <label class="form-label">Taille du QR Code</label>
+        <div class="size-buttons">
+          <button class="size-btn" onclick="setSize(128)">Petit</button>
+          <button class="size-btn active" onclick="setSize(256)">Moyen</button>
+          <button class="size-btn" onclick="setSize(512)">Grand</button>
+        </div>
+        <input type="range" id="customSizeSlider" class="size-slider" min="100" max="1000" value="256" oninput="updateSize()">
+        <div class="size-display" id="sizeDisplay">Taille : 256×256 px</div>
+      </div>
 
-    <footer class="footer">
-      <span>Dr KARA-ZAITRI M.A © 2026</span>
-      <div class="disclaimer">⚠️ Traitement local sécurisé : aucune donnée n'est transmise à l'extérieur.</div>
-    </footer>
-  </div>
+      <!-- CADRE -->
+      <div class="frame-options">
+        <label class="frame-toggle">
+          <input type="checkbox" id="addFrame" onchange="toggleFrame()">
+          Ajouter un cadre "Scannez-moi"
+        </label>
+        <div class="frame-color" id="frameColorRow" style="display:none">
+          <span style="font-size:12px;color:var(--text-light)">Couleur :</span>
+          <input type="color" id="frameColor" value="#1a3a5c" onchange="updateFrameColor()">
+          <input type="text" id="frameColorHex" value="#1A3A5C" maxlength="7" oninput="syncFrameColor()">
+        </div>
+      </div>
 
-  <script>
+      <button class="btn btn-primary" onclick="generateQR()">🎨 Générer le QR Code</button>
+    </div>
 
-async function checkAccess() {
-    const lock = document.getElementById('premium-lock');
-    // Bypass pour vos tests en local
-    if (location.hostname === "localhost" || location.hostname === "127.0.0.1") return;
+    <!-- AFFICHAGE QR -->
+    <div class="card">
+      <h2>📲 Votre QR Code</h2>
+      <div class="qr-display" id="qrcode"></div>
+      
+      <div id="downloadOptions" style="display:none;margin-top:16px">
+        <label class="form-label">Télécharger</label>
+        <div class="btn-row">
+          <button class="btn btn-success" onclick="downloadPNG()">📄 PNG</button>
+          <button class="btn btn-success" onclick="downloadSVG()">📐 SVG</button>
+          <button class="btn btn-success" onclick="downloadPDF()">📕 PDF</button>
+        </div>
+      </div>
+      
+      <div id="status"></div>
+    </div>
 
-    try {
-        // On appelle la nouvelle route dédiée
-        const resp = await fetch('https://www.dr-karazaitri-ma.net/wp-json/drk/v1/check-premium', { 
-            credentials: 'include' 
-        });
-        const data = await resp.json();
+    <!-- HISTORIQUE -->
+    <div class="card" id="historyCard" style="display:none">
+      <h2>📚 Historique</h2>
+      <div class="history-list" id="historyList"></div>
+      <button class="btn btn-secondary" onclick="clearHistory()" style="margin-top:12px;width:100%">🗑️ Effacer l'historique</button>
+    </div>
 
-        if (data.access === true) {
-            lock.style.display = 'none'; // Accès autorisé : on cache le mur
-            console.log("Vérification Premium : OK");
-        } else {
-            lock.style.display = 'flex'; // Accès refusé : on affiche le mur
-        }
-    } catch (e) {
-        console.error("Erreur de connexion à l'API", e);
-        lock.style.display = 'flex';
-    }
-}
-     
-    function generateQR() {
-      const val = document.getElementById('textInput').value.trim();
-      if (!val) return alert("Veuillez saisir un contenu.");
-      
-      document.getElementById('qrcode').innerHTML = "";
-      new QRCode(document.getElementById("qrcode"), {
-        text: val,
-        width: 256,
-        height: 256,
-        colorDark : "#000000",
-        colorLight : "#ffffff",
-        correctLevel : QRCode.CorrectLevel.H
-      });
-      document.getElementById('downloadSection').style.display = 'flex';
-    }
+    <!-- FOOTER -->
+    <footer class="footer">
+      <span>Dr KARA-ZAITRI M.A © 2026</span>
+      <div class="disclaimer">
+        ⚠️ <strong>Usage bureautique</strong> : Génération locale. Les QR codes sont créés dans votre navigateur.
+      </div>
+    </footer>
 
-    function downloadPNG() {
-      const canvas = document.querySelector('#qrcode canvas');
-      if (canvas) {
-        const link = document.createElement('a');
-        link.download = 'qrcode-dr-karazaitri.png';
-        link.href = canvas.toDataURL();
-        link.click();
-      }
-    }
+  </div>
 
-    document.addEventListener('DOMContentLoaded', checkAccess);
-  </script>
+  <script>
+    let qrcode = null;
+    let history = JSON.parse(localStorage.getItem('qr_history') || '[]');
+    let currentSize = 256;
+    let frameEnabled = false;
+    let frameColor = '#1a3a5c';
+
+    // TAILLE
+    function setSize(size) {
+      currentSize = size;
+      document.getElementById('customSizeSlider').value = size;
+      document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+      updateSize();
+    }
+
+    function updateSize() {
+      currentSize = parseInt(document.getElementById('customSizeSlider').value);
+      document.getElementById('sizeDisplay').textContent = `Taille : ${currentSize}×${currentSize} px`;
+      // Mettre à jour le bouton actif
+      document.querySelectorAll('.size-btn').forEach((btn, i) => {
+        btn.classList.toggle('active', [128,256,512][i] === currentSize);
+      });
+    }
+
+    // CADRE
+    function toggleFrame() {
+      frameEnabled = document.getElementById('addFrame').checked;
+      document.getElementById('frameColorRow').style.display = frameEnabled ? 'flex' : 'none';
+      if (qrcode) updateFrame();
+    }
+
+    function updateFrameColor() {
+      frameColor = document.getElementById('frameColor').value;
+      document.getElementById('frameColorHex').value = frameColor.toUpperCase();
+      if (qrcode) updateFrame();
+    }
+
+    function syncFrameColor() {
+      let v = document.getElementById('frameColorHex').value.trim();
+      if (v && !v.startsWith('#')) v = '#' + v;
+      if (/^#([0-9A-Fa-f]{6})$/.test(v)) {
+        frameColor = v;
+        document.getElementById('frameColor').value = v;
+        if (qrcode) updateFrame();
+      }
+      document.getElementById('frameColorHex').value = v.toUpperCase();
+    }
+
+    function updateFrame() {
+      // Supprimer l'ancien cadre
+      const oldFrame = document.querySelector('.frame');
+      if (oldFrame) oldFrame.remove();
+      
+      if (!frameEnabled || !qrcode) return;
+      
+      // Créer le nouveau cadre
+      const qrEl = document.getElementById('qrcode');
+      const frame = document.createElement('div');
+      frame.className = 'frame';
+      frame.style.border = `3px solid ${frameColor}`;
+      frame.style.borderRadius = '12px';
+      frame.innerHTML = `
+        <div class="frame-text" style="color:${frameColor}">Scannez-moi</div>
+        <div style="flex:1"></div>
+        <div class="frame-text" style="color:${frameColor}">Scannez-moi</div>
+      `;
+      qrEl.appendChild(frame);
+    }
+
+    // GÉNÉRATION QR
+    function generateQR() {
+      const text = document.getElementById('text').value.trim();
+      const status = document.getElementById('status');
+      
+      if (!text) {
+        status.textContent = '⚠️ Veuillez entrer un texte ou une URL';
+        status.className = 'error';
+        return;
+      }
+      
+      // Nettoyer
+      document.getElementById('qrcode').innerHTML = '';
+      status.className = '';
+      status.textContent = '';
+      
+      // Générer
+      qrcode = new QRCode(document.getElementById('qrcode'), {
+        text: text,
+        width: currentSize,
+        height: currentSize,
+        colorDark: '#000000',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.H
+      });
+      
+      // Ajouter le cadre si activé
+      setTimeout(() => {
+        updateFrame();
+        document.getElementById('downloadOptions').style.display = 'block';
+        saveToHistory(text, currentSize);
+        status.textContent = '✓ QR Code généré avec succès';
+        status.className = 'success';
+      }, 100);
+    }
+
+    // HISTORIQUE
+    function saveToHistory(text, size) {
+      const qrEl = document.getElementById('qrcode');
+      html2canvas(qrEl, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
+        const item = {
+          text: text.length > 50 ? text.substring(0, 50) + '…' : text,
+          size: size,
+          timestamp: new Date().toLocaleString('fr-FR'),
+          dataUrl: canvas.toDataURL('image/png')
+        };
+        history.unshift(item);
+        if (history.length > 10) history.pop();
+        localStorage.setItem('qr_history', JSON.stringify(history));
+        updateHistoryDisplay();
+      });
+    }
+
+    function updateHistoryDisplay() {
+      const list = document.getElementById('historyList');
+      const card = document.getElementById('historyCard');
+      
+      if (!history.length) {
+        card.style.display = 'none';
+        return;
+      }
+      
+      card.style.display = 'block';
+      list.innerHTML = history.map((item, i) => `
+        <div class="history-item" onclick="loadFromHistory(${i})">
+          <div class="history-qr"><img src="${item.dataUrl}" alt="QR"></div>
+          <div class="history-info">
+            <div class="history-text">${escapeHtml(item.text)}</div>
+            <div class="history-meta">${item.size}×${item.size} px • ${item.timestamp}</div>
+          </div>
+          <div class="history-actions">
+            <button onclick="event.stopPropagation(); regenerateQR(${i})">↻</button>
+            <button onclick="event.stopPropagation(); removeFromHistory(${i})">✕</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function loadFromHistory(i) {
+      const item = history[i];
+      document.getElementById('text').value = item.text.replace('…', '');
+      setSize(item.size);
+      generateQR();
+    }
+
+    function regenerateQR(i) {
+      loadFromHistory(i);
+    }
+
+    function removeFromHistory(i) {
+      history.splice(i, 1);
+      localStorage.setItem('qr_history', JSON.stringify(history));
+      updateHistoryDisplay();
+    }
+
+    function clearHistory() {
+      if (confirm('Effacer tout l\'historique ?')) {
+        history = [];
+        localStorage.removeItem('qr_history');
+        updateHistoryDisplay();
+      }
+    }
+
+    // TÉLÉCHARGEMENT
+    function downloadPNG() {
+      const qrEl = document.getElementById('qrcode');
+      html2canvas(qrEl, { scale: 3, backgroundColor: '#ffffff' }).then(canvas => {
+        canvas.toBlob(blob => {
+          saveAs(blob, `qrcode-${Date.now()}.png`);
+          showStatus('✓ PNG téléchargé', 'success');
+        });
+      });
+    }
+
+    function downloadSVG() {
+      const qrEl = document.getElementById('qrcode');
+      html2canvas(qrEl, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
+        const svgNS = 'http://www.w3.org/2000/svg';
+        const svg = document.createElementNS(svgNS, 'svg');
+        svg.setAttribute('width', canvas.width);
+        svg.setAttribute('height', canvas.height);
+        svg.setAttribute('viewBox', `0 0 ${canvas.width} ${canvas.height}`);
+        
+        const img = document.createElementNS(svgNS, 'image');
+        img.setAttribute('href', canvas.toDataURL());
+        img.setAttribute('width', canvas.width);
+        img.setAttribute('height', canvas.height);
+        svg.appendChild(img);
+        
+        const blob = new Blob([new XMLSerializer().serializeToString(svg)], { type: 'image/svg+xml' });
+        saveAs(blob, `qrcode-${Date.now()}.svg`);
+        showStatus('✓ SVG téléchargé', 'success');
+      });
+    }
+
+    function downloadPDF() {
+      const { jsPDF } = window.jspdf;
+      const qrEl = document.getElementById('qrcode');
+      html2canvas(qrEl, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
+        const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+        const imgData = canvas.toDataURL('image/png');
+        const pageW = doc.internal.pageSize.getWidth();
+        const pageH = doc.internal.pageSize.getHeight();
+        const ratio = Math.min((pageW - 40) / canvas.width, (pageH - 40) / canvas.height);
+        const w = canvas.width * ratio;
+        const h = canvas.height * ratio;
+        doc.addImage(imgData, 'PNG', (pageW - w) / 2, (pageH - h) / 2, w, h);
+        doc.save(`qrcode-${Date.now()}.pdf`);
+        showStatus('✓ PDF téléchargé', 'success');
+      });
+    }
+
+    // UTILITAIRES
+    function showStatus(msg, type) {
+      const s = document.getElementById('status');
+      s.textContent = msg;
+      s.className = type;
+      setTimeout(() => { s.className = ''; s.textContent = ''; }, 3000);
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // INITIALISATION
+    updateHistoryDisplay();
+    document.getElementById('text').addEventListener('keypress', e => {
+      if (e.key === 'Enter') generateQR();
+    });
+  </script>
 </body>
 </html>
