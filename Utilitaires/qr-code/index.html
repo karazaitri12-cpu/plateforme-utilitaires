@@ -174,9 +174,15 @@ body {
       const lock = document.getElementById('premium-lock');
       if (location.hostname === "localhost" || location.hostname === "127.0.0.1") return;
       try {
-        const resp = await fetch('https://www.dr-karazaitri-ma.net/wp-json/wp/v2/users/me', { credentials: 'include' });
-        if (!resp.ok) lock.style.display = 'flex';
-      } catch (e) { lock.style.display = 'flex'; }
+       const resp = await fetch('https://www.dr-karazaitri-ma.net/wp-json/drk/v1/check-premium', { 
+    credentials: 'include' 
+});
+const data = await resp.json();
+if (data.access === true) {
+    lock.style.display = 'none'; 
+} else {
+    lock.style.display = 'flex';
+}
     }
 
     function generateQR() {
