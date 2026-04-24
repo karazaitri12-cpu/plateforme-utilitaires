@@ -168,10 +168,10 @@
         .btn-success { background: var(--success); color: #fff; }
         #fileInput { display: none; }
 
-        /* RÉSULTATS */
+        /* RÉSULTATS - Version 4 colonnes */
         .results {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 16px;
             margin-top: 20px;
         }
@@ -346,9 +346,12 @@
         @media (max-width: 600px) {
             .controls { flex-direction: column; }
             .btn { width: 100%; }
-            .results { grid-template-columns: 1fr; }
+            .results { grid-template-columns: 1fr 1fr; }
             .app-header h1 { font-size: 18px; }
             .block-card { margin: 20px; padding: 30px 20px; }
+        }
+        @media (max-width: 400px) {
+            .results { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -366,7 +369,7 @@
     <header class="app-header">
         <span class="premium-badge">★</span>
         <h1>Analyseur de Texte Avancé</h1>
-        <p>Analysez vos documents en temps réel : mots, caractères, phrases</p>
+        <p>Analysez vos documents en temps réel : mots, caractères, phrases, lignes</p>
     </header>
 
     <div class="container">
@@ -405,6 +408,11 @@
                     <div class="value" id="sentenceCount">0</div>
                     <div class="unit">phrases</div>
                 </div>
+                <div class="result-card">
+                    <h4>Nombre de lignes</h4>
+                    <div class="value" id="lineCount">0</div>
+                    <div class="unit">lignes</div>
+                </div>
             </div>
         </div>
 
@@ -435,6 +443,13 @@
                         <li>Divise sur les terminateurs : <strong>. ! ?</strong></li>
                         <li>Gère les ponctuations multiples ("!!!", "...")</li>
                         <li>Compte uniquement les phrases avec du contenu</li>
+                    </ul>
+
+                    <h4><span class="highlight">Comptage des lignes :</span></h4>
+                    <ul>
+                        <li>Divise sur les retours à la ligne (<strong>\n</strong>, <strong>\r\n</strong>)</li>
+                        <li>Les lignes vides sont comptées</li>
+                        <li>Un texte sans retour à la ligne = 1 ligne</li>
                     </ul>
 
                     <h3>📁 Formats de fichiers supportés</h3>
@@ -536,10 +551,15 @@
             const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
             const sentenceCount = sentences.length;
             
+            // Lignes - compte toutes les lignes (y compris vides)
+            const lines = text.split(/\r?\n/);
+            const lineCount = lines.length;
+            
             // Affichage
             document.getElementById('wordCount').textContent = wordCount.toLocaleString('fr');
             document.getElementById('charCount').textContent = charCount.toLocaleString('fr');
             document.getElementById('sentenceCount').textContent = sentenceCount.toLocaleString('fr');
+            document.getElementById('lineCount').textContent = lineCount.toLocaleString('fr');
         }
 
         // Coller depuis presse-papiers
