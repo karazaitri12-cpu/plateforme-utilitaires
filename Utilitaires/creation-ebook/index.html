@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Générateur de cours — .docx</title>
+<title>Générateur de cours — .docx | Dr KARA-ZAITRI</title>
 
 <script type="module">
   import * as docx from 'https://cdn.jsdelivr.net/npm/docx@9.5.3/+esm';
@@ -27,12 +27,83 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 /* ==========================================================================
-   HEADER (Restauré à la version originale)
+   ÉCRAN DE BLOCAGE STANDARDISÉ
+   ========================================================================== */
+.block-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: var(--font-ui);
+}
+.block-card {
+  background: white;
+  border-radius: 16px;
+  padding: 40px 32px;
+  max-width: 450px;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  animation: fadeInUp 0.6s ease-out;
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.block-icon { font-size: 64px; margin-bottom: 16px; }
+.block-card h2 { color: #1a3a5c; margin-bottom: 12px; font-size: 24px; }
+.block-card p { color: #607d8b; margin-bottom: 24px; line-height: 1.6; }
+.block-btn {
+  display: inline-block;
+  background: linear-gradient(135deg, #1a3a5c, #345a7a);
+  color: white;
+  padding: 14px 32px;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.block-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(26,58,92,0.3); }
+.block-footer { margin-top: 24px; font-size: 12px; color: #999; border-top: 1px solid #eee; padding-top: 20px; }
+
+/* LOADING SPINNER */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--bg);
+  z-index: 9998;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 16px;
+}
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--line);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { font-size: 13px; color: var(--muted); }
+
+/* ==========================================================================
+   HEADER (RESTAURÉ À LA VERSION ORIGINALE)
    ========================================================================== */
 .app-header {
   background: linear-gradient(135deg, #0d2d52 0%, #1a4e8c 60%, #2563b8 100%);
   color: #fff;
-  padding: 22px 40px 18px; /* Padding original */
+  padding: 22px 40px 18px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -45,17 +116,16 @@
 
 .app-header-brand { display: flex; flex-direction: column; gap: 2px; }
 .app-header-label { font-size: 14px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; opacity: .65; color: white; }
-/* Force la couleur blanche pour contrer le thème WordPress */
 .app-header h1 { font-family: var(--font-ui); font-size: 22px; opacity: .9; font-weight: 700; color: white !important; margin: 0; line-height: 1.2; }
 .app-header-sub { font-size: 13px; opacity: .7; margin-top: 2px; color: rgba(255,255,255,0.8); }
 
 .header-actions { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.premium-badge-header { background: rgba(201,169,97,0.2); border-radius: 20px; padding: 4px 12px; font-size: 11px; font-weight: 600; color: #C9A961; }
 
-/* Ajustement mobile pour le header uniquement si l'écran est très petit */
 @media (max-width: 768px) {
   .app-header { flex-direction: column; align-items: flex-start; padding: 16px; gap: 15px; }
   .header-actions { width: 100%; flex-wrap: wrap; }
-  .btn-generate { flex: 1; }
+  .btn- { flex: 1; }
 }
 
 /* ==========================================================================
@@ -65,14 +135,13 @@ body { font-family: var(--font-ui); background: var(--bg); color: var(--ink); li
 
 button { font-family: inherit; cursor: pointer; border: none; background: none; transition: all .18s; }
 
-/* Boutons */
-.btn-generate {
+.btn- {
   display: inline-flex; align-items: center; gap: 8px; padding: 10px 15px;
-  background: #fff; color: var(--accent); /* Texte bleu pour le bouton blanc */
+  background: #fff; color: var(--accent);
   border-radius: 6px; font-size: 13px; font-weight: 500; letter-spacing: .03em;
   box-shadow: 0 2px 8px rgba(0,0,0,.15);
 }
-.btn-generate:hover:not(:disabled) { background: #e8f0fb; transform: translateY(-1px); }
+.btn-:hover:not(:disabled) { background: #e8f0fb; transform: translateY(-1px); }
 .btn-generate:disabled { opacity: .65; cursor: not-allowed; }
 
 .chapters-count { font-size: 12px; opacity: .75; background: rgba(255,255,255,.15); padding: 4px 12px; border-radius: 20px; font-weight: 300; color: white; }
@@ -143,7 +212,7 @@ input[type="text"]::placeholder { color: #b0bcca; font-size: 13px; }
 #editor { min-height: 300px; max-height: 600px; overflow-y: auto; padding: 12px 14px; outline: none; border-radius: 0 0 7px 7px; }
 #editor:empty::before { content: attr(data-placeholder); color: #b0bcca; pointer-events: none; }
 
-/* Styles de texte communs (Editeur et Preview) */
+/* Styles de texte */
 #editor, .rendered-preview { font-family: 'Source Sans 3',sans-serif; font-size: 14px; color: var(--ink); line-height: 1.75; word-wrap: break-word; }
 #editor h1, .rendered-preview h1 { font-family: var(--font-serif); font-size: 20px; font-weight: 700; color: #17365D; margin: 18px 0 8px; padding-bottom: 4px; border-bottom: 2px solid #bfdbfe; }
 #editor h2, .rendered-preview h2 { font-size: 17px; font-weight: 700; color: #17365D; margin: 14px 0 6px; }
@@ -208,32 +277,38 @@ input[type="text"]::placeholder { color: #b0bcca; font-size: 13px; }
 }
 
 @media (max-width: 768px) {
-  .lib-status {
-    display: none !important;
-  }
+  .lib-status { display: none !important; }
 }
 </style>
 </head>
 <body>
 
+<!-- ÉCRAN DE CHARGEMENT -->
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Vérification de l'accès premium...</div>
+</div>
+
+<!-- CONTENU DE L'OUTIL (MASQUÉ PAR DÉFAUT) -->
+<div id="appContent" style="display: none;">
+
 <header class="app-header">
   <div class="app-header-brand">
-    <div class="app-header-label">Outil de r&#233;daction acad&#233;mique</div>
-    <h1>G&#233;n&#233;rateur de ebook Word</h1>
-    <div class="app-header-sub">Format A4 &#183; Page de couverture &#183; En-t&#234;te par chapitre &#183; Num&#233;rotation automatique &#183; Tableaux</div>
+    <div class="app-header-label">Outil de rédaction académique</div>
+    <h1>Générateur de ebook Word</h1>
+    <div class="app-header-sub">Format A4 · Page de couverture · En-tête par chapitre · Numérotation automatique · Tableaux</div>
   </div>
   <div class="header-actions">
-    <span class="lib-status loading" id="libStatus">&#9203; Chargement&#8230;</span>
+    <span class="premium-badge-header">★ PREMIUM</span>
+    <span class="lib-status loading" id="libStatus">⏳ Chargement…</span>
     <span class="chapters-count" id="chapCount">0 chapitre</span>
     <button class="btn-generate" id="btnGenerate" onclick="generateDocx()" disabled>
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
-      G&#233;n&#233;rer le .docx
+      Générer le .docx
     </button>
-    
-    <button class="btn-generate" style="background:#e2e8f0; color:#475569;" onclick="exportProject()">💾 Sauvegarder le Projet (.json)</button>
-<button class="btn-generate" style="background:#e2e8f0; color:#475569;" onclick="document.getElementById('importFile').click()">📂 Charger un Projet</button>
-<input type="file" id="importFile" style="display:none" onchange="importProject(event)">
-    
+    <button class="btn-generate" style="background:#e2e8f0; color:#475569;" onclick="exportProject()">💾 Sauvegarder (.json)</button>
+    <button class="btn-generate" style="background:#e2e8f0; color:#475569;" onclick="document.getElementById('importFile').click()">📂 Charger (.json)</button>
+    <input type="file" id="importFile" style="display:none" onchange="importProject(event)">
   </div>
 </header>
 
@@ -256,7 +331,7 @@ input[type="text"]::placeholder { color: #b0bcca; font-size: 13px; }
       </h3>
       <div class="field-group">
         <label class="field-label">Titre du cours</label>
-        <input type="text" id="docTitle" placeholder="Ex : Gyn&#233;cologie-Obst&#233;trique &#8212; 3e cycle">
+        <input type="text" id="docTitle" placeholder="Ex : Gynécologie-Obstétrique — 3e cycle">
       </div>
     </div>
 
@@ -269,7 +344,7 @@ input[type="text"]::placeholder { color: #b0bcca; font-size: 13px; }
       <div class="form-body">
         <div class="field-group">
           <label class="field-label" for="inputTitle">Titre du chapitre <span class="badge-req">Obligatoire</span></label>
-          <input type="text" id="inputTitle" placeholder="Ex : D&#233;pistage du cancer du col de l'ut&#233;rus" maxlength="250">
+          <input type="text" id="inputTitle" placeholder="Ex : Dépistage du cancer du col de l'utérus" maxlength="250">
         </div>
         <div class="field-group">
           <label class="field-label">Contenu du chapitre <span class="badge-req">Obligatoire</span></label>
@@ -279,7 +354,7 @@ input[type="text"]::placeholder { color: #b0bcca; font-size: 13px; }
               <button class="tb-btn" onclick="edCmd('formatBlock','h1')" type="button"><b>H1</b></button>
               <button class="tb-btn" onclick="edCmd('formatBlock','h2')" type="button"><b>H2</b></button>
               <button class="tb-btn" onclick="edCmd('formatBlock','h3')" type="button"><b>H3</b></button>
-              <button class="tb-btn" onclick="edCmd('formatBlock','p')"  type="button">&#182; P</button>
+              <button class="tb-btn" onclick="edCmd('formatBlock','p')"  type="button">¶ P</button>
               <div class="tb-sep"></div>
               <span class="tb-label">Style</span>
               <button class="tb-btn" onclick="edCmd('bold')"      type="button"><b>G</b></button>
@@ -287,16 +362,16 @@ input[type="text"]::placeholder { color: #b0bcca; font-size: 13px; }
               <button class="tb-btn" onclick="edCmd('underline')" type="button"><u>S</u></button>
               <div class="tb-sep"></div>
               <span class="tb-label">Liste</span>
-              <button class="tb-btn" onclick="edCmd('insertUnorderedList')" type="button">&#8226; Liste</button>
+              <button class="tb-btn" onclick="edCmd('insertUnorderedList')" type="button">• Liste</button>
               <button class="tb-btn" onclick="edCmd('insertOrderedList')"   type="button">1. Liste</button>
               <div class="tb-sep"></div>
-              <button class="tb-btn" onclick="edCmd('removeFormat')" type="button" style="color:var(--muted)">&#x2715; Format</button>
+              <button class="tb-btn" onclick="edCmd('removeFormat')" type="button" style="color:var(--muted)">✕ Format</button>
             </div>
-            <div id="editor" contenteditable="true" data-placeholder="Collez ou saisissez le contenu du chapitre ici &#8212; texte, titres, listes, tableaux&#8230;"></div>
+            <div id="editor" contenteditable="true" data-placeholder="Collez ou saisissez le contenu du chapitre ici — texte, titres, listes, tableaux…"></div>
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">
-            <span style="font-size:10.5px;color:var(--muted)" id="charInfo">0 caract&#232;re</span>
-            <span style="font-size:10px;color:var(--muted)">Ctrl+Entr&#233;e pour ajouter</span>
+            <span style="font-size:10.5px;color:var(--muted)" id="charInfo">0 caractère</span>
+            <span style="font-size:10px;color:var(--muted)">Ctrl+Entrée pour ajouter</span>
           </div>
         </div>
         <div id="errBox" class="err-box"></div>
@@ -312,8 +387,8 @@ input[type="text"]::placeholder { color: #b0bcca; font-size: 13px; }
 
     <div class="preview-card">
       <div class="preview-head">
-        <div class="preview-head-title"><span class="dot"></span>Aper&#231;u du document</div>
-        <span style="font-size:11px;color:var(--muted)" id="previewInfo">&#8212;</span>
+        <div class="preview-head-title"><span class="dot"></span>Aperçu du document</div>
+        <span style="font-size:11px;color:var(--muted)" id="previewInfo">—</span>
       </div>
       <div id="previewBody">
         <div class="preview-empty">
@@ -327,271 +402,329 @@ input[type="text"]::placeholder { color: #b0bcca; font-size: 13px; }
 
 <div class="toast" id="toast"></div>
 
+</div>
+
+<!-- ÉCRAN DE BLOCAGE PREMIUM -->
+<div id="blockScreen" class="block-screen" style="display: none;">
+    <div class="block-card">
+        <div class="block-icon">🔒</div>
+        <h2>Accès Premium Requis</h2>
+        <p>Cet utilitaire est réservé aux membres premium.<br>Connectez-vous depuis la plateforme principale pour y accéder.</p>
+        <a href="https://www.dr-karazaitri-ma.net/connexion-membres/" class="block-btn">Se connecter / S'abonner</a>
+        <div class="block-footer">
+            🔑 Accès via token personnel
+        </div>
+    </div>
+</div>
+
 <script>
+// ========== SYSTÈME DE VÉRIFICATION PREMIUM STANDARDISÉ ==========
 
-const STORAGE_KEY = 'medical_ebook_generator_save_v1';
-
-function saveProject() {
-  const data = {
-    docTitle: document.getElementById('docTitle').value,
-    chapters: chapters
-  };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-}
-
-function loadProject() {
-  const saved = localStorage.getItem(STORAGE_KEY);
-  if (saved) {
-    try {
-      const data = JSON.parse(saved);
-      chapters = data.chapters || [];
-      document.getElementById('docTitle').value = data.docTitle || '';
-      updateUI();
-      if (chapters.length > 0) showToast("Projet restauré automatiquement", "info");
-    } catch(e) { console.error("Erreur chargement", e); }
-  }
-}
-
-// ════════════════════════════════════════════════════════════════
-//  STATUT BIBLIOTH&#200;QUE
-// ════════════════════════════════════════════════════════════════
-function setLibStatus(state) {
-  var el = document.getElementById('libStatus');
-  if (state === 'ready') { el.textContent = '\u2713 docx.js pr\u00eat'; el.className = 'lib-status ready'; }
-  else { el.textContent = '\u2715 Lib non charg\u00e9e (connexion requise)'; el.className = 'lib-status error'; }
-}
-if (window._docxReady) setLibStatus('ready');
-else {
-  document.addEventListener('docx-ready', function() { setLibStatus('ready'); });
-  setTimeout(function() { if (!window._docxReady) setLibStatus('error'); }, 8000);
-}
-
-// ════════════════════════════════════════════════════════════════
-//  ETAT & EDITEUR
-// ════════════════════════════════════════════════════════════════
-var chapters = [];
-var editingIndex = -1;
-
-function edCmd(cmd, val) {
-  document.getElementById('editor').focus();
-  document.execCommand(cmd, false, val || null);
-}
-function getEditorHTML() { return document.getElementById('editor').innerHTML.trim(); }
-function getEditorText() { return document.getElementById('editor').innerText.trim(); }
-function setEditorHTML(h) { document.getElementById('editor').innerHTML = h || ''; updateCharCount(); }
-function clearEditor() { document.getElementById('editor').innerHTML = ''; updateCharCount(); }
-function updateCharCount() {
-  var n = getEditorText().length;
-  document.getElementById('charInfo').textContent = n.toLocaleString('fr') + ' caract\u00e8re' + (n > 1 ? 's' : '');
-}
-document.getElementById('editor').addEventListener('input', updateCharCount);
-
-document.getElementById('editor').addEventListener('paste', function(e) {
-  e.preventDefault();
-  var d = e.clipboardData;
-  var html = d.getData('text/html');
-  if (html) { document.execCommand('insertHTML', false, sanitizePastedHTML(html)); }
-  else { document.execCommand('insertHTML', false, textToHTML(d.getData('text/plain'))); }
-  updateCharCount();
-});
-
-function sanitizePastedHTML(html) {
-  var tmp = document.createElement('div');
-  tmp.innerHTML = html;
-  ['script','style','meta','link','head'].forEach(function(t) {
-    tmp.querySelectorAll(t).forEach(function(el) { el.remove(); });
-  });
-  function cleanNode(el) {
-    Array.from(el.attributes).forEach(function(a) {
-      if (!['rowspan','colspan','style'].includes(a.name.toLowerCase())) el.removeAttribute(a.name);
-    });
-    if (el.tagName === 'SPAN') {
-      var s = el.getAttribute('style') || '';
-      if (s.includes('bold') || s.includes('700')) { var w = document.createElement('strong'); w.innerHTML = el.innerHTML; el.replaceWith(w); return; }
-      if (s.includes('italic')) { var w2 = document.createElement('em'); w2.innerHTML = el.innerHTML; el.replaceWith(w2); return; }
-      el.replaceWith(document.createTextNode(el.textContent)); return;
+async function checkPremiumAccess() {
+    const token = localStorage.getItem('kz_premium_token');
+    
+    if (!token) {
+        showBlockScreen();
+        return false;
     }
-    Array.from(el.children).forEach(cleanNode);
-  }
-  Array.from(tmp.children).forEach(cleanNode);
-  return tmp.innerHTML;
+    
+    try {
+        const response = await fetch(`https://www.dr-karazaitri-ma.net/wp-json/kz/v1/verify-token?token=${encodeURIComponent(token)}`);
+        const data = await response.json();
+        
+        if (data.valid === true) {
+            showApp();
+            return true;
+        } else {
+            showBlockScreen();
+            return false;
+        }
+    } catch (error) {
+        console.error('Erreur de vérification:', error);
+        showBlockScreen();
+        return false;
+    }
 }
 
-function textToHTML(txt) {
-  var html = '';
-  txt.split('\n').forEach(function(raw) {
-    var t = raw.trim();
-    if (!t) { html += '<p><br></p>'; return; }
-    if (t.startsWith('# '))   { html += '<h1>' + esc(t.slice(2)) + '</h1>'; return; }
-    if (t.startsWith('## '))  { html += '<h2>' + esc(t.slice(3)) + '</h2>'; return; }
-    if (t.startsWith('### ')) { html += '<h3>' + esc(t.slice(4)) + '</h3>'; return; }
-    var b = t.match(/^[•\-\*]\s+(.+)/);
-    if (b) { html += '<ul><li>' + esc(b[1]) + '</li></ul>'; return; }
-    var n = t.match(/^\d+[\.\)]\s+(.+)/);
-    if (n) { html += '<ol><li>' + esc(n[1]) + '</li></ol>'; return; }
-    html += '<p>' + esc(t) + '</p>';
-  });
-  return html;
-}
-function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-// ════════════════════════════════════════════════════════════════
-//  INTERFACE & ACTIONS
-// ════════════════════════════════════════════════════════════════
-function showToast(msg, type) {
-  type = type || 'success';
-  var t = document.getElementById('toast');
-  t.textContent = ({success:'\u2713 ', error:'\u2715 ', info:'\u2139 '}[type] || '') + msg;
-  t.className = 'toast show ' + type;
-  clearTimeout(t._tid);
-  t._tid = setTimeout(function() { t.classList.remove('show'); }, 3200);
-}
-function showErr(msg) {
-  var b = document.getElementById('errBox');
-  b.textContent = msg; b.classList.add('visible');
-  setTimeout(function() { b.classList.remove('visible'); }, 4000);
-}
-function updateUI() {
-  var n = chapters.length;
-  document.getElementById('chapCount').textContent = n + ' chapitre' + (n > 1 ? 's' : '');
-  document.getElementById('btnGenerate').disabled = n === 0;
-  document.getElementById('btnClear').disabled = n === 0;
-  document.getElementById('previewInfo').textContent = n === 0 ? '\u2014' : n + ' chapitre' + (n > 1 ? 's' : '') + ' \u2014 pr\u00eat \u00e0 g\u00e9n\u00e9rer';
-  renderSidebar(); renderPreview();
-}
-function renderSidebar() {
-  var el = document.getElementById('chaptersList');
-  if (!chapters.length) { el.innerHTML = '<div class="empty-sidebar">Aucun chapitre.<br>Remplissez le formulaire pour commencer.</div>'; return; }
-  el.innerHTML = chapters.map(function(ch, i) {
-    return '<div class="chapter-item' + (editingIndex === i ? ' active' : '') + '">' +
-      '<div class="ch-num">' + (i+1) + '</div>' +
-      '<div class="ch-info" onclick="scrollToPreview(' + i + ')" style="cursor:pointer">' +
-        '<div class="ch-title">' + esc(ch.title) + '</div>' +
-        '<div class="ch-preview">' + esc((ch.textPreview||'').slice(0,55)) + ((ch.textPreview||'').length>55?'\u2026':'') + '</div>' +
-      '</div>' +
-      '<button class="ch-delete" onclick="deleteChapter(' + i + ')" title="Supprimer">\u00d7</button>' +
-    '</div>';
-  }).join('');
-}
-function renderPreview() {
-  var el = document.getElementById('previewBody');
-  if (!chapters.length) {
-    el.innerHTML = '<div class="preview-empty"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" style="opacity:.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><p>Les chapitres appara\u00eetront ici dans l\'ordre du document.</p></div>';
-    return;
-  }
-  el.innerHTML = chapters.map(function(ch, i) {
-    return '<div class="cpi" id="cpi-' + i + '">' +
-      '<div class="cpi-head">' +
-        '<div class="cpi-num">Ch.\u00a0' + (i+1) + '</div>' +
-        '<div class="cpi-title">' + esc(ch.title) + '</div>' +
-        '<div class="cpi-actions">' +
-          '<button class="cpi-btn cpi-btn-edit" onclick="editChapter(' + i + ')">Modifier</button>' +
-          '<button class="cpi-btn cpi-btn-del" onclick="deleteChapter(' + i + ')">Supprimer</button>' +
-        '</div>' +
-      '</div>' +
-      '<div class="cpi-content rendered-preview">' + ch.html + '</div>' +
-    '</div>';
-  }).join('');
-}
-function scrollToPreview(i) {
-  var el = document.getElementById('cpi-' + i);
-  if (!el) return;
-  el.scrollIntoView({ behavior:'smooth', block:'center' });
-  el.classList.add('selected');
-  setTimeout(function() { el.classList.remove('selected'); }, 1500);
-}
-function addChapter() {
-  var title = document.getElementById('inputTitle').value.trim();
-  var html = getEditorHTML();
-  var text = getEditorText();
-  if (!title) { showErr('Veuillez saisir un titre.'); document.getElementById('inputTitle').focus(); return; }
-  if (!text)  { showErr('Veuillez saisir du contenu.'); document.getElementById('editor').focus(); return; }
-  var chapter = { title: title, html: html, textPreview: text };
-  if (editingIndex >= 0) {
-    chapters[editingIndex] = chapter;
-    showToast('Chapitre ' + (editingIndex+1) + ' modifi\u00e9.', 'success');
-    cancelEdit();
-  } else {
-    chapters.push(chapter);
-    document.getElementById('inputTitle').value = '';
-    clearEditor();
-    showToast('Chapitre ' + chapters.length + ' ajout\u00e9 (' + text.length.toLocaleString('fr') + ' car.).', 'success');
-    document.getElementById('inputTitle').focus();
-  }
-saveProject();
-  updateUI();
+function showBlockScreen() {
+    document.getElementById('loadingOverlay').style.display = 'none';
+    document.getElementById('blockScreen').style.display = 'flex';
+    document.getElementById('appContent').style.display = 'none';
 }
 
-function editChapter(i) {
-  editingIndex = i;
-  document.getElementById('inputTitle').value = chapters[i].title;
-  setEditorHTML(chapters[i].html);
-  document.getElementById('formTitle').textContent = 'Modifier le chapitre ' + (i+1);
-  document.getElementById('formBadge').textContent = '\u00c9DITION';
-  document.getElementById('btnAddLabel').textContent = 'Enregistrer';
-  document.getElementById('btnAdd').className = 'btn-add editing';
-  document.getElementById('btnCancel').style.display = '';
-  document.querySelector('.form-card').scrollIntoView({ behavior:'smooth', block:'start' });
-  setTimeout(function() { document.getElementById('inputTitle').focus(); }, 200);
-  updateUI();
+function showApp() {
+    document.getElementById('loadingOverlay').style.display = 'none';
+    document.getElementById('blockScreen').style.display = 'none';
+    document.getElementById('appContent').style.display = 'block';
+    initApp();
 }
-function cancelEdit() {
-  editingIndex = -1;
-  document.getElementById('inputTitle').value = '';
-  clearEditor();
-  document.getElementById('formTitle').textContent = 'Nouveau chapitre';
-  document.getElementById('formBadge').textContent = 'AJOUTER';
-  document.getElementById('btnAddLabel').textContent = 'Ajouter le chapitre';
-  document.getElementById('btnAdd').className = 'btn-add';
-  document.getElementById('btnCancel').style.display = 'none';
-  updateUI();
-}
-function deleteChapter(i) {
-  var was = editingIndex;
-  chapters.splice(i, 1);
-  if (was === i) cancelEdit(); else if (was > i) editingIndex--;
-  showToast('Chapitre supprim\u00e9.', 'info');
-saveProject();
-  updateUI();
-}
-function clearAll() {
-  if (!confirm('Tout effacer ?')) return;
-  chapters = []; cancelEdit();
-  showToast('Document r\u00e9initialis\u00e9.', 'info');
-localStorage.removeItem(STORAGE_KEY);
-  updateUI();
-}
-document.addEventListener('keydown', function(e) {
-  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); addChapter(); }
-});
 
-// ════════════════════════════════════════════════════════════════
-//  SPECS DU DOCUMENT — PALETTE M&#201;DICALE INSTITUTIONNELLE
-// ════════════════════════════════════════════════════════════════
-var SPECS = {
-  font:        'Arial',
-  bodySize:    22,      // 11 pt (demi-points)
-  smallSize:   18,      // 9 pt — en-têtes, pieds de page
-  lineSpacing: 276,     // interligne 1,15
-  margin: { top: 900, right: 1134, bottom: 1134, left: 1360, header: 360, footer: 360 },
-  colors: {
-    primaryDark:   '1C3557',  // bleu marine foncé — H1, couverture
-    primaryMid:    '2E5F8A',  // bleu médium — H2, accent
-    primaryLight:  '4A7FAA',  // bleu clair — H3
-    body:          '111827',  // quasi-noir — corps de texte
-    muted:         '6B7280',  // gris — métadonnées, en-tête
-    headerLine:    'CBD5E1',  // gris clair — filets d\'encadrement
-    tableHeaderBg: 'D9E8F5',  // bleu très pâle — fond th
-    tableBorder:   'A8C4DC',  // bleu-gris — bordures tableau
-    blockquoteBg:  'F0F5FA',  // fond nota bene
-    blockquoteBdr: '2E5F8A',  // bordure gauche nota bene
-    white:         'FFFFFF'
-  }
-};
+// ========== INITIALISATION DE L'APPLICATION ==========
 
-// ════════════════════════════════════════════════════════════════
-//  EXPORTEUR DOCX — FORMAT M&#201;DICAL INSTITUTIONNEL
-// ════════════════════════════════════════════════════════════════
+function initApp() {
+    // Initialisation de la bibliothèque docx
+    function setLibStatus(state) {
+        var el = document.getElementById('libStatus');
+        if (state === 'ready') { el.textContent = '✓ docx.js prêt'; el.className = 'lib-status ready'; }
+        else { el.textContent = '✕ Lib non chargée (connexion requise)'; el.className = 'lib-status error'; }
+    }
+    if (window._docxReady) setLibStatus('ready');
+    else {
+        document.addEventListener('docx-ready', function() { setLibStatus('ready'); });
+        setTimeout(function() { if (!window._docxReady) setLibStatus('error'); }, 8000);
+    }
+
+    const STORAGE_KEY = 'medical_ebook_generator_save_v1';
+    var chapters = [];
+    var editingIndex = -1;
+
+    function saveProject() {
+        const data = {
+            docTitle: document.getElementById('docTitle').value,
+            chapters: chapters
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    function loadProject() {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+            try {
+                const data = JSON.parse(saved);
+                chapters = data.chapters || [];
+                document.getElementById('docTitle').value = data.docTitle || '';
+                updateUI();
+                if (chapters.length > 0) showToast("Projet restauré automatiquement", "info");
+            } catch(e) { console.error("Erreur chargement", e); }
+        }
+    }
+
+    function edCmd(cmd, val) {
+        document.getElementById('editor').focus();
+        document.execCommand(cmd, false, val || null);
+    }
+    function getEditorHTML() { return document.getElementById('editor').innerHTML.trim(); }
+    function getEditorText() { return document.getElementById('editor').innerText.trim(); }
+    function setEditorHTML(h) { document.getElementById('editor').innerHTML = h || ''; updateCharCount(); }
+    function clearEditor() { document.getElementById('editor').innerHTML = ''; updateCharCount(); }
+    function updateCharCount() {
+        var n = getEditorText().length;
+        document.getElementById('charInfo').textContent = n.toLocaleString('fr') + ' caractère' + (n > 1 ? 's' : '');
+    }
+    document.getElementById('editor').addEventListener('input', updateCharCount);
+
+    document.getElementById('editor').addEventListener('paste', function(e) {
+        e.preventDefault();
+        var d = e.clipboardData;
+        var html = d.getData('text/html');
+        if (html) { document.execCommand('insertHTML', false, sanitizePastedHTML(html)); }
+        else { document.execCommand('insertHTML', false, textToHTML(d.getData('text/plain'))); }
+        updateCharCount();
+    });
+
+    function sanitizePastedHTML(html) {
+        var tmp = document.createElement('div');
+        tmp.innerHTML = html;
+        ['script','style','meta','link','head'].forEach(function(t) {
+            tmp.querySelectorAll(t).forEach(function(el) { el.remove(); });
+        });
+        function cleanNode(el) {
+            Array.from(el.attributes).forEach(function(a) {
+                if (!['rowspan','colspan','style'].includes(a.name.toLowerCase())) el.removeAttribute(a.name);
+            });
+            if (el.tagName === 'SPAN') {
+                var s = el.getAttribute('style') || '';
+                if (s.includes('bold') || s.includes('700')) { var w = document.createElement('strong'); w.innerHTML = el.innerHTML; el.replaceWith(w); return; }
+                if (s.includes('italic')) { var w2 = document.createElement('em'); w2.innerHTML = el.innerHTML; el.replaceWith(w2); return; }
+                el.replaceWith(document.createTextNode(el.textContent)); return;
+            }
+            Array.from(el.children).forEach(cleanNode);
+        }
+        Array.from(tmp.children).forEach(cleanNode);
+        return tmp.innerHTML;
+    }
+
+    function textToHTML(txt) {
+        var html = '';
+        txt.split('\n').forEach(function(raw) {
+            var t = raw.trim();
+            if (!t) { html += '<p><br></p>'; return; }
+            if (t.startsWith('# '))   { html += '<h1>' + esc(t.slice(2)) + '</h1>'; return; }
+            if (t.startsWith('## '))  { html += '<h2>' + esc(t.slice(3)) + '</h2>'; return; }
+            if (t.startsWith('### ')) { html += '<h3>' + esc(t.slice(4)) + '</h3>'; return; }
+            var b = t.match(/^[•\-\*]\s+(.+)/);
+            if (b) { html += '<ul><li>' + esc(b[1]) + '</li></ul>'; return; }
+            var n = t.match(/^\d+[\.\)]\s+(.+)/);
+            if (n) { html += '<ol><li>' + esc(n[1]) + '</li></ol>'; return; }
+            html += '<p>' + esc(t) + '</p>';
+        });
+        return html;
+    }
+    function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    function showToast(msg, type) {
+        type = type || 'success';
+        var t = document.getElementById('toast');
+        t.textContent = ({success:'✓ ', error:'✕ ', info:'ℹ '}[type] || '') + msg;
+        t.className = 'toast show ' + type;
+        clearTimeout(t._tid);
+        t._tid = setTimeout(function() { t.classList.remove('show'); }, 3200);
+    }
+    function showErr(msg) {
+        var b = document.getElementById('errBox');
+        b.textContent = msg; b.classList.add('visible');
+        setTimeout(function() { b.classList.remove('visible'); }, 4000);
+    }
+    function updateUI() {
+        var n = chapters.length;
+        document.getElementById('chapCount').textContent = n + ' chapitre' + (n > 1 ? 's' : '');
+        document.getElementById('btnGenerate').disabled = n === 0;
+        document.getElementById('btnClear').disabled = n === 0;
+        document.getElementById('previewInfo').textContent = n === 0 ? '—' : n + ' chapitre' + (n > 1 ? 's' : '') + ' — prêt à générer';
+        renderSidebar(); renderPreview();
+    }
+    function renderSidebar() {
+        var el = document.getElementById('chaptersList');
+        if (!chapters.length) { el.innerHTML = '<div class="empty-sidebar">Aucun chapitre.<br>Remplissez le formulaire pour commencer.</div>'; return; }
+        el.innerHTML = chapters.map(function(ch, i) {
+            return '<div class="chapter-item' + (editingIndex === i ? ' active' : '') + '">' +
+                '<div class="ch-num">' + (i+1) + '</div>' +
+                '<div class="ch-info" onclick="scrollToPreview(' + i + ')" style="cursor:pointer">' +
+                    '<div class="ch-title">' + esc(ch.title) + '</div>' +
+                    '<div class="ch-preview">' + esc((ch.textPreview||'').slice(0,55)) + ((ch.textPreview||'').length>55?'…':'') + '</div>' +
+                '</div>' +
+                '<button class="ch-delete" onclick="deleteChapter(' + i + ')" title="Supprimer">×</button>' +
+            '</div>';
+        }).join('');
+    }
+    function renderPreview() {
+        var el = document.getElementById('previewBody');
+        if (!chapters.length) {
+            el.innerHTML = '<div class="preview-empty"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" style="opacity:.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><p>Les chapitres apparaîtront ici dans l\'ordre du document.</p></div>';
+            return;
+        }
+        el.innerHTML = chapters.map(function(ch, i) {
+            return '<div class="cpi" id="cpi-' + i + '">' +
+                '<div class="cpi-head">' +
+                    '<div class="cpi-num">Ch. ' + (i+1) + '</div>' +
+                    '<div class="cpi-title">' + esc(ch.title) + '</div>' +
+                    '<div class="cpi-actions">' +
+                        '<button class="cpi-btn cpi-btn-edit" onclick="editChapter(' + i + ')">Modifier</button>' +
+                        '<button class="cpi-btn cpi-btn-del" onclick="deleteChapter(' + i + ')">Supprimer</button>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="cpi-content rendered-preview">' + ch.html + '</div>' +
+            '</div>';
+        }).join('');
+    }
+    window.scrollToPreview = function(i) {
+        var el = document.getElementById('cpi-' + i);
+        if (!el) return;
+        el.scrollIntoView({ behavior:'smooth', block:'center' });
+        el.classList.add('selected');
+        setTimeout(function() { el.classList.remove('selected'); }, 1500);
+    };
+    window.addChapter = function() {
+        var title = document.getElementById('inputTitle').value.trim();
+        var html = getEditorHTML();
+        var text = getEditorText();
+        if (!title) { showErr('Veuillez saisir un titre.'); document.getElementById('inputTitle').focus(); return; }
+        if (!text)  { showErr('Veuillez saisir du contenu.'); document.getElementById('editor').focus(); return; }
+        var chapter = { title: title, html: html, textPreview: text };
+        if (editingIndex >= 0) {
+            chapters[editingIndex] = chapter;
+            showToast('Chapitre ' + (editingIndex+1) + ' modifié.', 'success');
+            cancelEdit();
+        } else {
+            chapters.push(chapter);
+            document.getElementById('inputTitle').value = '';
+            clearEditor();
+            showToast('Chapitre ' + chapters.length + ' ajouté (' + text.length.toLocaleString('fr') + ' car.).', 'success');
+            document.getElementById('inputTitle').focus();
+        }
+        saveProject();
+        updateUI();
+    };
+    window.editChapter = function(i) {
+        editingIndex = i;
+        document.getElementById('inputTitle').value = chapters[i].title;
+        setEditorHTML(chapters[i].html);
+        document.getElementById('formTitle').textContent = 'Modifier le chapitre ' + (i+1);
+        document.getElementById('formBadge').textContent = 'ÉDITION';
+        document.getElementById('btnAddLabel').textContent = 'Enregistrer';
+        document.getElementById('btnAdd').className = 'btn-add editing';
+        document.getElementById('btnCancel').style.display = '';
+        document.querySelector('.form-card').scrollIntoView({ behavior:'smooth', block:'start' });
+        setTimeout(function() { document.getElementById('inputTitle').focus(); }, 200);
+        updateUI();
+    };
+    window.cancelEdit = function() {
+        editingIndex = -1;
+        document.getElementById('inputTitle').value = '';
+        clearEditor();
+        document.getElementById('formTitle').textContent = 'Nouveau chapitre';
+        document.getElementById('formBadge').textContent = 'AJOUTER';
+        document.getElementById('btnAddLabel').textContent = 'Ajouter le chapitre';
+        document.getElementById('btnAdd').className = 'btn-add';
+        document.getElementById('btnCancel').style.display = 'none';
+        updateUI();
+    };
+    window.deleteChapter = function(i) {
+        var was = editingIndex;
+        chapters.splice(i, 1);
+        if (was === i) cancelEdit(); else if (was > i) editingIndex--;
+        showToast('Chapitre supprimé.', 'info');
+        saveProject();
+        updateUI();
+    };
+    window.clearAll = function() {
+        if (!confirm('Tout effacer ?')) return;
+        chapters = []; cancelEdit();
+        showToast('Document réinitialisé.', 'info');
+        localStorage.removeItem(STORAGE_KEY);
+        updateUI();
+    };
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); addChapter(); }
+    });
+
+    // Exporter/Importer
+    window.exportProject = function() {
+        const data = {
+            docTitle: document.getElementById('docTitle').value,
+            chapters: chapters
+        };
+        const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = (data.docTitle || 'projet') + '_sauvegarde.json';
+        a.click();
+    };
+    window.importProject = function(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                if (confirm("Charger ce projet ? Cela remplacera votre travail actuel.")) {
+                    chapters = data.chapters || [];
+                    document.getElementById('docTitle').value = data.docTitle || '';
+                    saveProject();
+                    updateUI();
+                    showToast("Projet importé avec succès !", "success");
+                }
+            } catch (err) {
+                alert("Erreur : Ce fichier n'est pas un projet valide.");
+            }
+        };
+        reader.readAsText(file);
+    };
+
+    // Fonctions docx
+    // ========== EXPORTATEUR DOCX COMPLET (À REMPLACER) ==========
+
 var docxExporter = {
 
   colorToHex: function(colorStr) {
@@ -655,7 +788,6 @@ var docxExporter = {
         ShadingType = D.ShadingType, LineRuleType = D.LineRuleType;
     var paras = [];
     var base = { bold: false, italic: false, underline: false, color: null };
-    // Compteurs de numérotation automatique — réinitialisés à chaque chapitre
     var h2Count = 0;
     var h3Count = 0;
 
@@ -672,9 +804,7 @@ var docxExporter = {
       if (el.nodeType !== 1) return;
       var tag = el.tagName.toLowerCase();
 
-      // H1 — grand titre de section, filet marine épais
       if (tag === 'h1') {
-        // H1 réinitialise les deux compteurs
         h2Count = 0; h3Count = 0;
         paras.push(new Paragraph({
           heading: HeadingLevel.HEADING_1,
@@ -684,7 +814,6 @@ var docxExporter = {
         }));
         return;
       }
-      // H2 — section intermédiaire numérotée  ex : "2. Examen clinique"
       if (tag === 'h2') {
         h2Count++; h3Count = 0;
         var h2Label = h2Count + '.\u2002' + self.cleanText(el.textContent);
@@ -696,7 +825,6 @@ var docxExporter = {
         }));
         return;
       }
-      // H3-H6 — sous-section numérotée  ex : "2.3 Interrogatoire"
       if (/^h[3-6]$/.test(tag)) {
         h3Count++;
         var h3Label = h2Count + '.' + h3Count + '\u2002' + self.cleanText(el.textContent);
@@ -708,7 +836,6 @@ var docxExporter = {
         return;
       }
 
-      // TABLEAU
       if (tag === 'table') {
         var trs = el.querySelectorAll('tr');
         if (!trs.length) return;
@@ -756,7 +883,6 @@ var docxExporter = {
         return;
       }
 
-      // LISTES
       if (tag === 'ul' || tag === 'ol') {
         var ref = tag === 'ul' ? bRef : nRef;
         Array.from(el.children).forEach(function(li) {
@@ -774,7 +900,6 @@ var docxExporter = {
         return;
       }
 
-      // BLOCKQUOTE — nota bene médical
       if (tag === 'blockquote') {
         var runs = self.extractRuns(el, Object.assign({}, base, { italic: true, color: SPECS.colors.primaryMid }), D);
         paras.push(new Paragraph({
@@ -788,7 +913,6 @@ var docxExporter = {
         return;
       }
 
-      // PARAGRAPHES
       if (tag === 'p' || tag === 'div') {
         if (el.querySelector('table,ul,ol,h1,h2,h3,h4,blockquote')) {
           Array.from(el.childNodes).forEach(function(c) { processBlock(c); }); return;
@@ -835,7 +959,6 @@ var docxExporter = {
     var title  = docTitle  || 'Document m\u00e9dical';
     var author = docAuthor || '';
 
-    // Configuration de la num\u00e9rotation
     var numConfig = [{
       reference: 'headings-num',
       levels: [
@@ -859,50 +982,34 @@ var docxExporter = {
 
     var sections = [];
 
-    // ════════════════════════════════════════════════════════
-    //  SECTION 0 — PAGE DE COUVERTURE
-    // ════════════════════════════════════════════════════════
+    // PAGE DE COUVERTURE
     var coverChildren = [];
-
-    // Espacement vertical sup\u00e9rieur
     for (var i = 0; i < 9; i++) coverChildren.push(new Paragraph({ text:'', spacing:{ after:0 } }));
-
-    // Label type document
     coverChildren.push(new Paragraph({
       children: [new TextRun({ text:'COURS M\u00c9DICAL', font:SPECS.font, size:20, bold:true, color:SPECS.colors.muted, characterSpacing:120 })],
       alignment: AlignmentType.CENTER,
       spacing: { after: 120 }
     }));
-
-    // Filet fin sup\u00e9rieur
     coverChildren.push(new Paragraph({
       text: '',
       spacing: { after: 400 },
       border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: SPECS.colors.primaryDark, space: 1 } }
     }));
-
-    // TITRE PRINCIPAL — grand, marine
     coverChildren.push(new Paragraph({
       children: [new TextRun({ text: title, font: SPECS.font, size: 56, bold: true, color: SPECS.colors.primaryDark })],
       alignment: AlignmentType.CENTER,
       spacing: { after: 320 }
     }));
-
-    // Filet fin inf\u00e9rieur
     coverChildren.push(new Paragraph({
       text: '',
       spacing: { after: 560 },
       border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: SPECS.colors.primaryDark, space: 1 } }
     }));
-
-    // Nombre de chapitres
     coverChildren.push(new Paragraph({
       children: [new TextRun({ text: chapters.length + ' chapitre' + (chapters.length>1?'s':''), font:SPECS.font, size:24, color:SPECS.colors.muted, italics:true })],
       alignment: AlignmentType.CENTER,
       spacing: { after: 720 }
     }));
-
-    // Auteur (si renseign\u00e9)
     if (author) {
       coverChildren.push(new Paragraph({
         children: [new TextRun({ text: author, font: SPECS.font, size: 28, bold: true, color: SPECS.colors.primaryMid })],
@@ -910,8 +1017,6 @@ var docxExporter = {
         spacing: { after: 160 }
       }));
     }
-
-    // Date
     coverChildren.push(new Paragraph({
       children: [new TextRun({ text: dateStr, font: SPECS.font, size: 22, color: SPECS.colors.muted })],
       alignment: AlignmentType.CENTER,
@@ -928,13 +1033,10 @@ var docxExporter = {
       children: coverChildren
     });
 
-    // ════════════════════════════════════════════════════════
-    //  SECTIONS CHAPITRES
-    // ════════════════════════════════════════════════════════
+    // CHAPITRES
     chapters.forEach(function(ch, idx) {
       var bRef = 'b'+idx, nRef = 'n'+idx;
 
-      // En-t\u00eate : Titre du chapitre uniquement (gauche)
       var header = new Header({ children: [new Paragraph({
         children: [
           new TextRun({ text: ch.title, font:SPECS.font, size:SPECS.smallSize, color:SPECS.colors.primaryMid, bold:true })
@@ -943,7 +1045,6 @@ var docxExporter = {
         spacing:  { before: 0, after: 80 }
       })] });
 
-      // Pied de page : num\u00e9ro de page uniquement (droite)
       var footer = new Footer({ children: [new Paragraph({
         children: [
           new TextRun({ text: '\t', font:SPECS.font, size:SPECS.smallSize }),
@@ -954,7 +1055,6 @@ var docxExporter = {
         spacing:  { before: 80 }
       })] });
 
-      // Contenu
       var bodyParas = self.htmlToDocxParagraphs(ch.html, bRef, nRef, D);
 
       sections.push({
@@ -965,18 +1065,15 @@ var docxExporter = {
         headers: { default: header },
         footers: { default: footer },
         children: [
-          // Titre du chapitre — filet intégré directement en bas
           new Paragraph({
             children: [new TextRun({ text: ch.title, font:SPECS.font, size:36, bold:true, color:SPECS.colors.primaryDark })],
             spacing: { before: 0, after: 240 },
             border: { bottom: { style: BorderStyle.SINGLE, size: 8, color: SPECS.colors.primaryDark, space: 4 } }
-          }),
-          // Corps
+          })
         ].concat(bodyParas)
       });
     });
 
-    // Styles du document
     var doc = new D.Document({
       creator:     author || 'G\u00e9n\u00e9rateur m\u00e9dical',
       title:       title,
@@ -1007,82 +1104,38 @@ var docxExporter = {
     return await Packer.toBlob(doc);
   }
 };
+    
+    window.generateDocx = async function() {
+        if (!chapters.length) return;
+        if (!window.docx) { showErr("La bibliothèque docx.js n'est pas chargée. Vérifiez votre connexion."); return; }
+        var btn = document.getElementById('btnGenerate');
+        btn.disabled = true;
+        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin .7s linear infinite"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0"/></svg> Génération…';
+        var title = document.getElementById('docTitle').value.trim() || 'Cours';
+        try {
+            var blob = await docxExporter.(chapters, title, '');
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            var fname = (title.replace(/[^a-zA-Z0-9\u00C0-\u024F\s\-_]/g,'').trim() || 'document') + '.docx';
+            a.href = url; a.download = fname;
+            document.body.appendChild(a); a.click();
+            document.body.removeChild(a); URL.revokeObjectURL(url);
+            showToast('Fichier « ' + fname + ' » téléchargé !', 'success');
+        } catch(err) {
+            console.error(err);
+            showErr('Erreur : ' + err.message);
+            showToast('Échec de la génération.', 'error');
+        }
+        btn.disabled = false;
+        btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg> Générer le .docx';
+    };
 
-// ════════════════════════════════════════════════════════════════
-//  D&#201;CLENCHEUR EXPORT
-// ════════════════════════════════════════════════════════════════
-async function generateDocx() {
-  if (!chapters.length) return;
-  if (!window.docx) { showErr("La biblioth\u00e8que docx.js n'est pas charg\u00e9e. V\u00e9rifiez votre connexion."); return; }
-
-  var btn = document.getElementById('btnGenerate');
-  btn.disabled = true;
-  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin .7s linear infinite"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0"/></svg> G\u00e9n\u00e9ration\u2026';
-
-  var title  = document.getElementById('docTitle').value.trim() || 'Cours';
-  var author = '';
-
-  try {
-    var blob  = await docxExporter.generate(chapters, title, author);
-    var url   = URL.createObjectURL(blob);
-    var a     = document.createElement('a');
-    var fname = (title.replace(/[^a-zA-Z0-9\u00C0-\u024F\s\-_]/g,'').trim() || 'document') + '.docx';
-    a.href = url; a.download = fname;
-    document.body.appendChild(a); a.click();
-    document.body.removeChild(a); URL.revokeObjectURL(url);
-    showToast('Fichier\u202f\u00ab\u202f' + fname + '\u202f\u00bb t\u00e9l\u00e9charg\u00e9 !', 'success');
-  } catch(err) {
-    console.error(err);
-    showErr('Erreur\u00a0: ' + err.message);
-    showToast('\u00c9chec de la g\u00e9n\u00e9ration.', 'error');
-  }
-
-  btn.disabled = false;
-  btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg> G\u00e9n\u00e9rer le .docx';
+    document.getElementById('docTitle').addEventListener('input', saveProject);
+    loadProject();
 }
 
-// Init
-document.getElementById('docTitle').addEventListener('input', saveProject); loadProject();
-
-
-// Télécharge tout le projet sous forme de fichier .json
-function exportProject() {
-  const data = {
-    docTitle: document.getElementById('docTitle').value,
-    chapters: chapters
-  };
-  const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = (data.docTitle || 'projet') + '_sauvegarde.json';
-  a.click();
-}
-
-// Charge un projet à partir d'un fichier .json sélectionné
-function importProject(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      const data = JSON.parse(e.target.result);
-      if (confirm("Charger ce projet ? Cela remplacera votre travail actuel.")) {
-        chapters = data.chapters || [];
-        document.getElementById('docTitle').value = data.docTitle || '';
-        saveProject(); // Enregistre immédiatement dans la mémoire locale
-        updateUI();
-        showToast("Projet importé avec succès !", "success");
-      }
-    } catch (err) {
-      alert("Erreur : Ce fichier n'est pas un projet valide.");
-    }
-  };
-  reader.readAsText(file);
-}
-
+// LANCER LA VÉRIFICATION PREMIUM
+checkPremiumAccess();
 </script>
 </body>
 </html>
-
