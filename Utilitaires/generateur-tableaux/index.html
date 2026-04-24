@@ -42,7 +42,7 @@
             position: fixed;
             inset: 0;
             z-index: 9999;
-            background: var(--bg-page);
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 60%, var(--primary-light) 100%);
             flex-direction: column;
             align-items: center;
             justify-content: center;
@@ -51,50 +51,46 @@
         }
         #kz-gate.visible { display: flex; }
 
-        .kz-gate-box {
+        .lock-card {
             background: #fff;
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 40px 32px;
-            max-width: 420px;
+            border-radius: 16px;
+            padding: 48px 40px;
+            max-width: 460px;
             width: 100%;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            box-shadow: 0 8px 40px rgba(0,0,0,0.25);
         }
-        .kz-gate-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-        }
-        .kz-gate-title {
-            font-size: 18px;
-            font-weight: 700;
+        .lock-card h2 {
+            font-size: 22px;
+            font-weight: 800;
             color: var(--primary);
-            margin-bottom: 10px;
+            margin: 16px 0 14px;
+            letter-spacing: -0.3px;
         }
-        .kz-gate-msg {
-            font-size: 14px;
+        .lock-card p {
+            font-size: 15px;
             color: var(--text-light);
-            margin-bottom: 24px;
             line-height: 1.6;
+            margin-bottom: 28px;
         }
-        .kz-gate-btn {
+        .btn-upgrade {
             display: inline-block;
-            padding: 11px 28px;
-            background: var(--primary);
-            color: #fff;
-            border-radius: 6px;
+            padding: 14px 32px;
+            background: linear-gradient(135deg, #C9A961, #e0c070, #C9A961);
+            background-size: 200% auto;
+            color: var(--primary-dark);
+            border-radius: 8px;
             text-decoration: none;
-            font-weight: 600;
+            font-weight: 800;
             font-size: 14px;
-            transition: background 0.2s;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            transition: background-position 0.4s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(201,169,97,0.4);
         }
-        .kz-gate-btn:hover { background: var(--primary-light); }
-        .kz-gate-btn.secondary {
-            background: transparent;
-            color: var(--primary);
-            border: 1px solid var(--border);
-            margin-left: 10px;
+        .btn-upgrade:hover {
+            background-position: right center;
+            box-shadow: 0 6px 20px rgba(201,169,97,0.6);
         }
-        .kz-gate-btn.secondary:hover { background: var(--bg-input); }
 
         /* Spinner de chargement */
         #kz-loading {
@@ -441,19 +437,17 @@
 
   <!-- ÉCRAN DE BLOCAGE (non connecté / non premium) -->
   <div id="kz-gate">
-    <div class="kz-gate-box">
-      <div class="kz-gate-icon" id="kz-gate-icon">🔒</div>
-      <div class="kz-gate-title" id="kz-gate-title">Accès réservé aux membres</div>
-      <div class="kz-gate-msg" id="kz-gate-msg">
-        Cet utilitaire est réservé aux membres premium.<br>
-        Connectez-vous depuis le site pour accéder à cet outil.
+    <div class="lock-card">
+      <span style="font-size:60px;">⭐</span>
+      <h2 id="kz-gate-title">Espace Partenaire Premium</h2>
+      <p id="kz-gate-msg">Cet utilitaire est réservé aux membres abonnés de la plateforme du <strong>Dr KARA-ZAITRI</strong>.</p>
+      <a href="https://www.dr-karazaitri-ma.net/compte-dadherent/paiement-dadhesion/" class="btn-upgrade" id="kz-gate-btn">Activer mon accès Premium</a>
+      <div style="margin-top:25px;">
+        <a href="https://www.dr-karazaitri-ma.net/connexion-membres/" style="color:var(--primary);font-weight:600;text-decoration:none;" id="kz-gate-link2">Déjà membre ? Se connecter</a>
       </div>
-      <a href="https://www.dr-karazaitri-ma.net/connexion-membres/" class="kz-gate-btn" id="kz-gate-btn">
-        Se connecter
-      </a>
-      <a href="https://karazaitri12-cpu.github.io/plateforme-utilitaires/" class="kz-gate-btn secondary">
-        ← Retour
-      </a>
+      <div style="margin-top:14px;">
+        <a href="https://karazaitri12-cpu.github.io/plateforme-utilitaires/" style="color:var(--text-light);font-size:13px;text-decoration:none;">← Retour à la plateforme</a>
+      </div>
     </div>
   </div>
 
@@ -692,29 +686,29 @@
 
     function showGate(reason) {
       loading.style.display = 'none';
-      var icon  = document.getElementById('kz-gate-icon');
       var title = document.getElementById('kz-gate-title');
       var msg   = document.getElementById('kz-gate-msg');
       var btn   = document.getElementById('kz-gate-btn');
+      var link2 = document.getElementById('kz-gate-link2');
 
       if (reason === 'expired') {
-        icon.textContent  = '⏱️';
         title.textContent = 'Session expirée';
         msg.innerHTML     = 'Votre session a expiré ou vous avez été déconnecté.<br>Reconnectez-vous pour accéder à cet outil.';
         btn.textContent   = 'Se reconnecter';
-        btn.href          = SITE_URL;
+        btn.href          = 'https://www.dr-karazaitri-ma.net/connexion-membres/';
+        link2.style.display = 'none';
       } else if (reason === 'nopremium') {
-        icon.textContent  = '⭐';
-        title.textContent = 'Accès membres premium';
-        msg.innerHTML     = 'Cet utilitaire est réservé aux membres premium.<br>Votre abonnement ne donne pas accès à cette section.';
-        btn.textContent   = 'Voir les offres';
-        btn.href          = 'https://www.dr-karazaitri-ma.net/paiement-adhesion/';
+        title.textContent = 'Espace Partenaire Premium';
+        msg.innerHTML     = 'Cet utilitaire est réservé aux membres abonnés de la plateforme du <strong>Dr KARA-ZAITRI</strong>.';
+        btn.textContent   = 'Activer mon accès Premium';
+        btn.href          = 'https://www.dr-karazaitri-ma.net/compte-dadherent/paiement-dadhesion/';
+        link2.style.display = '';
       } else {
-        icon.textContent  = '🔒';
-        title.textContent = 'Accès réservé';
-        msg.innerHTML     = 'Cet utilitaire est réservé aux membres premium.<br>Connectez-vous depuis votre espace membre pour y accéder.';
-        btn.textContent   = 'Se connecter';
-        btn.href          = SITE_URL;
+        title.textContent = 'Espace Partenaire Premium';
+        msg.innerHTML     = 'Cet utilitaire est réservé aux membres abonnés de la plateforme du <strong>Dr KARA-ZAITRI</strong>.';
+        btn.textContent   = 'Activer mon accès Premium';
+        btn.href          = 'https://www.dr-karazaitri-ma.net/compte-dadherent/paiement-dadhesion/';
+        link2.style.display = '';
       }
 
       gate.classList.add('visible');
