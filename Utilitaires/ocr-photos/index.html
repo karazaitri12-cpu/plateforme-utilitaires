@@ -588,16 +588,28 @@ async function checkPremiumAccess() {
 }
 
 function showBlockScreen() {
-    document.getElementById('loadingOverlay').style.display = 'none';
-    document.getElementById('blockScreen').style.display = 'flex';
-    document.getElementById('appContent').style.display = 'none';
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const blockScreen = document.getElementById('blockScreen');
+    const appContent = document.getElementById('appContent');
+    if (loadingOverlay) loadingOverlay.style.display = 'none';
+    if (blockScreen) blockScreen.style.display = 'flex';
+    if (appContent) appContent.style.display = 'none';
 }
 
 function showApp() {
-    document.getElementById('loadingOverlay').style.display = 'none';
-    document.getElementById('blockScreen').style.display = 'none';
-    document.getElementById('appContent').style.display = 'block';
-    initApp();
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const blockScreen = document.getElementById('blockScreen');
+    const appContent = document.getElementById('appContent');
+    if (loadingOverlay) loadingOverlay.style.display = 'none';
+    if (blockScreen) blockScreen.style.display = 'none';
+    if (appContent) appContent.style.display = 'block';
+    
+    // Attendre que le DOM soit complètement chargé avant d'initialiser l'app
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initApp);
+    } else {
+        initApp();
+    }
 }
 
 // ========== INITIALISATION DE L'APPLICATION ==========
@@ -983,22 +995,13 @@ function initApp() {
     }
 
     // Initialisation
-    document.addEventListener('DOMContentLoaded', () => {
-        window.ocrApp = new OCRApp();
-    });
-
-    // Gestion des erreurs globales
-    window.addEventListener('unhandledrejection', (event) => {
-        console.error('Promesse non gérée:', event.reason);
-        if (window.ocrApp) {
-            window.ocrApp.showNotification('Une erreur inattendue s\'est produite', 'error');
-            window.ocrApp.hideStatus();
-        }
-    });
+    window.ocrApp = new OCRApp();
 }
 
 // LANCER LA VÉRIFICATION PREMIUM
 checkPremiumAccess();
 </script>
+    
+
 </body>
 </html>
