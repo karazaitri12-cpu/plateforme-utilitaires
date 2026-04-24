@@ -4,754 +4,1420 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Générateur QR Code | Dr KARA-ZAITRI</title>
+<style>
+/* ── BLOC PREMIUM ── */
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:#f4f7f9;min-height:100vh;}
 
-<!-- Bibliothèques externes -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+#kz-loading{display:flex;position:fixed;inset:0;z-index:9998;background:#f4f7f9;align-items:center;justify-content:center;flex-direction:column;gap:16px;}
+.kz-spinner{width:40px;height:40px;border:3px solid #cfd8dc;border-top-color:#1a3a5c;border-radius:50%;animation:kz-spin 0.8s linear infinite;}
+@keyframes kz-spin{to{transform:rotate(360deg);}}
+.kz-loading-txt{font-size:13px;color:#607d8b;}
+
+#kz-gate{display:none;position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#0d2538 0%,#1a3a5c 60%,#345a7a 100%);flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;}
+#kz-gate.visible{display:flex;}
+.kz-lock-card{background:#fff;border-radius:16px;padding:40px;max-width:440px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,0.25);}
+.kz-lock-card h2{font-size:20px;font-weight:800;color:#1a3a5c;margin:14px 0 12px;}
+.kz-lock-card p{font-size:14px;color:#607d8b;line-height:1.6;margin-bottom:24px;}
+.kz-btn-upgrade{display:inline-block;padding:13px 28px;background:linear-gradient(135deg,#C9A961,#e0c070,#C9A961);color:#0d2538;border-radius:8px;text-decoration:none;font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:0.5px;box-shadow:0 4px 15px rgba(201,169,97,0.4);}
+.kz-link-login{display:block;margin-top:20px;color:#1a3a5c;font-weight:600;text-decoration:none;font-size:13px;}
+.kz-link-back{display:block;margin-top:10px;color:#90a4ae;font-size:12px;text-decoration:none;}
+
+#kz-content{display:none;}
+#kz-content.visible{display:block;}
+</style>
+</head>
+<body>
+
+<!-- SPINNER DE CHARGEMENT -->
+<div id="kz-loading">
+  <div class="kz-spinner"></div>
+  <div class="kz-loading-txt">V&#233;rification de l&rsquo;acc&#232;s&hellip;</div>
+</div>
+
+<!-- ÉCRAN DE BLOCAGE -->
+<div id="kz-gate">
+  <div class="kz-lock-card">
+    <span style="font-size:52px">&#11088;</span>
+    <h2>Outil Premium</h2>
+    <p>Cet utilitaire est r&#233;serv&#233; aux membres abonn&#233;s de la plateforme du <strong>Dr KARA-ZAITRI</strong>.</p>
+    <a href="https://www.dr-karazaitri-ma.net/compte-dadherent/paiement-dadhesion/" class="kz-btn-upgrade">Activer mon acc&#232;s Premium</a>
+    <a href="https://www.dr-karazaitri-ma.net/connexion-membres/" class="kz-link-login">D&#233;j&#224; membre ? Se connecter</a>
+    <a href="https://karazaitri12-cpu.github.io/plateforme-utilitaires/" class="kz-link-back">&#8592; Retour &#224; la plateforme</a>
+  </div>
+</div>
+
+<!-- CONTENU PRINCIPAL -->
+<div id="kz-content">
+
+<!--
+  ================================================================
+  GÉNÉRATEUR QR CODE — v3.0 ELEMENTOR BLINDÉ
+  Dr KARA-ZAITRI M.A. | dr-karazaitri-ma.net
+
+  CORRECTIONS vs version précédente :
+  ✓ Zéro dépendance CDN (moteur QR inline, export inline)
+  ✓ localStorage remplacé par variable JS en mémoire
+  ✓ Variable "history" renommée en qrHistory (évite window.history)
+  ✓ event implicite supprimé — paramètre explicite partout
+  ✓ SVG export vectoriel réel (pas de html2canvas)
+  ✓ confirm() remplacé par dialogue HTML inline
+  ✓ setTimeout fragile remplacé par callback QR natif
+  ✓ CSS entièrement isolé (all:initial + préfixe qrv3-)
+  ✓ Pas de <form>, pas de <iframe>, IIFE complet
+  ✓ Unicode CSS en \XXXX dans les pseudo-éléments
+
+  DÉPLOIEMENT : Widget HTML Elementor sur page protégée
+  par plugin membre WordPress. Aucune vérification JS d'accès.
+  ================================================================
+-->
+
+<div id="qrv3-root">
 
 <style>
-/* ==========================================
-   DESIGN INSTITUTIONNEL COMPLET
-   ========================================== */
-:root {
-  --primary: #1a3a5c;
-  --primary-light: #345a7a;
-  --primary-dark: #0d2538;
-  --text: #37474f;
-  --text-light: #607d8b;
-  --border: #cfd8dc;
-  --bg-page: #f4f7f9;
-  --bg-card: #ffffff;
-  --bg-input: #f8f9fa;
-  --success: #2e7d32;
-  --warning: #ed6c02;
-  --error: #c62828;
-  --premium: #C9A961;
-  --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+/* ── RESET TOTAL ISOLÉ ─────────────────────────────────────── */
+#qrv3-root {
+  all: initial;
+  display: block;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.55;
+  color: #37474f;
+  box-sizing: border-box;
+}
+#qrv3-root *, #qrv3-root *::before, #qrv3-root *::after {
+  box-sizing: inherit;
+  margin: 0;
+  padding: 0;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-  font-family: var(--font-ui);
-  background: var(--bg-page);
-  color: var(--text);
-  line-height: 1.5;
-  min-height: 100vh;
+/* ── VARIABLES ─────────────────────────────────────────────── */
+#qrv3-root {
+  --q-primary:     #1a3a5c;
+  --q-primary-lt:  #2a5580;
+  --q-primary-dk:  #0f2238;
+  --q-text:        #37474f;
+  --q-text-lt:     #78909c;
+  --q-border:      #cfd8dc;
+  --q-bg:          #f4f7f9;
+  --q-card:        #ffffff;
+  --q-input-bg:    #f0f4f7;
+  --q-success:     #2e7d32;
+  --q-error:       #c62828;
+  --q-warn-bg:     #fff8e1;
+  --q-warn-text:   #6d4c00;
+  --q-radius:      10px;
+  --q-shadow:      0 2px 10px rgba(26,58,92,.09);
 }
 
-/* NAVIGATION */
-.nav-bar {
-  position: sticky;
-  top: 0;
-  z-index: 2000;
-  background: #fff;
-  border-bottom: 1px solid var(--border);
-  padding: 12px 20px;
-  display: flex;
-  align-items: center;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+/* ── WRAPPER ───────────────────────────────────────────────── */
+.qrv3-wrap {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0 14px 28px;
+  background: var(--q-bg);
 }
-.back-link {
-  text-decoration: none;
-  color: var(--primary);
-  font-weight: 600;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.back-link:hover { text-decoration: underline; }
 
-/* HEADER */
-.app-header {
-  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+/* ── EN-TÊTE ───────────────────────────────────────────────── */
+.qrv3-header {
+  background: linear-gradient(135deg, var(--q-primary) 0%, var(--q-primary-lt) 100%);
   color: #fff;
-  padding: 20px;
+  padding: 22px 20px 18px;
+  border-radius: var(--q-radius) var(--q-radius) 0 0;
   text-align: center;
-  position: sticky;
-  top: 52px;
-  z-index: 100;
+  margin-bottom: 18px;
 }
-.app-header h1 {
-  font-size: 20px;
+.qrv3-header h1 {
+  font-size: 1.15rem;
   font-weight: 700;
-  margin: 0 0 5px;
+  color: #fff;
+  margin: 0 0 4px;
+  letter-spacing: .3px;
 }
-.app-header p {
-  font-size: 13px;
-  opacity: 0.9;
+.qrv3-header p {
+  font-size: .82rem;
+  color: rgba(255,255,255,.88);
   margin: 0;
 }
-.premium-badge {
-  position: absolute;
-  top: 12px;
-  right: 16px;
-  color: var(--premium);
-  font-size: 24px;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.3);
-}
 
-/* CONTENEUR */
-.container {
-  max-width: 700px;
-  margin: 24px auto;
-  padding: 0 16px;
-}
-
-/* CARTES */
-.card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 10px;
+/* ── CARTE ─────────────────────────────────────────────────── */
+.qrv3-card {
+  background: var(--q-card);
+  border: 1px solid var(--q-border);
+  border-radius: var(--q-radius);
   padding: 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  margin-bottom: 16px;
+  box-shadow: var(--q-shadow);
 }
-.card h2 {
-  font-size: 16px;
+.qrv3-card-title {
+  font-size: .78rem;
   font-weight: 700;
-  color: var(--primary);
-  margin: 0 0 16px;
+  text-transform: uppercase;
+  letter-spacing: .7px;
+  color: var(--q-primary);
+  border-bottom: 2px solid var(--q-border);
   padding-bottom: 10px;
-  border-bottom: 2px solid var(--border);
+  margin-bottom: 18px;
 }
 
-/* FORMULAIRES */
-.form-group {
-  margin-bottom: 16px;
+/* ── CHAMPS ────────────────────────────────────────────────── */
+.qrv3-field {
+  margin-bottom: 14px;
 }
-.form-label {
+.qrv3-label {
   display: block;
-  font-size: 12px;
+  font-size: .74rem;
   font-weight: 700;
-  color: var(--text);
   text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--q-text-lt);
   margin-bottom: 6px;
-  letter-spacing: 0.03em;
 }
-.form-input {
+.qrv3-input,
+.qrv3-select {
+  display: block;
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--q-border);
   border-radius: 6px;
-  font-size: 14px;
-  background: var(--bg-input);
-  transition: border-color 0.2s;
-}
-.form-input:focus {
-  border-color: var(--primary);
+  font-size: .93rem;
+  font-family: inherit;
+  color: var(--q-text);
+  background: var(--q-input-bg);
+  transition: border-color .2s, background .2s;
   outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.qrv3-input:focus,
+.qrv3-select:focus {
+  border-color: var(--q-primary);
   background: #fff;
-  box-shadow: 0 0 0 2px rgba(26,58,92,0.1);
+  box-shadow: 0 0 0 3px rgba(26,58,92,.10);
 }
 
-/* TAILLE */
-.size-options {
-  margin-bottom: 16px;
+/* ── GRILLE 2 COL ──────────────────────────────────────────── */
+.qrv3-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
 }
-.size-buttons {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin-bottom: 10px;
-}
-.size-btn {
-  padding: 8px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--bg-card);
-  color: var(--text);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.size-btn:hover, .size-btn.active {
-  background: var(--primary);
-  color: #fff;
-  border-color: var(--primary);
-}
-.size-slider {
-  width: 100%;
-  margin: 8px 0;
-}
-.size-display {
-  font-size: 12px;
-  color: var(--text-light);
-  text-align: center;
-  font-weight: 600;
-}
+.qrv3-row .qrv3-field { flex: 1; min-width: 140px; }
 
-/* CADRE */
-.frame-options {
-  margin-bottom: 16px;
-  padding: 12px;
-  background: var(--bg-input);
+/* ── COULEURS ──────────────────────────────────────────────── */
+.qrv3-color-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.qrv3-color-pick {
+  width: 38px;
+  height: 36px;
+  border: 1px solid var(--q-border);
   border-radius: 6px;
-}
-.frame-toggle {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text);
-  margin-bottom: 8px;
-}
-.frame-toggle input {
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-}
-.frame-color {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.frame-color input[type="color"] {
-  width: 40px;
-  height: 30px;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  cursor: pointer;
-  background: #fff;
   padding: 2px;
+  background: #fff;
+  cursor: pointer;
+  flex-shrink: 0;
 }
-.frame-color input[type="text"] {
+.qrv3-color-hex {
   flex: 1;
-  padding: 6px 10px;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  font-size: 12px;
+  padding: 8px 10px;
+  border: 1px solid var(--q-border);
+  border-radius: 6px;
+  font-size: .85rem;
+  font-family: monospace;
+  color: var(--q-text);
+  background: var(--q-input-bg);
+  outline: none;
   text-transform: uppercase;
 }
+.qrv3-color-hex:focus {
+  border-color: var(--q-primary);
+  background: #fff;
+}
 
-/* BOUTONS */
-.btn {
+/* ── TAILLE SLIDER ─────────────────────────────────────────── */
+.qrv3-slider {
+  width: 100%;
+  margin: 6px 0 4px;
+  accent-color: var(--q-primary);
+  cursor: pointer;
+}
+.qrv3-size-label {
+  font-size: .78rem;
+  color: var(--q-text-lt);
+  font-weight: 600;
+  text-align: right;
+  display: block;
+}
+
+/* ── TAILLE PRESETS ────────────────────────────────────────── */
+.qrv3-presets {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.qrv3-preset {
+  padding: 6px 14px;
+  border: 1px solid var(--q-border);
+  border-radius: 20px;
+  font-size: .8rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--q-card);
+  color: var(--q-text);
+  transition: all .18s;
+  font-family: inherit;
+}
+.qrv3-preset:hover,
+.qrv3-preset[data-active="true"] {
+  background: var(--q-primary);
+  color: #fff;
+  border-color: var(--q-primary);
+}
+
+/* ── OPTION CADRE ──────────────────────────────────────────── */
+.qrv3-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.qrv3-toggle-row input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--q-primary);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.qrv3-toggle-row label {
+  font-size: .88rem;
+  font-weight: 600;
+  color: var(--q-text);
+  cursor: pointer;
+}
+
+/* ── BOUTONS ───────────────────────────────────────────────── */
+.qrv3-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 10px 18px;
+  gap: 7px;
+  padding: 11px 20px;
   border-radius: 6px;
+  font-size: .9rem;
   font-weight: 600;
-  font-size: 14px;
+  font-family: inherit;
   cursor: pointer;
   border: none;
-  transition: all 0.2s;
-  width: 100%;
+  transition: opacity .18s, transform .12s;
+  text-decoration: none;
+  line-height: 1;
 }
-.btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.btn-primary { background: var(--primary); color: #fff; }
-.btn-primary:hover:not(:disabled) { background: var(--primary-light); }
-.btn-success { background: var(--success); color: #fff; }
-.btn-success:hover:not(:disabled) { background: #388e3c; }
-.btn-secondary { background: var(--bg-card); color: var(--primary); border: 1px solid var(--border); }
-.btn-secondary:hover:not(:disabled) { background: var(--bg-input); }
-.btn-row {
+.qrv3-btn:active  { transform: scale(.97); }
+.qrv3-btn:disabled { opacity: .45; cursor: not-allowed; }
+
+.qrv3-btn-primary { background: var(--q-primary); color: #fff; width: 100%; }
+.qrv3-btn-primary:hover:not(:disabled) { opacity: .88; }
+
+.qrv3-btn-success { background: var(--q-success); color: #fff; }
+.qrv3-btn-success:hover:not(:disabled) { opacity: .88; }
+
+.qrv3-btn-outline {
+  background: transparent;
+  color: var(--q-primary);
+  border: 1px solid var(--q-primary);
+}
+.qrv3-btn-outline:hover:not(:disabled) { background: var(--q-primary); color: #fff; }
+
+.qrv3-btn-danger { background: var(--q-error); color: #fff; }
+.qrv3-btn-danger:hover:not(:disabled) { opacity: .88; }
+
+.qrv3-dl-row {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin-top: 12px;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 16px;
 }
 
-/* QR DISPLAY */
-.qr-display {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px;
-  background: var(--bg-input);
-  border-radius: 8px;
-  border: 2px dashed var(--border);
-  min-height: 200px;
-}
-.qr-display:empty::before {
-  content: "Le QR code apparaîtra ici";
-  color: var(--text-light);
-  font-size: 14px;
-}
-#qrcode {
+/* ── ZONE QR ───────────────────────────────────────────────── */
+.qrv3-preview-zone {
   display: flex;
   justify-content: center;
   align-items: center;
-  position: relative;
-  background: #fff;
-  padding: 15px;
+  min-height: 230px;
+  background: var(--q-input-bg);
+  border: 2px dashed var(--q-border);
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  padding: 24px;
+  position: relative;
 }
-.frame {
+.qrv3-canvas-wrap {
+  position: relative;
+  display: inline-block;
+  background: #fff;
+  padding: 14px;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.10);
+  line-height: 0;
+}
+.qrv3-canvas-wrap canvas {
+  display: block;
+}
+/* Cadre "Scannez-moi" */
+.qrv3-frame-border {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-  font-weight: 600;
-  font-size: 12px;
-  color: #000;
+  inset: 4px;
+  border-radius: 6px;
   pointer-events: none;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  width: 100%;
-  height: 100%;
+  padding: 4px 0;
 }
-.frame-text {
-  padding: 4px 8px;
-  background: rgba(255,255,255,0.9);
+.qrv3-frame-label {
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  background: rgba(255,255,255,.92);
   border-radius: 4px;
+  padding: 2px 8px;
+  line-height: 1.4;
+}
+.qrv3-empty-hint {
+  text-align: center;
+  color: var(--q-text-lt);
+  font-size: .85rem;
+}
+.qrv3-empty-hint-icon {
+  font-size: 2.2rem;
+  display: block;
+  margin-bottom: 8px;
+  opacity: .35;
 }
 
-/* HISTORIQUE */
-.history-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+/* ── ALERTES ───────────────────────────────────────────────── */
+.qrv3-alert {
+  border-radius: 6px;
+  padding: 9px 13px;
+  font-size: .83rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  display: none;
 }
-.history-item {
+.qrv3-alert-error {
+  background: #fdecea;
+  color: var(--q-error);
+  border: 1px solid #ef9a9a;
+}
+.qrv3-alert-success {
+  background: #e8f5e9;
+  color: var(--q-success);
+  border: 1px solid #a5d6a7;
+}
+
+/* ── DIALOGUE CONFIRMATION ─────────────────────────────────── */
+.qrv3-confirm {
+  display: none;
+  background: #fff3e0;
+  border: 1px solid #ffcc02;
+  border-radius: 8px;
+  padding: 14px 16px;
+  font-size: .87rem;
+  color: #5d4037;
+  margin-top: 10px;
+}
+.qrv3-confirm p { margin-bottom: 10px; font-weight: 600; }
+.qrv3-confirm-btns { display: flex; gap: 8px; }
+
+/* ── HISTORIQUE ────────────────────────────────────────────── */
+.qrv3-hist-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px;
-  background: var(--bg-input);
-  border-radius: 6px;
-  border-left: 3px solid var(--primary);
+  padding: 10px 12px;
+  background: var(--q-input-bg);
+  border-radius: 7px;
+  border-left: 3px solid var(--q-primary);
+  margin-bottom: 8px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background .18s;
 }
-.history-item:hover {
-  background: #e3f2fd;
-  border-left-color: var(--success);
-}
-.history-qr {
-  width: 50px;
-  height: 50px;
+.qrv3-hist-item:hover { background: #e3f2fd; }
+.qrv3-hist-item:last-child { margin-bottom: 0; }
+.qrv3-hist-thumb {
+  width: 48px;
+  height: 48px;
   background: #fff;
-  padding: 4px;
-  border-radius: 4px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--q-border);
+  border-radius: 5px;
+  flex-shrink: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.history-qr img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
+.qrv3-hist-thumb canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
 }
-.history-info {
-  flex: 1;
-  min-width: 0;
-}
-.history-text {
-  font-size: 13px;
+.qrv3-hist-info { flex: 1; min-width: 0; }
+.qrv3-hist-text {
+  font-size: .82rem;
   font-weight: 600;
-  color: var(--text);
+  color: var(--q-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.history-meta {
-  font-size: 11px;
-  color: var(--text-light);
+.qrv3-hist-meta {
+  font-size: .72rem;
+  color: var(--q-text-lt);
+  margin-top: 2px;
 }
-.history-actions {
-  display: flex;
-  gap: 4px;
-}
-.history-actions button {
-  padding: 4px 8px;
-  font-size: 11px;
-  border: none;
+.qrv3-hist-del {
+  background: none;
+  border: 1px solid var(--q-border);
   border-radius: 4px;
+  padding: 4px 8px;
+  font-size: .75rem;
   cursor: pointer;
-  background: var(--bg-card);
-  color: var(--text);
+  color: var(--q-text-lt);
+  font-family: inherit;
+  transition: all .15s;
+  flex-shrink: 0;
 }
-.history-actions button:hover {
-  background: var(--primary);
-  color: #fff;
+.qrv3-hist-del:hover { background: var(--q-error); color: #fff; border-color: var(--q-error); }
+
+/* ── NOTICE LÉGALE ─────────────────────────────────────────── */
+.qrv3-notice {
+  background: var(--q-warn-bg);
+  border-left: 3px solid #ffcc02;
+  color: var(--q-warn-text);
+  padding: 9px 13px;
+  border-radius: 0 6px 6px 0;
+  font-size: .74rem;
+  line-height: 1.5;
+  margin-top: 14px;
 }
 
-/* STATUS */
-#status {
-  margin-top: 12px;
-  padding: 10px;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 600;
+/* ── FOOTER ────────────────────────────────────────────────── */
+.qrv3-footer {
   text-align: center;
-  display: none;
-}
-#status.success {
-  background: #e8f5e9;
-  color: var(--success);
-  display: block;
-}
-#status.error {
-  background: #ffebee;
-  color: var(--error);
-  display: block;
+  font-size: .71rem;
+  color: var(--q-text-lt);
+  padding: 12px 0 4px;
+  border-top: 1px solid var(--q-border);
+  margin-top: 6px;
 }
 
-/* FOOTER */
-.footer {
-  text-align: center;
-  padding: 20px;
-  font-size: 11px;
-  color: var(--text-light);
-  margin-top: 24px;
-  border-top: 1px solid var(--border);
-}
-.disclaimer {
-  background: #fff3cd;
-  color: #856404;
-  padding: 10px;
-  border-radius: 6px;
-  border: 1px solid #ffeeba;
-  margin-top: 12px;
-  font-size: 10px;
-  line-height: 1.4;
-}
-
-/* RESPONSIVE */
-@media (max-width: 600px) {
-  .size-buttons { grid-template-columns: 1fr; }
-  .btn-row { grid-template-columns: 1fr; }
-  .history-item { flex-direction: column; text-align: center; }
-  .history-actions { justify-content: center; }
+/* ── RESPONSIVE ────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .qrv3-header h1 { font-size: 1rem; }
+  .qrv3-card { padding: 14px; }
+  .qrv3-dl-row { grid-template-columns: 1fr; }
+  .qrv3-row { flex-direction: column; }
 }
 </style>
-</head>
-<body>
 
-  <!-- NAVIGATION -->
-  <nav class="nav-bar">
-    <a href="https://karazaitri12-cpu.github.io/plateforme-utilitaires/" class="back-link">← Retour aux Utilitaires</a>
-  </nav>
+<!-- ── STRUCTURE HTML ──────────────────────────────────────── -->
+<div class="qrv3-wrap">
 
-  <!-- HEADER -->
-  <header class="app-header">
-    <span class="premium-badge">★</span>
-    <h1>Générateur de QR Code</h1>
-    <p>Créez des QR codes personnalisés pour liens, textes, contacts</p>
-  </header>
-
-  <div class="container">
-
-    <!-- GÉNÉRATEUR -->
-    <div class="card">
-      <h2>📱 Créer un QR Code</h2>
-      
-      <div class="form-group">
-        <label class="form-label" for="text">Contenu <span style="color:var(--error)">*</span></label>
-        <input type="text" id="text" class="form-input" placeholder="https://exemple.com ou votre texte">
-      </div>
-
-      <!-- TAILLE -->
-      <div class="size-options">
-        <label class="form-label">Taille du QR Code</label>
-        <div class="size-buttons">
-          <button class="size-btn" onclick="setSize(128)">Petit</button>
-          <button class="size-btn active" onclick="setSize(256)">Moyen</button>
-          <button class="size-btn" onclick="setSize(512)">Grand</button>
-        </div>
-        <input type="range" id="customSizeSlider" class="size-slider" min="100" max="1000" value="256" oninput="updateSize()">
-        <div class="size-display" id="sizeDisplay">Taille : 256×256 px</div>
-      </div>
-
-      <!-- CADRE -->
-      <div class="frame-options">
-        <label class="frame-toggle">
-          <input type="checkbox" id="addFrame" onchange="toggleFrame()">
-          Ajouter un cadre "Scannez-moi"
-        </label>
-        <div class="frame-color" id="frameColorRow" style="display:none">
-          <span style="font-size:12px;color:var(--text-light)">Couleur :</span>
-          <input type="color" id="frameColor" value="#1a3a5c" onchange="updateFrameColor()">
-          <input type="text" id="frameColorHex" value="#1A3A5C" maxlength="7" oninput="syncFrameColor()">
-        </div>
-      </div>
-
-      <button class="btn btn-primary" onclick="generateQR()">🎨 Générer le QR Code</button>
-    </div>
-
-    <!-- AFFICHAGE QR -->
-    <div class="card">
-      <h2>📲 Votre QR Code</h2>
-      <div class="qr-display" id="qrcode"></div>
-      
-      <div id="downloadOptions" style="display:none;margin-top:16px">
-        <label class="form-label">Télécharger</label>
-        <div class="btn-row">
-          <button class="btn btn-success" onclick="downloadPNG()">📄 PNG</button>
-          <button class="btn btn-success" onclick="downloadSVG()">📐 SVG</button>
-          <button class="btn btn-success" onclick="downloadPDF()">📕 PDF</button>
-        </div>
-      </div>
-      
-      <div id="status"></div>
-    </div>
-
-    <!-- HISTORIQUE -->
-    <div class="card" id="historyCard" style="display:none">
-      <h2>📚 Historique</h2>
-      <div class="history-list" id="historyList"></div>
-      <button class="btn btn-secondary" onclick="clearHistory()" style="margin-top:12px;width:100%">🗑️ Effacer l'historique</button>
-    </div>
-
-    <!-- FOOTER -->
-    <footer class="footer">
-      <span>Dr KARA-ZAITRI M.A © 2026</span>
-      <div class="disclaimer">
-        ⚠️ <strong>Usage bureautique</strong> : Génération locale. Les QR codes sont créés dans votre navigateur.
-      </div>
-    </footer>
-
+  <!-- En-tête -->
+  <div class="qrv3-header">
+    <h1>G&#233;n&#233;rateur de QR Code</h1>
+    <p>Cr&#233;ation instantan&#233;e &mdash; traitement local, aucune donn&#233;e transmise</p>
   </div>
 
-  <script>
-    let qrcode = null;
-    let history = JSON.parse(localStorage.getItem('qr_history') || '[]');
-    let currentSize = 256;
-    let frameEnabled = false;
-    let frameColor = '#1a3a5c';
+  <!-- Carte configuration -->
+  <div class="qrv3-card">
+    <div class="qrv3-card-title">Configuration</div>
 
-    // TAILLE
-    function setSize(size) {
-      currentSize = size;
-      document.getElementById('customSizeSlider').value = size;
-      document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
-      event.target.classList.add('active');
-      updateSize();
-    }
+    <div id="qrv3-alert" class="qrv3-alert qrv3-alert-error" role="alert"></div>
 
-    function updateSize() {
-      currentSize = parseInt(document.getElementById('customSizeSlider').value);
-      document.getElementById('sizeDisplay').textContent = `Taille : ${currentSize}×${currentSize} px`;
-      // Mettre à jour le bouton actif
-      document.querySelectorAll('.size-btn').forEach((btn, i) => {
-        btn.classList.toggle('active', [128,256,512][i] === currentSize);
-      });
-    }
+    <!-- Contenu -->
+    <div class="qrv3-field">
+      <label class="qrv3-label" for="qrv3-text">Contenu (URL ou texte) <span style="color:var(--q-error)">*</span></label>
+      <input type="text" id="qrv3-text" class="qrv3-input"
+             placeholder="https://www.dr-karazaitri-ma.net/..."
+             autocomplete="off" spellcheck="false">
+    </div>
 
-    // CADRE
-    function toggleFrame() {
-      frameEnabled = document.getElementById('addFrame').checked;
-      document.getElementById('frameColorRow').style.display = frameEnabled ? 'flex' : 'none';
-      if (qrcode) updateFrame();
-    }
+    <!-- Taille -->
+    <div class="qrv3-field">
+      <label class="qrv3-label">Taille</label>
+      <div class="qrv3-presets" id="qrv3-presets">
+        <button class="qrv3-preset" data-size="128" onclick="qrv3SetPreset(this,128)">Petit (128)</button>
+        <button class="qrv3-preset" data-size="256" data-active="true" onclick="qrv3SetPreset(this,256)">Moyen (256)</button>
+        <button class="qrv3-preset" data-size="400" onclick="qrv3SetPreset(this,400)">Grand (400)</button>
+        <button class="qrv3-preset" data-size="512" onclick="qrv3SetPreset(this,512)">Tr&#232;s grand (512)</button>
+      </div>
+      <input type="range" id="qrv3-slider" class="qrv3-slider"
+             min="100" max="600" step="8" value="256"
+             oninput="qrv3SliderChange(this)">
+      <span class="qrv3-size-label" id="qrv3-size-lbl">256 &times; 256 px</span>
+    </div>
 
-    function updateFrameColor() {
-      frameColor = document.getElementById('frameColor').value;
-      document.getElementById('frameColorHex').value = frameColor.toUpperCase();
-      if (qrcode) updateFrame();
-    }
+    <!-- Couleurs -->
+    <div class="qrv3-row">
+      <div class="qrv3-field">
+        <label class="qrv3-label">Couleur des modules</label>
+        <div class="qrv3-color-wrap">
+          <input type="color" id="qrv3-dark-pick" class="qrv3-color-pick" value="#000000"
+                 oninput="qrv3SyncColor('dark')">
+          <input type="text"  id="qrv3-dark-hex"  class="qrv3-color-hex" value="#000000" maxlength="7"
+                 oninput="qrv3HexInput('dark')">
+        </div>
+      </div>
+      <div class="qrv3-field">
+        <label class="qrv3-label">Couleur de fond</label>
+        <div class="qrv3-color-wrap">
+          <input type="color" id="qrv3-light-pick" class="qrv3-color-pick" value="#ffffff"
+                 oninput="qrv3SyncColor('light')">
+          <input type="text"  id="qrv3-light-hex"  class="qrv3-color-hex" value="#ffffff" maxlength="7"
+                 oninput="qrv3HexInput('light')">
+        </div>
+      </div>
+    </div>
 
-    function syncFrameColor() {
-      let v = document.getElementById('frameColorHex').value.trim();
-      if (v && !v.startsWith('#')) v = '#' + v;
-      if (/^#([0-9A-Fa-f]{6})$/.test(v)) {
-        frameColor = v;
-        document.getElementById('frameColor').value = v;
-        if (qrcode) updateFrame();
-      }
-      document.getElementById('frameColorHex').value = v.toUpperCase();
-    }
+    <!-- Niveau de correction -->
+    <div class="qrv3-field">
+      <label class="qrv3-label" for="qrv3-ecl">Niveau de correction d&rsquo;erreur</label>
+      <select id="qrv3-ecl" class="qrv3-select">
+        <option value="L">L &mdash; 7 % (fichier l&#233;ger)</option>
+        <option value="M">M &mdash; 15 %</option>
+        <option value="Q">Q &mdash; 25 %</option>
+        <option value="H" selected>H &mdash; 30 % (recommand&#233;)</option>
+      </select>
+    </div>
 
-    function updateFrame() {
-      // Supprimer l'ancien cadre
-      const oldFrame = document.querySelector('.frame');
-      if (oldFrame) oldFrame.remove();
-      
-      if (!frameEnabled || !qrcode) return;
-      
-      // Créer le nouveau cadre
-      const qrEl = document.getElementById('qrcode');
-      const frame = document.createElement('div');
-      frame.className = 'frame';
-      frame.style.border = `3px solid ${frameColor}`;
-      frame.style.borderRadius = '12px';
-      frame.innerHTML = `
-        <div class="frame-text" style="color:${frameColor}">Scannez-moi</div>
-        <div style="flex:1"></div>
-        <div class="frame-text" style="color:${frameColor}">Scannez-moi</div>
-      `;
-      qrEl.appendChild(frame);
-    }
-
-    // GÉNÉRATION QR
-    function generateQR() {
-      const text = document.getElementById('text').value.trim();
-      const status = document.getElementById('status');
-      
-      if (!text) {
-        status.textContent = '⚠️ Veuillez entrer un texte ou une URL';
-        status.className = 'error';
-        return;
-      }
-      
-      // Nettoyer
-      document.getElementById('qrcode').innerHTML = '';
-      status.className = '';
-      status.textContent = '';
-      
-      // Générer
-      qrcode = new QRCode(document.getElementById('qrcode'), {
-        text: text,
-        width: currentSize,
-        height: currentSize,
-        colorDark: '#000000',
-        colorLight: '#ffffff',
-        correctLevel: QRCode.CorrectLevel.H
-      });
-      
-      // Ajouter le cadre si activé
-      setTimeout(() => {
-        updateFrame();
-        document.getElementById('downloadOptions').style.display = 'block';
-        saveToHistory(text, currentSize);
-        status.textContent = '✓ QR Code généré avec succès';
-        status.className = 'success';
-      }, 100);
-    }
-
-    // HISTORIQUE
-    function saveToHistory(text, size) {
-      const qrEl = document.getElementById('qrcode');
-      html2canvas(qrEl, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
-        const item = {
-          text: text.length > 50 ? text.substring(0, 50) + '…' : text,
-          size: size,
-          timestamp: new Date().toLocaleString('fr-FR'),
-          dataUrl: canvas.toDataURL('image/png')
-        };
-        history.unshift(item);
-        if (history.length > 10) history.pop();
-        localStorage.setItem('qr_history', JSON.stringify(history));
-        updateHistoryDisplay();
-      });
-    }
-
-    function updateHistoryDisplay() {
-      const list = document.getElementById('historyList');
-      const card = document.getElementById('historyCard');
-      
-      if (!history.length) {
-        card.style.display = 'none';
-        return;
-      }
-      
-      card.style.display = 'block';
-      list.innerHTML = history.map((item, i) => `
-        <div class="history-item" onclick="loadFromHistory(${i})">
-          <div class="history-qr"><img src="${item.dataUrl}" alt="QR"></div>
-          <div class="history-info">
-            <div class="history-text">${escapeHtml(item.text)}</div>
-            <div class="history-meta">${item.size}×${item.size} px • ${item.timestamp}</div>
-          </div>
-          <div class="history-actions">
-            <button onclick="event.stopPropagation(); regenerateQR(${i})">↻</button>
-            <button onclick="event.stopPropagation(); removeFromHistory(${i})">✕</button>
+    <!-- Cadre -->
+    <div class="qrv3-field">
+      <div class="qrv3-toggle-row">
+        <input type="checkbox" id="qrv3-frame" onchange="qrv3ToggleFrameOpts()">
+        <label for="qrv3-frame">Ajouter un cadre &#171;&nbsp;Scannez-moi&nbsp;&#187;</label>
+      </div>
+      <div id="qrv3-frame-opts" style="display:none">
+        <div class="qrv3-field" style="margin-bottom:0">
+          <label class="qrv3-label">Couleur du cadre</label>
+          <div class="qrv3-color-wrap">
+            <input type="color" id="qrv3-frame-pick" class="qrv3-color-pick" value="#1a3a5c"
+                   oninput="qrv3SyncColor('frame')">
+            <input type="text"  id="qrv3-frame-hex"  class="qrv3-color-hex" value="#1A3A5C" maxlength="7"
+                   oninput="qrv3HexInput('frame')">
           </div>
         </div>
-      `).join('');
-    }
+      </div>
+    </div>
 
-    function loadFromHistory(i) {
-      const item = history[i];
-      document.getElementById('text').value = item.text.replace('…', '');
-      setSize(item.size);
-      generateQR();
-    }
+    <button class="qrv3-btn qrv3-btn-primary" id="qrv3-go" onclick="qrv3Generate()">
+      G&#233;n&#233;rer le QR Code
+    </button>
+  </div>
 
-    function regenerateQR(i) {
-      loadFromHistory(i);
-    }
+  <!-- Carte résultat -->
+  <div class="qrv3-card">
+    <div class="qrv3-card-title">R&#233;sultat</div>
 
-    function removeFromHistory(i) {
-      history.splice(i, 1);
-      localStorage.setItem('qr_history', JSON.stringify(history));
-      updateHistoryDisplay();
-    }
+    <div class="qrv3-preview-zone" id="qrv3-preview">
+      <div class="qrv3-empty-hint" id="qrv3-hint">
+        <span class="qrv3-empty-hint-icon">&#9641;</span>
+        Le QR Code appara&#238;tra ici apr&#232;s g&#233;n&#233;ration
+      </div>
+    </div>
 
-    function clearHistory() {
-      if (confirm('Effacer tout l\'historique ?')) {
-        history = [];
-        localStorage.removeItem('qr_history');
-        updateHistoryDisplay();
+    <div id="qrv3-dl-section" style="display:none">
+      <div class="qrv3-dl-row">
+        <button class="qrv3-btn qrv3-btn-success" onclick="qrv3DownloadPNG()">
+          T&#233;l&#233;charger PNG
+        </button>
+        <button class="qrv3-btn qrv3-btn-success" onclick="qrv3DownloadSVG()">
+          T&#233;l&#233;charger SVG
+        </button>
+      </div>
+      <div id="qrv3-dl-ok" class="qrv3-alert qrv3-alert-success" style="margin-top:10px"></div>
+    </div>
+
+    <div class="qrv3-notice">
+      &#9888;&#65039; Traitement enti&#232;rement local — aucune donn&#233;e n&rsquo;est envoy&#233;e &#224; un serveur ext&#233;rieur.
+      Les QR Codes g&#233;n&#233;r&#233;s sont &#224; usage professionnel sous la responsabilit&#233; de l&rsquo;utilisateur.
+    </div>
+  </div>
+
+  <!-- Carte historique (session uniquement) -->
+  <div class="qrv3-card" id="qrv3-hist-card" style="display:none">
+    <div class="qrv3-card-title">Historique de session</div>
+    <div id="qrv3-hist-list"></div>
+
+    <!-- Dialogue de confirmation inline (remplace confirm()) -->
+    <div class="qrv3-confirm" id="qrv3-confirm">
+      <p>Effacer tout l&rsquo;historique de session ?</p>
+      <div class="qrv3-confirm-btns">
+        <button class="qrv3-btn qrv3-btn-danger" style="flex:1" onclick="qrv3ClearConfirmed()">Effacer</button>
+        <button class="qrv3-btn qrv3-btn-outline" style="flex:1" onclick="qrv3HideConfirm()">Annuler</button>
+      </div>
+    </div>
+
+    <button class="qrv3-btn qrv3-btn-outline" style="width:100%;margin-top:12px"
+            onclick="qrv3AskClear()">
+      Effacer l&rsquo;historique
+    </button>
+  </div>
+
+  <div class="qrv3-footer">
+    Dr KARA-ZAITRI M.A. &copy; 2026 &mdash; dr-karazaitri-ma.net
+  </div>
+
+</div><!-- /.qrv3-wrap -->
+</div><!-- /#qrv3-root -->
+
+<!-- ============================================================
+     MOTEUR QR + LOGIQUE — IIFE COMPLET, ZÉRO CDN
+     Moteur : qrcode-generator de Kazuhiko Arase (MIT)
+     Intégré inline pour garantir le fonctionnement hors réseau
+============================================================ -->
+<script>
+(function () {
+"use strict";
+
+/* ─────────────────────────────────────────────────────────────
+   1. MOTEUR QR (qrcode-generator, MIT, Kazuhiko Arase)
+   Source: https://github.com/kazuhikoarase/qrcode-generator
+   Version compacte — byte mode, versions 1-40, niveaux L/M/Q/H
+───────────────────────────────────────────────────────────── */
+var QRErrorCorrectionLevel = { L: 1, M: 0, Q: 3, H: 2 };
+
+var QRMode = {
+  MODE_BYTE: 4,
+  getLengthInBits: function (mode, type) {
+    if (mode === 4) return type < 10 ? 8 : 16;
+    return 0;
+  }
+};
+
+var QRPatternPosition = {
+  PATTERN_POSITION_TABLE: [
+    [], [6,18], [6,22], [6,26], [6,30], [6,34],
+    [6,22,38], [6,24,42], [6,26,46], [6,28,50], [6,30,54],
+    [6,32,58], [6,34,62], [6,26,46,66], [6,26,48,70],
+    [6,26,50,74], [6,30,54,78], [6,30,56,82], [6,30,58,86],
+    [6,34,62,90], [6,28,50,72,94], [6,26,50,74,98],
+    [6,30,54,78,102], [6,28,54,80,106], [6,32,58,84,110],
+    [6,30,58,86,114], [6,34,62,90,118], [6,26,50,74,98,122],
+    [6,30,54,78,102,126], [6,26,52,78,104,130],
+    [6,30,56,82,108,132], [6,34,60,86,112,136],
+    [6,30,58,86,114,142], [6,34,62,90,118,146],
+    [6,30,54,78,102,126,150], [6,24,50,76,102,128,154],
+    [6,28,54,80,106,132,158], [6,32,58,84,110,136,162],
+    [6,26,54,82,110,138,166], [6,30,58,86,114,142,170]
+  ]
+};
+
+var QRUtil = {
+  G15: (1<<10)|(1<<8)|(1<<5)|(1<<4)|(1<<2)|(1<<1)|(1<<0),
+  G18: (1<<12)|(1<<11)|(1<<10)|(1<<9)|(1<<8)|(1<<5)|(1<<2)|(1<<0),
+  G15_MASK: (1<<14)|(1<<12)|(1<<10)|(1<<4)|(1<<1),
+  bchDigit: function (d) { var n=0; while(d!==0){n++;d>>>=1;} return n; },
+  getBCHTypeInfo: function (d) {
+    var b = d<<10;
+    while (QRUtil.bchDigit(b)-QRUtil.bchDigit(QRUtil.G15)>=0)
+      b^=QRUtil.G15<<(QRUtil.bchDigit(b)-QRUtil.bchDigit(QRUtil.G15));
+    return ((d<<10)|b)^QRUtil.G15_MASK;
+  },
+  getBCHTypeNumber: function (d) {
+    var b = d<<12;
+    while (QRUtil.bchDigit(b)-QRUtil.bchDigit(QRUtil.G18)>=0)
+      b^=QRUtil.G18<<(QRUtil.bchDigit(b)-QRUtil.bchDigit(QRUtil.G18));
+    return (d<<12)|b;
+  },
+  getMaskFunction: function (p) {
+    switch(p) {
+      case 0: return function(i,j){return (i+j)%2===0;};
+      case 1: return function(i){return i%2===0;};
+      case 2: return function(i,j){return j%3===0;};
+      case 3: return function(i,j){return (i+j)%3===0;};
+      case 4: return function(i,j){return (Math.floor(i/2)+Math.floor(j/3))%2===0;};
+      case 5: return function(i,j){return (i*j)%2+(i*j)%3===0;};
+      case 6: return function(i,j){return ((i*j)%2+(i*j)%3)%2===0;};
+      case 7: return function(i,j){return ((i*j)%3+(i+j)%2)%2===0;};
+    }
+  }
+};
+
+/* GF(256) */
+var EXP_TABLE = new Array(256), LOG_TABLE = new Array(256);
+(function(){
+  for(var i=0;i<8;i++) EXP_TABLE[i]=1<<i;
+  for(var i2=8;i2<256;i2++) EXP_TABLE[i2]=EXP_TABLE[i2-4]^EXP_TABLE[i2-5]^EXP_TABLE[i2-6]^EXP_TABLE[i2-8];
+  for(var i3=0;i3<255;i3++) LOG_TABLE[EXP_TABLE[i3]]=i3;
+})();
+function gfMul(a,b){ return (a===0||b===0)?0:EXP_TABLE[(LOG_TABLE[a]+LOG_TABLE[b])%255]; }
+
+/* BitBuffer */
+function qrBitBuffer(){
+  var buf=[], len=0;
+  return {
+    put: function(n,l){ for(var i=0;i<l;i++) this.putBit(((n>>>(l-i-1))&1)===1); },
+    putBit: function(b){ var idx=Math.floor(len/8); if(buf.length<=idx) buf.push(0); if(b) buf[idx]|=0x80>>>(len%8); len++; },
+    getBuffer: function(){ return buf; },
+    getAt: function(i){ return (buf[Math.floor(i/8)]>>>(7-i%8))&1; },
+    getLengthInBits: function(){ return len; }
+  };
+}
+
+/* RS error correction */
+function rsCorrect(data, ecCount){
+  var poly=[1];
+  for(var i=0;i<ecCount;i++){
+    var r=new Array(poly.length+1).fill(0);
+    for(var j=0;j<poly.length;j++) for(var k=0;k<2;k++) r[j+k]^=gfMul(poly[j],[1,EXP_TABLE[i]][k]);
+    poly=r;
+  }
+  var mod=data.slice().concat(new Array(poly.length-1).fill(0));
+  for(var i2=0;i2<data.length;i2++){
+    var ratio=mod[i2];
+    if(ratio!==0) for(var j2=0;j2<poly.length;j2++) mod[i2+j2]^=gfMul(poly[j2],ratio);
+  }
+  return mod.slice(data.length);
+}
+
+/* RS Blocks table */
+var RS_BLOCK_TABLE = [
+  [1,26,19],[1,26,16],[1,26,13],[1,26,9],
+  [1,44,34],[1,44,28],[1,44,22],[1,44,16],
+  [1,70,55],[1,70,44],[2,35,17],[2,35,13],
+  [1,100,80],[2,50,32],[2,25,24],[4,25,9],
+  [1,134,108],[2,67,43],[2,33,15,2,34,16],[2,33,11,2,34,12],
+  [2,86,68],[4,43,27],[4,43,19],[4,43,15],
+  [2,98,78],[4,49,31],[2,32,14,4,33,15],[4,39,13,1,40,14],
+  [2,121,97],[2,60,38,2,61,39],[4,40,18,2,41,19],[4,40,14,2,41,15],
+  [2,146,116],[3,58,36,2,59,37],[4,36,16,4,37,17],[4,36,12,4,37,13],
+  [2,86,68,2,87,69],[4,69,43,1,70,44],[6,43,19,2,44,20],[6,43,15,2,44,16],
+  [4,101,81],[1,80,50,4,81,51],[4,50,22,4,51,23],[3,36,12,8,37,13],
+  [2,116,92,2,117,93],[6,58,36,2,59,37],[4,46,20,6,47,21],[7,42,14,4,43,15],
+  [4,133,107],[8,59,37,1,60,38],[8,44,20,4,45,21],[12,33,11,4,34,12],
+  [3,145,115,1,146,116],[4,64,40,5,65,41],[11,36,16,5,37,17],[11,36,12,5,37,13],
+  [5,109,87,1,110,88],[5,65,41,5,66,42],[5,54,24,7,55,25],[11,36,12,7,37,13],
+  [5,122,98,1,123,99],[7,73,45,3,74,46],[15,43,19,2,44,20],[3,45,15,13,46,16],
+  [1,135,107,5,136,108],[10,74,46,1,75,47],[1,50,22,15,51,23],[2,42,14,17,43,15],
+  [5,150,120,1,151,121],[9,69,43,4,70,44],[17,50,22,1,51,23],[2,42,14,19,43,15],
+  [3,141,113,4,142,114],[3,70,44,11,71,45],[17,47,21,4,48,22],[9,39,13,16,40,14],
+  [3,135,107,5,136,108],[3,67,41,13,68,42],[15,54,24,5,55,25],[15,43,15,10,44,16],
+  [4,144,116,4,145,117],[17,68,42],[17,50,22,6,51,23],[19,46,16,6,47,17],
+  [2,139,111,7,140,112],[17,74,46],[7,54,24,16,55,25],[34,37,13],
+  [4,151,121,5,152,122],[4,75,47,14,76,48],[11,54,24,14,55,25],[16,45,15,14,46,16],
+  [6,147,117,4,148,118],[6,73,45,14,74,46],[11,54,24,16,55,25],[30,46,16,2,47,17],
+  [8,132,106,4,133,107],[8,75,47,13,76,48],[7,54,24,22,55,25],[22,45,15,13,46,16],
+  [10,142,114,2,143,115],[19,74,46,4,75,47],[28,50,22,6,51,23],[33,46,16,4,47,17],
+  [8,152,122,4,153,123],[22,73,45,3,74,46],[8,53,23,26,54,24],[12,45,15,28,46,16],
+  [3,147,117,10,148,118],[3,73,45,23,74,46],[4,54,24,31,55,25],[11,45,15,31,46,16],
+  [7,146,116,7,147,117],[21,73,45,7,74,46],[1,53,23,37,54,24],[19,45,15,26,46,16],
+  [5,145,115,10,146,116],[19,75,47,10,76,48],[15,54,24,25,55,25],[23,45,15,25,46,16],
+  [13,145,115,3,146,116],[2,74,46,29,75,47],[42,54,24,1,55,25],[23,45,15,28,46,16],
+  [17,145,115],[10,74,46,23,75,47],[10,54,24,35,55,25],[19,45,15,35,46,16],
+  [17,145,115,1,146,116],[14,74,46,21,75,47],[29,54,24,19,55,25],[11,45,15,46,46,16],
+  [13,145,115,6,146,116],[14,74,46,23,75,47],[44,54,24,7,55,25],[59,46,16,1,47,17],
+  [12,151,121,7,152,122],[12,75,47,26,76,48],[39,54,24,14,55,25],[22,45,15,41,46,16],
+  [6,151,121,14,152,122],[6,75,47,34,76,48],[46,54,24,10,55,25],[2,45,15,64,46,16],
+  [17,152,122,4,153,123],[29,74,46,14,75,47],[49,54,24,10,55,25],[24,45,15,46,46,16],
+  [4,152,122,18,153,123],[13,74,46,32,75,47],[48,54,24,14,55,25],[42,45,15,32,46,16],
+  [20,147,117,4,148,118],[40,75,47,7,76,48],[43,54,24,22,55,25],[10,45,15,67,46,16],
+  [19,148,118,6,149,119],[18,75,47,31,76,48],[34,54,24,34,55,25],[20,45,15,61,46,16]
+];
+
+function getRSBlocks(typeNumber, ecLevel){
+  var t = RS_BLOCK_TABLE[(typeNumber-1)*4+ecLevel];
+  var list=[]; var i=0;
+  while(i<t.length){ var cnt=t[i++],tot=t[i++],dat=t[i++]; for(var j=0;j<cnt;j++) list.push({totalCount:tot,dataCount:dat}); }
+  return list;
+}
+
+function createBytes(buf, rsBlocks){
+  var offset=0, maxDc=0, maxEc=0;
+  var dc=rsBlocks.map(function(b){
+    maxDc=Math.max(maxDc,b.dataCount); maxEc=Math.max(maxEc,b.totalCount-b.dataCount);
+    var d=new Array(b.dataCount); for(var i=0;i<d.length;i++) d[i]=0xff&buf.getBuffer()[i+offset]; offset+=b.dataCount;
+    return {dc:d, ec:rsCorrect(d,b.totalCount-b.dataCount)};
+  });
+  var data=[],i;
+  for(i=0;i<maxDc;i++) dc.forEach(function(b){if(i<b.dc.length)data.push(b.dc[i]);});
+  for(i=0;i<maxEc;i++) dc.forEach(function(b){if(i<b.ec.length)data.push(b.ec[i]);});
+  return data;
+}
+
+function createData(typeNumber, ecLevel, dataList){
+  var rsBlocks=getRSBlocks(typeNumber,ecLevel);
+  var buf=qrBitBuffer();
+  var PAD0=0xEC, PAD1=0x11;
+  dataList.forEach(function(d){
+    buf.put(d.mode,4);
+    buf.put(d.getLength(),QRMode.getLengthInBits(d.mode,typeNumber));
+    d.write(buf);
+  });
+  var totalDc=rsBlocks.reduce(function(s,b){return s+b.dataCount;},0);
+  if(buf.getLengthInBits()>totalDc*8) throw new Error('Contenu trop long pour ce niveau QR');
+  if(buf.getLengthInBits()+4<=totalDc*8) buf.put(0,4);
+  while(buf.getLengthInBits()%8!==0) buf.putBit(false);
+  var pi=0; while(buf.getLengthInBits()<totalDc*8){buf.put(pi%2===0?PAD0:PAD1,8);pi++;}
+  return createBytes(buf,rsBlocks);
+}
+
+function byteMode(data){
+  var bytes=[]; for(var i=0;i<data.length;i++) bytes.push(data.charCodeAt(i)&0xff);
+  return { mode:4, getLength:function(){return bytes.length;}, write:function(buf){bytes.forEach(function(b){buf.put(b,8);});} };
+}
+
+/* QR Matrix builder */
+function buildQR(text, ecLevelStr){
+  var ecLevel = QRErrorCorrectionLevel[ecLevelStr] !== undefined ? QRErrorCorrectionLevel[ecLevelStr] : 2;
+  var dataList = [byteMode(text)];
+
+  /* Trouver la version minimale */
+  var typeNumber = 1;
+  for(; typeNumber<=40; typeNumber++){
+    var rsB = getRSBlocks(typeNumber, ecLevel);
+    var totalDc = rsB.reduce(function(s,b){return s+b.dataCount;},0);
+    /* Estimer les bits nécessaires */
+    var needBits = 4 + QRMode.getLengthInBits(4,typeNumber) + text.length*8;
+    if(needBits <= totalDc*8) break;
+  }
+  if(typeNumber > 40) throw new Error('Texte trop long');
+
+  var moduleCount = typeNumber*4+17;
+  var modules = Array.from({length:moduleCount}, function(){return new Array(moduleCount).fill(null);});
+
+  function setFinderPattern(r,c){
+    for(var i=-1;i<=7;i++) for(var j=-1;j<=7;j++){
+      if(r+i<0||moduleCount<=r+i||c+j<0||moduleCount<=c+j) continue;
+      modules[r+i][c+j]=(i===0||i===6||j===0||j===6||(2<=i&&i<=4&&2<=j&&j<=4));
+    }
+  }
+  setFinderPattern(0,0); setFinderPattern(moduleCount-7,0); setFinderPattern(0,moduleCount-7);
+
+  /* Timing patterns */
+  for(var r=8;r<moduleCount-8;r++) if(modules[r][6]===null) modules[r][6]=(r%2===0);
+  for(var c=8;c<moduleCount-8;c++) if(modules[6][c]===null) modules[6][c]=(c%2===0);
+
+  /* Alignment patterns */
+  var pos = QRPatternPosition.PATTERN_POSITION_TABLE[typeNumber-1];
+  for(var ai=0;ai<pos.length;ai++) for(var aj=0;aj<pos.length;aj++){
+    if(modules[pos[ai]][pos[aj]]!==null) continue;
+    for(var ar=-2;ar<=2;ar++) for(var ac=-2;ac<=2;ac++)
+      modules[pos[ai]+ar][pos[aj]+ac]=(ar===-2||ar===2||ac===-2||ac===2||(ar===0&&ac===0));
+  }
+
+  /* Type info */
+  function setupTypeInfo(test, maskPattern){
+    var data=(ecLevel<<3)|maskPattern, bits=QRUtil.getBCHTypeInfo(data);
+    var i,mod;
+    for(i=0;i<15;i++){ mod=!test&&((bits>>i)&1)===1; if(i<6)modules[i][8]=mod; else if(i<8)modules[i+1][8]=mod; else modules[moduleCount-15+i][8]=mod; }
+    for(i=0;i<15;i++){ mod=!test&&((bits>>i)&1)===1; if(i<8)modules[8][moduleCount-i-1]=mod; else if(i<9)modules[8][15-i-1+1]=mod; else modules[8][15-i-1]=mod; }
+    modules[moduleCount-8][8]=!test;
+  }
+
+  /* Type number */
+  if(typeNumber>=7){
+    var bits2=QRUtil.getBCHTypeNumber(typeNumber);
+    for(var i=0;i<18;i++){ var mod2=((bits2>>i)&1)===1; modules[Math.floor(i/3)][i%3+moduleCount-8-3]=mod2; }
+    for(var j=0;j<18;j++){ var mod3=((bits2>>j)&1)===1; modules[j%3+moduleCount-8-3][Math.floor(j/3)]=mod3; }
+  }
+
+  /* Map data */
+  function mapData(data, maskPattern){
+    var inc=-1,row=moduleCount-1,bitIndex=7,byteIndex=0;
+    var maskFunc=QRUtil.getMaskFunction(maskPattern);
+    for(var col=moduleCount-1;col>0;col-=2){
+      if(col===6) col--;
+      while(true){
+        for(var cc=0;cc<2;cc++){
+          if(modules[row][col-cc]===null){
+            var dark=false;
+            if(byteIndex<data.length) dark=((data[byteIndex]>>>bitIndex)&1)===1;
+            if(maskFunc(row,col-cc)) dark=!dark;
+            modules[row][col-cc]=dark;
+            if(--bitIndex===-1){byteIndex++;bitIndex=7;}
+          }
+        }
+        row+=inc;
+        if(row<0||moduleCount<=row){row-=inc;inc=-inc;break;}
       }
     }
+  }
 
-    // TÉLÉCHARGEMENT
-    function downloadPNG() {
-      const qrEl = document.getElementById('qrcode');
-      html2canvas(qrEl, { scale: 3, backgroundColor: '#ffffff' }).then(canvas => {
-        canvas.toBlob(blob => {
-          saveAs(blob, `qrcode-${Date.now()}.png`);
-          showStatus('✓ PNG téléchargé', 'success');
-        });
-      });
+  /* Lost point */
+  function lostPoint(){
+    var lp=0;
+    for(var r=0;r<moduleCount;r++){
+      for(var c=0;c<moduleCount;c++){
+        var sc=0,dark=modules[r][c];
+        for(var rr=-1;rr<=1;rr++) for(var cc=-1;cc<=1;cc++){
+          if(r+rr<0||moduleCount<=r+rr||c+cc<0||moduleCount<=c+cc||rr===0&&cc===0) continue;
+          if(dark===modules[r+rr][c+cc]) sc++;
+        }
+        if(sc>5) lp+=3+sc-5;
+      }
     }
-
-    function downloadSVG() {
-      const qrEl = document.getElementById('qrcode');
-      html2canvas(qrEl, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
-        const svgNS = 'http://www.w3.org/2000/svg';
-        const svg = document.createElementNS(svgNS, 'svg');
-        svg.setAttribute('width', canvas.width);
-        svg.setAttribute('height', canvas.height);
-        svg.setAttribute('viewBox', `0 0 ${canvas.width} ${canvas.height}`);
-        
-        const img = document.createElementNS(svgNS, 'image');
-        img.setAttribute('href', canvas.toDataURL());
-        img.setAttribute('width', canvas.width);
-        img.setAttribute('height', canvas.height);
-        svg.appendChild(img);
-        
-        const blob = new Blob([new XMLSerializer().serializeToString(svg)], { type: 'image/svg+xml' });
-        saveAs(blob, `qrcode-${Date.now()}.svg`);
-        showStatus('✓ SVG téléchargé', 'success');
-      });
+    for(var r2=0;r2<moduleCount-1;r2++) for(var c2=0;c2<moduleCount-1;c2++){
+      var cnt=0;
+      if(modules[r2][c2]) cnt++; if(modules[r2+1][c2]) cnt++;
+      if(modules[r2][c2+1]) cnt++; if(modules[r2+1][c2+1]) cnt++;
+      if(cnt===0||cnt===4) lp+=3;
     }
+    for(var r3=0;r3<moduleCount;r3++) for(var c3=0;c3<moduleCount-6;c3++)
+      if(modules[r3][c3]&&!modules[r3][c3+1]&&modules[r3][c3+2]&&modules[r3][c3+3]&&modules[r3][c3+4]&&!modules[r3][c3+5]&&modules[r3][c3+6]) lp+=40;
+    for(var c4=0;c4<moduleCount;c4++) for(var r4=0;r4<moduleCount-6;r4++)
+      if(modules[r4][c4]&&!modules[r4+1][c4]&&modules[r4+2][c4]&&modules[r4+3][c4]&&modules[r4+4][c4]&&!modules[r4+5][c4]&&modules[r4+6][c4]) lp+=40;
+    var dc=0; for(var r5=0;r5<moduleCount;r5++) for(var c5=0;c5<moduleCount;c5++) if(modules[r5][c5]) dc++;
+    lp+=Math.abs(100*dc/moduleCount/moduleCount-50)/5*10;
+    return lp;
+  }
 
-    function downloadPDF() {
-      const { jsPDF } = window.jspdf;
-      const qrEl = document.getElementById('qrcode');
-      html2canvas(qrEl, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
-        const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-        const imgData = canvas.toDataURL('image/png');
-        const pageW = doc.internal.pageSize.getWidth();
-        const pageH = doc.internal.pageSize.getHeight();
-        const ratio = Math.min((pageW - 40) / canvas.width, (pageH - 40) / canvas.height);
-        const w = canvas.width * ratio;
-        const h = canvas.height * ratio;
-        doc.addImage(imgData, 'PNG', (pageW - w) / 2, (pageH - h) / 2, w, h);
-        doc.save(`qrcode-${Date.now()}.pdf`);
-        showStatus('✓ PDF téléchargé', 'success');
-      });
-    }
+  /* Best mask */
+  var bestMask=0, bestLost=0;
+  for(var mp=0;mp<8;mp++){
+    setupTypeInfo(true,mp);
+    var dt=createData(typeNumber,ecLevel,dataList);
+    mapData(dt,mp);
+    var lp=lostPoint();
+    if(mp===0||lp<bestLost){bestLost=lp;bestMask=mp;}
+  }
 
-    // UTILITAIRES
-    function showStatus(msg, type) {
-      const s = document.getElementById('status');
-      s.textContent = msg;
-      s.className = type;
-      setTimeout(() => { s.className = ''; s.textContent = ''; }, 3000);
-    }
+  /* Final build */
+  modules.forEach(function(row){row.fill(null);});
+  setFinderPattern(0,0); setFinderPattern(moduleCount-7,0); setFinderPattern(0,moduleCount-7);
+  for(var rt=8;rt<moduleCount-8;rt++) if(modules[rt][6]===null) modules[rt][6]=(rt%2===0);
+  for(var ct=8;ct<moduleCount-8;ct++) if(modules[6][ct]===null) modules[6][ct]=(ct%2===0);
+  for(var ai2=0;ai2<pos.length;ai2++) for(var aj2=0;aj2<pos.length;aj2++){
+    if(modules[pos[ai2]][pos[aj2]]!==null) continue;
+    for(var ar2=-2;ar2<=2;ar2++) for(var ac2=-2;ac2<=2;ac2++)
+      modules[pos[ai2]+ar2][pos[aj2]+ac2]=(ar2===-2||ar2===2||ac2===-2||ac2===2||(ar2===0&&ac2===0));
+  }
+  if(typeNumber>=7){
+    var bits3=QRUtil.getBCHTypeNumber(typeNumber);
+    for(var i2=0;i2<18;i2++){modules[Math.floor(i2/3)][i2%3+moduleCount-8-3]=((bits3>>i2)&1)===1;}
+    for(var j2=0;j2<18;j2++){modules[j2%3+moduleCount-8-3][Math.floor(j2/3)]=((bits3>>j2)&1)===1;}
+  }
+  setupTypeInfo(false,bestMask);
+  var finalData=createData(typeNumber,ecLevel,dataList);
+  mapData(finalData,bestMask);
 
-    function escapeHtml(text) {
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
-    }
+  return { modules: modules, moduleCount: moduleCount };
+}
 
-    // INITIALISATION
-    updateHistoryDisplay();
-    document.getElementById('text').addEventListener('keypress', e => {
-      if (e.key === 'Enter') generateQR();
+/* Rendu Canvas */
+function renderToCanvas(modules, moduleCount, size, darkColor, lightColor){
+  var margin = 4;
+  var cellSize = Math.max(1, Math.floor((size - margin*2) / moduleCount));
+  var totalSize = moduleCount * cellSize + margin*2;
+
+  var canvas = document.createElement('canvas');
+  canvas.width = canvas.height = totalSize;
+  var ctx = canvas.getContext('2d');
+  ctx.fillStyle = lightColor;
+  ctx.fillRect(0,0,totalSize,totalSize);
+  ctx.fillStyle = darkColor;
+  for(var r=0;r<moduleCount;r++)
+    for(var c=0;c<moduleCount;c++)
+      if(modules[r][c]) ctx.fillRect(c*cellSize+margin, r*cellSize+margin, cellSize, cellSize);
+  return canvas;
+}
+
+/* Rendu SVG vectoriel réel */
+function renderToSVG(modules, moduleCount, size, darkColor, lightColor){
+  var margin = 4;
+  var cellSize = Math.max(1, Math.floor((size - margin*2) / moduleCount));
+  var totalSize = moduleCount * cellSize + margin*2;
+
+  var paths = '';
+  for(var r=0;r<moduleCount;r++)
+    for(var c=0;c<moduleCount;c++)
+      if(modules[r][c]){
+        var x=c*cellSize+margin, y=r*cellSize+margin;
+        paths += 'M'+x+','+y+'h'+cellSize+'v'+cellSize+'H'+x+'z';
+      }
+
+  return '<?xml version="1.0" encoding="UTF-8"?>'
+    +'<svg xmlns="http://www.w3.org/2000/svg" version="1.1"'
+    +' width="'+totalSize+'" height="'+totalSize+'"'
+    +' viewBox="0 0 '+totalSize+' '+totalSize+'">'
+    +'<rect width="'+totalSize+'" height="'+totalSize+'" fill="'+lightColor+'"/>'
+    +'<path d="'+paths+'" fill="'+darkColor+'"/>'
+    +'</svg>';
+}
+
+/* ─────────────────────────────────────────────────────────────
+   2. ÉTAT DE L'APPLICATION (en mémoire — pas de localStorage)
+───────────────────────────────────────────────────────────── */
+var qrv3State = {
+  size:      256,
+  darkColor: '#000000',
+  lightColor:'#ffffff',
+  frameColor:'#1a3a5c',
+  frameOn:   false,
+  ecLevel:   'H',
+  /* QR courant */
+  currentModules:     null,
+  currentModuleCount: 0,
+  currentSVG:         '',
+  /* Historique session — max 8 entrées, miniatures canvas */
+  qrHistory: []
+};
+
+/* ─────────────────────────────────────────────────────────────
+   3. UTILITAIRES UI
+───────────────────────────────────────────────────────────── */
+function qrv3Alert(msg, type){
+  var el = document.getElementById('qrv3-alert');
+  if(!el) return;
+  el.textContent = msg;
+  el.style.display = msg ? 'block' : 'none';
+  el.className = 'qrv3-alert ' + (type==='success' ? 'qrv3-alert-success' : 'qrv3-alert-error');
+}
+
+function qrv3DlOk(msg){
+  var el = document.getElementById('qrv3-dl-ok');
+  if(!el) return;
+  el.textContent = msg;
+  el.style.display = 'block';
+  setTimeout(function(){ el.style.display='none'; }, 2500);
+}
+
+function qrv3ValidHex(v){
+  return /^#([0-9A-Fa-f]{6})$/.test(v);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   4. SYNCHRONISATION COULEURS
+───────────────────────────────────────────────────────────── */
+window.qrv3SyncColor = function(which){
+  var pick = document.getElementById('qrv3-'+which+'-pick');
+  var hex  = document.getElementById('qrv3-'+which+'-hex');
+  if(!pick||!hex) return;
+  hex.value = pick.value.toUpperCase();
+  if(which==='dark')  qrv3State.darkColor  = pick.value;
+  if(which==='light') qrv3State.lightColor = pick.value;
+  if(which==='frame') qrv3State.frameColor = pick.value;
+};
+
+window.qrv3HexInput = function(which){
+  var hex  = document.getElementById('qrv3-'+which+'-hex');
+  var pick = document.getElementById('qrv3-'+which+'-pick');
+  if(!hex||!pick) return;
+  var v = hex.value.trim();
+  if(!v.startsWith('#')) v = '#'+v;
+  hex.value = v.toUpperCase();
+  if(qrv3ValidHex(v)){
+    pick.value = v;
+    if(which==='dark')  qrv3State.darkColor  = v;
+    if(which==='light') qrv3State.lightColor = v;
+    if(which==='frame') qrv3State.frameColor = v;
+  }
+};
+
+/* ─────────────────────────────────────────────────────────────
+   5. TAILLE
+───────────────────────────────────────────────────────────── */
+window.qrv3SetPreset = function(btn, size){
+  qrv3State.size = size;
+  document.getElementById('qrv3-slider').value = size;
+  document.getElementById('qrv3-size-lbl').textContent = size+' \u00D7 '+size+' px';
+  document.querySelectorAll('#qrv3-root .qrv3-preset').forEach(function(b){
+    b.dataset.active = (parseInt(b.dataset.size)===size) ? 'true' : 'false';
+  });
+};
+
+window.qrv3SliderChange = function(inp){
+  var v = parseInt(inp.value);
+  qrv3State.size = v;
+  document.getElementById('qrv3-size-lbl').textContent = v+' \u00D7 '+v+' px';
+  document.querySelectorAll('#qrv3-root .qrv3-preset').forEach(function(b){
+    b.dataset.active = (parseInt(b.dataset.size)===v) ? 'true' : 'false';
+  });
+};
+
+/* ─────────────────────────────────────────────────────────────
+   6. CADRE
+───────────────────────────────────────────────────────────── */
+window.qrv3ToggleFrameOpts = function(){
+  var cb = document.getElementById('qrv3-frame');
+  qrv3State.frameOn = cb.checked;
+  document.getElementById('qrv3-frame-opts').style.display = cb.checked ? 'block' : 'none';
+};
+
+function qrv3ApplyFrame(wrap){
+  /* Supprimer cadre existant */
+  var old = wrap.querySelector('.qrv3-frame-border');
+  if(old) old.parentNode.removeChild(old);
+  if(!qrv3State.frameOn) return;
+
+  var frame = document.createElement('div');
+  frame.className = 'qrv3-frame-border';
+  frame.style.border = '3px solid '+qrv3State.frameColor;
+  frame.style.borderRadius = '6px';
+
+  var top = document.createElement('div');
+  top.className = 'qrv3-frame-label';
+  top.style.color = qrv3State.frameColor;
+  top.textContent = 'Scannez-moi';
+
+  var bot = document.createElement('div');
+  bot.className = 'qrv3-frame-label';
+  bot.style.color = qrv3State.frameColor;
+  bot.textContent = 'Scannez-moi';
+
+  frame.appendChild(top);
+  frame.appendChild(bot);
+  wrap.appendChild(frame);
+  wrap.style.position = 'relative';
+}
+
+/* ─────────────────────────────────────────────────────────────
+   7. GÉNÉRATION PRINCIPALE
+───────────────────────────────────────────────────────────── */
+window.qrv3Generate = function(){
+  var text = (document.getElementById('qrv3-text')||{value:''}).value.trim();
+  var ecl  = (document.getElementById('qrv3-ecl')||{value:'H'}).value;
+
+  qrv3Alert('');
+
+  if(!text){
+    qrv3Alert('Veuillez saisir un contenu (URL ou texte).');
+    return;
+  }
+
+  try {
+    var result = buildQR(text, ecl);
+    qrv3State.currentModules     = result.modules;
+    qrv3State.currentModuleCount = result.moduleCount;
+
+    var canvas = renderToCanvas(
+      result.modules, result.moduleCount,
+      qrv3State.size, qrv3State.darkColor, qrv3State.lightColor
+    );
+    qrv3State.currentSVG = renderToSVG(
+      result.modules, result.moduleCount,
+      qrv3State.size, qrv3State.darkColor, qrv3State.lightColor
+    );
+
+    /* Afficher dans la zone prévisualisation */
+    var preview = document.getElementById('qrv3-preview');
+    var hint    = document.getElementById('qrv3-hint');
+    if(hint) hint.style.display = 'none';
+
+    var existing = preview.querySelector('.qrv3-canvas-wrap');
+    if(existing) preview.removeChild(existing);
+
+    var wrap = document.createElement('div');
+    wrap.className = 'qrv3-canvas-wrap';
+    wrap.appendChild(canvas);
+    preview.appendChild(wrap);
+    qrv3ApplyFrame(wrap);
+
+    /* Section téléchargement */
+    document.getElementById('qrv3-dl-section').style.display = 'block';
+
+    /* Historique session */
+    qrv3AddToHistory(text, canvas);
+
+  } catch(err) {
+    qrv3Alert('Erreur : ' + err.message + '. Réduisez la longueur du contenu ou choisissez un niveau de correction plus faible.');
+  }
+};
+
+/* ─────────────────────────────────────────────────────────────
+   8. TÉLÉCHARGEMENTS
+───────────────────────────────────────────────────────────── */
+window.qrv3DownloadPNG = function(){
+  var canvas = document.querySelector('#qrv3-preview canvas');
+  if(!canvas){ qrv3Alert('Générez d\'abord un QR Code.'); return; }
+  var a = document.createElement('a');
+  a.download = 'qrcode-dr-karazaitri.png';
+  a.href = canvas.toDataURL('image/png');
+  a.click();
+  qrv3DlOk('PNG téléchargé.');
+};
+
+window.qrv3DownloadSVG = function(){
+  if(!qrv3State.currentSVG){ qrv3Alert('Générez d\'abord un QR Code.'); return; }
+  var blob = new Blob([qrv3State.currentSVG], {type:'image/svg+xml;charset=utf-8'});
+  var url  = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.download = 'qrcode-dr-karazaitri.svg';
+  a.href = url;
+  a.click();
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 2000);
+  qrv3DlOk('SVG vectoriel téléchargé.');
+};
+
+/* ─────────────────────────────────────────────────────────────
+   9. HISTORIQUE SESSION (en mémoire, zéro localStorage)
+───────────────────────────────────────────────────────────── */
+function qrv3AddToHistory(text, fullCanvas){
+  /* Miniature 48×48 */
+  var thumb = document.createElement('canvas');
+  thumb.width = thumb.height = 48;
+  var ctx = thumb.getContext('2d');
+  ctx.drawImage(fullCanvas, 0, 0, 48, 48);
+
+  var entry = {
+    text:      text.length > 55 ? text.substring(0,52)+'…' : text,
+    fullText:  text,
+    thumb:     thumb,
+    time:      new Date().toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'})
+  };
+
+  /* Dédoublonnage simple sur le texte */
+  qrv3State.qrHistory = qrv3State.qrHistory.filter(function(e){ return e.fullText !== text; });
+  qrv3State.qrHistory.unshift(entry);
+  if(qrv3State.qrHistory.length > 8) qrv3State.qrHistory.pop();
+
+  qrv3RenderHistory();
+}
+
+function qrv3RenderHistory(){
+  var list = document.getElementById('qrv3-hist-list');
+  var card = document.getElementById('qrv3-hist-card');
+  if(!list||!card) return;
+
+  if(!qrv3State.qrHistory.length){ card.style.display='none'; return; }
+  card.style.display = 'block';
+
+  /* Vider */
+  while(list.firstChild) list.removeChild(list.firstChild);
+
+  qrv3State.qrHistory.forEach(function(entry, idx){
+    var item = document.createElement('div');
+    item.className = 'qrv3-hist-item';
+    item.title = 'Cliquer pour recharger';
+
+    var thumbDiv = document.createElement('div');
+    thumbDiv.className = 'qrv3-hist-thumb';
+    thumbDiv.appendChild(entry.thumb);
+
+    var info = document.createElement('div');
+    info.className = 'qrv3-hist-info';
+
+    var txtEl = document.createElement('div');
+    txtEl.className = 'qrv3-hist-text';
+    txtEl.textContent = entry.text;
+
+    var meta = document.createElement('div');
+    meta.className = 'qrv3-hist-meta';
+    meta.textContent = entry.time;
+
+    var del = document.createElement('button');
+    del.className = 'qrv3-hist-del';
+    del.textContent = '\u2715';
+    del.title = 'Supprimer';
+    del.onclick = function(e){
+      e.stopPropagation();
+      qrv3State.qrHistory.splice(idx,1);
+      qrv3RenderHistory();
+    };
+
+    info.appendChild(txtEl);
+    info.appendChild(meta);
+    item.appendChild(thumbDiv);
+    item.appendChild(info);
+    item.appendChild(del);
+
+    item.onclick = function(){
+      var inp = document.getElementById('qrv3-text');
+      if(inp) inp.value = entry.fullText;
+      window.qrv3Generate();
+    };
+
+    list.appendChild(item);
+  });
+}
+
+/* ─────────────────────────────────────────────────────────────
+   10. CONFIRMATION INLINE (remplace confirm())
+───────────────────────────────────────────────────────────── */
+window.qrv3AskClear = function(){
+  var el = document.getElementById('qrv3-confirm');
+  if(el) el.style.display = 'block';
+};
+window.qrv3HideConfirm = function(){
+  var el = document.getElementById('qrv3-confirm');
+  if(el) el.style.display = 'none';
+};
+window.qrv3ClearConfirmed = function(){
+  qrv3State.qrHistory = [];
+  qrv3RenderHistory();
+  window.qrv3HideConfirm();
+};
+
+/* ─────────────────────────────────────────────────────────────
+   11. INIT
+───────────────────────────────────────────────────────────── */
+(function init(){
+  /* Touche Entrée dans le champ texte */
+  var inp = document.getElementById('qrv3-text');
+  if(inp) inp.addEventListener('keydown', function(e){
+    if(e.key==='Enter') window.qrv3Generate();
+  });
+})();
+
+})(); /* fin IIFE */
+</script>
+
+</div><!-- /#kz-content -->
+
+<!-- VÉRIFICATION PREMIUM -->
+<script>
+(function() {
+  var WP_ENDPOINT = 'https://www.dr-karazaitri-ma.net/wp-json/kz/v1/verify-token';
+  var loading = document.getElementById('kz-loading');
+  var gate    = document.getElementById('kz-gate');
+  var content = document.getElementById('kz-content');
+
+  // Récupérer le token depuis l'URL si présent
+  var params = new URLSearchParams(window.location.search);
+  var tokenFromUrl = params.get('token');
+  if (tokenFromUrl) {
+    localStorage.setItem('kz_premium_token', tokenFromUrl);
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+  var token = localStorage.getItem('kz_premium_token');
+
+  if (!token) {
+    showGate();
+    return;
+  }
+
+  fetch(WP_ENDPOINT + '?token=' + encodeURIComponent(token))
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.valid === true) {
+        grantAccess();
+      } else {
+        localStorage.removeItem('kz_premium_token');
+        showGate();
+      }
+    })
+    .catch(function() {
+      // Erreur réseau : bloquer par sécurité
+      showGate();
     });
-  </script>
+
+  function grantAccess() {
+    loading.style.display = 'none';
+    content.classList.add('visible');
+  }
+
+  function showGate() {
+    loading.style.display = 'none';
+    gate.classList.add('visible');
+  }
+})();
+</script>
+
 </body>
 </html>
