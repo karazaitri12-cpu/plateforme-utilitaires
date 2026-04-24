@@ -395,5 +395,48 @@
 })();
 </script>
 
+
+<script>
+(function() {
+    const WP_ENDPOINT = 'https://www.dr-karazaitri-ma.net/wp-json/kz/v1/verify-token';
+
+    // Lire le token depuis l'URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const tokenFromUrl = urlParams.get('token');
+
+    if (tokenFromUrl) {
+        localStorage.setItem('kz_premium_token', tokenFromUrl);
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    const token = localStorage.getItem('kz_premium_token');
+
+    if (!token) {
+        setPremiumState(false);
+        return;
+    }
+
+    fetch(WP_ENDPOINT + '?token=' + encodeURIComponent(token))
+        .then(r => r.json())
+        .then(data => setPremiumState(data.valid === true))
+        .catch(() => setPremiumState(false));
+
+    function setPremiumState(isPremium) {
+        document.body.classList.toggle('kz-premium', isPremium);
+        document.body.classList.toggle('kz-guest', !isPremium);
+
+        // Outils premium : visibles seulement si premium
+        document.querySelectorAll('[data-premium="true"]').forEach(el => {
+            el.style.display = isPremium ? '' : 'none';
+        });
+
+        // Message accès refusé : visible seulement si non premium
+        document.querySelectorAll('[data-premium-lock]').forEach(el => {
+            el.style.display = isPremium ? 'none' : '';
+        });
+    }
+})();
+</script>
+    
 </body>
 </html>
