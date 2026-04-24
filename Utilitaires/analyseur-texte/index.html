@@ -299,218 +299,324 @@
             line-height: 1.4;
         }
 
+        /* ÉCRAN DE BLOCAGE PREMIUM */
+        .block-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: var(--font-ui);
+        }
+        .block-card {
+            background: white;
+            border-radius: 16px;
+            padding: 40px 32px;
+            max-width: 450px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            animation: fadeInUp 0.6s ease-out;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .block-icon { font-size: 64px; margin-bottom: 16px; }
+        .block-card h2 { color: #1a3a5c; margin-bottom: 12px; font-size: 24px; }
+        .block-card p { color: #607d8b; margin-bottom: 24px; line-height: 1.6; }
+        .block-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #1a3a5c, #345a7a);
+            color: white;
+            padding: 14px 32px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .block-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(26,58,92,0.3); }
+        .block-footer { margin-top: 24px; font-size: 12px; color: #999; border-top: 1px solid #eee; padding-top: 20px; }
+
         /* RESPONSIVE */
         @media (max-width: 600px) {
             .controls { flex-direction: column; }
             .btn { width: 100%; }
             .results { grid-template-columns: 1fr; }
             .app-header h1 { font-size: 18px; }
+            .block-card { margin: 20px; padding: 30px 20px; }
         }
     </style>
 </head>
 <body>
 
-  <!-- NAVIGATION -->
-  <nav class="nav-bar">
-    <a href="https://karazaitri12-cpu.github.io/plateforme-utilitaires/" class="back-link">← Retour aux Utilitaires</a>
-  </nav>
+<!-- CONTENU DE L'OUTIL (MASQUÉ PAR DÉFAUT) -->
+<div id="appContent" style="display: none;">
 
-  <!-- HEADER -->
-  <header class="app-header">
-    <span class="premium-badge">★</span>
-    <h1>Analyseur de Texte Avancé</h1>
-    <p>Analysez vos documents en temps réel : mots, caractères, phrases</p>
-  </header>
+    <!-- NAVIGATION -->
+    <nav class="nav-bar">
+        <a href="https://karazaitri12-cpu.github.io/plateforme-utilitaires/" class="back-link">← Retour aux Utilitaires</a>
+    </nav>
 
-  <div class="container">
+    <!-- HEADER -->
+    <header class="app-header">
+        <span class="premium-badge">★</span>
+        <h1>Analyseur de Texte Avancé</h1>
+        <p>Analysez vos documents en temps réel : mots, caractères, phrases</p>
+    </header>
 
-    <!-- ZONE DE SAISIE -->
-    <div class="card">
-      <h2>📝 Saisir votre texte</h2>
-      
-      <textarea id="textInput" placeholder="Collez ou saisissez votre texte ici pour l'analyser instantanément..."></textarea>
-      
-      <div class="controls">
-        <button class="btn btn-primary" onclick="pasteText()">📋 Coller</button>
-        <button class="btn btn-secondary" onclick="clearText()">🗑️ Effacer</button>
-        <button class="btn btn-secondary" onclick="document.getElementById('fileInput').click()">📁 Importer</button>
-        <input type="file" id="fileInput" accept=".txt,.docx,.pdf" onchange="importFile(event)">
-      </div>
+    <div class="container">
+
+        <!-- ZONE DE SAISIE -->
+        <div class="card">
+            <h2>📝 Saisir votre texte</h2>
+            
+            <textarea id="textInput" placeholder="Collez ou saisissez votre texte ici pour l'analyser instantanément..."></textarea>
+            
+            <div class="controls">
+                <button class="btn btn-primary" onclick="pasteText()">📋 Coller</button>
+                <button class="btn btn-secondary" onclick="clearText()">🗑️ Effacer</button>
+                <button class="btn btn-secondary" onclick="document.getElementById('fileInput').click()">📁 Importer</button>
+                <input type="file" id="fileInput" accept=".txt,.docx,.pdf" onchange="importFile(event)">
+            </div>
+        </div>
+
+        <!-- RÉSULTATS -->
+        <div class="card">
+            <h2>📊 Résultats de l'analyse</h2>
+            
+            <div class="results">
+                <div class="result-card">
+                    <h4>Nombre de mots</h4>
+                    <div class="value" id="wordCount">0</div>
+                    <div class="unit">mots</div>
+                </div>
+                <div class="result-card">
+                    <h4>Nombre de caractères</h4>
+                    <div class="value" id="charCount">0</div>
+                    <div class="unit">caractères</div>
+                </div>
+                <div class="result-card">
+                    <h4>Nombre de phrases</h4>
+                    <div class="value" id="sentenceCount">0</div>
+                    <div class="unit">phrases</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODE D'EMPLOI -->
+        <div class="card help-section">
+            <button class="help-toggle" id="helpToggle" onclick="toggleHelp()">
+                📖 Mode d'emploi <span></span>
+            </button>
+            <div class="help-content" id="helpContent">
+                <div class="help-inner">
+                    <h3>🔢 Comment sont comptés les éléments ?</h3>
+                    
+                    <h4><span class="highlight">Comptage des mots :</span></h4>
+                    <ul>
+                        <li>Supprime les espaces en début et fin de texte</li>
+                        <li>Divise sur tous types d'espaces (espaces, tabulations, retours)</li>
+                        <li>Filtre les chaînes vides pour un comptage précis</li>
+                    </ul>
+
+                    <h4><span class="highlight">Comptage des caractères :</span></h4>
+                    <ul>
+                        <li>Compte <strong>tous</strong> les caractères sans exception</li>
+                        <li>Inclut lettres, chiffres, espaces, ponctuations, accents</li>
+                    </ul>
+
+                    <h4><span class="highlight">Comptage des phrases :</span></h4>
+                    <ul>
+                        <li>Divise sur les terminateurs : <strong>. ! ?</strong></li>
+                        <li>Gère les ponctuations multiples ("!!!", "...")</li>
+                        <li>Compte uniquement les phrases avec du contenu</li>
+                    </ul>
+
+                    <h3>📁 Formats de fichiers supportés</h3>
+                    <ul>
+                        <li><strong>.txt</strong> : Texte brut</li>
+                        <li><strong>.docx</strong> : Word moderne (via Mammoth.js)</li>
+                        <li><strong>.pdf</strong> : PDF texte (via PDF.js)</li>
+                    </ul>
+
+                    <h3>💡 Conseils d'utilisation</h3>
+                    <ul>
+                        <li>Analyse en temps réel pendant la saisie</li>
+                        <li>Compatible avec textes longs (plusieurs milliers de mots)</li>
+                        <li>Usage médical : parfait pour articles, rapports, contenus web</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="footer">
+            <span>Dr KARA-ZAITRI M.A © 2026</span>
+            <div class="disclaimer">
+                ⚠️ <strong>Usage bureautique</strong> : Analyse locale dans votre navigateur. Aucun texte n'est envoyé sur un serveur.
+            </div>
+        </footer>
+
     </div>
+</div>
 
-    <!-- RÉSULTATS -->
-    <div class="card">
-      <h2>📊 Résultats de l'analyse</h2>
-      
-      <div class="results">
-        <div class="result-card">
-          <h4>Nombre de mots</h4>
-          <div class="value" id="wordCount">0</div>
-          <div class="unit">mots</div>
+<!-- ÉCRAN DE BLOCAGE PREMIUM -->
+<div id="blockScreen" class="block-screen" style="display: none;">
+    <div class="block-card">
+        <div class="block-icon">🔒</div>
+        <h2>Accès Premium Requis</h2>
+        <p>Cet utilitaire est réservé aux membres premium.<br>Connectez-vous depuis la plateforme principale pour y accéder.</p>
+        <a href="https://www.dr-karazaitri-ma.net/connexion-membres/" class="block-btn">Se connecter / S'abonner</a>
+        <div class="block-footer">
+            🔑 Accès via token personnel
         </div>
-        <div class="result-card">
-          <h4>Nombre de caractères</h4>
-          <div class="value" id="charCount">0</div>
-          <div class="unit">caractères</div>
-        </div>
-        <div class="result-card">
-          <h4>Nombre de phrases</h4>
-          <div class="value" id="sentenceCount">0</div>
-          <div class="unit">phrases</div>
-        </div>
-      </div>
     </div>
+</div>
 
-    <!-- MODE D'EMPLOI -->
-    <div class="card help-section">
-      <button class="help-toggle" id="helpToggle" onclick="toggleHelp()">
-        📖 Mode d'emploi <span></span>
-      </button>
-      <div class="help-content" id="helpContent">
-        <div class="help-inner">
-          <h3>🔢 Comment sont comptés les éléments ?</h3>
-          
-          <h4><span class="highlight">Comptage des mots :</span></h4>
-          <ul>
-            <li>Supprime les espaces en début et fin de texte</li>
-            <li>Divise sur tous types d'espaces (espaces, tabulations, retours)</li>
-            <li>Filtre les chaînes vides pour un comptage précis</li>
-          </ul>
-
-          <h4><span class="highlight">Comptage des caractères :</span></h4>
-          <ul>
-            <li>Compte <strong>tous</strong> les caractères sans exception</li>
-            <li>Inclut lettres, chiffres, espaces, ponctuations, accents</li>
-          </ul>
-
-          <h4><span class="highlight">Comptage des phrases :</span></h4>
-          <ul>
-            <li>Divise sur les terminateurs : <strong>. ! ?</strong></li>
-            <li>Gère les ponctuations multiples ("!!!", "...")</li>
-            <li>Compte uniquement les phrases avec du contenu</li>
-          </ul>
-
-          <h3>📁 Formats de fichiers supportés</h3>
-          <ul>
-            <li><strong>.txt</strong> : Texte brut</li>
-            <li><strong>.docx</strong> : Word moderne (via Mammoth.js)</li>
-            <li><strong>.pdf</strong> : PDF texte (via PDF.js)</li>
-          </ul>
-
-          <h3>💡 Conseils d'utilisation</h3>
-          <ul>
-            <li>Analyse en temps réel pendant la saisie</li>
-            <li>Compatible avec textes longs (plusieurs milliers de mots)</li>
-            <li>Usage médical : parfait pour articles, rapports, contenus web</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-    <!-- FOOTER -->
-    <footer class="footer">
-      <span>Dr KARA-ZAITRI M.A © 2026</span>
-      <div class="disclaimer">
-        ⚠️ <strong>Usage bureautique</strong> : Analyse locale dans votre navigateur. Aucun texte n'est envoyé sur un serveur.
-      </div>
-    </footer>
-
-  </div>
-
-  <script>
-    // Analyse du texte
-    function analyzeText() {
-      const text = document.getElementById('textInput').value;
-      
-      // Mots
-      const words = text.trim().split(/\s+/).filter(w => w.length > 0);
-      const wordCount = text.trim() === '' ? 0 : words.length;
-      
-      // Caractères
-      const charCount = text.length;
-      
-      // Phrases
-      const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
-      const sentenceCount = sentences.length;
-      
-      // Affichage
-      document.getElementById('wordCount').textContent = wordCount.toLocaleString('fr');
-      document.getElementById('charCount').textContent = charCount.toLocaleString('fr');
-      document.getElementById('sentenceCount').textContent = sentenceCount.toLocaleString('fr');
-    }
-
-    // Coller depuis presse-papiers
-    async function pasteText() {
-      try {
-        const text = await navigator.clipboard.readText();
-        document.getElementById('textInput').value = text;
-        analyzeText();
-      } catch (err) {
-        alert('Impossible de coller. Utilisez Ctrl+V manuellement.');
-      }
-    }
-
-    // Effacer
-    function clearText() {
-      document.getElementById('textInput').value = '';
-      analyzeText();
-    }
-
-    // Import fichier
-    async function importFile(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      
-      const ext = file.name.split('.').pop().toLowerCase();
-      
-      try {
-        if (ext === 'txt') {
-          const text = await file.text();
-          document.getElementById('textInput').value = text;
-          
-        } else if (ext === 'docx') {
-          const arrayBuffer = await file.arrayBuffer();
-          const result = await mammoth.extractRawText({ arrayBuffer });
-          document.getElementById('textInput').value = result.value;
-          
-        } else if (ext === 'pdf') {
-          const arrayBuffer = await file.arrayBuffer();
-          const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-          let fullText = '';
-          for (let i = 1; i <= pdf.numPages; i++) {
-            const page = await pdf.getPage(i);
-            const content = await page.getTextContent();
-            fullText += content.items.map(item => item.str).join(' ') + '\n';
-          }
-          document.getElementById('textInput').value = fullText;
-          
-        } else {
-          alert('Format non supporté. Utilisez : TXT, DOCX ou PDF');
-          return;
-        }
-        analyzeText();
-      } catch (err) {
-        console.error('Erreur import:', err);
-        alert('Erreur lors de la lecture du fichier : ' + err.message);
-      }
-      // Reset input pour permettre ré-import du même fichier
-      event.target.value = '';
-    }
-
-    // Toggle mode d'emploi
-    function toggleHelp() {
-      const content = document.getElementById('helpContent');
-      const toggle = document.getElementById('helpToggle');
-      const isShown = content.classList.toggle('show');
-      toggle.classList.toggle('active', isShown);
-      content.style.maxHeight = isShown ? content.scrollHeight + 'px' : '0';
-    }
-
-    // Événements
-    document.getElementById('textInput').addEventListener('input', analyzeText);
+<script>
+    // ========== SYSTÈME DE VÉRIFICATION PREMIUM ==========
     
-    // Initialisation
-    analyzeText();
-  </script>
+    async function checkPremiumAccess() {
+        const token = localStorage.getItem('kz_premium_token');
+        
+        if (!token) {
+            showBlockScreen();
+            return false;
+        }
+        
+        try {
+            const response = await fetch(`https://www.dr-karazaitri-ma.net/wp-json/kz/v1/verify-token?token=${encodeURIComponent(token)}`);
+            const data = await response.json();
+            
+            if (data.valid === true) {
+                showApp();
+                return true;
+            } else {
+                showBlockScreen();
+                return false;
+            }
+        } catch (error) {
+            console.error('Erreur de vérification:', error);
+            showBlockScreen();
+            return false;
+        }
+    }
+
+    function showBlockScreen() {
+        document.getElementById('blockScreen').style.display = 'flex';
+        document.getElementById('appContent').style.display = 'none';
+    }
+
+    function showApp() {
+        document.getElementById('blockScreen').style.display = 'none';
+        document.getElementById('appContent').style.display = 'block';
+        initApp();
+    }
+
+    // ========== INITIALISATION DE L'APPLICATION ==========
+    
+    function initApp() {
+        // Analyse du texte
+        function analyzeText() {
+            const text = document.getElementById('textInput').value;
+            
+            // Mots
+            const words = text.trim().split(/\s+/).filter(w => w.length > 0);
+            const wordCount = text.trim() === '' ? 0 : words.length;
+            
+            // Caractères
+            const charCount = text.length;
+            
+            // Phrases
+            const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+            const sentenceCount = sentences.length;
+            
+            // Affichage
+            document.getElementById('wordCount').textContent = wordCount.toLocaleString('fr');
+            document.getElementById('charCount').textContent = charCount.toLocaleString('fr');
+            document.getElementById('sentenceCount').textContent = sentenceCount.toLocaleString('fr');
+        }
+
+        // Coller depuis presse-papiers
+        window.pasteText = async function() {
+            try {
+                const text = await navigator.clipboard.readText();
+                document.getElementById('textInput').value = text;
+                analyzeText();
+            } catch (err) {
+                alert('Impossible de coller. Utilisez Ctrl+V manuellement.');
+            }
+        };
+
+        // Effacer
+        window.clearText = function() {
+            document.getElementById('textInput').value = '';
+            analyzeText();
+        };
+
+        // Import fichier
+        window.importFile = async function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const ext = file.name.split('.').pop().toLowerCase();
+            
+            try {
+                if (ext === 'txt') {
+                    const text = await file.text();
+                    document.getElementById('textInput').value = text;
+                    
+                } else if (ext === 'docx') {
+                    const arrayBuffer = await file.arrayBuffer();
+                    const result = await mammoth.extractRawText({ arrayBuffer });
+                    document.getElementById('textInput').value = result.value;
+                    
+                } else if (ext === 'pdf') {
+                    const arrayBuffer = await file.arrayBuffer();
+                    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                    let fullText = '';
+                    for (let i = 1; i <= pdf.numPages; i++) {
+                        const page = await pdf.getPage(i);
+                        const content = await page.getTextContent();
+                        fullText += content.items.map(item => item.str).join(' ') + '\n';
+                    }
+                    document.getElementById('textInput').value = fullText;
+                    
+                } else {
+                    alert('Format non supporté. Utilisez : TXT, DOCX ou PDF');
+                    return;
+                }
+                analyzeText();
+            } catch (err) {
+                console.error('Erreur import:', err);
+                alert('Erreur lors de la lecture du fichier : ' + err.message);
+            }
+            event.target.value = '';
+        };
+
+        // Toggle mode d'emploi
+        window.toggleHelp = function() {
+            const content = document.getElementById('helpContent');
+            const toggle = document.getElementById('helpToggle');
+            const isShown = content.classList.toggle('show');
+            toggle.classList.toggle('active', isShown);
+            content.style.maxHeight = isShown ? content.scrollHeight + 'px' : '0';
+        };
+
+        // Événements
+        document.getElementById('textInput').addEventListener('input', analyzeText);
+        
+        // Initialisation
+        analyzeText();
+    }
+
+    // LANCER LA VÉRIFICATION PREMIUM
+    checkPremiumAccess();
+</script>
 </body>
 </html>
