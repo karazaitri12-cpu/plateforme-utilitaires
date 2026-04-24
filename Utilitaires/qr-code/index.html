@@ -415,7 +415,7 @@ body {
   line-height: 1.4;
 }
 
-/* ÉCRAN DE BLOCAGE */
+/* ÉCRAN DE BLOCAGE SIMPLIFIÉ */
 .block-screen {
   position: fixed;
   top: 0;
@@ -475,18 +475,6 @@ body {
 .block-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(26,58,92,0.3);
-}
-.loading-spinner {
-  display: inline-block;
-  width: 40px;
-  height: 40px;
-  border: 4px solid rgba(255,255,255,0.3);
-  border-top-color: var(--premium);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-@keyframes spin {
-  to { transform: rotate(360deg); }
 }
 
 /* RESPONSIVE */
@@ -592,18 +580,11 @@ body {
   <div class="block-card">
     <div class="block-icon">🔒</div>
     <h2>Accès Premium Requis</h2>
-    <p>Cette fonctionnalité est réservée aux membres premium.<br>Connectez-vous pour y accéder.</p>
+    <p>Cet utilitaire est réservé aux membres premium.<br>Connectez-vous depuis la plateforme principale pour y accéder.</p>
     <a href="https://www.dr-karazaitri-ma.net/connexion-membres/" class="block-btn" id="loginLink">Se connecter / S'abonner</a>
     <div style="margin-top: 20px; font-size: 12px; color: #999;">
-      Code d'accès personnel requis
+      🔑 Accès via token personnel
     </div>
-  </div>
-</div>
-
-<div id="loadingOverlay" class="block-screen" style="display: none;">
-  <div class="block-card">
-    <div class="loading-spinner"></div>
-    <p style="margin-top: 20px;">Vérification de votre abonnement...</p>
   </div>
 </div>
 
@@ -616,30 +597,35 @@ body {
     let frameColor = '#1a3a5c';
     let accessGranted = false;
 
-    // FONCTIONS DE VÉRIFICATION D'ACCÈS
+    // === VÉRIFICATION D'ACCÈS SIMPLIFIÉE ===
+    // On vérifie juste la présence d'un token valide
+    // Si la carte est grisée sur la plateforme, l'utilisateur ne peut pas accéder directement
+    
     async function verifyAccess() {
       const token = localStorage.getItem('kz_premium_token');
       
+      // Pas de token → accès refusé
       if (!token) {
-        console.log('Aucun token trouvé');
+        console.log('Aucun token trouvé - accès refusé');
         showBlockScreen();
         return false;
       }
       
       try {
+        // Vérification rapide du token
         const response = await fetch(`https://www.dr-karazaitri-ma.net/wp-json/kz/v1/verify-token?token=${encodeURIComponent(token)}`);
         
         if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
+          throw new Error(`Erreur HTTP ${response.status}`);
         }
         
         const data = await response.json();
         
         if (data.valid === true) {
-          console.log('Accès premium validé');
+          console.log('✅ Accès premium validé');
           return true;
         } else {
-          console.log('Token invalide');
+          console.log('❌ Token invalide');
           showBlockScreen();
           return false;
         }
@@ -651,18 +637,16 @@ body {
     }
 
     function showBlockScreen() {
-      document.getElementById('loadingOverlay').style.display = 'none';
       document.getElementById('blockScreen').style.display = 'flex';
       document.getElementById('appContent').style.display = 'none';
     }
 
     function showApp() {
-      document.getElementById('loadingOverlay').style.display = 'none';
       document.getElementById('blockScreen').style.display = 'none';
       document.getElementById('appContent').style.display = 'block';
       accessGranted = true;
       
-      // Initialiser l'application
+      // Charger l'historique
       loadHistory();
       updateHistoryDisplay();
       
@@ -673,11 +657,7 @@ body {
     }
 
     async function initAccess() {
-      // Afficher l'écran de chargement
-      document.getElementById('loadingOverlay').style.display = 'flex';
-      document.getElementById('blockScreen').style.display = 'none';
-      document.getElementById('appContent').style.display = 'none';
-      
+      // Vérification simple sans écran de chargement
       const isValid = await verifyAccess();
       
       if (isValid) {
@@ -685,7 +665,8 @@ body {
       }
     }
 
-    // Toutes les fonctions existantes de l'application
+    // ========== FONCTIONS EXISTANTES DE L'APPLICATION ==========
+    
     function loadHistory() {
       const saved = localStorage.getItem('qr_history');
       if (saved) {
@@ -909,7 +890,6 @@ body {
       });
     }
 
-    // UTILITAIRES
     function showStatus(msg, type) {
       const s = document.getElementById('status');
       s.textContent = msg;
@@ -923,7 +903,7 @@ body {
       return div.innerHTML;
     }
 
-    // Démarrer la vérification d'accès
+    // === LANCEMENT ===
     initAccess();
   </script>
 </body>
