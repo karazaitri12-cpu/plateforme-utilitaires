@@ -722,9 +722,34 @@ function initApp() {
         reader.readAsText(file);
     };
 
-    // Fonctions docx
-    // ========== EXPORTATEUR DOCX COMPLET (À REMPLACER) ==========
+   // Fonctions docx
+// ========== EXPORTATEUR DOCX COMPLET ==========
 
+// Fonctions docx
+
+// ========== SPÉCIFICATIONS DU DOCUMENT ==========
+var SPECS = {
+  font: 'Arial',
+  bodySize: 22,
+  smallSize: 18,
+  lineSpacing: 276,
+  margin: { top: 900, right: 1134, bottom: 1134, left: 1360, header: 360, footer: 360 },
+  colors: {
+    primaryDark: '1C3557',
+    primaryMid: '2E5F8A',
+    primaryLight: '4A7FAA',
+    body: '111827',
+    muted: '6B7280',
+    headerLine: 'CBD5E1',
+    tableHeaderBg: 'D9E8F5',
+    tableBorder: 'A8C4DC',
+    blockquoteBg: 'F0F5FA',
+    blockquoteBdr: '2E5F8A',
+    white: 'FFFFFF'
+  }
+};
+
+// ========== EXPORTATEUR DOCX ==========
 var docxExporter = {
 
   colorToHex: function(colorStr) {
@@ -956,7 +981,7 @@ var docxExporter = {
 
     var today = new Date();
     var dateStr = today.toLocaleDateString('fr-FR', { year:'numeric', month:'long', day:'numeric' });
-    var title  = docTitle  || 'Document m\u00e9dical';
+    var title  = docTitle  || 'Document médical';
     var author = docAuthor || '';
 
     var numConfig = [{
@@ -970,7 +995,7 @@ var docxExporter = {
     chapters.forEach(function(ch, idx) {
       numConfig.push({
         reference: 'b'+idx,
-        levels: [{ level:0, format:LevelFormat.BULLET, text:'\u2013', alignment:AlignmentType.LEFT,
+        levels: [{ level:0, format:LevelFormat.BULLET, text:'–', alignment:AlignmentType.LEFT,
           style:{ paragraph:{ indent:{ left:640, hanging:320 } }, run:{ font:SPECS.font, size:SPECS.bodySize, color:SPECS.colors.body } } }]
       });
       numConfig.push({
@@ -986,7 +1011,7 @@ var docxExporter = {
     var coverChildren = [];
     for (var i = 0; i < 9; i++) coverChildren.push(new Paragraph({ text:'', spacing:{ after:0 } }));
     coverChildren.push(new Paragraph({
-      children: [new TextRun({ text:'COURS M\u00c9DICAL', font:SPECS.font, size:20, bold:true, color:SPECS.colors.muted, characterSpacing:120 })],
+      children: [new TextRun({ text:'COURS MÉDICAL', font:SPECS.font, size:20, bold:true, color:SPECS.colors.muted, characterSpacing:120 })],
       alignment: AlignmentType.CENTER,
       spacing: { after: 120 }
     }));
@@ -1075,9 +1100,9 @@ var docxExporter = {
     });
 
     var doc = new D.Document({
-      creator:     author || 'G\u00e9n\u00e9rateur m\u00e9dical',
+      creator:     author || 'Générateur médical',
       title:       title,
-      description: 'G\u00e9n\u00e9r\u00e9 le ' + dateStr,
+      description: 'Généré le ' + dateStr,
       styles: {
         default: {
           document: {
