@@ -2,10 +2,12 @@ const http = require('http');
 const { exec } = require('child_process');
 const fs = require('fs');
 const path = require('path');
+const os = require('os'); // Permet de détecter le PC et l'utilisateur
+
 const PORT = 3456;
 
 const server = http.createServer((req, res) => {
-    // TRÈS IMPORTANT : Autorise ton site GitHub à parler à ton PC
+    // Autorise le site GitHub à communiquer avec le PC
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
 
@@ -22,6 +24,13 @@ const server = http.createServer((req, res) => {
     try {
         const url = new URL(req.url, `http://${req.headers.host}`);
         const filePath = url.searchParams.get('path');
+
+        // NOUVEAU : DÉTECTION AUTOMATIQUE DU DOSSIER "DOCUMENTS" DU PC
+        if (url.pathname === '/default-root') {
+            const defaultRoot = path.join(os.homedir(), 'Documents');
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            return res.end(JSON.stringify({ root: defaultRoot }));
+        }
 
         if (url.pathname === '/open' && filePath) {
             const cmd = process.platform === 'win32' ? `start "" "${filePath}"` : `xdg-open "${filePath}"`;
@@ -55,8 +64,9 @@ const server = http.createServer((req, res) => {
 
 server.listen(PORT, () => {
     console.log('\n======================================================');
-    console.log(' 🔌 Pont Local FileSearch activé !');
-    console.log(' 🌐 Allez sur votre site GitHub pour faire vos recherches.');
+    console.log(' 🔌 Moteur de recherche Copernic activé !');
+    console.log(` 👤 Utilisateur détecté : ${os.userInfo().username}`);
+    console.log(' 🌐 Allez sur votre site Web pour faire vos recherches.');
     console.log('======================================================\n');
-    console.log('Laissez cette fenêtre ouverte.\n');
+    console.log('Laissez cette fenêtre noire ouverte (vous pouvez la réduire).\n');
 });
