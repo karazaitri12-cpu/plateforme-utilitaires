@@ -385,7 +385,7 @@ body { font-family: var(--font-ui); background: var(--bg-page); color: var(--tex
       const welcome = document.getElementById('welcomeState'), info = document.getElementById('resultsInfo'), list = document.getElementById('resultsList');
       if (index.length === 0) { welcome.style.display = 'flex'; info.style.display = 'none'; list.style.display = 'none'; return; }
       welcome.style.display = 'none'; info.style.display = 'flex'; list.style.display = 'block';
-      info.innerHTML = query ? `<strong>${results.length}</strong> résultat(s) trouvé(s)` : `<strong>${results.length}</strong> fichier(s) en mémoire`;
+      info.innerHTML = query ? `<strong>${results.length}</strong>  résultat(s) trouvé(s)` : `<strong>${results.length}</strong> fichier(s) en mémoire`;
       
       list.innerHTML = results.slice(0, 100).map(f => {
         const nameHTML = query ? hl(esc(f.name), query) : esc(f.name);
