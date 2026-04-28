@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FileSearch — Recherche locale</title>
+<style>
+  :root {
+    --bg: #f4f6fb; --surface: #ffffff; --surface2: #f0f2f8; --border: #dde1ee; --border2: #c8cde0;
+    --accent: #2563eb; --accent2: #7c3aed; --accent-light: #eff4ff;
+    --green: #059669; --yellow: #d97706; --red: #dc2626;
+    --text: #1e2340; --text2: #4b5271; --text3: #9399b5;
+    --font: 'Segoe UI', 'SF Pro Display', system-ui, sans-serif; --mono: 'Consolas', 'SF Mono', monospace;
+    --radius: 10px; --shadow: 0 2px 8px rgba(30,35,64,0.07); --shadow-md: 0 4px 20px rgba(30,35,64,0.12);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+
+  header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; height: 56px; display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 4px rgba(30,35,64,0.06); }
+  .logo { display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 700; letter-spacing: -0.3px; color: var(--text); }
+  .logo-icon { width: 30px; height: 30px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; color: #fff; }
+  .header-stats { margin-left: auto; display: flex; align-items: center; gap: 20px; font-size: 12px; color: var(--text3); }
+  .header-stats span { color: var(--accent); font-weight: 600; }
+
+  .search-wrap { padding: 18px 24px 0; }
+  .search-box { position: relative; }
+  .search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text3); pointer-events: none; }
+  #searchInput { width: 100%; background: var(--surface); border: 1.5px solid var(--border2); border-radius: var(--radius); color: var(--text); font-family: var(--font); font-size: 15px; padding: 11px 40px 11px 42px; outline: none; transition: all 0.2s; box-shadow: var(--shadow); }
+  #searchInput:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+  .clear-btn { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text3); cursor: pointer; font-size: 15px; display: none; }
+
+  .toolbar { padding: 12px 24px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .btn { display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1.5px solid transparent; transition: all 0.15s; white-space: nowrap; font-family: var(--font); }
+  .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 1px 4px rgba(37,99,235,0.2); }
+  .btn-outline { background: var(--surface); color: var(--text2); border-color: var(--border2); box-shadow: var(--shadow); }
+  .btn-danger { background: var(--surface); color: var(--red); border-color: var(--border2); box-shadow: var(--shadow); }
+  .filter-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-left: auto; }
+  .chip { padding: 5px 13px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1.5px solid var(--border2); color: var(--text2); background: var(--surface); transition: all 0.15s; font-family: var(--font); }
+  .chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .chip.all.active { background: var(--accent2); border-color: var(--accent2); }
+
+  .progress-bar-wrap { height: 3px; background: var(--border); display: none; }
+  .progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); width: 0%; transition: width 0.2s; }
+
+  .root-bar { padding: 8px 24px; background: #fffbeb; border-bottom: 1px solid #fde68a; display: flex; align-items: center; gap: 10px; font-size: 13px; }
+  .root-bar label { color: #92400e; font-weight: 600; white-space: nowrap; }
+  .root-bar input { flex: 1; padding: 6px 10px; border: 1.5px solid #fcd34d; border-radius: 7px; font-size: 13px; font-family: var(--mono); outline: none; }
+  .root-bar .btn-save { padding: 6px 14px; background: var(--accent); color: #fff; border: none; border-radius: 7px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: var(--font); }
+  .root-bar-ok { background: #f0fdf4 !important; border-color: #bbf7d0 !important; }
+  .root-bar-ok label { color: #166534 !important; }
+
+  .main { flex: 1; display: flex; overflow: hidden; margin-top: 12px; }
+  .sidebar { width: 240px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+  .sidebar-header { padding: 12px 16px 10px; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text3); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
+  .tree { flex: 1; overflow-y: auto; padding: 8px 0; }
+  .folder-node { padding: 7px 14px; font-size: 13px; color: var(--text2); cursor: pointer; display: flex; align-items: center; gap: 8px; border-radius: 7px; margin: 1px 6px; transition: background 0.1s; }
+  .folder-node:hover { background: var(--surface2); color: var(--text); }
+  .folder-node.active { background: var(--accent-light); color: var(--accent); font-weight: 600; }
+  .folder-node .count { margin-left: auto; font-size: 11px; background: var(--surface2); padding: 1px 7px; border-radius: 10px; color: var(--text3); }
+
+  .results-wrap { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .results-info { padding: 10px 20px; font-size: 12px; color: var(--text3); border-bottom: 1px solid var(--border); background: var(--surface); display: flex; gap: 6px; }
+  .results-list { flex: 1; overflow-y: auto; padding: 12px 16px; }
+  .file-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius); margin-bottom: 8px; padding: 13px 16px; box-shadow: var(--shadow); }
+  .file-card-top { display: flex; align-items: flex-start; gap: 12px; }
+  .file-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; }
+  .icon-pdf  { background: #fee2e2; color: var(--red); } .icon-docx { background: #dbeafe; color: var(--accent); } .icon-txt  { background: #d1fae5; color: var(--green); } .icon-other{ background: var(--surface2); color: var(--text3); }
+  .file-meta { flex: 1; min-width: 0; }
+  .file-name { font-size: 14px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; }
+  .file-name mark, .snippet mark { background: #bfdbfe; color: #1d4ed8; border-radius: 2px; padding: 0 2px; font-weight: bold;}
+  .file-path { font-size: 11px; color: var(--text3); font-family: var(--mono); }
+  .file-size { font-size: 11px; color: var(--text3); margin-left:10px;}
+  .snippet { font-size: 12.5px; color: var(--text2); line-height: 1.6; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .card-actions { margin-top: 10px; display: flex; gap: 8px; }
+  .open-btn, .copy-path-btn { padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid transparent; font-family: var(--font); transition: all 0.15s;}
+  .open-btn { background: var(--accent-light); color: var(--accent); border-color: #bfdbfe; }
+  .copy-path-btn { background: var(--surface2); color: var(--text2); border-color: var(--border2); }
+  
+  /* NOUVEAU : STYLE DU BOUTON SUPPRIMER */
+  .delete-btn { background: #fff0f0; color: var(--red); border-color: #fecaca; }
+  .delete-btn:hover { background: #fecaca; color: #991b1b; }
+
+  .welcome { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 40px; text-align: center; }
+  .drop-zone { border: 2px dashed var(--border2); border-radius: 14px; padding: 36px 60px; margin-top: 8px; cursor: pointer; background: var(--surface); }
+
+  /* MODAL MODE D'EMPLOI */
+  .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(30,35,64,0.6); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
+  .modal-overlay.show { display: flex; }
+  .modal-content { background: var(--surface); width: 90%; max-width: 700px; max-height: 85vh; border-radius: 12px; box-shadow: var(--shadow-md); display: flex; flex-direction: column; overflow: hidden; animation: modalIn 0.2s ease-out; }
+  .modal-header { padding: 16px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: var(--surface2); }
+  .modal-header h2 { font-size: 18px; color: var(--text); display: flex; align-items: center; gap: 8px; }
+  .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text3); transition: color 0.15s; }
+  .modal-close:hover { color: var(--red); }
+  .modal-body { padding: 24px; overflow-y: auto; font-size: 14px; line-height: 1.6; color: var(--text2); }
+  .modal-body h3 { color: var(--text); margin: 24px 0 10px; font-size: 16px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  .modal-body h3:first-child { margin-top: 0; }
+  .modal-body code { background: var(--bg); border: 1px solid var(--border); padding: 2px 6px; border-radius: 4px; font-family: var(--mono); font-size: 13px; color: var(--accent); }
+  .modal-body ul { margin-left: 20px; margin-bottom: 15px; }
+  .modal-body li { margin-bottom: 6px; }
+  .modal-body strong { color: var(--text); }
+  .info-box { background: #fffbeb; border-left: 4px solid var(--yellow); padding: 12px; margin: 12px 0; border-radius: 0 6px 6px 0; }
+  .alert-box { background: #fee2e2; border-left: 4px solid var(--red); padding: 12px; margin: 12px 0; border-radius: 0 6px 6px 0; color: #991b1b; }
+  @keyframes modalIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+  #toast { position: fixed; bottom: 24px; right: 24px; background: var(--text); border-radius: 10px; padding: 12px 18px; font-size: 13px; color: #fff; transform: translateY(16px); opacity: 0; transition: all 0.25s; z-index: 999; }
+  #toast.show { opacity: 1; transform: translateY(0); }
+  #folderInput { display: none; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><div class="logo-icon">&#128269;</div>FileSearch</div>
+  <div class="header-stats">
+    <button id="helpBtn" class="btn btn-outline" style="padding: 4px 12px; font-size: 12px; height: auto;">📖 Mode d'emploi</button>
+    <div>Fichiers&nbsp;: <span id="totalFiles">0</span></div>
+    <div>Dossiers&nbsp;: <span id="totalFolders">0</span></div>
+  </div>
+</header>
+
+<div class="search-wrap">
+  <div class="search-box">
+    <span class="search-icon">&#128269;</span>
+    <input type="text" id="searchInput" placeholder="Rechercher dans les fichiers indexés… (Ctrl+F)" autocomplete="off" spellcheck="false" />
+    <button class="clear-btn" id="clearSearch">&#10005;</button>
+  </div>
+</div>
+
+<div class="toolbar">
+  <input type="file" id="folderInput" webkitdirectory multiple />
+  <button class="btn btn-primary" id="addFolderBtn">&#43;&nbsp;Ajouter un dossier</button>
+  <button class="btn btn-outline" id="reindexBtn">&#8635;&nbsp;Ré-indexer</button>
+  <button class="btn btn-danger" id="clearIndexBtn">&#128465;&nbsp;Vider l'index</button>
+  <div class="filter-chips">
+    <button class="chip all active" data-ext="all">Tous</button>
+    <button class="chip" data-ext="pdf">PDF</button>
+    <button class="chip" data-ext="docx">DOCX</button>
+    <button class="chip" data-ext="txt">TXT</button>
+  </div>
+</div>
+
+<div class="progress-bar-wrap" id="progressWrap"><div class="progress-bar" id="progressBar"></div></div>
+
+<div class="root-bar" id="rootBar">
+  <label>&#128193; Racine du dossier&nbsp;:</label>
+  <input type="text" id="rootInput" placeholder="Ex: C:\Users\b-info\Documents" spellcheck="false" />
+  <button class="btn-save" id="rootSave">Enregistrer</button>
+</div>
+
+<div class="main">
+  <aside class="sidebar">
+    <div class="sidebar-header">Dossiers <span id="folderCount">0</span></div>
+    <div class="tree" id="treeView"></div>
+  </aside>
+
+  <div class="results-wrap">
+    <div class="welcome" id="welcomeState">
+      <div style="font-size:40px; opacity:0.3;">&#128193;</div>
+      <h2>Recherche locale de fichiers</h2>
+      <p>Ajoutez un dossier pour indexer son contenu, puis recherchez instantanément.</p>
+    </div>
+    <div id="resultsInfo" class="results-info" style="display:none"></div>
+    <div class="results-list" id="resultsList" style="display:none"></div>
+  </div>
+</div>
+
+<!-- MODAL MODE D'EMPLOI -->
+<div class="modal-overlay" id="helpModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>📖 Mode d'emploi - FileSearch</h2>
+      <button class="modal-close" id="closeHelp">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="info-box">Ce logiciel vous permet de chercher des mots précis à l'intérieur de vos documents (Word, PDF, txt...) stockés sur votre PC, sans utiliser internet.</div>
+      <h3>⚠️ Prérequis Indispensable : Installer Node.js</h3>
+      <div class="alert-box"><strong>IMPORTANT :</strong> Pour que ce logiciel fonctionne (surtout si vous changez d'ordinateur), le moteur "Node.js" doit être installé sur Windows.</div>
+      <ul><li>Allez sur le site officiel : <strong>https://nodejs.org</strong></li><li>Téléchargez et installez la version recommandée (LTS).</li><li>Sans ça, la commande <code>node</code> ne fonctionnera pas !</li></ul>
+      <h3>🚀 1. Démarrer le Serveur</h3>
+      <ul><li>Ouvrez une invite de commandes (CMD) dans le dossier de FileSearch.</li><li>Tapez : <code>node server.js</code> et appuyez sur Entrée.</li><li><strong>Laissez la fenêtre noire ouverte</strong> en arrière-plan.</li></ul>
+      <h3>⚙️ 2. Configuration : La "Racine" (À faire une fois)</h3>
+      <ul><li>Dans la barre jaune "Racine du dossier", tapez le chemin général où se trouvent vos fichiers (ex: <code>C:\Users\nom\Documents</code>).</li><li>Cliquez sur <strong>Enregistrer</strong>.</li></ul>
+      <h3>🌐 3. Ouvrir la bonne adresse Web</h3>
+      <ul><li>Ne faites pas un simple double-clic sur le fichier !</li><li>Ouvrez votre navigateur internet et tapez exactement cette adresse : <br><strong><code>http://localhost:3456/copernic-local.html</code></strong></li></ul>
+      <h3>📁 4. Mémoriser vos dossiers (Indexation)</h3>
+      <ul><li>Cliquez sur <strong>+ Ajouter un dossier</strong> et sélectionnez un dossier sur votre PC.</li></ul>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const DB_KEY = 'filesearch_index_v3', ROOT_KEY = 'filesearch_root', SERVER = 'http://localhost:3456';
+let index = [], filteredResults = [], activeExt = 'all', rootPath = '';
+
+/* MODAL LOGIC */
+document.getElementById('helpBtn').addEventListener('click', () => document.getElementById('helpModal').classList.add('show'));
+document.getElementById('closeHelp').addEventListener('click', () => document.getElementById('helpModal').classList.remove('show'));
+document.getElementById('helpModal').addEventListener('click', (e) => { if(e.target === document.getElementById('helpModal')) document.getElementById('helpModal').classList.remove('show'); });
+
+function loadRoot() {
+  rootPath = localStorage.getItem(ROOT_KEY) || '';
+  const bar = document.getElementById('rootBar');
+  if (rootPath) { document.getElementById('rootInput').value = rootPath; bar.classList.add('root-bar-ok'); bar.querySelector('label').textContent = '\u2713 Racine\u00a0:'; }
+}
+
+function saveRoot() {
+  const val = document.getElementById('rootInput').value.trim();
+  if (!val) return toast('Entrez un chemin valide');
+  rootPath = val; localStorage.setItem(ROOT_KEY, rootPath);
+  const bar = document.getElementById('rootBar');
+  bar.classList.add('root-bar-ok'); bar.querySelector('label').textContent = '\u2713 Racine\u00a0:';
+  toast('Racine enregistrée');
+}
+
+function buildAbsPath(relPath) {
+  if (!rootPath) return relPath;
+  let root = rootPath.replace(/\//g, '\\').replace(/\\+$/, '');
+  let rel = relPath.replace(/\//g, '\\');
+  let firstFolder = rel.split('\\')[0];
+  if (root.endsWith('\\' + firstFolder)) {
+    let relWithoutFirst = rel.split('\\').slice(1).join('\\');
+    return root + '\\' + relWithoutFirst;
+  } else {
+    return root + '\\' + rel;
+  }
+}
+
+function loadIndex() { try { const r = localStorage.getItem(DB_KEY); if (r) index = JSON.parse(r); } catch(e) { index = []; } updateStats(); renderTree(); if (index.length > 0) showResults(index); }
+function saveIndex() { try { localStorage.setItem(DB_KEY, JSON.stringify(index)); } catch(e) { toast('⚠️ Index trop volumineux pour localStorage.', 5000); } }
+function updateStats() { document.getElementById('totalFiles').textContent = index.length; const f = [...new Set(index.map(f => f.folder))]; document.getElementById('totalFolders').textContent = f.length; document.getElementById('folderCount').textContent = f.length; }
+
+function renderTree() {
+  const tree = document.getElementById('treeView'), folders = {};
+  index.forEach(f => { folders[f.folder] = (folders[f.folder]||0)+1; });
+  let html = `<div class="folder-node active" data-folder="all">Tous<span class="count">${index.length}</span></div>`;
+  Object.entries(folders).forEach(([folder, count]) => { html += `<div class="folder-node" data-folder="${esc(folder)}"><span style="overflow:hidden;text-overflow:ellipsis;flex:1">${esc(folder)}</span><span class="count">${count}</span></div>`; });
+  tree.innerHTML = html;
+  tree.querySelectorAll('.folder-node').forEach(node => { node.addEventListener('click', () => {
+    tree.querySelectorAll('.folder-node').forEach(n => n.classList.remove('active')); node.classList.add('active');
+    doSearch(document.getElementById('searchInput').value, node.dataset.folder === 'all' ? index : index.filter(f => f.folder === node.dataset.folder));
+  });});
+}
+
+async function readFile(file) { const ext = getExt(file.name); if (['txt','md','csv'].includes(ext)) return await file.text(); if (ext === 'pdf') return await extractPDF(file); if (['docx','doc'].includes(ext)) return await extractDOC(file); return ''; }
+async function extractPDF(file) { try { const str = new TextDecoder('latin1').decode(new Uint8Array(await file.arrayBuffer())); let t = ''; for (const m of str.matchAll(/BT([\s\S]*?)ET/g)) { for (const w of m[1].matchAll(/\((.*?)\)/g)) t += w[1].replace(/\\[nrt\\()]/g,' ')+' '; } return t.slice(0,30000); } catch(e){return '';} }
+async function extractDOC(file) { try { const bytes = new Uint8Array(await file.arrayBuffer()); let ascii = '', run = ''; for (let i=0;i<bytes.length;i++){const b=bytes[i]; if((b>=0x20&&b<=0x7E)||b===0x0A)run+=String.fromCharCode(b);else{if(run.length>=5)ascii+=run+' ';run='';}} return ascii.slice(0,30000); } catch(e){return '';} }
+
+async function indexFiles(files) {
+  const pw=document.getElementById('progressWrap'),pb=document.getElementById('progressBar'); pw.style.display='block';
+  const existing=new Set(index.map(f=>f.path)); let added=0;
+  for(let i=0;i<files.length;i++){
+    pb.style.width=Math.round((i/files.length)*100)+'%'; const file=files[i],ext=getExt(file.name);
+    if(!['txt','md','pdf','docx','doc','csv'].includes(ext)){continue;}
+    const path=file.webkitRelativePath||file.name; if(existing.has(path)){continue;}
+    const folder=path.includes('/')?path.split('/').slice(0,-1).join('/'):'(racine)';
+    let content=''; try{content=await readFile(file);}catch(e){}
+    index.push({name:file.name,path,folder,ext,size:file.size,content:content||''}); added++;
+  }
+  pb.style.width='100%'; setTimeout(()=>{pw.style.display='none';pb.style.width='0%';},600);
+  saveIndex();updateStats();renderTree();showResults(index); toast(`\u2713 ${added} fichier(s) indexé(s)`);
+}
+
+function doSearch(query, subset) {
+  let pool = subset || index; if(activeExt!=='all') pool=pool.filter(f=>f.ext===activeExt);
+  if(!query.trim()) { showResults(pool); return; }
+  const terms=query.toLowerCase().split(/\s+/).filter(Boolean);
+  filteredResults = pool.filter(f=>terms.every(t=>(f.name+' '+f.content).toLowerCase().includes(t)));
+  showResults(filteredResults, query);
+}
+
+function hl(text, query) {
+  if (!query) return text;
+  const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+  let r = text;
+  terms.forEach(t => {
+    const re = new RegExp('(' + t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+    r = r.replace(re, '<mark>$1</mark>');
+  });
+  return r;
+}
+
+function snip(content, query) {
+  if (!query || !content) return '';
+  const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+  const lower = content.toLowerCase();
+  let pos = -1;
+  for (const t of terms) { pos = lower.indexOf(t); if (pos >= 0) break; }
+  if (pos < 0) return '';
+  const s = Math.max(0, pos - 60);
+  const e = Math.min(content.length, pos + 150);
+  const snippetText = (s > 0 ? '...' : '') + content.substring(s, e) + (e < content.length ? '...' : '');
+  return hl(esc(snippetText), query);
+}
+
+function showResults(results, query) {
+  const welcome=document.getElementById('welcomeState'),info=document.getElementById('resultsInfo'),list=document.getElementById('resultsList');
+  if(index.length===0){welcome.style.display='flex';info.style.display='none';list.style.display='none';return;}
+  welcome.style.display='none';info.style.display='flex';list.style.display='block';
+  info.innerHTML=query?`<strong>${results.length}</strong> résultats`:`<strong>${results.length}</strong> fichiers`;
+  
+  list.innerHTML=results.slice(0,100).map((f,i)=> {
+    const nameHTML = query ? hl(esc(f.name), query) : esc(f.name);
+    const snippetHTML = query && f.content ? snip(f.content, query) : '';
+    
+    return `<div class="file-card">
+      <div class="file-card-top">
+        <div class="file-icon ${['pdf','docx','doc','txt'].includes(f.ext)?'icon-'+(f.ext==='doc'?'docx':f.ext):'icon-other'}">${f.ext.toUpperCase()}</div>
+        <div class="file-meta"><div class="file-name">${nameHTML}</div><div class="file-path">${esc(f.path)} <span class="file-size">${Math.round(f.size/1024)} Ko</span></div></div>
+      </div>
+      ${snippetHTML ? `<div class="snippet">${snippetHTML}</div>` : ''}
+      <div class="card-actions">
+        <button class="open-btn" onclick="openFile('${esc(f.path).replace(/'/g,"\\'")}')">Ouvrir</button>
+        <button class="open-btn" style="background:var(--surface2);color:var(--text2);border-color:var(--border2)" onclick="locateFile('${esc(f.path).replace(/'/g,"\\'")}')">Localiser</button>
+        <!-- NOUVEAU BOUTON SUPPRIMER -->
+        <button class="open-btn delete-btn" onclick="deleteFile('${esc(f.path).replace(/'/g,"\\'")}')">&#128465; Supprimer</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function openFile(relPath) { const absPath = buildAbsPath(relPath); await fetch(SERVER + '/open?path=' + encodeURIComponent(absPath)); }
+async function locateFile(relPath) { const absPath = buildAbsPath(relPath); await fetch(SERVER + '/explore?path=' + encodeURIComponent(absPath)); }
+
+/* NOUVELLE FONCTION SUPPRIMER */
+async function deleteFile(relPath) {
+  // ALERTE DE SÉCURITÉ
+  if(!confirm("⚠️ DANGER : Voulez-vous vraiment SUPPRIMER DÉFINITIVEMENT ce fichier de votre ordinateur ?\n\nCette action est IRRÉVERSIBLE (le fichier n'ira pas dans la corbeille).")) return;
+  
+  const absPath = buildAbsPath(relPath);
+  try {
+    const r = await fetch(SERVER + '/delete?path=' + encodeURIComponent(absPath));
+    const data = await r.json();
+    if(data.ok) {
+      toast('🗑️ Fichier supprimé définitivement.');
+      // Retirer de la mémoire de recherche
+      index = index.filter(f => f.path !== relPath);
+      saveIndex();
+      updateStats();
+      renderTree();
+      // Mettre à jour l'écran immédiatement
+      doSearch(document.getElementById('searchInput').value);
+    } else {
+      toast('❌ Erreur : Impossible de supprimer ce fichier (peut-être déjà ouvert dans Word ?)', 5000);
+    }
+  } catch(e) {
+    toast('❌ Erreur : Serveur local non connecté.', 5000);
+  }
+}
+
+function getExt(n){return(n.split('.').pop()||'').toLowerCase();}
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function toast(msg, duration = 3000){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),duration);}
+
+document.getElementById('addFolderBtn').addEventListener('click',()=>document.getElementById('folderInput').click());
+document.getElementById('reindexBtn').addEventListener('click',()=>document.getElementById('folderInput').click());
+document.getElementById('folderInput').addEventListener('change',async(e)=>{ const files=Array.from(e.target.files);if(files.length){toast(`Indexation en cours...`);await indexFiles(files);e.target.value='';} });
+document.getElementById('searchInput').addEventListener('input',(e)=>{ document.getElementById('clearSearch').style.display=e.target.value?'block':'none'; doSearch(e.target.value); });
+document.getElementById('clearSearch').addEventListener('click',()=>{ document.getElementById('searchInput').value=''; document.getElementById('clearSearch').style.display='none'; doSearch(''); });
+document.querySelectorAll('.chip').forEach(c=>{ c.addEventListener('click',()=>{ document.querySelectorAll('.chip').forEach(x=>x.classList.remove('active')); c.classList.add('active');activeExt=c.dataset.ext; doSearch(document.getElementById('searchInput').value); }); });
+document.getElementById('clearIndexBtn').addEventListener('click',()=>{ if(confirm('Vider l\'index ?')){index=[];localStorage.removeItem(DB_KEY);updateStats();renderTree();showResults([]);toast('Index vidé');} });
+document.getElementById('rootSave').addEventListener('click', saveRoot);
+
+loadRoot(); loadIndex();
+</script>
+</body>
+</html>
