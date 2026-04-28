@@ -51,6 +51,8 @@ body { font-family: var(--font-ui); background: var(--bg-page); color: var(--tex
 .btn-outline:hover { background: var(--bg-input); }
 .btn-danger { background: var(--error); color: #fff; }
 .btn-danger:hover { background: #b71c1c; }
+.btn-help { background: #fff; color: var(--primary); border: 2px solid #fff; font-weight: bold; }
+.btn-help:hover { background: var(--primary-light); color: #fff; }
 
 .filter-chips { display: flex; gap: 6px; margin-left: auto; flex-wrap: wrap; }
 .chip { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); color: var(--text); background: var(--bg-card); transition: all 0.2s; }
@@ -107,21 +109,24 @@ body { font-family: var(--font-ui); background: var(--bg-page); color: var(--tex
 .drop-zone { border: 2px dashed var(--border); border-radius: 10px; padding: 24px 40px; margin-top: 12px; cursor: pointer; background: var(--bg-card); font-weight: 600; color: var(--primary); transition: all 0.2s; }
 .drop-zone:hover { border-color: var(--primary); background: #e3f2fd; }
 
-.modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
+/* MODAL MODE D'EMPLOI ÉLARGI */
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
 .modal-overlay.show { display: flex; }
-.modal-content { background: var(--bg-card); width: 90%; max-width: 650px; max-height: 85vh; border-radius: 10px; box-shadow: 0 8px 30px rgba(0,0,0,0.15); display: flex; flex-direction: column; overflow: hidden; animation: modalIn 0.25s ease-out; }
+.modal-content { background: var(--bg-card); width: 90%; max-width: 800px; max-height: 90vh; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); display: flex; flex-direction: column; overflow: hidden; animation: modalIn 0.2s ease-out; }
 @keyframes modalIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-.modal-header { padding: 14px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: var(--bg-input); }
-.modal-header h2 { font-size: 16px; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 6px; }
-.modal-close { background: none; border: none; font-size: 22px; cursor: pointer; color: var(--text-light); transition: color 0.15s; }
-.modal-close:hover { color: var(--error); }
-.modal-body { padding: 18px 20px; overflow-y: auto; font-size: 13px; line-height: 1.6; color: var(--text); }
-.modal-body h3 { font-size: 14px; font-weight: 700; color: var(--primary); margin: 16px 0 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
-.modal-body ul { margin-left: 20px; margin-bottom: 12px; }
-.modal-body li { margin-bottom: 5px; color: var(--text); }
-.info-box { background: #fff3cd; border-left: 4px solid var(--warning); padding: 10px 14px; margin: 12px 0; border-radius: 0 6px 6px 0; font-size: 12px; color: #856404; }
+.modal-header { padding: 16px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: var(--primary); color: white; }
+.modal-header h2 { font-size: 18px; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 8px; }
+.modal-close { background: none; border: none; font-size: 28px; cursor: pointer; color: white; opacity: 0.8; transition: opacity 0.15s; }
+.modal-close:hover { opacity: 1; }
+.modal-body { padding: 24px; overflow-y: auto; font-size: 14px; line-height: 1.6; color: var(--text); background: #fafafa; }
+.step-box { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+.step-title { font-size: 16px; font-weight: 700; color: var(--primary); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+.step-number { background: var(--primary); color: white; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 12px; }
+.modal-body ul { margin-left: 24px; margin-bottom: 0; }
+.modal-body li { margin-bottom: 8px; }
+.highlight { background: #fff3cd; padding: 2px 6px; border-radius: 4px; font-weight: 600; color: #856404; }
 
-#toast { position: fixed; bottom: 20px; right: 20px; background: var(--text); color: #fff; border-radius: 8px; padding: 10px 16px; font-size: 13px; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transform: translateY(20px); opacity: 0; transition: all 0.25s; z-index: 9999; }
+#toast { position: fixed; bottom: 20px; right: 20px; background: var(--primary-dark); color: #fff; border-radius: 8px; padding: 12px 20px; font-size: 14px; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.2); transform: translateY(20px); opacity: 0; transition: all 0.25s; z-index: 9999; }
 #toast.show { transform: translateY(0); opacity: 1; }
 #folderInput { display: none; }
 @media (max-width: 900px) { .main { flex-direction: column; } .sidebar { width: 100%; height: auto; max-height: 200px; border-right: none; border-bottom: 1px solid var(--border); } .filter-chips { margin-left: 0; } }
@@ -142,7 +147,7 @@ body { font-family: var(--font-ui); background: var(--bg-page); color: var(--tex
       </div>
     </div>
     <div class="header-stats">
-      <button id="helpBtn" class="btn btn-outline" style="padding:4px 10px;font-size:11px;height:auto">📖 Aide</button>
+      <button id="helpBtn" class="btn btn-help" style="padding:6px 14px;font-size:12px;height:auto">📖 Guide pas-à-pas pour démarrer</button>
       <div>Fichiers : <span id="totalFiles">0</span></div>
       <div>Dossiers : <span id="totalFolders">0</span></div>
     </div>
@@ -151,16 +156,16 @@ body { font-family: var(--font-ui); background: var(--bg-page); color: var(--tex
   <div class="search-wrap">
     <div class="search-box">
       <span class="search-icon">🔍</span>
-      <input type="text" id="searchInput" placeholder="Rechercher dans les fichiers indexés… (Ctrl+F)" autocomplete="off" spellcheck="false" />
+      <input type="text" id="searchInput" placeholder="Tapez un mot-clé (ex: césarienne, nom d'un patient...)" autocomplete="off" spellcheck="false" />
       <button class="clear-btn" id="clearSearch">✕</button>
     </div>
   </div>
 
   <div class="toolbar">
     <input type="file" id="folderInput" webkitdirectory multiple />
-    <button class="btn btn-primary" id="addFolderBtn">➕ Ajouter un dossier</button>
-    <button class="btn btn-outline" id="reindexBtn">🔄 Ré-indexer</button>
-    <button class="btn btn-danger" id="clearIndexBtn">🗑️ Vider l'index</button>
+    <button class="btn btn-primary" id="addFolderBtn">➕ Ajouter un dossier à mémoriser</button>
+    <button class="btn btn-outline" id="reindexBtn">🔄 Mettre à jour (Ré-indexer)</button>
+    <button class="btn btn-danger" id="clearIndexBtn">🗑️ Vider la mémoire</button>
     <div class="filter-chips">
       <button class="chip all active" data-ext="all">Tous</button>
       <button class="chip" data-ext="pdf">PDF</button>
@@ -172,9 +177,9 @@ body { font-family: var(--font-ui); background: var(--bg-page); color: var(--tex
   <div class="progress-wrap" id="progressWrap"><div class="progress-bar" id="progressBar"></div></div>
 
   <div class="root-bar" id="rootBar">
-    <label>📁 Racine :</label>
-    <input type="text" id="rootInput" placeholder="Ex: C:\Users\Documents" spellcheck="false" />
-    <button class="btn-save" id="rootSave">Enregistrer</button>
+    <label>📁 Racine de votre PC :</label>
+    <input type="text" id="rootInput" placeholder="Détection automatique en cours..." spellcheck="false" />
+    <button class="btn-save" id="rootSave">Enregistrer manuellement</button>
   </div>
 
   <div class="main">
@@ -186,36 +191,74 @@ body { font-family: var(--font-ui); background: var(--bg-page); color: var(--tex
     <div class="results-wrap">
       <div class="welcome" id="welcomeState">
         <div class="welcome-icon">📁</div>
-        <h2>Recherche locale de fichiers</h2>
-        <p>Ajoutez un dossier pour indexer son contenu, puis recherchez instantanément dans le texte des documents.</p>
-        <div class="drop-zone" onclick="document.getElementById('folderInput').click()">+ Sélectionner un dossier à indexer</div>
+        <h2>Bienvenue dans votre moteur de recherche personnel !</h2>
+        <p>Ce logiciel est capable de lire à l'intérieur de tous vos documents pour retrouver n'importe quel mot instantanément.</p>
+        <div class="drop-zone" onclick="document.getElementById('folderInput').click()">Cliquez ici pour choisir le dossier que Copernic doit analyser</div>
       </div>
       <div id="resultsInfo" class="results-info" style="display:none"></div>
       <div class="results-list" id="resultsList" style="display:none"></div>
     </div>
   </div>
 
-  <!-- MODAL -->
+  <!-- MODAL MODE D'EMPLOI DEBUTANT -->
   <div class="modal-overlay" id="helpModal">
     <div class="modal-content">
       <div class="modal-header">
-        <h2>📖 Mode d'emploi - Recherche Copernic</h2>
+        <h2>📖 Comment utiliser Copernic ? (De A à Z)</h2>
         <button class="modal-close" id="closeHelp">×</button>
       </div>
       <div class="modal-body">
-        <div class="info-box">Cet outil indexe le contenu de vos documents pour une recherche plein texte ultra-rapide.</div>
-        <h3>🚀 Utilisation</h3>
-        <ul>
-          <li>Lancez le fichier <code>node server.js</code> sur votre ordinateur en arrière-plan.</li>
-          <li>Indiquez la "Racine" de vos dossiers (ex: <code>C:\Users\Documents</code>).</li>
-          <li>Cliquez sur <strong>➕ Ajouter un dossier</strong> pour mémoriser vos fichiers.</li>
-          <li>Cherchez un mot. Les boutons <strong>Ouvrir</strong>, <strong>Localiser</strong> et <strong>Supprimer</strong> ordonneront à votre PC d'agir.</li>
-        </ul>
-        <h3>🔒 Sécurité</h3>
-        <ul>
-          <li>Tout se passe localement ! Aucun de vos fichiers n'est envoyé sur internet.</li>
-          <li>L'interface sur GitHub ne fait que "parler" à votre serveur local.</li>
-        </ul>
+        
+        <p style="margin-bottom: 20px; font-size: 15px;">Bienvenue ! Ce logiciel est comme Google, mais conçu pour chercher des mots <strong>à l'intérieur de vos propres fichiers</strong> (Word, PDF, txt) stockés sur votre ordinateur. <br>Pour des raisons de sécurité, un site internet n'a pas le droit d'ouvrir vos fichiers. Nous avons donc divisé le travail en deux parties : le "Moteur" (sur votre PC) et le "Tableau de bord" (ce site Web).</p>
+
+        <div class="step-box">
+          <div class="step-title"><span class="step-number">1</span> Allumer le "Moteur" (À faire tous les jours)</div>
+          <p>Pour que ce site puisse ouvrir vos documents Word, il a besoin qu'un petit programme tourne en arrière-plan sur votre PC.</p>
+          <ul>
+            <li>Allez dans le dossier où se trouve votre fichier <span class="highlight">server.js</span>.</li>
+            <li><strong>Astuce pour gagner du temps :</strong> Créez un fichier texte, écrivez dedans <code>node server.js</code>, et enregistrez-le sous le nom <span class="highlight">Allumer_Copernic.bat</span>.</li>
+            <li>Faites un double-clic sur ce fichier <code>.bat</code>. Une <strong>fenêtre noire</strong> s'ouvre. C'est votre moteur ! Réduisez-la simplement en bas de l'écran.</li>
+          </ul>
+        </div>
+
+        <div class="step-box">
+          <div class="step-title"><span class="step-number">2</span> Ouvrir le Tableau de bord</div>
+          <ul>
+            <li>Ouvrez votre navigateur internet (Chrome, Edge...)</li>
+            <li>Allez sur le site : <span class="highlight">karazaitri12-cpu.github.io/plateforme-utilitaires/</span></li>
+            <li>C'est ici que vous ferez toutes vos recherches ! Ajoutez ce site à vos favoris (étoile en haut).</li>
+          </ul>
+        </div>
+
+        <div class="step-box">
+          <div class="step-title"><span class="step-number">3</span> La "Racine" (Configuré automatiquement !)</div>
+          <ul>
+            <li>Regardez la barre jaune/verte juste au-dessus.</li>
+            <li>Grâce à votre "Moteur" allumé, le site a <strong>détecté automatiquement</strong> le nom de votre ordinateur et l'a rempli pour vous (ex: <code>C:\Users\karaz\Documents</code>).</li>
+            <li>Si la barre est verte ("✓ Racine"), vous n'avez absolument rien à faire !</li>
+          </ul>
+        </div>
+
+        <div class="step-box">
+          <div class="step-title"><span class="step-number">4</span> Donner de la mémoire à Copernic (L'indexation)</div>
+          <p>Le logiciel a besoin de "lire" vos fichiers une première fois pour les mémoriser.</p>
+          <ul>
+            <li>Cliquez sur le gros bouton bleu <span class="highlight">➕ Ajouter un dossier</span>.</li>
+            <li>Sélectionnez le dossier de votre PC contenant vos cours ou dossiers médicaux.</li>
+            <li>Patientez pendant que la barre de progression avance.</li>
+            <li><em>Note : Si vous ajoutez de nouveaux fichiers sur votre PC demain, cliquez simplement sur "🔄 Ré-indexer" pour mettre sa mémoire à jour.</em></li>
+          </ul>
+        </div>
+
+        <div class="step-box">
+          <div class="step-title"><span class="step-number">5</span> Faire une recherche magique !</div>
+          <ul>
+            <li>Tapez un mot dans la barre de recherche en haut.</li>
+            <li>Les résultats s'affichent immédiatement. Le texte autour de votre mot s'affiche en bleu pour vous donner le contexte.</li>
+            <li>Cliquez sur <span class="highlight">📂 Ouvrir</span> : Votre ordinateur ouvrira instantanément Microsoft Word ou votre lecteur PDF avec ce fichier !</li>
+          </ul>
+        </div>
+
       </div>
     </div>
   </div>
@@ -224,7 +267,7 @@ body { font-family: var(--font-ui); background: var(--bg-page); color: var(--tex
 
   <footer class="footer">
     <span>Dr KARA-ZAITRI M.A © 2026</span>
-    <div class="disclaimer">⚠️ Usage bureautique privé. Nécessite le serveur Node.js local allumé pour l'ouverture des fichiers.</div>
+    <div class="disclaimer">⚠️ Vos fichiers restent 100% privés. Aucun contenu n'est envoyé sur internet. Ce site ne sert que de télécommande pour votre ordinateur.</div>
   </footer>
 
   <script>
@@ -237,19 +280,44 @@ body { font-family: var(--font-ui); background: var(--bg-page); color: var(--tex
     document.getElementById('closeHelp').addEventListener('click', () => document.getElementById('helpModal').classList.remove('show'));
     document.getElementById('helpModal').addEventListener('click', (e) => { if(e.target === document.getElementById('helpModal')) document.getElementById('helpModal').classList.remove('show'); });
 
-    function loadRoot() {
+    // DÉTECTION AUTOMATIQUE DE LA RACINE AU DÉMARRAGE
+    async function loadRoot() {
       rootPath = localStorage.getItem(ROOT_KEY) || '';
       const bar = document.getElementById('rootBar');
-      if (rootPath) { document.getElementById('rootInput').value = rootPath; bar.classList.add('root-bar-ok'); bar.querySelector('label').textContent = '✓ Racine :'; }
+      const input = document.getElementById('rootInput');
+      
+      if (rootPath) { 
+        input.value = rootPath; 
+        bar.classList.add('root-bar-ok'); 
+        bar.querySelector('label').textContent = '✓ Racine :'; 
+      } else {
+        // Tentative de détection via le serveur local (si allumé)
+        try {
+          const r = await fetch(SERVER_URL + '/default-root');
+          const data = await r.json();
+          if (data.root) {
+            input.value = data.root;
+            rootPath = data.root;
+            localStorage.setItem(ROOT_KEY, rootPath);
+            bar.classList.add('root-bar-ok');
+            bar.querySelector('label').textContent = '✓ Racine (Auto) :';
+            toast('Racine de l\'ordinateur détectée automatiquement !');
+          }
+        } catch(e) {
+          // Serveur éteint, l'utilisateur devra le remplir ou l'allumer
+        }
+      }
     }
+
     function saveRoot() {
       const val = document.getElementById('rootInput').value.trim();
       if (!val) return toast('Entrez un chemin valide');
       rootPath = val; localStorage.setItem(ROOT_KEY, rootPath);
       const bar = document.getElementById('rootBar');
       bar.classList.add('root-bar-ok'); bar.querySelector('label').textContent = '✓ Racine :';
-      toast('Racine enregistrée');
+      toast('Racine enregistrée manuellement');
     }
+    
     function buildAbsPath(relPath) {
       if (!rootPath) return relPath;
       let root = rootPath.replace(/\//g, '\\').replace(/\\+$/, '');
@@ -260,7 +328,7 @@ body { font-family: var(--font-ui); background: var(--bg-page); color: var(--tex
     }
 
     function loadIndex() { try { const r = localStorage.getItem(DB_KEY); if (r) index = JSON.parse(r); } catch(e) { index = []; } updateStats(); renderTree(); if (index.length > 0) showResults(index); }
-    function saveIndex() { try { localStorage.setItem(DB_KEY, JSON.stringify(index)); } catch(e) { toast('⚠️ Index trop volumineux pour le stockage local'); } }
+    function saveIndex() { try { localStorage.setItem(DB_KEY, JSON.stringify(index)); } catch(e) { toast('⚠️ L\'index est très lourd. Pensez à vider la mémoire si ça ralentit.'); } }
     function updateStats() { document.getElementById('totalFiles').textContent = index.length; const folders = [...new Set(index.map(f => f.folder))]; document.getElementById('totalFolders').textContent = folders.length; document.getElementById('folderCount').textContent = folders.length; }
 
     function renderTree() {
@@ -290,7 +358,7 @@ body { font-family: var(--font-ui); background: var(--bg-page); color: var(--tex
         index.push({ name: file.name, path, folder, ext, size: file.size, content: content || '' }); added++;
       }
       pb.style.width = '100%'; setTimeout(() => { pw.style.display = 'none'; pb.style.width = '0%'; }, 600);
-      saveIndex(); updateStats(); renderTree(); showResults(index); toast(`✓ ${added} fichier(s) indexé(s)`);
+      saveIndex(); updateStats(); renderTree(); showResults(index); toast(`✓ ${added} fichier(s) mémorisé(s) avec succès`);
     }
 
     function doSearch(query, subset) {
@@ -308,7 +376,7 @@ body { font-family: var(--font-ui); background: var(--bg-page); color: var(--tex
       const welcome = document.getElementById('welcomeState'), info = document.getElementById('resultsInfo'), list = document.getElementById('resultsList');
       if (index.length === 0) { welcome.style.display = 'flex'; info.style.display = 'none'; list.style.display = 'none'; return; }
       welcome.style.display = 'none'; info.style.display = 'flex'; list.style.display = 'block';
-      info.innerHTML = query ? `<strong>${results.length}</strong> résultat(s)` : `<strong>${results.length}</strong> fichier(s)`;
+      info.innerHTML = query ? `<strong>${results.length}</strong> résultat(s) trouvé(s)` : `<strong>${results.length}</strong> fichier(s) en mémoire`;
       
       list.innerHTML = results.slice(0, 100).map(f => {
         const nameHTML = query ? hl(esc(f.name), query) : esc(f.name);
@@ -338,42 +406,42 @@ body { font-family: var(--font-ui); background: var(--bg-page); color: var(--tex
     async function openFile(relPath) { 
       const absPath = buildAbsPath(relPath); 
       try { await fetch(SERVER_URL + '/open?path=' + encodeURIComponent(absPath)); } 
-      catch(e) { toast('⚠️ Erreur: Le serveur Node.js est-il lancé ?'); }
+      catch(e) { toast('⚠️ Action impossible : Vérifiez que le "Moteur" (fenêtre noire) est allumé sur ce PC !', 5000); }
     }
     
     async function locateFile(relPath) { 
       const absPath = buildAbsPath(relPath); 
       try { await fetch(SERVER_URL + '/explore?path=' + encodeURIComponent(absPath)); } 
-      catch(e) { toast('⚠️ Erreur: Le serveur Node.js est-il lancé ?'); }
+      catch(e) { toast('⚠️ Action impossible : Vérifiez que le "Moteur" (fenêtre noire) est allumé sur ce PC !', 5000); }
     }
 
     async function deleteFile(relPath) {
-      if(!confirm("⚠️ DANGER : Voulez-vous vraiment SUPPRIMER DÉFINITIVEMENT ce fichier ?")) return;
+      if(!confirm("⚠️ ATTENTION : Voulez-vous vraiment SUPPRIMER DÉFINITIVEMENT ce fichier de votre ordinateur ?\n\nIl ne sera pas dans la corbeille.")) return;
       const absPath = buildAbsPath(relPath);
       try {
         const r = await fetch(SERVER_URL + '/delete?path=' + encodeURIComponent(absPath));
         const data = await r.json();
         if(data.ok) {
-          toast('🗑️ Fichier supprimé.');
+          toast('🗑️ Fichier détruit définitivement.');
           index = index.filter(f => f.path !== relPath);
           saveIndex(); updateStats(); renderTree(); doSearch(document.getElementById('searchInput').value);
-        } else toast('❌ Erreur de suppression');
-      } catch(e) { toast('⚠️ Erreur: Le serveur Node.js est-il lancé ?'); }
+        } else toast('❌ Erreur : Impossible de supprimer ce fichier (est-il déjà ouvert dans Word ?)');
+      } catch(e) { toast('⚠️ Action impossible : Le "Moteur" n\'est pas allumé !', 5000); }
     }
 
-    function copyPath(relPath) { const absPath = buildAbsPath(relPath); navigator.clipboard.writeText(absPath).then(() => toast('✓ Chemin copié')).catch(() => toast('⚠️ Erreur de copie.')); }
+    function copyPath(relPath) { const absPath = buildAbsPath(relPath); navigator.clipboard.writeText(absPath).then(() => toast('✓ Chemin copié en mémoire')).catch(() => toast('⚠️ Erreur de copie.')); }
     
     function getExt(n) { return (n.split('.').pop()||'').toLowerCase(); }
     function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-    function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
+    function toast(msg, duration=3000) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), duration); }
 
     document.getElementById('addFolderBtn').addEventListener('click', () => document.getElementById('folderInput').click());
     document.getElementById('reindexBtn').addEventListener('click', () => document.getElementById('folderInput').click());
-    document.getElementById('folderInput').addEventListener('change', async (e) => { const files = Array.from(e.target.files); if (files.length) { toast('Indexation en cours...'); await indexFiles(files); e.target.value = ''; } });
+    document.getElementById('folderInput').addEventListener('change', async (e) => { const files = Array.from(e.target.files); if (files.length) { toast('Lecture des fichiers en cours, patientez...'); await indexFiles(files); e.target.value = ''; } });
     document.getElementById('searchInput').addEventListener('input', (e) => { document.getElementById('clearSearch').style.display = e.target.value ? 'block' : 'none'; doSearch(e.target.value); });
     document.getElementById('clearSearch').addEventListener('click', () => { document.getElementById('searchInput').value = ''; document.getElementById('clearSearch').style.display = 'none'; doSearch(''); });
     document.querySelectorAll('.chip').forEach(c => { c.addEventListener('click', () => { document.querySelectorAll('.chip').forEach(x => x.classList.remove('active')); c.classList.add('active'); activeExt = c.dataset.ext; doSearch(document.getElementById('searchInput').value); }); });
-    document.getElementById('clearIndexBtn').addEventListener('click', () => { if (confirm('Vider l\'index de recherche ?')) { index = []; localStorage.removeItem(DB_KEY); updateStats(); renderTree(); showResults([]); toast('Index vidé'); } });
+    document.getElementById('clearIndexBtn').addEventListener('click', () => { if (confirm('Voulez-vous faire un nettoyage complet de la mémoire de recherche ?')) { index = []; localStorage.removeItem(DB_KEY); updateStats(); renderTree(); showResults([]); toast('Mémoire vidée avec succès'); } });
     document.getElementById('rootSave').addEventListener('click', saveRoot);
     document.getElementById('searchInput').addEventListener('keydown', (e) => { if (e.key === 'Escape') { document.getElementById('searchInput').value = ''; doSearch(''); } });
 
