@@ -32,7 +32,7 @@ body { font-family: var(--font-ui); background: var(--bg-page); color: var(--tex
 .app-header h1 { font-size: 18px; font-weight: 700; margin: 0; }
 .app-header p { font-size: 12px; opacity: 0.9; margin: 2px 0 0; }
 .premium-badge { color: var(--premium); font-size: 22px; }
-.header-stats { display: flex; gap: 16px; font-size: 12px; color: rgba(255,255,255,0.9); align-items: center; }
+.header-stats { display: flex; gap: 16px; font-size: 12px; color: rgba(255,255,255,0.9); align-items: center; flex-wrap: wrap; }
 .header-stats span { font-weight: 600; }
 
 .search-wrap { padding: 16px 20px 0; }
@@ -43,7 +43,7 @@ body { font-family: var(--font-ui); background: var(--bg-page); color: var(--tex
 .clear-btn { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-light); cursor: pointer; font-size: 16px; display: none; }
 
 .toolbar { padding: 12px 20px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; background: var(--bg-card); border-bottom: 1px solid var(--border); }
-.btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; border: none; transition: all 0.2s; }
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; border: none; transition: all 0.2s; font-family: var(--font-ui); text-decoration: none; }
 .btn-primary { background: var(--primary); color: #fff; }
 .btn-primary:hover { background: var(--primary-light); }
 .btn-outline { background: var(--bg-card); color: var(--primary); border: 1px solid var(--border); }
@@ -52,6 +52,10 @@ body { font-family: var(--font-ui); background: var(--bg-page); color: var(--tex
 .btn-danger:hover { background: #b71c1c; }
 .btn-help { background: #fff; color: var(--primary); border: 2px solid #fff; font-weight: bold; }
 .btn-help:hover { background: var(--primary-light); color: #fff; }
+
+/* LE BOUTON VERT DE TÉLÉCHARGEMENT */
+.btn-download { background: var(--success); color: white; border: 2px solid var(--success); box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+.btn-download:hover { background: #1b5e20; border-color: #1b5e20; color: white;}
 
 .filter-chips { display: flex; gap: 6px; margin-left: auto; flex-wrap: wrap; }
 .chip { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); color: var(--text); background: var(--bg-card); transition: all 0.2s; }
@@ -146,11 +150,15 @@ body { font-family: var(--font-ui); background: var(--bg-page); color: var(--tex
         <p>Recherche locale plein texte dans vos documents</p>
       </div>
     </div>
+    
+    <!-- ✅ NOUVELLE ZONE AVEC LE BOUTON DE TELECHARGEMENT EN EVIDENCE -->
     <div class="header-stats">
-      <button id="helpBtn" class="btn btn-help" style="padding:6px 14px;font-size:12px;height:auto">📖 Guide pas-à-pas pour démarrer</button>
+      <a href="https://github.com/karazaitri12-cpu/plateforme-utilitaires/releases/download/v1.0/Moteur_Copernic.zip" class="btn btn-download">⬇️ Télécharger le Moteur</a>
+      <button id="helpBtn" class="btn btn-help">📖 Guide pas-à-pas</button>
       <div>Fichiers : <span id="totalFiles">0</span></div>
       <div>Dossiers : <span id="totalFolders">0</span></div>
     </div>
+    
   </header>
 
   <div class="search-wrap">
@@ -214,16 +222,9 @@ body { font-family: var(--font-ui); background: var(--bg-page); color: var(--tex
         <div class="step-box">
           <div class="step-title"><span class="step-number">1</span> Télécharger et allumer le "Moteur"</div>
           <p>Pour que ce site puisse ouvrir vos documents Word ou PDF, il a besoin d'un petit programme de liaison sur votre ordinateur.</p>
-          
-          <div style="text-align: center; margin: 15px 0;">
-            <!-- LIEN A MODIFIER SELON TA RELEASE GITHUB SI TU VEUX LE METTRE EN ZIP -->
-            <a href="https://github.com/karazaitri12-cpu/plateforme-utilitaires/releases/download/v1.0/Moteur_Copernic.zip" style="background: #2e7d32; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-flex; align-items: center; gap: 8px;">
-              <span style="font-size: 18px;">⬇️</span> Télécharger le Moteur Copernic
-            </a>
-          </div>
-
           <ul>
-            <li>Téléchargez, décompressez et placez ce fichier où vous voulez sur votre PC.</li>
+            <li>Cliquez sur le bouton vert <strong>"Télécharger le Moteur"</strong> situé en haut à droite de l'écran.</li>
+            <li>Décompressez le fichier et placez-le où vous voulez sur votre PC.</li>
             <li><strong>Faites un double-clic dessus.</strong> Une fenêtre noire va s'ouvrir : c'est le moteur ! Réduisez-la simplement en bas de l'écran. <em>(À faire à chaque fois que vous utilisez le site).</em></li>
           </ul>
         </div>
@@ -250,7 +251,6 @@ body { font-family: var(--font-ui); background: var(--bg-page); color: var(--tex
   <div id="toast"></div>
 
   <script>
-    // CORRECTION : Utilisation de 127.0.0.1 au lieu de localhost pour contourner la sécurité de certains navigateurs
     const SERVER_URL = 'http://127.0.0.1:3456';
     const DB_KEY = 'copernic_index_v1', ROOT_KEY = 'copernic_root';
     let index = [], filteredResults = [], activeExt = 'all', rootPath = '';
@@ -311,7 +311,6 @@ body { font-family: var(--font-ui); background: var(--bg-page); color: var(--tex
       tree.querySelectorAll('.folder-node').forEach(node => { node.addEventListener('click', () => { tree.querySelectorAll('.folder-node').forEach(n => n.classList.remove('active')); node.classList.add('active'); const folder = node.dataset.folder; doSearch(document.getElementById('searchInput').value, folder === 'all' ? index : index.filter(f => f.folder === folder)); }); });
     }
 
-    /* --- NOUVEAUX LECTEURS AVANCÉS (PDF complet et DOCX ZIP) --- */
     async function readFile(file) { 
       const ext = getExt(file.name); 
       try {
@@ -396,7 +395,6 @@ body { font-family: var(--font-ui); background: var(--bg-page); color: var(--tex
       return r; 
     }
 
-    /* --- NOUVEAU SYSTÈME MULTI-OCCURRENCES --- */
     function snip(content, query) { 
       if (!query || !content) return ''; 
       const terms = query.toLowerCase().split(/\s+/).filter(Boolean); 
@@ -455,7 +453,6 @@ body { font-family: var(--font-ui); background: var(--bg-page); color: var(--tex
           </div>
           ${snippetHTML ? `<div class="snippet">${snippetHTML}</div>` : ''}
           <div class="card-actions">
-            <!-- BOUTONS MAINTENUS ET FONCTIONNELS ! -->
             <button class="action-btn btn-open" onclick="openFile('${esc(f.path).replace(/'/g,"\\'")}')">📂 Ouvrir</button>
             <button class="action-btn btn-copy" onclick="locateFile('${esc(f.path).replace(/'/g,"\\'")}')">📁 Localiser</button>
             <button class="action-btn btn-copy" onclick="copyPath('${esc(f.path).replace(/'/g,"\\'")}')">📋 Copier le chemin</button>
@@ -465,7 +462,6 @@ body { font-family: var(--font-ui); background: var(--bg-page); color: var(--tex
       }).join('');
     }
 
-    /* --- APPELS API VERS LE SERVEUR LOCAL (127.0.0.1) --- */
     async function openFile(relPath) { 
       const absPath = buildAbsPath(relPath); 
       try { 
