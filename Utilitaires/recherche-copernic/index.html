@@ -212,12 +212,20 @@ body { font-family: var(--font-ui); background: var(--bg-page); color: var(--tex
         <p style="margin-bottom: 20px; font-size: 15px;">Bienvenue ! Ce logiciel est comme Google, mais conçu pour chercher des mots <strong>à l'intérieur de vos propres fichiers</strong> (Word, PDF, txt) stockés sur votre ordinateur. <br>Pour des raisons de sécurité, un site internet n'a pas le droit d'ouvrir vos fichiers. Nous avons donc divisé le travail en deux parties : le "Moteur" (sur votre PC) et le "Tableau de bord" (ce site Web).</p>
 
         <div class="step-box">
-          <div class="step-title"><span class="step-number">1</span> Allumer le "Moteur" (À faire tous les jours)</div>
-          <p>Pour que ce site puisse ouvrir vos documents Word, il a besoin qu'un petit programme tourne en arrière-plan sur votre PC.</p>
+          <div class="step-title"><span class="step-number">1</span> Télécharger et allumer le "Moteur"</div>
+          <p>Pour que ce site puisse ouvrir vos documents Word ou PDF, il a besoin d'un petit programme de liaison sur votre ordinateur.</p>
+          
+          <!-- BOUTON DE TELECHARGEMENT -->
+          <div style="text-align: center; margin: 15px 0;">
+            <a href="Moteur_Copernic.exe" download style="background: #2e7d32; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-flex; align-items: center; gap: 8px;">
+              <span style="font-size: 18px;">⬇️</span> Télécharger le Moteur Copernic (Windows)
+            </a>
+          </div>
+
           <ul>
-            <li>Allez dans le dossier où se trouve votre fichier <span class="highlight">server.js</span>.</li>
-            <li><strong>Astuce pour gagner du temps :</strong> Créez un fichier texte, écrivez dedans <code>node server.js</code>, et enregistrez-le sous le nom <span class="highlight">Allumer_Copernic.bat</span>.</li>
-            <li>Faites un double-clic sur ce fichier <code>.bat</code>. Une <strong>fenêtre noire</strong> s'ouvre. C'est votre moteur ! Réduisez-la simplement en bas de l'écran.</li>
+            <li>Cliquez sur le bouton vert ci-dessus pour télécharger le fichier <code>Moteur_Copernic.exe</code>.</li>
+            <li>Placez ce fichier où vous voulez sur votre PC (ex: sur votre Bureau).</li>
+            <li><strong>Faites un double-clic dessus.</strong> Une fenêtre noire va s'ouvrir : c'est le moteur ! Réduisez-la simplement en bas de l'écran. <em>(À faire à chaque fois que vous utilisez le site).</em></li>
           </ul>
         </div>
 
