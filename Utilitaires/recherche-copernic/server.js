@@ -5,22 +5,15 @@ const path = require('path');
 const PORT = 3456;
 
 const server = http.createServer((req, res) => {
+    // TRÈS IMPORTANT : Autorise ton site GitHub à parler à ton PC
     res.setHeader('Access-Control-Allow-Origin', '*');
-    
-    // Servir la page HTML
-    if (req.url === '/' || req.url === '/index.html') {
-        const htmlPath = path.join(__dirname, 'index.html');
-        fs.readFile(htmlPath, (err, data) => {
-            if (err) {
-                res.writeHead(404);
-                return res.end('Page HTML non trouvée');
-            }
-            res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-            return res.end(data);
-        });
-        return;
+    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+
+    if (req.method === 'OPTIONS') {
+        res.writeHead(200);
+        return res.end();
     }
-    
+
     if (req.url === '/ping') {
         res.writeHead(200);
         return res.end('ok');
@@ -31,18 +24,14 @@ const server = http.createServer((req, res) => {
         const filePath = url.searchParams.get('path');
 
         if (url.pathname === '/open' && filePath) {
-            const cmd = process.platform === 'win32' 
-                ? `start "" "${filePath}"` 
-                : `xdg-open "${filePath}"`;
+            const cmd = process.platform === 'win32' ? `start "" "${filePath}"` : `xdg-open "${filePath}"`;
             exec(cmd);
             res.writeHead(200, { 'Content-Type': 'application/json' });
             return res.end(JSON.stringify({ ok: true }));
         }
 
         if (url.pathname === '/explore' && filePath) {
-            const cmd = process.platform === 'win32' 
-                ? `explorer /select,"${filePath}"` 
-                : `xdg-open "${path.dirname(filePath)}"`;
+            const cmd = process.platform === 'win32' ? `explorer /select,"${filePath}"` : `xdg-open "${path.dirname(filePath)}"`;
             exec(cmd);
             res.writeHead(200, { 'Content-Type': 'application/json' });
             return res.end(JSON.stringify({ ok: true }));
@@ -51,14 +40,11 @@ const server = http.createServer((req, res) => {
         if (url.pathname === '/delete' && filePath) {
             fs.unlink(filePath, (err) => {
                 res.writeHead(200, { 'Content-Type': 'application/json' });
-                if (err) {
-                    return res.end(JSON.stringify({ ok: false, error: err.message }));
-                }
+                if (err) return res.end(JSON.stringify({ ok: false, error: err.message }));
                 return res.end(JSON.stringify({ ok: true }));
             });
             return;
         }
-
     } catch (e) {
         // Ignorer les erreurs
     }
@@ -68,9 +54,9 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-    console.log('\n========================================');
-    console.log('   🔍 FileSearch — Serveur démarré     ');
-    console.log(`   http://localhost:${PORT}            `);
-    console.log('========================================\n');
-    console.log('✅ Laissez cette fenêtre ouverte\n');
+    console.log('\n======================================================');
+    console.log(' 🔌 Pont Local FileSearch activé !');
+    console.log(' 🌐 Allez sur votre site GitHub pour faire vos recherches.');
+    console.log('======================================================\n');
+    console.log('Laissez cette fenêtre ouverte.\n');
 });
