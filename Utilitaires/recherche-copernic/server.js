@@ -7,13 +7,13 @@ const PORT = 3456;
 const server = http.createServer((req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     
-    // Servir la page HTML principale
+    // Servir la page HTML
     if (req.url === '/' || req.url === '/index.html') {
         const htmlPath = path.join(__dirname, 'index.html');
         fs.readFile(htmlPath, (err, data) => {
             if (err) {
                 res.writeHead(404);
-                return res.end('Page non trouvée');
+                return res.end('Page HTML non trouvée');
             }
             res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
             return res.end(data);
@@ -41,7 +41,7 @@ const server = http.createServer((req, res) => {
 
         if (url.pathname === '/explore' && filePath) {
             const cmd = process.platform === 'win32' 
-                ? `explorer /select, "${filePath}"` 
+                ? `explorer /select,"${filePath}"` 
                 : `xdg-open "${path.dirname(filePath)}"`;
             exec(cmd);
             res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -64,7 +64,7 @@ const server = http.createServer((req, res) => {
     }
 
     res.writeHead(404);
-    res.end('Page non trouvée');
+    res.end('Not Found');
 });
 
 server.listen(PORT, () => {
