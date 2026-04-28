@@ -5,11 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Recherche Copernic | Dr KARA-ZAITRI</title>
 
-<!-- Bibliothèques externes pour extraction PDF/DOCX -->
+<!-- Bibliothèques externes pour extraction PDF et DOCX -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script>
-  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-</script>
+<script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
 <style>
 /* DESIGN INSTITUTIONNEL */
@@ -91,6 +90,8 @@ body { font-family: var(--font-ui); background: var(--bg-page); color: var(--tex
 .file-name mark, .snippet mark { background: #bbdefb; color: #0d47a1; border-radius: 2px; padding: 0 3px; font-weight: 700; }
 .file-path { font-size: 11px; color: var(--text-light); font-family: var(--mono); word-break: break-all; }
 .file-size { font-size: 11px; color: var(--text-light); margin-left: 8px; }
+
+/* MODIFICATION CSS POUR LE MULTI-OCCURRENCES */
 .snippet { font-size: 13px; color: var(--text); line-height: 1.6; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); overflow: hidden; }
 
 .card-actions { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
@@ -109,7 +110,6 @@ body { font-family: var(--font-ui); background: var(--bg-page); color: var(--tex
 .drop-zone { border: 2px dashed var(--border); border-radius: 10px; padding: 24px 40px; margin-top: 12px; cursor: pointer; background: var(--bg-card); font-weight: 600; color: var(--primary); transition: all 0.2s; }
 .drop-zone:hover { border-color: var(--primary); background: #e3f2fd; }
 
-/* MODAL MODE D'EMPLOI ÉLARGI */
 .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
 .modal-overlay.show { display: flex; }
 .modal-content { background: var(--bg-card); width: 90%; max-width: 800px; max-height: 90vh; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); display: flex; flex-direction: column; overflow: hidden; animation: modalIn 0.2s ease-out; }
@@ -209,79 +209,49 @@ body { font-family: var(--font-ui); background: var(--bg-page); color: var(--tex
       </div>
       <div class="modal-body">
         
-        <p style="margin-bottom: 20px; font-size: 15px;">Bienvenue ! Ce logiciel est comme Google, mais conçu pour chercher des mots <strong>à l'intérieur de vos propres fichiers</strong> (Word, PDF, txt) stockés sur votre ordinateur. <br>Pour des raisons de sécurité, un site internet n'a pas le droit d'ouvrir vos fichiers. Nous avons donc divisé le travail en deux parties : le "Moteur" (sur votre PC) et le "Tableau de bord" (ce site Web).</p>
+        <p style="margin-bottom: 20px; font-size: 15px;">Pour des raisons de sécurité, un site internet n'a pas le droit d'ouvrir vos fichiers. Nous avons donc divisé le travail en deux parties : le "Moteur" (sur votre PC) et le "Tableau de bord" (ce site Web).</p>
 
         <div class="step-box">
           <div class="step-title"><span class="step-number">1</span> Télécharger et allumer le "Moteur"</div>
           <p>Pour que ce site puisse ouvrir vos documents Word ou PDF, il a besoin d'un petit programme de liaison sur votre ordinateur.</p>
           
-          <!-- BOUTON DE TELECHARGEMENT -->
           <div style="text-align: center; margin: 15px 0;">
-            <a href="Moteur_Copernic." download style="background: #2e7d32; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-flex; align-items: center; gap: 8px;">
-              <span style="font-size: 18px;">⬇️</span> Télécharger le Moteur Copernic (Windows)
+            <!-- LIEN A MODIFIER SELON TA RELEASE GITHUB SI TU VEUX LE METTRE EN ZIP -->
+            <a href="https://github.com/karazaitri12-cpu/plateforme-utilitaires/releases/download/v1.0/Moteur_Copernic.zip" style="background: #2e7d32; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-flex; align-items: center; gap: 8px;">
+              <span style="font-size: 18px;">⬇️</span> Télécharger le Moteur Copernic
             </a>
           </div>
 
           <ul>
-            <li>Cliquez sur le bouton vert ci-dessus pour télécharger le fichier <code>Moteur_Copernic.zip</code>.</li>
-            <li>Décompressez le fichier zip ---> exe (ignorer la mise en garde et cliquez sur 'Informations complémentaires' puis 'Installer quand même')</li>
-            <li>Placez ce fichier où vous voulez sur votre PC (ex: sur votre Bureau).</li>
+            <li>Téléchargez, décompressez et placez ce fichier où vous voulez sur votre PC.</li>
             <li><strong>Faites un double-clic dessus.</strong> Une fenêtre noire va s'ouvrir : c'est le moteur ! Réduisez-la simplement en bas de l'écran. <em>(À faire à chaque fois que vous utilisez le site).</em></li>
           </ul>
         </div>
 
         <div class="step-box">
-          <div class="step-title"><span class="step-number">2</span> Ouvrir le Tableau de bord</div>
-          <ul>
-            <li>Ouvrez votre navigateur internet (Chrome, Edge...)</li>
-            <li>Allez sur le site : <span class="highlight">karazaitri12-cpu.github.io/plateforme-utilitaires/</span></li>
-            <li>C'est ici que vous ferez toutes vos recherches ! Ajoutez ce site à vos favoris (étoile en haut).</li>
-          </ul>
-        </div>
-
-        <div class="step-box">
-          <div class="step-title"><span class="step-number">3</span> La "Racine" (Configuré automatiquement !)</div>
+          <div class="step-title"><span class="step-number">2</span> La "Racine" (Configuré automatiquement !)</div>
           <ul>
             <li>Regardez la barre jaune/verte juste au-dessus.</li>
-            <li>Grâce à votre "Moteur" allumé, le site a <strong>détecté automatiquement</strong> le nom de votre ordinateur et l'a rempli pour vous (ex: <code>C:\Users\karaz\Documents</code>).</li>
-            <li>Si la barre est verte ("✓ Racine"), vous n'avez absolument rien à faire !</li>
+            <li>Grâce à votre "Moteur" allumé, le site a <strong>détecté automatiquement</strong> le nom de votre ordinateur et l'a rempli pour vous.</li>
           </ul>
         </div>
 
         <div class="step-box">
-          <div class="step-title"><span class="step-number">4</span> Donner de la mémoire à Copernic (L'indexation)</div>
-          <p>Le logiciel a besoin de "lire" vos fichiers une première fois pour les mémoriser.</p>
+          <div class="step-title"><span class="step-number">3</span> Donner de la mémoire à Copernic (L'indexation)</div>
           <ul>
-            <li>Cliquez sur le gros bouton bleu <span class="highlight">➕ Ajouter un dossier</span>.</li>
-            <li>Sélectionnez le dossier de votre PC contenant vos cours ou dossiers médicaux.</li>
-            <li>Patientez pendant que la barre de progression avance.</li>
-            <li><em>Note : Si vous ajoutez de nouveaux fichiers sur votre PC demain, cliquez simplement sur "🔄 Ré-indexer" pour mettre sa mémoire à jour.</em></li>
+            <li>Cliquez sur le gros bouton bleu <span class="highlight">➕ Ajouter un dossier</span> et sélectionnez votre dossier Windows.</li>
+            <li>Le logiciel va scanner tout le contenu de vos PDF et DOCX en profondeur.</li>
           </ul>
         </div>
-
-        <div class="step-box">
-          <div class="step-title"><span class="step-number">5</span> Faire une recherche magique !</div>
-          <ul>
-            <li>Tapez un mot dans la barre de recherche en haut.</li>
-            <li>Les résultats s'affichent immédiatement. Le texte autour de votre mot s'affiche en bleu pour vous donner le contexte.</li>
-            <li>Cliquez sur <span class="highlight">📂 Ouvrir</span> : Votre ordinateur ouvrira instantanément Microsoft Word ou votre lecteur PDF avec ce fichier !</li>
-          </ul>
-        </div>
-
       </div>
     </div>
   </div>
 
   <div id="toast"></div>
 
-  <footer class="footer">
-    <span>Dr KARA-ZAITRI M.A © 2026</span>
-    <div class="disclaimer">⚠️ Vos fichiers restent 100% privés. Aucun contenu n'est envoyé sur internet. Ce site ne sert que de télécommande pour votre ordinateur.</div>
-  </footer>
-
   <script>
-    // URL DE L'API LOCALE NODE.JS
-    const SERVER_URL = 'http://localhost:3456';
+    // CORRECTION : Utilisation de 127.0.0.1 au lieu de localhost pour contourner la sécurité de certains navigateurs
+    const SERVER_URL = 'http://127.0.0.1:3456';
     const DB_KEY = 'copernic_index_v1', ROOT_KEY = 'copernic_root';
     let index = [], filteredResults = [], activeExt = 'all', rootPath = '';
 
@@ -289,32 +259,24 @@ body { font-family: var(--font-ui); background: var(--bg-page); color: var(--tex
     document.getElementById('closeHelp').addEventListener('click', () => document.getElementById('helpModal').classList.remove('show'));
     document.getElementById('helpModal').addEventListener('click', (e) => { if(e.target === document.getElementById('helpModal')) document.getElementById('helpModal').classList.remove('show'); });
 
-    // DÉTECTION AUTOMATIQUE DE LA RACINE AU DÉMARRAGE
     async function loadRoot() {
       rootPath = localStorage.getItem(ROOT_KEY) || '';
       const bar = document.getElementById('rootBar');
       const input = document.getElementById('rootInput');
       
       if (rootPath) { 
-        input.value = rootPath; 
-        bar.classList.add('root-bar-ok'); 
-        bar.querySelector('label').textContent = '✓ Racine :'; 
+        input.value = rootPath; bar.classList.add('root-bar-ok'); bar.querySelector('label').textContent = '✓ Racine :'; 
       } else {
-        // Tentative de détection via le serveur local (si allumé)
         try {
           const r = await fetch(SERVER_URL + '/default-root');
           const data = await r.json();
           if (data.root) {
-            input.value = data.root;
-            rootPath = data.root;
+            input.value = data.root; rootPath = data.root;
             localStorage.setItem(ROOT_KEY, rootPath);
-            bar.classList.add('root-bar-ok');
-            bar.querySelector('label').textContent = '✓ Racine (Auto) :';
+            bar.classList.add('root-bar-ok'); bar.querySelector('label').textContent = '✓ Racine (Auto) :';
             toast('Racine de l\'ordinateur détectée automatiquement !');
           }
-        } catch(e) {
-          // Serveur éteint, l'utilisateur devra le remplir ou l'allumer
-        }
+        } catch(e) { /* Moteur éteint */ }
       }
     }
 
@@ -337,7 +299,7 @@ body { font-family: var(--font-ui); background: var(--bg-page); color: var(--tex
     }
 
     function loadIndex() { try { const r = localStorage.getItem(DB_KEY); if (r) index = JSON.parse(r); } catch(e) { index = []; } updateStats(); renderTree(); if (index.length > 0) showResults(index); }
-    function saveIndex() { try { localStorage.setItem(DB_KEY, JSON.stringify(index)); } catch(e) { toast('⚠️ L\'index est très lourd. Pensez à vider la mémoire si ça ralentit.'); } }
+    function saveIndex() { try { localStorage.setItem(DB_KEY, JSON.stringify(index)); } catch(e) { toast('⚠️ L\'index est très lourd.'); } }
     function updateStats() { document.getElementById('totalFiles').textContent = index.length; const folders = [...new Set(index.map(f => f.folder))]; document.getElementById('totalFolders').textContent = folders.length; document.getElementById('folderCount').textContent = folders.length; }
 
     function renderTree() {
@@ -349,9 +311,54 @@ body { font-family: var(--font-ui); background: var(--bg-page); color: var(--tex
       tree.querySelectorAll('.folder-node').forEach(node => { node.addEventListener('click', () => { tree.querySelectorAll('.folder-node').forEach(n => n.classList.remove('active')); node.classList.add('active'); const folder = node.dataset.folder; doSearch(document.getElementById('searchInput').value, folder === 'all' ? index : index.filter(f => f.folder === folder)); }); });
     }
 
-    async function readFile(file) { const ext = getExt(file.name); if (['txt','md','csv'].includes(ext)) return await file.text(); if (ext === 'pdf') return await extractPDF(file); if (['docx','doc'].includes(ext)) return await extractDOC(file); return ''; }
-    async function extractPDF(file) { try { const str = new TextDecoder('latin1').decode(new Uint8Array(await file.arrayBuffer())); let t = ''; for (const m of str.matchAll(/BT([\s\S]*?)ET/g)) { for (const w of m[1].matchAll(/\((.*?)\)/g)) { t += w[1].replace(/\\[nrt\\()]/g, ' ') + ' '; } } return t.slice(0, 30000); } catch(e) { return ''; } }
-    async function extractDOC(file) { try { const bytes = new Uint8Array(await file.arrayBuffer()); let ascii = '', run = ''; for (let i=0; i<bytes.length; i++) { const b = bytes[i]; if ((b>=0x20 && b<=0x7E) || b===0x0A) run += String.fromCharCode(b); else { if (run.length>=5) ascii += run + ' '; run = ''; } } return ascii.slice(0, 30000); } catch(e) { return ''; } }
+    /* --- NOUVEAUX LECTEURS AVANCÉS (PDF complet et DOCX ZIP) --- */
+    async function readFile(file) { 
+      const ext = getExt(file.name); 
+      try {
+        if (['txt','md','csv'].includes(ext)) return await file.text(); 
+        if (ext === 'pdf') return await extractPDF(file); 
+        if (ext === 'docx') return await extractDOCX(file); 
+        if (ext === 'doc') return await extractDOC(file); 
+      } catch(e) { console.error("Erreur de lecture sur", file.name, e); }
+      return ''; 
+    }
+
+    async function extractPDF(file) { 
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
+        let fullText = '';
+        const maxPages = Math.min(pdf.numPages, 100);
+        for (let i = 1; i <= maxPages; i++) {
+            const page = await pdf.getPage(i);
+            const textContent = await page.getTextContent();
+            fullText += textContent.items.map(s => s.str).join(' ') + ' ';
+        }
+        return fullText.slice(0, 150000);
+      } catch(e) { return ''; } 
+    }
+
+    async function extractDOCX(file) {
+      try {
+        const zip = await JSZip.loadAsync(file);
+        const docXml = await zip.file("word/document.xml").async("string");
+        const cleanText = docXml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+        return cleanText.slice(0, 150000);
+      } catch(e) { return ''; }
+    }
+
+    async function extractDOC(file) { 
+      try { 
+        const bytes = new Uint8Array(await file.arrayBuffer()); 
+        let ascii = '', run = ''; 
+        for (let i=0; i<bytes.length; i++) { 
+          const b = bytes[i]; 
+          if ((b>=0x20 && b<=0x7E) || b===0x0A || b===0xC9 || b===0xE8 || b===0xE9 || b===0xE0) run += String.fromCharCode(b); 
+          else { if (run.length>=4) ascii += run + ' '; run = ''; } 
+        } 
+        return ascii.slice(0, 100000); 
+      } catch(e) { return ''; } 
+    }
 
     async function indexFiles(files) {
       const pw = document.getElementById('progressWrap'), pb = document.getElementById('progressBar'); pw.style.display = 'block';
@@ -367,7 +374,7 @@ body { font-family: var(--font-ui); background: var(--bg-page); color: var(--tex
         index.push({ name: file.name, path, folder, ext, size: file.size, content: content || '' }); added++;
       }
       pb.style.width = '100%'; setTimeout(() => { pw.style.display = 'none'; pb.style.width = '0%'; }, 600);
-      saveIndex(); updateStats(); renderTree(); showResults(index); toast(`✓ ${added} fichier(s) mémorisé(s) avec succès`);
+      saveIndex(); updateStats(); renderTree(); showResults(index); toast(`✓ ${added} fichier(s) mémorisé(s) en profondeur`);
     }
 
     function doSearch(query, subset) {
@@ -378,14 +385,24 @@ body { font-family: var(--font-ui); background: var(--bg-page); color: var(--tex
       showResults(filteredResults, query);
     }
 
-    function hl(text, query) { if (!query) return text; const terms = query.toLowerCase().split(/\s+/).filter(Boolean); let r = text; terms.forEach(t => { const re = new RegExp('(' + t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi'); r = r.replace(re, '<mark>$1</mark>'); }); return r; }
+    function hl(text, query) { 
+      if (!query) return text; 
+      const terms = query.toLowerCase().split(/\s+/).filter(Boolean); 
+      let r = text; 
+      terms.forEach(t => { 
+        const re = new RegExp('(' + t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi'); 
+        r = r.replace(re, '<mark>$1</mark>'); 
+      }); 
+      return r; 
+    }
+
+    /* --- NOUVEAU SYSTÈME MULTI-OCCURRENCES --- */
     function snip(content, query) { 
       if (!query || !content) return ''; 
       const terms = query.toLowerCase().split(/\s+/).filter(Boolean); 
       const lower = content.toLowerCase(); 
       
       let positions = [];
-      // 1. Trouver TOUTES les apparitions du mot
       terms.forEach(t => {
         let pos = lower.indexOf(t);
         while (pos !== -1) {
@@ -395,42 +412,33 @@ body { font-family: var(--font-ui); background: var(--bg-page); color: var(--tex
       });
 
       if (positions.length === 0) return '';
-      
-      // 2. Trier dans l'ordre de lecture
       positions.sort((a, b) => a - b);
       let totalOccurrences = positions.length;
 
       let snippets = [];
       let lastEnd = -1;
 
-      // 3. Extraire les différents paragraphes
       for (let pos of positions) {
         let start = Math.max(0, pos - 40);
         let end = Math.min(content.length, pos + 120);
-
-        // Si le mot est répété juste à côté, on ne réaffiche pas la même phrase
         if (start < lastEnd) continue; 
-
         let snippetText = (start > 0 ? '...' : '') + content.substring(start, end) + (end < content.length ? '...' : '');
         snippets.push(hl(esc(snippetText), query));
         lastEnd = end;
-
-        // Limiter à 4 passages maximum par fichier pour ne pas saturer l'écran
         if (snippets.length >= 4) break; 
       }
 
-      // 4. Affichage final avec le compteur
       let countBadge = `<div style="font-size:11px; color:var(--primary); background:#e3f2fd; display:inline-block; padding:2px 8px; border-radius:10px; font-weight:bold; margin-bottom:8px;">🎯 ${totalOccurrences} occurrence(s) trouvée(s)</div><br>`;
       let sep = '<div style="color:var(--text-light); text-align:center; opacity:0.3; margin:8px 0; font-size:16px;">•••</div>';
       
       return countBadge + snippets.join(sep); 
     }
-    
+
     function showResults(results, query) {
       const welcome = document.getElementById('welcomeState'), info = document.getElementById('resultsInfo'), list = document.getElementById('resultsList');
       if (index.length === 0) { welcome.style.display = 'flex'; info.style.display = 'none'; list.style.display = 'none'; return; }
       welcome.style.display = 'none'; info.style.display = 'flex'; list.style.display = 'block';
-      info.innerHTML = query ? `<strong>${results.length}</strong>  résultat(s) trouvé(s)` : `<strong>${results.length}</strong> fichier(s) en mémoire`;
+      info.innerHTML = query ? `<strong>${results.length}</strong> résultat(s) trouvé(s)` : `<strong>${results.length}</strong> fichier(s) en mémoire`;
       
       list.innerHTML = results.slice(0, 100).map(f => {
         const nameHTML = query ? hl(esc(f.name), query) : esc(f.name);
@@ -447,6 +455,7 @@ body { font-family: var(--font-ui); background: var(--bg-page); color: var(--tex
           </div>
           ${snippetHTML ? `<div class="snippet">${snippetHTML}</div>` : ''}
           <div class="card-actions">
+            <!-- BOUTONS MAINTENUS ET FONCTIONNELS ! -->
             <button class="action-btn btn-open" onclick="openFile('${esc(f.path).replace(/'/g,"\\'")}')">📂 Ouvrir</button>
             <button class="action-btn btn-copy" onclick="locateFile('${esc(f.path).replace(/'/g,"\\'")}')">📁 Localiser</button>
             <button class="action-btn btn-copy" onclick="copyPath('${esc(f.path).replace(/'/g,"\\'")}')">📋 Copier le chemin</button>
@@ -456,17 +465,23 @@ body { font-family: var(--font-ui); background: var(--bg-page); color: var(--tex
       }).join('');
     }
 
-    /* --- APPELS API VERS LE SERVEUR LOCAL NODE.JS --- */
+    /* --- APPELS API VERS LE SERVEUR LOCAL (127.0.0.1) --- */
     async function openFile(relPath) { 
       const absPath = buildAbsPath(relPath); 
-      try { await fetch(SERVER_URL + '/open?path=' + encodeURIComponent(absPath)); } 
-      catch(e) { toast('⚠️ Action impossible : Vérifiez que le "Moteur" (fenêtre noire) est allumé sur ce PC !', 5000); }
+      try { 
+        const response = await fetch(SERVER_URL + '/open?path=' + encodeURIComponent(absPath)); 
+        if (!response.ok) throw new Error('Network error');
+      } 
+      catch(e) { toast('⚠️ Action impossible : Vérifiez que le "Moteur" est allumé sur ce PC !', 5000); }
     }
     
     async function locateFile(relPath) { 
       const absPath = buildAbsPath(relPath); 
-      try { await fetch(SERVER_URL + '/explore?path=' + encodeURIComponent(absPath)); } 
-      catch(e) { toast('⚠️ Action impossible : Vérifiez que le "Moteur" (fenêtre noire) est allumé sur ce PC !', 5000); }
+      try { 
+        const response = await fetch(SERVER_URL + '/explore?path=' + encodeURIComponent(absPath)); 
+        if (!response.ok) throw new Error('Network error');
+      } 
+      catch(e) { toast('⚠️ Action impossible : Vérifiez que le "Moteur" est allumé sur ce PC !', 5000); }
     }
 
     async function deleteFile(relPath) {
@@ -474,17 +489,17 @@ body { font-family: var(--font-ui); background: var(--bg-page); color: var(--tex
       const absPath = buildAbsPath(relPath);
       try {
         const r = await fetch(SERVER_URL + '/delete?path=' + encodeURIComponent(absPath));
+        if (!r.ok) throw new Error('Network error');
         const data = await r.json();
         if(data.ok) {
           toast('🗑️ Fichier détruit définitivement.');
           index = index.filter(f => f.path !== relPath);
           saveIndex(); updateStats(); renderTree(); doSearch(document.getElementById('searchInput').value);
-        } else toast('❌ Erreur : Impossible de supprimer ce fichier (est-il déjà ouvert dans Word ?)');
+        } else toast('❌ Erreur : Impossible de supprimer ce fichier');
       } catch(e) { toast('⚠️ Action impossible : Le "Moteur" n\'est pas allumé !', 5000); }
     }
 
     function copyPath(relPath) { const absPath = buildAbsPath(relPath); navigator.clipboard.writeText(absPath).then(() => toast('✓ Chemin copié en mémoire')).catch(() => toast('⚠️ Erreur de copie.')); }
-    
     function getExt(n) { return (n.split('.').pop()||'').toLowerCase(); }
     function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
     function toast(msg, duration=3000) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), duration); }
