@@ -1,497 +1,802 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plateforme Utilitaires | Dr KARA-ZAITRI M.A</title>
-    <meta name="description" content="Utilitaires techniques et bureautiques pour professionnels de santé.">
-    <style>
-        /* --- BASE & DESIGN SYSTEM INSTITUTIONNEL --- */
-        #med-hub-full {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif !important;
-            color: #4a6977 !important;
-            background-color: #ffffff !important;
-            width: 100% !important;
-            margin: 0 auto !important;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recherche Copernic | Dr KARA-ZAITRI</title>
 
-        /* EN-TÊTE PRINCIPAL */
-        #med-hub-full .main-header {
-            background: #fff !important;
-            border-bottom: 3px solid #1a3a5c !important;
-            padding: 25px 20px !important;
-            text-align: center !important;
-        }
-        #med-hub-full .main-header h1 {
-            font-size: 20px !important;
-            color: #1a3a5c !important;
-            margin: 0 !important;
-            text-transform: uppercase !important;
-            letter-spacing: 0.5px !important;
-            font-weight: 700 !important;
-        }
-        #med-hub-full .main-header .subtitle {
-            font-size: 13px !important;
-            color: #607d8b !important;
-            margin: 5px 0 0 0 !important;
-        }
-        #med-hub-full .main-header .subtitle a {
-            color: #1a3a5c !important;
-            text-decoration: none !important;
-            border-bottom: 1px dotted #1a3a5c !important;
-        }
+<!-- Bibliothèques externes pour extraction PDF/DOCX -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+</script>
 
-        /* BARRE DE RECHERCHE */
-        #med-hub-full .search-section {
-            background: #f4f7f9 !important;
-            padding: 20px !important;
-            border-bottom: 1px solid #cfd8dc !important;
-        }
-        #med-hub-full .search-wrapper {
-            position: relative !important;
-            max-width: 500px !important;
-            margin: 0 auto !important;
-        }
-        #med-hub-full #tool-search {
-            width: 100% !important;
-            height: 44px !important;
-            padding: 0 45px !important;
-            border: 1px solid #cfd8dc !important;
-            border-radius: 8px !important;
-            outline: none !important;
-            font-size: 16px !important;
-        }
-        #med-hub-full #tool-search:focus { border-color: #1a3a5c !important; }
-        #med-hub-full .search-icon { position: absolute !important; left: 15px; top: 13px; font-size: 18px; color: #90a4ae; }
-        #med-hub-full #clear-search { position: absolute !important; right: 12px; top: 5px; font-size: 28px; color: #cfd8dc; cursor: pointer; display: none; }
-
-        /* SECTIONS PAR CATÉGORIE */
-        .category-section {
-            padding: 25px 20px !important;
-            border-bottom: 1px solid #f0f0f0 !important;
-        }
-        .category-section:last-child { border-bottom: none !important; }
-        
-        .category-title {
-            font-size: 16px !important;
-            font-weight: 700 !important;
-            color: #546e7a !important;
-            margin: 0 0 20px 0 !important;
-            padding-bottom: 8px !important;
-            border-bottom: 2px solid #cfd8dc !important;
-            display: flex !important;
-            align-items: center !important;
-            gap: 8px !important;
-            text-transform: uppercase !important;
-            letter-spacing: 0.5px !important;
-        }
-
-        /* GRILLE */
-        #med-hub-full .tools-grid {
-            display: grid !important;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
-            gap: 15px !important;
-        }
-
-        .tool-card-med {
-            display: flex !important;
-            flex-direction: column !important;
-            text-decoration: none !important;
-            background: #ffffff !important;
-            border: 1px solid #e0e6ed !important;
-            padding: 20px !important;
-            position: relative !important;
-            border-radius: 10px !important;
-            transition: all 0.3s ease !important;
-        }
-
-        .tool-card-med:hover { 
-            border-color: #1a3a5c !important; 
-            box-shadow: 0 6px 15px rgba(0,0,0,0.08) !important; 
-            transform: translateY(-3px) !important; 
-        }
-
-        .tool-card-med.hidden { display: none !important; }
-
-        /* ✅ CARTES PREMIUM VERROUILLÉES pour les non-membres */
-        .tool-card-med[data-premium="true"].kz-locked {
-            opacity: 0.6 !important;
-            cursor: not-allowed !important;
-            pointer-events: none !important;
-            filter: grayscale(30%) !important;
-        }
-
-        .tool-header-flex { display: flex !important; align-items: center !important; margin-bottom: 10px !important; }
-        .tool-icon-small { height: 35px !important; width: 35px !important; object-fit: contain !important; margin-right: 15px !important; flex-shrink: 0 !important; }
-        .tool-name-med { font-size: 16px !important; font-weight: 700 !important; color: #1a3a5c !important; margin: 0 !important; line-height: 1.2 !important; }
-        .tool-desc-med { font-size: 13.5px !important; color: #546e7a !important; font-weight: 400; margin: 0 !important; line-height: 1.4 !important; }
-
-        /* BADGES */
-        .premium-ribbon {
-            position: absolute !important;
-            top: 8px !important;
-            right: 10px !important;
-            color: #C9A961 !important;
-            font-size: 20px !important;
-        }
-        .badge-coming {
-            position: absolute !important;
-            top: 12px !important;
-            right: 12px !important;
-            background: #ff9800 !important;
-            color: #fff !important;
-            padding: 3px 10px !important;
-            border-radius: 12px !important;
-            font-size: 11px !important;
-            font-weight: 700 !important;
-        }
-
-        /* BANDEAU NON-MEMBRE */
-        #kz-guest-banner {
-            display: none;
-            background: #c62828;
-            color: #fff;
-            text-align: center;
-            padding: 12px 20px;
-            font-size: 13px;
-            font-weight: 600;
-        }
-       #kz-guest-banner a {
-    color: #ffffff;
-    text-decoration: underline;
-    font-weight: 800;
-    margin-left: 8px;
-    background: rgba(0,0,0,0.25);
-    padding: 2px 8px;
-    border-radius: 4px;
+<style>
+/* ==========================================
+   DESIGN INSTITUTIONNEL COMPLET
+   ========================================== */
+:root {
+  --primary: #1a3a5c;
+  --primary-light: #345a7a;
+  --primary-dark: #0d2538;
+  --text: #37474f;
+  --text-light: #607d8b;
+  --border: #cfd8dc;
+  --bg-page: #f4f7f9;
+  --bg-card: #ffffff;
+  --bg-input: #f8f9fa;
+  --success: #2e7d32;
+  --warning: #ed6c02;
+  --error: #c62828;
+  --premium: #C9A961;
+  --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  --mono: 'Consolas', 'SF Mono', monospace;
 }
-        .portal-disclaimer { 
-            margin: 0 20px 40px 20px !important; 
-            padding: 15px !important; 
-            background: #fbfbfb !important; 
-            border: 1px dashed #cfd8dc !important; 
-            border-radius: 8px !important;
-            font-size: 11px !important; 
-            color: #78909c !important; 
-            text-align: center !important;
-        }
 
-        @media (max-width: 600px) {
-            #med-hub-full .main-header { padding: 20px 15px !important; }
-            #med-hub-full .tools-grid { grid-template-columns: 1fr !important; }
-        }
-    </style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font-ui);
+  background: var(--bg-page);
+  color: var(--text);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* ✅ BANDEAU DE NAVIGATION (CORRIGÉ) */
+.nav-bar {
+  position: sticky;
+  top: 0;
+  z-index: 2000;
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+.back-link {
+  text-decoration: none;
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: color 0.2s;
+}
+.back-link:hover { color: var(--primary-light); text-decoration: underline; }
+
+/* HEADER */
+.app-header {
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  color: #fff;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.app-header-left { display: flex; align-items: center; gap: 10px; }
+.app-header h1 { font-size: 18px; font-weight: 700; margin: 0; }
+.app-header p { font-size: 12px; opacity: 0.9; margin: 2px 0 0; }
+.premium-badge { color: var(--premium); font-size: 22px; }
+.header-stats { display: flex; gap: 16px; font-size: 12px; color: rgba(255,255,255,0.9); align-items: center; }
+.header-stats span { font-weight: 600; }
+
+/* SEARCH BAR */
+.search-wrap { padding: 16px 20px 0; }
+.search-box { position: relative; max-width: 700px; margin: 0 auto; }
+.search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-light); pointer-events: none; }
+#searchInput {
+  width: 100%;
+  padding: 11px 40px 11px 42px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  background: var(--bg-input);
+  transition: border-color 0.2s;
+}
+#searchInput:focus { border-color: var(--primary); outline: none; background: #fff; box-shadow: 0 0 0 2px rgba(26,58,92,0.1); }
+.clear-btn {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; color: var(--text-light); cursor: pointer; font-size: 16px; display: none;
+}
+
+/* TOOLBAR */
+.toolbar {
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+}
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 14px; border-radius: 6px;
+  font-weight: 600; font-size: 13px; cursor: pointer;
+  border: none; transition: all 0.2s;
+}
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover:not(:disabled) { background: var(--primary-light); }
+.btn-outline { background: var(--bg-card); color: var(--primary); border: 1px solid var(--border); }
+.btn-outline:hover:not(:disabled) { background: var(--bg-input); }
+.btn-danger { background: var(--error); color: #fff; }
+.btn-danger:hover:not(:disabled) { background: #b71c1c; }
+
+.filter-chips { display: flex; gap: 6px; margin-left: auto; flex-wrap: wrap; }
+.chip {
+  padding: 5px 12px; border-radius: 20px;
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  border: 1px solid var(--border); color: var(--text);
+  background: var(--bg-card); transition: all 0.2s;
+}
+.chip.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+/* PROGRESS BAR */
+.progress-wrap { height: 3px; background: var(--border); display: none; }
+.progress-bar { height: 100%; background: linear-gradient(90deg, var(--primary), var(--primary-light)); width: 0%; transition: width 0.2s; }
+
+/* ROOT BAR */
+.root-bar {
+  padding: 8px 20px;
+  background: #fff3cd;
+  border-bottom: 1px solid #ffeeba;
+  display: flex; align-items: center; gap: 10px;
+  font-size: 12px; flex-wrap: wrap;
+}
+.root-bar label { color: #856404; font-weight: 600; white-space: nowrap; }
+.root-bar input {
+  flex: 1; min-width: 200px; padding: 6px 10px;
+  border: 1px solid #ffc107; border-radius: 6px;
+  font-size: 12px; font-family: var(--mono); outline: none;
+}
+.root-bar .btn-save {
+  padding: 6px 14px; background: var(--primary); color: #fff;
+  border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;
+}
+.root-bar-ok { background: #d1e7dd !important; border-color: #badbcc !important; }
+.root-bar-ok label { color: #0f5132 !important; }
+
+/* MAIN LAYOUT */
+.main { display: flex; overflow: hidden; margin-top: 12px; min-height: calc(100vh - 320px); }
+
+/* SIDEBAR */
+.sidebar {
+  width: 220px; background: var(--bg-card);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.sidebar-header {
+  padding: 10px 16px; font-size: 11px; font-weight: 700;
+  letter-spacing: 0.05em; text-transform: uppercase;
+  color: var(--text-light); border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between;
+}
+.tree { flex: 1; overflow-y: auto; padding: 6px 0; }
+.folder-node {
+  padding: 7px 14px; font-size: 13px; color: var(--text);
+  cursor: pointer; display: flex; align-items: center; gap: 8px;
+  border-radius: 6px; margin: 2px 8px; transition: background 0.15s;
+}
+.folder-node:hover { background: var(--bg-input); }
+.folder-node.active { background: #e3f2fd; color: var(--primary); font-weight: 600; }
+.folder-node .count {
+  margin-left: auto; font-size: 11px;
+  background: var(--bg-input); padding: 2px 8px;
+  border-radius: 10px; color: var(--text-light);
+}
+
+/* RESULTS */
+.results-wrap { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.results-info {
+  padding: 10px 20px; font-size: 12px; color: var(--text-light);
+  border-bottom: 1px solid var(--border); background: var(--bg-card);
+}
+.results-list { flex: 1; overflow-y: auto; padding: 12px 16px; }
+
+/* FILE CARD */
+.file-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 8px; margin-bottom: 10px; padding: 14px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.file-card-top { display: flex; align-items: flex-start; gap: 12px; }
+.file-icon {
+  width: 36px; height: 36px; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; flex-shrink: 0;
+}
+.icon-pdf { background: #ffebee; color: var(--error); }
+.icon-docx { background: #e3f2fd; color: var(--primary); }
+.icon-txt { background: #e8f5e9; color: var(--success); }
+.icon-other { background: var(--bg-input); color: var(--text-light); }
+
+.file-meta { flex: 1; min-width: 0; }
+.file-name {
+  font-size: 14px; font-weight: 600; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  margin-bottom: 4px;
+}
+/* SURLIGNAGE RECHERCHE (bleu institutionnel) */
+.file-name mark, .snippet mark {
+  background: #bbdefb; color: #0d47a1;
+  border-radius: 2px; padding: 0 3px; font-weight: 700;
+}
+.file-path { font-size: 11px; color: var(--text-light); font-family: var(--mono); word-break: break-all; }
+.file-size { font-size: 11px; color: var(--text-light); margin-left: 8px; }
+
+.snippet {
+  font-size: 12px; color: var(--text); line-height: 1.5;
+  margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card-actions { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
+.copy-btn {
+  padding: 5px 12px; border-radius: 5px;
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  background: var(--bg-input); color: var(--text); border: 1px solid var(--border);
+  transition: all 0.2s;
+}
+.copy-btn:hover { background: var(--border); }
+
+/* WELCOME STATE */
+.welcome {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 16px; padding: 40px 20px; text-align: center;
+  color: var(--text-light);
+}
+.welcome-icon { font-size: 48px; opacity: 0.3; }
+.welcome h2 { font-size: 18px; font-weight: 700; color: var(--text); }
+.welcome p { font-size: 13px; max-width: 400px; }
+.drop-zone {
+  border: 2px dashed var(--border); border-radius: 10px;
+  padding: 24px 40px; margin-top: 12px; cursor: pointer;
+  background: var(--bg-card); font-weight: 600; color: var(--primary);
+  transition: all 0.2s;
+}
+.drop-zone:hover { border-color: var(--primary); background: #e3f2fd; }
+
+/* MODAL MODE D'EMPLOI */
+.modal-overlay {
+  display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5); z-index: 2000;
+  align-items: center; justify-content: center;
+  backdrop-filter: blur(2px);
+}
+.modal-overlay.show { display: flex; }
+.modal-content {
+  background: var(--bg-card); width: 90%; max-width: 650px;
+  max-height: 85vh; border-radius: 10px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+  display: flex; flex-direction: column; overflow: hidden;
+  animation: modalIn 0.25s ease-out;
+}
+@keyframes modalIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+.modal-header {
+  padding: 14px 20px; border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--bg-input);
+}
+.modal-header h2 { font-size: 16px; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 6px; }
+.modal-close {
+  background: none; border: none; font-size: 22px;
+  cursor: pointer; color: var(--text-light); transition: color 0.15s;
+}
+.modal-close:hover { color: var(--error); }
+
+.modal-body {
+  padding: 18px 20px; overflow-y: auto;
+  font-size: 13px; line-height: 1.6; color: var(--text);
+}
+.modal-body h3 {
+  font-size: 14px; font-weight: 700; color: var(--primary);
+  margin: 16px 0 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border);
+}
+.modal-body h3:first-child { margin-top: 0; }
+.modal-body ul { margin-left: 20px; margin-bottom: 12px; }
+.modal-body li { margin-bottom: 5px; color: var(--text); }
+.modal-body code {
+  background: var(--bg-input); border: 1px solid var(--border);
+  padding: 2px 6px; border-radius: 4px; font-family: var(--mono);
+  font-size: 12px; color: var(--primary);
+}
+.info-box {
+  background: #fff3cd; border-left: 4px solid var(--warning);
+  padding: 10px 14px; margin: 12px 0; border-radius: 0 6px 6px 0;
+  font-size: 12px; color: #856404;
+}
+.alert-box {
+  background: #e3f2fd; border-left: 4px solid var(--primary);
+  padding: 10px 14px; margin: 12px 0; border-radius: 0 6px 6px 0;
+  font-size: 12px; color: var(--primary-dark);
+}
+
+/* TOAST */
+#toast {
+  position: fixed; bottom: 20px; right: 20px;
+  background: var(--text); color: #fff;
+  border-radius: 8px; padding: 10px 16px;
+  font-size: 13px; font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transform: translateY(20px); opacity: 0;
+  transition: all 0.25s; z-index: 9999;
+}
+#toast.show { transform: translateY(0); opacity: 1; }
+
+/* FOOTER */
+.footer {
+  text-align: center; padding: 16px 20px;
+  font-size: 11px; color: var(--text-light);
+  margin-top: 20px; border-top: 1px solid var(--border);
+}
+.disclaimer {
+  background: #fff3cd; color: #856404;
+  padding: 10px; border-radius: 6px;
+  border: 1px solid #ffeeba; margin-top: 12px;
+  font-size: 10px; line-height: 1.4;
+}
+
+/* HIDDEN INPUT */
+#folderInput { display: none; }
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .main { flex-direction: column; }
+  .sidebar { width: 100%; height: auto; max-height: 200px; border-right: none; border-bottom: 1px solid var(--border); }
+  .filter-chips { margin-left: 0; }
+  .app-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .header-stats { margin-top: 4px; }
+}
+@media (max-width: 600px) {
+  .toolbar { flex-direction: column; align-items: stretch; }
+  .btn { width: 100%; justify-content: center; }
+  .filter-chips { justify-content: center; }
+  .file-card-top { flex-direction: column; }
+  .root-bar { flex-direction: column; align-items: stretch; }
+  .root-bar input { min-width: auto; }
+}
+</style>
 </head>
 <body>
 
-<div id="med-hub-full">
+  <!-- ✅ BANDEAU DE NAVIGATION (CORRIGÉ) -->
+  <nav class="nav-bar">
+    <a href="https://karazaitri12-cpu.github.io/plateforme-utilitaires/" class="back-link">← Retour aux Utilitaires</a>
+  </nav>
 
-    <!-- BANDEAU VISIBLE UNIQUEMENT AUX NON-MEMBRES -->
-    <div id="kz-guest-banner">
-        ★ Certains outils sont réservés aux membres premium.
-        <a href="https://www.dr-karazaitri-ma.net/compte-dadherent/paiement-dadhesion/">Activer mon accès</a>
-        &nbsp;|&nbsp;
-        <a href="https://www.dr-karazaitri-ma.net/connexion-membres/">Se connecter</a>
+  <!-- HEADER -->
+  <header class="app-header">
+    <div class="app-header-left">
+      <span class="premium-badge">★</span>
+      <div>
+        <h1>🔍 Recherche Copernic</h1>
+        <p>Recherche locale plein texte dans vos documents</p>
+      </div>
     </div>
-
-    <!-- EN-TÊTE -->
-    <header class="main-header">
-        <h1>Plateforme Utilitaires Techniques</h1>
-        <p class="subtitle">Outils bureautiques et productivité | Site FemCare Hub sur <a href="https://www.dr-karazaitri-ma.net">www.dr-karazaitri-ma.net</a></p>
-    </header>
-
-    <!-- RECHERCHE -->
-    <div class="search-section">
-        <div class="search-wrapper">
-            <span class="search-icon">&#128269;</span>
-            <input type="text" id="tool-search" placeholder="Rechercher un utilitaire...">
-            <span id="clear-search">&times;</span>
-        </div>
+    <div class="header-stats">
+      <button id="helpBtn" class="btn btn-outline" style="padding:4px 10px;font-size:11px;height:auto">📖 Aide</button>
+      <div>Fichiers : <span id="totalFiles">0</span></div>
+      <div>Dossiers : <span id="totalFolders">0</span></div>
     </div>
+  </header>
 
-    <!-- ========== SECTION 1: CALCUL & CONVERSION ========== -->
-    <section class="category-section">
-        <h2 class="category-title">📊 CALCUL & CONVERSION</h2>
-        <div class="tools-grid">
-
-            <a href="Utilitaires/calculatrice/" class="tool-card-med" data-cat="util" data-search="calculatrice mémoire trigonométrie scientifique pourcentage">
-                <div class="tool-header-flex">
-                    <span class="tool-icon-small" style="font-size:28px">🧮</span>
-                    <h3 class="tool-name-med">Calculatrice Clinique</h3>
-                </div>
-                <p class="tool-desc-med">Opérations avancées, mémoire, fonctions scientifiques, pourcentages contextuels.</p>
-            </a>
-
-            <a href="Utilitaires/convertisseur/" class="tool-card-med" data-cat="util" data-search="convertisseur unités température poids volume vitesse pression énergie">
-                <div class="tool-header-flex">
-                    <span class="tool-icon-small" style="font-size:28px">🔄</span>
-                    <h3 class="tool-name-med">Convertisseur d'unités</h3>
-                </div>
-                <p class="tool-desc-med">Conversion de poids, température, volumes, dosages, vitesses, pressions, énergies.</p>
-            </a>
-
-            <a href="Utilitaires/convertisseur-images/" class="tool-card-med" data-cat="util" data-search="convertisseur images jpeg png webp compression zip">
-                <div class="tool-header-flex">
-                    <span class="tool-icon-small" style="font-size:28px">🖼️</span>
-                    <h3 class="tool-name-med">Convertisseur d'Images</h3>
-                </div>
-                <p class="tool-desc-med">Conversion JPEG/PNG ⇄ WebP avec compression et export ZIP.</p>
-            </a>
-
-            <a href="Utilitaires/convertisseur-gps/" class="tool-card-med" data-cat="util" data-search="gps coordonnées dms plus codes convertisseur">
-                <div class="tool-header-flex">
-                    <span class="tool-icon-small" style="font-size:28px">📍</span>
-                    <h3 class="tool-name-med">Convertisseur GPS</h3>
-                </div>
-                <p class="tool-desc-med">Conversion coordonnées DMS, décimal, Plus Codes Google.</p>
-            </a>
-
-        </div>
-    </section>
-
-    <!-- ========== SECTION 2: GESTION DE DOCUMENTS ========== -->
-    <section class="category-section">
-        <h2 class="category-title">📄 GESTION DE DOCUMENTS</h2>
-        <div class="tools-grid">
-
-            <!-- ✅ PREMIUM -->
-            <a href="Utilitaires/ocr-photos/" class="tool-card-med" data-cat="gestion" data-search="ocr photos texte extraction reconnaissance" data-premium="true">
-                <div class="premium-ribbon">★</div>
-                <div class="tool-header-flex">
-                    <span class="tool-icon-small" style="font-size:28px">📷</span>
-                    <h3 class="tool-name-med">OCR Photos</h3>
-                </div>
-                <p class="tool-desc-med">Extraction de texte depuis images ou captures d'écran.</p>
-            </a>
-
-            <!-- ✅ PREMIUM -->
-            <a href="Utilitaires/pdf-ocr/" class="tool-card-med" data-cat="gestion" data-search="pdf ocr numérisation document scan reconnaissance texte" data-premium="true">
-                <div class="premium-ribbon">★</div>
-                <div class="tool-header-flex">
-                    <span class="tool-icon-small" style="font-size:28px">📄</span>
-                    <h3 class="tool-name-med">PDF OCR</h3>
-                </div>
-                <p class="tool-desc-med">Numérisation et reconnaissance de PDF scannés en texte éditable.</p>
-            </a>
-
-            <!-- ✅ PREMIUM -->
-            <a href="Utilitaires/pdf-manager/" class="tool-card-med" data-cat="gestion" data-search="pdf manager fusion découpage édition" data-premium="true">
-                <div class="premium-ribbon">★</div>
-                <div class="tool-header-flex">
-                    <span class="tool-icon-small" style="font-size:28px">📑</span>
-                    <h3 class="tool-name-med">PDF Manager</h3>
-                </div>
-                <p class="tool-desc-med">Fusion, découpage, compression et édition de documents PDF.</p>
-            </a>
-
-            <!-- Gratuit -->
-            <a href="Utilitaires/edition-excel/" class="tool-card-med" data-cat="gestion" data-search="excel xls édition tableur modification">
-                <div class="tool-header-flex">
-                    <span class="tool-icon-small" style="font-size:28px">📊</span>
-                    <h3 class="tool-name-med">Édition Excel</h3>
-                </div>
-                <p class="tool-desc-med">Modification de tableurs en ligne avec filtres, tri, export.</p>
-            </a>
-
-            <!-- ✅ PREMIUM -->
-            <a href="Utilitaires/creation-ebook/" class="tool-card-med" data-cat="gestion" data-search="ebook word chapitres assemblage document rédaction" data-premium="true">
-                <div class="premium-ribbon">★</div>
-                <div class="tool-header-flex">
-                    <span class="tool-icon-small" style="font-size:28px">📚</span>
-                    <h3 class="tool-name-med">Création Ebook</h3>
-                </div>
-                <p class="tool-desc-med">Assemblage de fichiers Word en document structuré avec export DOCX.</p>
-            </a>
-
-            <!-- ✅ PREMIUM -->
-            <a href="Utilitaires/generateur-tableaux/" class="tool-card-med" data-cat="gestion" data-search="tableau html générateur structure code édition" data-premium="true">
-                <div class="premium-ribbon">★</div>
-                <div class="tool-header-flex">
-                    <span class="tool-icon-small" style="font-size:28px">📋</span>
-                    <h3 class="tool-name-med">Tableaux HTML</h3>
-                </div>
-                <p class="tool-desc-med">Générateur de structures HTML tabulaires avec édition en direct.</p>
-            </a>
-
-        </div>
-    </section>
-
-    <!-- ========== SECTION 3: UTILITAIRES DIVERS ========== -->
-    <section class="category-section">
-        <h2 class="category-title">🛠️ UTILITAIRES DIVERS</h2>
-        <div class="tools-grid">
-
-            <!-- ✅ PREMIUM -->
-            <a href="Utilitaires/qr-code/" class="tool-card-med" data-cat="util" data-search="qr code générateur lien texte contact" data-premium="true">
-                <div class="premium-ribbon">★</div>
-                <div class="tool-header-flex">
-                    <span class="tool-icon-small" style="font-size:28px">🏷️</span>
-                    <h3 class="tool-name-med">Générateur QR Code</h3>
-                </div>
-                <p class="tool-desc-med">Création de QR codes personnalisés pour liens, textes, contacts.</p>
-            </a>
-
-            <!-- ✅ PREMIUM -->
-            <a href="Utilitaires/comparateur-texte/" class="tool-card-med" data-cat="util" data-search="comparateur texte différence analyse comparaison" data-premium="true">
-                <div class="premium-ribbon">★</div>
-                <div class="tool-header-flex">
-                    <span class="tool-icon-small" style="font-size:28px">📝</span>
-                    <h3 class="tool-name-med">Comparateur de texte</h3>
-                </div>
-                <p class="tool-desc-med">Détection de différences entre deux documents texte avec vue fusionnée.</p>
-            </a>
-
-            <!-- ✅ PREMIUM -->
-            <a href="Utilitaires/analyseur-texte/" class="tool-card-med" data-cat="util" data-search="analyseur texte statistiques mots caractères phrases docx pdf" data-premium="true">
-                <div class="premium-ribbon">★</div>
-                <div class="tool-header-flex">
-                    <span class="tool-icon-small" style="font-size:28px">📈</span>
-                    <h3 class="tool-name-med">Analyseur Texte</h3>
-                </div>
-                <p class="tool-desc-med">Statistiques avancées de fichiers TXT, DOCX et PDF.</p>
-            </a>
-
-            <!-- ✅ PREMIUM - NOUVEAU -->
-            <a href="Utilitaires/recherche-copernic/" class="tool-card-med" data-cat="util" data-search="recherche copernic fichiers indexation texte pdf docx" data-premium="true">
-                <div class="premium-ribbon">★</div>
-                <div class="tool-header-flex">
-                    <span class="tool-icon-small" style="font-size:28px">🔍</span>
-                    <h3 class="tool-name-med">Recherche Copernic</h3>
-                </div>
-                <p class="tool-desc-med">Recherche plein texte locale dans PDF, DOCX et TXT.</p>
-            </a>
-
-            <!-- Gratuit -->
-            <a href="https://www.dr-karazaitri-ma.net/repertoire-telephonique/" class="tool-card-med" data-cat="util" data-search="répertoire téléphone contacts professionnels annuaire">
-                <div class="tool-header-flex">
-                    <span class="tool-icon-small" style="font-size:28px">📞</span>
-                    <h3 class="tool-name-med">Répertoire</h3>
-                </div>
-                <p class="tool-desc-med">Contacts professionnels sécurisés.</p>
-            </a>
-
-        </div>
-    </section>
-
-    <!-- ========== SECTION 4: MÉDICAL ========== -->
-    <section class="category-section">
-        <h2 class="category-title">🏥 MÉDICAL</h2>
-        <div class="tools-grid">
-
-            <a href="https://www.dr-karazaitri-ma.net/suivi-de-la-tension-arterielle/" class="tool-card-med" data-cat="medical" data-search="tension hta suivi auto-mesure tensionnelle">
-                <div class="tool-header-flex">
-                    <span class="tool-icon-small" style="font-size:28px">❤️</span>
-                    <h3 class="tool-name-med">Suivi Tensionnel</h3>
-                </div>
-                <p class="tool-desc-med">Journal d'auto-mesure tensionnelle.</p>
-            </a>
-
-        </div>
-    </section>
-
-    <!-- ========== SECTION 5: LOISIRS ========== -->
-    <section class="category-section">
-        <h2 class="category-title">🎮 LOISIRS</h2>
-        <div class="tools-grid">
-
-            <a href="https://www.dr-karazaitri-ma.net/jeu-de-memoire/" class="tool-card-med" data-cat="loisir" data-search="jeu mémoire cognitif entraînement cerveau">
-                <div class="tool-header-flex">
-                    <span class="tool-icon-small" style="font-size:28px">🧠</span>
-                    <h3 class="tool-name-med">Jeu de Mémoire</h3>
-                </div>
-                <p class="tool-desc-med">Entraînement cognitif et mémoire.</p>
-            </a>
-
-            <a href="https://www.dr-karazaitri-ma.net/mastermind-classique/" class="tool-card-med" data-cat="loisir" data-search="mastermind jeu couleurs déduction logique">
-                <div class="tool-header-flex">
-                    <span class="tool-icon-small" style="font-size:28px">🎲</span>
-                    <h3 class="tool-name-med">Mastermind</h3>
-                </div>
-                <p class="tool-desc-med">Déduction logique et stratégie.</p>
-            </a>
-
-        </div>
-    </section>
-
-    <div class="portal-disclaimer">
-        ⚠️ <strong>Usage bureautique</strong> : Ces utilitaires sont fournis à titre informatif. Aucun fichier n'est envoyé sur un serveur. Les outils médicaux spécialisés restent sur <em>dr-karazaitri-ma.net</em>.
+  <!-- SEARCH BAR -->
+  <div class="search-wrap">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="Rechercher dans les fichiers indexés… (Ctrl+F)" autocomplete="off" spellcheck="false" />
+      <button class="clear-btn" id="clearSearch">✕</button>
     </div>
+  </div>
 
-</div><!-- /#med-hub-full -->
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <input type="file" id="folderInput" webkitdirectory multiple />
+    <button class="btn btn-primary" id="addFolderBtn">➕ Ajouter un dossier</button>
+    <button class="btn btn-outline" id="reindexBtn">🔄 Ré-indexer</button>
+    <button class="btn btn-danger" id="clearIndexBtn">🗑️ Vider l'index</button>
+    <div class="filter-chips">
+      <button class="chip all active" data-ext="all">Tous</button>
+      <button class="chip" data-ext="pdf">PDF</button>
+      <button class="chip" data-ext="docx">DOCX</button>
+      <button class="chip" data-ext="txt">TXT</button>
+    </div>
+  </div>
 
-<!-- ========== SCRIPTS ========== -->
+  <!-- PROGRESS -->
+  <div class="progress-wrap" id="progressWrap"><div class="progress-bar" id="progressBar"></div></div>
 
-<!-- Recherche -->
-<script>
-(function() {
-    var input    = document.getElementById('tool-search');
-    var clearBtn = document.getElementById('clear-search');
-    var cards    = document.querySelectorAll('.tool-card-med');
+  <!-- ROOT BAR -->
+  <div class="root-bar" id="rootBar">
+    <label>📁 Racine :</label>
+    <input type="text" id="rootInput" placeholder="Ex: C:\Users\Documents" spellcheck="false" />
+    <button class="btn-save" id="rootSave">Enregistrer</button>
+  </div>
 
-    function filterAll() {
-        var query = input.value.toLowerCase().trim();
-        clearBtn.style.display = query.length > 0 ? 'block' : 'none';
-        cards.forEach(function(card) {
-            var searchData = card.getAttribute('data-search').toLowerCase();
-            card.classList.toggle('hidden', !searchData.includes(query));
+  <!-- MAIN CONTENT -->
+  <div class="main">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-header">Dossiers <span id="folderCount">0</span></div>
+      <div class="tree" id="treeView"></div>
+    </aside>
+
+    <!-- RESULTS -->
+    <div class="results-wrap">
+      <div class="welcome" id="welcomeState">
+        <div class="welcome-icon">📁</div>
+        <h2>Recherche locale de fichiers</h2>
+        <p>Ajoutez un dossier pour indexer son contenu, puis recherchez instantanément dans le texte des documents.</p>
+        <div class="drop-zone" onclick="document.getElementById('folderInput').click()">
+          + Sélectionner un dossier à indexer
+        </div>
+      </div>
+      <div id="resultsInfo" class="results-info" style="display:none"></div>
+      <div class="results-list" id="resultsList" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- MODAL MODE D'EMPLOI -->
+  <div class="modal-overlay" id="helpModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>📖 Mode d'emploi - Recherche Copernic</h2>
+        <button class="modal-close" id="closeHelp">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="info-box">
+          Cet outil indexe le contenu de vos documents (PDF, DOCX, TXT) pour une recherche plein texte locale.
+        </div>
+
+        <h3>🚀 Utilisation immédiate (Recommandé)</h3>
+        <ul>
+          <li><strong>1.</strong> Cliquez sur <strong>➕ Ajouter un dossier</strong> et sélectionnez un dossier de votre PC</li>
+          <li><strong>2.</strong> L'indexation extrait le texte des fichiers automatiquement</li>
+          <li><strong>3.</strong> Tapez votre recherche : les résultats s'affichent en temps réel avec surlignage</li>
+          <li><strong>4.</strong> Cliquez sur <strong>📋 Copier le chemin</strong> pour ouvrir manuellement le fichier</li>
+        </ul>
+
+        <h3>⚙️ Configuration</h3>
+        <ul>
+          <li><strong>Racine du dossier :</strong> Définissez le chemin de base (ex: <code>C:\Users\Nom\Documents</code>) pour que les chemins affichés soient corrects</li>
+          <li><strong>Persistance :</strong> L'index est sauvegardé dans votre navigateur (localStorage)</li>
+        </ul>
+
+        <h3>💡 Mode Expert (Optionnel)</h3>
+        <div class="alert-box">
+          Pour activer l'ouverture directe des fichiers (boutons Ouvrir/Localiser), vous devez héberger cet outil localement avec Node.js. Voir le fichier <code>server.js</code> inclus.
+        </div>
+        <ul>
+          <li>Installez Node.js depuis <code>https://nodejs.org</code></li>
+          <li>Dans le dossier, lancez : <code>node server.js</code></li>
+          <li>Accédez à <code>http://localhost:3456</code></li>
+        </ul>
+
+        <h3>🔒 Confidentialité</h3>
+        <ul>
+          <li>Tout le traitement se fait <strong>localement</strong> dans votre navigateur</li>
+          <li>Aucun contenu de fichier n'est envoyé vers un serveur externe</li>
+          <li>L'index reste stocké sur votre appareil</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast"></div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <span>Dr KARA-ZAITRI M.A © 2026</span>
+    <div class="disclaimer">
+      ⚠️ <strong>Usage bureautique</strong> : Indexation et recherche locales. Aucun fichier n'est envoyé sur un serveur. Les fonctions "Ouvrir/Localiser" directes nécessitent un serveur Node.js local (mode expert).
+    </div>
+  </footer>
+
+  <!-- LOGIQUE JAVASCRIPT -->
+  <script>
+    const DB_KEY = 'copernic_index_v1', ROOT_KEY = 'copernic_root';
+    let index = [], filteredResults = [], activeExt = 'all', rootPath = '';
+
+    /* MODAL */
+    document.getElementById('helpBtn').addEventListener('click', () => document.getElementById('helpModal').classList.add('show'));
+    document.getElementById('closeHelp').addEventListener('click', () => document.getElementById('helpModal').classList.remove('show'));
+    document.getElementById('helpModal').addEventListener('click', (e) => { if(e.target === document.getElementById('helpModal')) document.getElementById('helpModal').classList.remove('show'); });
+
+    /* ROOT PATH */
+    function loadRoot() {
+      rootPath = localStorage.getItem(ROOT_KEY) || '';
+      const bar = document.getElementById('rootBar');
+      if (rootPath) {
+        document.getElementById('rootInput').value = rootPath;
+        bar.classList.add('root-bar-ok');
+        bar.querySelector('label').textContent = '✓ Racine :';
+      }
+    }
+    function saveRoot() {
+      const val = document.getElementById('rootInput').value.trim();
+      if (!val) return toast('Entrez un chemin valide');
+      rootPath = val;
+      localStorage.setItem(ROOT_KEY, rootPath);
+      const bar = document.getElementById('rootBar');
+      bar.classList.add('root-bar-ok');
+      bar.querySelector('label').textContent = '✓ Racine :';
+      toast('Racine enregistrée');
+    }
+    function buildAbsPath(relPath) {
+      if (!rootPath) return relPath;
+      let root = rootPath.replace(/\//g, '\\').replace(/\\+$/, '');
+      let rel = relPath.replace(/\//g, '\\');
+      let first = rel.split('\\')[0];
+      if (root.endsWith('\\' + first)) {
+        return root + '\\' + rel.split('\\').slice(1).join('\\');
+      }
+      return root + '\\' + rel;
+    }
+
+    /* INDEX */
+    function loadIndex() {
+      try {
+        const r = localStorage.getItem(DB_KEY);
+        if (r) index = JSON.parse(r);
+      } catch(e) { index = []; }
+      updateStats();
+      renderTree();
+      if (index.length > 0) showResults(index);
+    }
+    function saveIndex() {
+      try { localStorage.setItem(DB_KEY, JSON.stringify(index)); }
+      catch(e) { toast('⚠️ Index trop volumineux pour le stockage local'); }
+    }
+    function updateStats() {
+      document.getElementById('totalFiles').textContent = index.length;
+      const folders = [...new Set(index.map(f => f.folder))];
+      document.getElementById('totalFolders').textContent = folders.length;
+      document.getElementById('folderCount').textContent = folders.length;
+    }
+
+    /* TREE */
+    function renderTree() {
+      const tree = document.getElementById('treeView');
+      const folders = {};
+      index.forEach(f => { folders[f.folder] = (folders[f.folder]||0) + 1; });
+      
+      let html = `<div class="folder-node active" data-folder="all">Tous <span class="count">${index.length}</span></div>`;
+      Object.entries(folders).forEach(([folder, count]) => {
+        html += `<div class="folder-node" data-folder="${esc(folder)}">
+          <span style="overflow:hidden;text-overflow:ellipsis;flex:1">${esc(folder)}</span>
+          <span class="count">${count}</span>
+        </div>`;
+      });
+      tree.innerHTML = html;
+      
+      tree.querySelectorAll('.folder-node').forEach(node => {
+        node.addEventListener('click', () => {
+          tree.querySelectorAll('.folder-node').forEach(n => n.classList.remove('active'));
+          node.classList.add('active');
+          const folder = node.dataset.folder;
+          doSearch(document.getElementById('searchInput').value, folder === 'all' ? index : index.filter(f => f.folder === folder));
         });
+      });
     }
 
-    input.addEventListener('input', filterAll);
-    clearBtn.addEventListener('click', function() {
-        input.value = '';
-        filterAll();
-        input.focus();
-    });
-})();
-</script>
-
-<!-- Vérification premium -->
-<script>
-(function() {
-    var WP_ENDPOINT = 'https://www.dr-karazaitri-ma.net/wp-json/kz/v1/verify-token';
-
-    // Récupérer le token depuis l'URL si présent
-    var urlParams    = new URLSearchParams(window.location.search);
-    var tokenFromUrl = urlParams.get('token');
-    if (tokenFromUrl) {
-        localStorage.setItem('kz_premium_token', tokenFromUrl);
-        window.history.replaceState({}, document.title, window.location.pathname);
+    /* FILE READING */
+    async function readFile(file) {
+      const ext = getExt(file.name);
+      if (['txt','md','csv'].includes(ext)) return await file.text();
+      if (ext === 'pdf') return await extractPDF(file);
+      if (['docx','doc'].includes(ext)) return await extractDOC(file);
+      return '';
+    }
+    async function extractPDF(file) {
+      try {
+        const str = new TextDecoder('latin1').decode(new Uint8Array(await file.arrayBuffer()));
+        let t = '';
+        for (const m of str.matchAll(/BT([\s\S]*?)ET/g)) {
+          for (const w of m[1].matchAll(/\((.*?)\)/g)) {
+            t += w[1].replace(/\\[nrt\\()]/g, ' ') + ' ';
+          }
+        }
+        return t.slice(0, 30000);
+      } catch(e) { return ''; }
+    }
+    async function extractDOC(file) {
+      try {
+        const bytes = new Uint8Array(await file.arrayBuffer());
+        let ascii = '', run = '';
+        for (let i=0; i<bytes.length; i++) {
+          const b = bytes[i];
+          if ((b>=0x20 && b<=0x7E) || b===0x0A) run += String.fromCharCode(b);
+          else { if (run.length>=5) ascii += run + ' '; run = ''; }
+        }
+        return ascii.slice(0, 30000);
+      } catch(e) { return ''; }
     }
 
-    var token = localStorage.getItem('kz_premium_token');
+    /* INDEXING */
+    async function indexFiles(files) {
+      const pw = document.getElementById('progressWrap'), pb = document.getElementById('progressBar');
+      pw.style.display = 'block';
+      const existing = new Set(index.map(f => f.path));
+      let added = 0;
+      
+      for (let i=0; i<files.length; i++) {
+        pb.style.width = Math.round((i/files.length)*100) + '%';
+        const file = files[i], ext = getExt(file.name);
+        if (!['txt','md','pdf','docx','doc','csv'].includes(ext)) continue;
+        
+        const path = file.webkitRelativePath || file.name;
+        if (existing.has(path)) continue;
+        
+        const folder = path.includes('/') ? path.split('/').slice(0,-1).join('/') : '(racine)';
+        let content = '';
+        try { content = await readFile(file); } catch(e) {}
+        
+        index.push({ name: file.name, path, folder, ext, size: file.size, content: content || '' });
+        added++;
+      }
+      pb.style.width = '100%';
+      setTimeout(() => { pw.style.display = 'none'; pb.style.width = '0%'; }, 600);
+      
+      saveIndex();
+      updateStats();
+      renderTree();
+      showResults(index);
+      toast(`✓ ${added} fichier(s) indexé(s)`);
+    }
 
-    if (!token) {
-        setPremiumState(false);
+    /* SEARCH */
+    function doSearch(query, subset) {
+      let pool = subset || index;
+      if (activeExt !== 'all') pool = pool.filter(f => f.ext === activeExt);
+      
+      if (!query.trim()) { showResults(pool); return; }
+      
+      const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+      filteredResults = pool.filter(f =>
+        terms.every(t => (f.name + ' ' + f.content).toLowerCase().includes(t))
+      );
+      showResults(filteredResults, query);
+    }
+
+    /* HIGHLIGHT & SNIPPET */
+    function hl(text, query) {
+      if (!query) return text;
+      const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+      let r = text;
+      terms.forEach(t => {
+        const re = new RegExp('(' + t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+        r = r.replace(re, '<mark>$1</mark>');
+      });
+      return r;
+    }
+    function snip(content, query) {
+      if (!query || !content) return '';
+      const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+      const lower = content.toLowerCase();
+      let pos = -1;
+      for (const t of terms) { pos = lower.indexOf(t); if (pos >= 0) break; }
+      if (pos < 0) return '';
+      const s = Math.max(0, pos - 60), e = Math.min(content.length, pos + 150);
+      const snippetText = (s>0?'...':'') + content.substring(s,e) + (e<content.length?'...':'');
+      return hl(esc(snippetText), query);
+    }
+
+    /* DISPLAY RESULTS */
+    function showResults(results, query) {
+      const welcome = document.getElementById('welcomeState');
+      const info = document.getElementById('resultsInfo');
+      const list = document.getElementById('resultsList');
+      
+      if (index.length === 0) {
+        welcome.style.display = 'flex';
+        info.style.display = 'none';
+        list.style.display = 'none';
         return;
+      }
+      welcome.style.display = 'none';
+      info.style.display = 'flex';
+      list.style.display = 'block';
+      
+      info.innerHTML = query
+        ? `<strong>${results.length}</strong> résultat${results.length>1?'s':''}`
+        : `<strong>${results.length}</strong> fichier${results.length>1?'s':''}`;
+      
+      list.innerHTML = results.slice(0, 100).map(f => {
+        const nameHTML = query ? hl(esc(f.name), query) : esc(f.name);
+        const snippetHTML = query && f.content ? snip(f.content, query) : '';
+        const iconClass = ['pdf','docx','txt'].includes(f.ext) ? 'icon-'+f.ext : 'icon-other';
+        
+        return `<div class="file-card">
+          <div class="file-card-top">
+            <div class="file-icon ${iconClass}">${f.ext.toUpperCase()}</div>
+            <div class="file-meta">
+              <div class="file-name">${nameHTML}</div>
+              <div class="file-path">${esc(f.path)} <span class="file-size">${Math.round(f.size/1024)} Ko</span></div>
+            </div>
+          </div>
+          ${snippetHTML ? `<div class="snippet">${snippetHTML}</div>` : ''}
+          <div class="card-actions">
+            <button class="copy-btn" onclick="copyPath('${esc(f.path).replace(/'/g,"\\'")}')">📋 Copier le chemin</button>
+          </div>
+        </div>`;
+      }).join('');
     }
 
-    fetch(WP_ENDPOINT + '?token=' + encodeURIComponent(token))
-        .then(function(r) { return r.json(); })
-        .then(function(data) { setPremiumState(data.valid === true); })
-        .catch(function() { setPremiumState(false); });
-
-    function setPremiumState(isPremium) {
-
-        // Cartes premium : cliquables si premium, grisées et bloquées sinon
-        document.querySelectorAll('[data-premium="true"]').forEach(function(card) {
-            if (!isPremium) {
-                card.classList.add('kz-locked');
-                card.setAttribute('title', 'Accès réservé aux membres premium');
-                // Intercepter le clic pour rediriger vers la page de connexion
-                card.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    window.location.href = 'https://www.dr-karazaitri-ma.net/connexion-membres/';
-                });
-            }
-        });
-
-        // Bandeau non-membre
-        var banner = document.getElementById('kz-guest-banner');
-        if (banner) banner.style.display = isPremium ? 'none' : 'block';
+    /* COPY PATH */
+    function copyPath(relPath) {
+      const absPath = buildAbsPath(relPath);
+      navigator.clipboard.writeText(absPath).then(() => {
+        toast('✓ Chemin copié dans le presse-papiers');
+      }).catch(() => {
+        toast('⚠️ Impossible de copier. Sélectionnez manuellement le chemin affiché.');
+      });
     }
-})();
-</script>
 
+    /* UTILS */
+    function getExt(n) { return (n.split('.').pop()||'').toLowerCase(); }
+    function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    function toast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    /* EVENT LISTENERS */
+    document.getElementById('addFolderBtn').addEventListener('click', () => document.getElementById('folderInput').click());
+    document.getElementById('reindexBtn').addEventListener('click', () => document.getElementById('folderInput').click());
+    document.getElementById('folderInput').addEventListener('change', async (e) => {
+      const files = Array.from(e.target.files);
+      if (files.length) {
+        toast('Indexation en cours...');
+        await indexFiles(files);
+        e.target.value = '';
+      }
+    });
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      document.getElementById('clearSearch').style.display = e.target.value ? 'block' : 'none';
+      doSearch(e.target.value);
+    });
+    document.getElementById('clearSearch').addEventListener('click', () => {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('clearSearch').style.display = 'none';
+      doSearch('');
+    });
+    document.querySelectorAll('.chip').forEach(c => {
+      c.addEventListener('click', () => {
+        document.querySelectorAll('.chip').forEach(x => x.classList.remove('active'));
+        c.classList.add('active');
+        activeExt = c.dataset.ext;
+        doSearch(document.getElementById('searchInput').value);
+      });
+    });
+    document.getElementById('clearIndexBtn').addEventListener('click', () => {
+      if (confirm('Vider l\'index de recherche ?')) {
+        index = [];
+        localStorage.removeItem(DB_KEY);
+        updateStats();
+        renderTree();
+        showResults([]);
+        toast('Index vidé');
+      }
+    });
+    document.getElementById('rootSave').addEventListener('click', saveRoot);
+    document.getElementById('searchInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { document.getElementById('searchInput').value = ''; doSearch(''); }
+    });
+
+    /* INIT */
+    loadRoot();
+    loadIndex();
+  </script>
 </body>
 </html>
