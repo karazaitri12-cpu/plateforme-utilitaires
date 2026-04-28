@@ -91,7 +91,7 @@ body { font-family: var(--font-ui); background: var(--bg-page); color: var(--tex
 .file-name mark, .snippet mark { background: #bbdefb; color: #0d47a1; border-radius: 2px; padding: 0 3px; font-weight: 700; }
 .file-path { font-size: 11px; color: var(--text-light); font-family: var(--mono); word-break: break-all; }
 .file-size { font-size: 11px; color: var(--text-light); margin-left: 8px; }
-.snippet { font-size: 12px; color: var(--text); line-height: 1.5; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.snippet { font-size: 13px; color: var(--text); line-height: 1.6; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); overflow: hidden; }
 
 .card-actions { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
 .action-btn { padding: 5px 12px; border-radius: 5px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); transition: all 0.2s; font-family: var(--font-ui); }
@@ -379,8 +379,53 @@ body { font-family: var(--font-ui); background: var(--bg-page); color: var(--tex
     }
 
     function hl(text, query) { if (!query) return text; const terms = query.toLowerCase().split(/\s+/).filter(Boolean); let r = text; terms.forEach(t => { const re = new RegExp('(' + t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi'); r = r.replace(re, '<mark>$1</mark>'); }); return r; }
-    function snip(content, query) { if (!query || !content) return ''; const terms = query.toLowerCase().split(/\s+/).filter(Boolean); const lower = content.toLowerCase(); let pos = -1; for (const t of terms) { pos = lower.indexOf(t); if (pos >= 0) break; } if (pos < 0) return ''; const s = Math.max(0, pos - 60), e = Math.min(content.length, pos + 150); const snippetText = (s>0?'...':'') + content.substring(s,e) + (e<content.length?'...':''); return hl(esc(snippetText), query); }
+    function snip(content, query) { 
+      if (!query || !content) return ''; 
+      const terms = query.toLowerCase().split(/\s+/).filter(Boolean); 
+      const lower = content.toLowerCase(); 
+      
+      let positions = [];
+      // 1. Trouver TOUTES les apparitions du mot
+      terms.forEach(t => {
+        let pos = lower.indexOf(t);
+        while (pos !== -1) {
+          positions.push(pos);
+          pos = lower.indexOf(t, pos + t.length);
+        }
+      });
 
+      if (positions.length === 0) return '';
+      
+      // 2. Trier dans l'ordre de lecture
+      positions.sort((a, b) => a - b);
+      let totalOccurrences = positions.length;
+
+      let snippets = [];
+      let lastEnd = -1;
+
+      // 3. Extraire les différents paragraphes
+      for (let pos of positions) {
+        let start = Math.max(0, pos - 40);
+        let end = Math.min(content.length, pos + 120);
+
+        // Si le mot est répété juste à côté, on ne réaffiche pas la même phrase
+        if (start < lastEnd) continue; 
+
+        let snippetText = (start > 0 ? '...' : '') + content.substring(start, end) + (end < content.length ? '...' : '');
+        snippets.push(hl(esc(snippetText), query));
+        lastEnd = end;
+
+        // Limiter à 4 passages maximum par fichier pour ne pas saturer l'écran
+        if (snippets.length >= 4) break; 
+      }
+
+      // 4. Affichage final avec le compteur
+      let countBadge = `<div style="font-size:11px; color:var(--primary); background:#e3f2fd; display:inline-block; padding:2px 8px; border-radius:10px; font-weight:bold; margin-bottom:8px;">🎯 ${totalOccurrences} occurrence(s) trouvée(s)</div><br>`;
+      let sep = '<div style="color:var(--text-light); text-align:center; opacity:0.3; margin:8px 0; font-size:16px;">•••</div>';
+      
+      return countBadge + snippets.join(sep); 
+    }
+    
     function showResults(results, query) {
       const welcome = document.getElementById('welcomeState'), info = document.getElementById('resultsInfo'), list = document.getElementById('resultsList');
       if (index.length === 0) { welcome.style.display = 'flex'; info.style.display = 'none'; list.style.display = 'none'; return; }
