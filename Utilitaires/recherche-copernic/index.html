@@ -204,42 +204,67 @@ body { font-family: var(--font-ui); background: var(--bg-page); color: var(--tex
     </div>
   </div>
 
-  <!-- MODAL MODE D'EMPLOI -->
+<!-- MODAL MODE D'EMPLOI ULTRA-SIMPLIFIÉ -->
   <div class="modal-overlay" id="helpModal">
     <div class="modal-content">
       <div class="modal-header">
-        <h2>📖 Comment utiliser Copernic ? (De A à Z)</h2>
+        <h2>📖 Guide d'utilisation simplifié (De A à Z)</h2>
         <button class="modal-close" id="closeHelp">×</button>
       </div>
       <div class="modal-body">
-        <p style="margin-bottom: 20px; font-size: 15px;">Pour des raisons de sécurité, un site internet n'a pas le droit d'ouvrir vos fichiers. Nous avons donc divisé le travail en deux parties : le "Moteur" (sur votre PC) et le "Tableau de bord" (ce site Web).</p>
+        
+        <p style="margin-bottom: 20px; font-size: 15px; color: var(--primary-light); font-weight: bold; text-align: center; background: #e3f2fd; padding: 10px; border-radius: 8px;">
+          Bienvenue ! Pour protéger vos données, ce site Web ne peut pas fouiller dans votre ordinateur tout seul. Il a besoin d'un petit programme assistant : le "Moteur". Voici comment faire :
+        </p>
+
         <div class="step-box">
-          <div class="step-title"><span class="step-number">1</span> Télécharger et allumer le "Moteur"</div>
-          <p>Pour que ce site puisse ouvrir vos documents Word ou PDF, il a besoin d'un petit programme de liaison sur votre ordinateur.</p>
+          <div class="step-title"><span class="step-number">1</span> Télécharger le Moteur (Le bouton vert)</div>
           <ul>
-            <li>Cliquez sur le bouton vert <strong>"Télécharger le Moteur"</strong> situé en haut à droite de l'écran.</li>
-            <li>Décompressez le fichier et placez-le où vous voulez sur votre PC.</li>
-            <li><strong>Faites un double-clic dessus.</strong> Une fenêtre noire va s'ouvrir : c'est le moteur ! Réduisez-la simplement en bas de l'écran. <em>(À faire à chaque fois que vous utilisez le site).</em></li>
+            <li>En haut à droite de ce site, cliquez sur le bouton vert <strong>⬇️ Télécharger le Moteur</strong>.</li>
+            <li>Un fichier (<em>Moteur_Copernic.zip</em>) va se télécharger sur votre ordinateur.</li>
+            <li>Allez dans votre dossier "Téléchargements", faites un <strong>clic-droit</strong> sur ce fichier et choisissez <strong>"Extraire tout"</strong>.</li>
           </ul>
         </div>
+
         <div class="step-box">
-          <div class="step-title"><span class="step-number">2</span> La "Racine" (Configuré automatiquement !)</div>
+          <div class="step-title"><span class="step-number">2</span> Allumer le Moteur (La fenêtre noire)</div>
           <ul>
-            <li>Regardez la barre jaune/verte juste au-dessus.</li>
-            <li>Grâce à votre "Moteur" allumé, le site a <strong>détecté automatiquement</strong> le nom de votre ordinateur et l'a rempli pour vous.</li>
+            <li>Ouvrez le dossier que vous venez d'extraire et faites un <strong>double-clic</strong> sur le programme "Moteur_Copernic".</li>
+            <li><em>Note : Si Windows affiche un écran bleu de protection, cliquez sur "Informations complémentaires" puis sur "Exécuter quand même".</em></li>
+            <li>Une petite fenêtre noire va s'ouvrir. <strong style="color: red;">Surtout, ne la fermez pas !</strong> Réduisez-la simplement en bas de l'écran avec le trait <strong style="font-size:16px;">−</strong> en haut à droite.</li>
+            <li>👉 <em>Vous devrez faire ce double-clic à chaque fois que vous voudrez utiliser ce site.</em></li>
           </ul>
         </div>
+
         <div class="step-box">
-          <div class="step-title"><span class="step-number">3</span> Donner de la mémoire à Copernic (L'indexation)</div>
+          <div class="step-title"><span class="step-number">3</span> Vérifier la connexion</div>
           <ul>
-            <li>Cliquez sur le gros bouton bleu <span class="highlight">➕ Ajouter un dossier</span> et sélectionnez votre dossier Windows.</li>
-            <li>Le logiciel va scanner tout le contenu de vos PDF et DOCX en profondeur.</li>
+            <li>Revenez sur ce site Web et rafraîchissez la page (touche <strong>F5</strong> du clavier).</li>
+            <li>Regardez la petite barre juste au-dessus. Si le moteur est bien allumé, elle va devenir verte et afficher : <strong style="color: #0f5132; background: #d1e7dd; padding: 2px 6px; border-radius: 4px;">✓ Racine (Auto)</strong> avec le nom de votre ordinateur !</li>
           </ul>
         </div>
+
+        <div class="step-box">
+          <div class="step-title"><span class="step-number">4</span> Donner de la mémoire à Copernic</div>
+          <ul>
+            <li>Copernic ne connaît pas encore vos fichiers. Cliquez sur le gros bouton bleu <strong>➕ Ajouter un dossier à mémoriser</strong>.</li>
+            <li>Choisissez un dossier sur votre PC (par exemple, là où vous rangez tous vos PDF et compte-rendus).</li>
+            <li>Laissez le logiciel travailler... La barre de chargement va avancer. Il lit tout en profondeur !</li>
+          </ul>
+        </div>
+
+        <div class="step-box">
+          <div class="step-title"><span class="step-number">5</span> Chercher et Ouvrir !</div>
+          <ul>
+            <li>Tapez n'importe quel mot dans la barre de recherche (un nom de maladie, un médicament, le nom d'un patient...).</li>
+            <li>Les résultats s'affichent instantanément.</li>
+            <li>Cliquez sur le bouton <strong>📂 Ouvrir</strong> à côté d'un résultat : le document apparaîtra sous vos yeux sur votre ordinateur, comme par magie !</li>
+          </ul>
+        </div>
+
       </div>
     </div>
   </div>
-
   <div id="toast"></div>
 
   <script>
