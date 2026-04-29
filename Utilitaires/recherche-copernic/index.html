@@ -453,10 +453,11 @@ body { font-family: var(--font-ui); background: var(--bg-page); color: var(--tex
           </div>
           ${snippetHTML ? `<div class="snippet">${snippetHTML}</div>` : ''}
           <div class="card-actions">
-            <button class="action-btn btn-open" onclick="openFile('${esc(f.path).replace(/'/g,"\\'")}')">📂 Ouvrir</button>
-            <button class="action-btn btn-copy" onclick="locateFile('${esc(f.path).replace(/'/g,"\\'")}')">📁 Localiser</button>
-            <button class="action-btn btn-copy" onclick="copyPath('${esc(f.path).replace(/'/g,"\\'")}')">📋 Copier le chemin</button>
-            <button class="action-btn btn-del" onclick="deleteFile('${esc(f.path).replace(/'/g,"\\'")}')">🗑️ Supprimer</button>
+            <!-- 🛡️ CORRECTION : Utilisation de dataset.path pour protéger les backslashs Windows -->
+            <button class="action-btn btn-open" data-path="${esc(f.path)}" onclick="openFile(this.dataset.path)">📂 Ouvrir</button>
+            <button class="action-btn btn-copy" data-path="${esc(f.path)}" onclick="locateFile(this.dataset.path)">📁 Localiser</button>
+            <button class="action-btn btn-copy" data-path="${esc(f.path)}" onclick="copyPath(this.dataset.path)">📋 Copier le chemin</button>
+            <button class="action-btn btn-del" data-path="${esc(f.path)}" onclick="deleteFile(this.dataset.path)">🗑️ Supprimer</button>
           </div>
         </div>`;
       }).join('');
