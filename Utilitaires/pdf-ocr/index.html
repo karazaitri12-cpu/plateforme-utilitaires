@@ -881,8 +881,8 @@ function initApp() {
                 showMessage('Veuillez sélectionner un fichier PDF valide', 'error');
                 return false;
             }
-            if (pdfFile.size > 50 * 1024 * 1024) {
-                showMessage('Le fichier est trop volumineux (max 50MB)', 'error');
+            if (pdfFile.size > 150 * 1024 * 1024) {
+                showMessage('Le fichier est trop volumineux (max 150MB)', 'error');
                 return false;
             }
 
