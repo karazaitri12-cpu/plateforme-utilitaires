@@ -770,561 +770,549 @@ function showApp() {
 // ========== INITIALISATION DE L'APPLICATION ==========
 
 function initApp() {
-    document.addEventListener('DOMContentLoaded', function() {
-        // Vérifie si on est en local (file://)
-        if (window.location.protocol === 'file:') {
-            showMessage("Erreur : L'application doit être hébergée sur un serveur (http:// ou https://)", 'error');
-            return;
+    // 🛡️ CORRECTION : On a retiré le 'DOMContentLoaded' car le DOM est déjà chargé
+    // au moment où la sécurité Premium valide l'accès !
+
+    // Vérifie si on est en local (file://)
+    if (window.location.protocol === 'file:') {
+        alert("Erreur : L'application doit être hébergée sur un serveur (http:// ou https://)");
+        return;
+    }
+
+    // Variables globales
+    let pdfFile = null;
+    let fileURL = null;
+    let stopConversion = false;
+    let totalPages = 0;
+    let conversionErrors = [];
+    const MAX_RETRY_ATTEMPTS = 3;
+
+    // Récupère les éléments du DOM
+    const elements = {
+        dropzone: document.getElementById('dropzone'),
+        resetBtn: document.getElementById('reset-btn'),
+        convertBtn: document.getElementById('convert-btn'),
+        stopBtn: document.getElementById('stop-btn'),
+        copyBtn: document.getElementById('copy-btn'),
+        exportBtn: document.getElementById('export-btn'),
+        exportDocxBtn: document.getElementById('export-docx-btn'),
+        viewPdfBtn: document.getElementById('view-pdf-btn'),
+        pageCount: document.getElementById('page-count'),
+        errorMessage: document.getElementById('error-message'),
+        tabsContainer: document.getElementById('tabs'),
+        tabContentsContainer: document.getElementById('tab-contents'),
+        pdfViewer: document.getElementById('pdf-viewer'),
+        loading: document.getElementById('loading'),
+        progressBar: document.getElementById('progress-bar'),
+        progress: document.getElementById('progress'),
+        fileInfo: document.querySelector('.file-info'),
+        fileSize: document.getElementById('file-size'),
+        filePath: document.getElementById('file-path'),
+        searchContainer: document.getElementById('search-container'),
+        searchText: document.getElementById('search-text'),
+        clearSearch: document.getElementById('clear-search'),
+        searchCount: document.getElementById('search-count'),
+        editorToolbar: document.getElementById('editor-toolbar'),
+        formatStyle: document.getElementById('format-style'),
+        previewBtn: document.getElementById('preview-btn'),
+        previewModal: document.getElementById('preview-modal'),
+        previewContent: document.getElementById('preview-content'),
+        closeModal: document.querySelector('.close-modal'),
+        showHistoryBtn: document.getElementById('show-history-btn'),
+        recentFilesPanel: document.getElementById('recent-files-panel'),
+        recentFilesList: document.getElementById('recent-files-list')
+    };
+
+    // Fonction pour afficher des messages
+    function showMessage(message, type = 'info') {
+        if (elements.errorMessage) {
+            elements.errorMessage.textContent = message;
+            elements.errorMessage.className = type;
+            elements.errorMessage.style.display = 'block';
         }
+    }
 
-        // Variables globales
-        let pdfFile = null;
-        let fileURL = null;
-        let stopConversion = false;
-        let totalPages = 0;
-        let conversionErrors = [];
-        const MAX_RETRY_ATTEMPTS = 3;
+    // Formatage de la taille du fichier
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
 
-        // Récupère les éléments du DOM
-        const elements = {
-            dropzone: document.getElementById('dropzone'),
-            resetBtn: document.getElementById('reset-btn'),
-            convertBtn: document.getElementById('convert-btn'),
-            stopBtn: document.getElementById('stop-btn'),
-            copyBtn: document.getElementById('copy-btn'),
-            exportBtn: document.getElementById('export-btn'),
-            exportDocxBtn: document.getElementById('export-docx-btn'),
-            viewPdfBtn: document.getElementById('view-pdf-btn'),
-            pageCount: document.getElementById('page-count'),
-            errorMessage: document.getElementById('error-message'),
-            tabsContainer: document.getElementById('tabs'),
-            tabContentsContainer: document.getElementById('tab-contents'),
-            pdfViewer: document.getElementById('pdf-viewer'),
-            loading: document.getElementById('loading'),
-            progressBar: document.getElementById('progress-bar'),
-            progress: document.getElementById('progress'),
-            fileInfo: document.querySelector('.file-info'),
-            fileSize: document.getElementById('file-size'),
-            filePath: document.getElementById('file-path'),
-            searchContainer: document.getElementById('search-container'),
-            searchText: document.getElementById('search-text'),
-            clearSearch: document.getElementById('clear-search'),
-            searchCount: document.getElementById('search-count'),
-            editorToolbar: document.getElementById('editor-toolbar'),
-            formatStyle: document.getElementById('format-style'),
-            previewBtn: document.getElementById('preview-btn'),
-            previewModal: document.getElementById('preview-modal'),
-            previewContent: document.getElementById('preview-content'),
-            closeModal: document.querySelector('.close-modal'),
-            showHistoryBtn: document.getElementById('show-history-btn'),
-            recentFilesPanel: document.getElementById('recent-files-panel'),
-            recentFilesList: document.getElementById('recent-files-list')
-        };
+    // Gestion du glisser-déposer
+    function handleDragOver(e) {
+        e.preventDefault(); e.stopPropagation();
+        if (elements.dropzone) elements.dropzone.classList.add('dragover');
+    }
 
-        // Fonction pour afficher des messages
-        function showMessage(message, type = 'info') {
-            if (elements.errorMessage) {
-                elements.errorMessage.textContent = message;
-                elements.errorMessage.className = type;
-                elements.errorMessage.style.display = 'block';
-            }
-            console.log(`[${type.toUpperCase()}] ${message}`);
+    function handleDragLeave(e) {
+        e.preventDefault(); e.stopPropagation();
+        if (elements.dropzone) elements.dropzone.classList.remove('dragover');
+    }
+
+    async function handleDrop(e) {
+        e.preventDefault(); e.stopPropagation();
+        if (elements.dropzone) elements.dropzone.classList.remove('dragover');
+        if (e.dataTransfer.files.length > 0) {
+            pdfFile = e.dataTransfer.files[0];
+            await handleFileUpload();
         }
+    }
 
-        // Formatage de la taille du fichier
-        function formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        }
-
-        // Gestion du glisser-déposer
-        function handleDragOver(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            if (elements.dropzone) {
-                elements.dropzone.classList.add('dragover');
-            }
-        }
-
-        function handleDragLeave(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            if (elements.dropzone) {
-                elements.dropzone.classList.remove('dragover');
-            }
-        }
-
-        async function handleDrop(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            if (elements.dropzone) {
-                elements.dropzone.classList.remove('dragover');
-            }
-            if (e.dataTransfer.files.length > 0) {
-                pdfFile = e.dataTransfer.files[0];
+    function handleFileSelect() {
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'application/pdf';
+        fileInput.addEventListener('change', async function(event) {
+            if (event.target.files.length > 0) {
+                pdfFile = event.target.files[0];
                 await handleFileUpload();
             }
-        }
+        });
+        fileInput.click();
+    }
 
-        function handleFileSelect() {
-            const fileInput = document.createElement('input');
-            fileInput.type = 'file';
-            fileInput.accept = 'application/pdf';
-            fileInput.addEventListener('change', async function(event) {
-                if (event.target.files.length > 0) {
-                    pdfFile = event.target.files[0];
-                    await handleFileUpload();
-                }
+    // Gestion du fichier PDF uploadé
+    async function handleFileUpload() {
+        try {
+            if (!pdfFile || !pdfFile.type.match('application/pdf')) {
+                showMessage('Veuillez sélectionner un fichier PDF valide', 'error');
+                return false;
+            }
+            if (pdfFile.size > 50 * 1024 * 1024) {
+                showMessage('Le fichier est trop volumineux (max 50MB)', 'error');
+                return false;
+            }
+
+            if (elements.fileInfo) {
+                elements.fileInfo.style.display = 'block';
+                if (elements.fileSize) elements.fileSize.textContent = formatFileSize(pdfFile.size);
+                if (elements.filePath) elements.filePath.textContent = pdfFile.name;
+            }
+
+            if (fileURL) URL.revokeObjectURL(fileURL);
+            fileURL = URL.createObjectURL(pdfFile);
+            
+            if (elements.dropzone) elements.dropzone.textContent = `✓ ${pdfFile.name}`;
+            if (elements.pdfViewer) elements.pdfViewer.style.display = 'none';
+            if (elements.viewPdfBtn) elements.viewPdfBtn.style.display = 'inline-flex';
+
+            // 🛡️ CORRECTION : Lecture robuste du PDF en ArrayBuffer
+            const arrayBuffer = await pdfFile.arrayBuffer();
+            const loadingTask = pdfjsLib.getDocument({data: arrayBuffer});
+            const pdf = await loadingTask.promise;
+            
+            totalPages = pdf.numPages;
+            if (elements.pageCount) elements.pageCount.textContent = `📄 ${totalPages} page(s)`;
+            updateRecentFiles(pdfFile);
+            return true;
+
+        } catch (error) {
+            console.error('Erreur chargement PDF:', error);
+            let errorMsg = 'Erreur lors du chargement du PDF';
+            if (error.name === 'PasswordException') errorMsg = 'Le PDF est protégé par un mot de passe';
+            else if (error.message && error.message.includes('Invalid PDF')) errorMsg = 'Le PDF semble corrompu';
+            showMessage(errorMsg, 'error');
+            return false;
+        }
+    }
+
+    // Historique des fichiers
+    function updateRecentFiles(file) {
+        const recentFiles = JSON.parse(localStorage.getItem('recentFiles')) || [];
+        const existingIndex = recentFiles.findIndex(f => f.name === file.name && f.size === file.size);
+        if (existingIndex !== -1) recentFiles.splice(existingIndex, 1);
+        recentFiles.unshift({ name: file.name, size: file.size, lastOpened: new Date().toISOString(), dataURL: fileURL });
+        localStorage.setItem('recentFiles', JSON.stringify(recentFiles.slice(0, 5)));
+        displayRecentFiles();
+        if (elements.showHistoryBtn) elements.showHistoryBtn.style.display = 'inline-flex';
+    }
+
+    function displayRecentFiles() {
+        const recentFiles = JSON.parse(localStorage.getItem('recentFiles')) || [];
+        if (elements.recentFilesList) {
+            elements.recentFilesList.innerHTML = recentFiles.map(file => `
+                <li>
+                    <span class="file-name">${file.name}</span>
+                    <span class="file-size">(${formatFileSize(file.size)})</span>
+                    <button class="open-recent" data-url="${file.dataURL}" title="Ouvrir">
+                        <i class="fas fa-folder-open"></i>
+                    </button>
+                </li>
+            `).join('');
+        }
+    }
+
+    // Visualisation du PDF
+    function togglePdfViewer() {
+        if (!pdfFile || !fileURL) {
+            showMessage('Veuillez d\'abord sélectionner un fichier PDF', 'error');
+            return;
+        }
+        if (elements.pdfViewer) {
+            if (elements.pdfViewer.style.display === 'block') {
+                elements.pdfViewer.style.display = 'none';
+                if (elements.viewPdfBtn) elements.viewPdfBtn.innerHTML = '<i class="fas fa-eye"></i> Visualiser';
+            } else {
+                elements.pdfViewer.src = fileURL + '#toolbar=1';
+                elements.pdfViewer.style.display = 'block';
+                if (elements.viewPdfBtn) elements.viewPdfBtn.innerHTML = '<i class="fas fa-eye-slash"></i> Cacher';
+            }
+        }
+    }
+
+    // Conversion OCR d'une page
+    async function convertPage(pageNum, retryAttempt = 0) {
+        try {
+            const arrayBuffer = await pdfFile.arrayBuffer();
+            const loadingTask = pdfjsLib.getDocument({data: arrayBuffer});
+            const pdf = await loadingTask.promise;
+            
+            if (!document.getElementById(`tab-${pageNum}`)) createTab(pageNum);
+            const tabContent = document.getElementById(`tab-${pageNum}`);
+            if (tabContent) tabContent.textContent = `🔄 Conversion page ${pageNum}...`;
+
+            const page = await pdf.getPage(pageNum);
+            const viewport = page.getViewport({scale: 2.0});
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+
+            await page.render({ canvasContext: context, viewport }).promise;
+
+            const { data: { text } } = await Tesseract.recognize(canvas, 'fra', {
+                logger: m => console.log(m),
+                tessedit_pageseg_mode: 6
             });
-            fileInput.click();
-        }
+            
+            if (text.trim().length < 10) throw new Error("Texte reconnu trop court");
 
-        // Gestion du fichier PDF uploadé
-        async function handleFileUpload() {
-            try {
-                if (!pdfFile || !pdfFile.type.match('application/pdf')) {
-                    showMessage('Veuillez sélectionner un fichier PDF valide', 'error');
-                    return false;
-                }
-                if (pdfFile.size > 50 * 1024 * 1024) {
-                    showMessage('Le fichier est trop volumineux (max 50MB)', 'error');
-                    return false;
-                }
+            if (tabContent) {
+                tabContent.textContent = text;
+                enhanceTables(tabContent);
+            }
+            showTab(pageNum);
+            updateProgress(pageNum, totalPages);
+            return true;
 
-                if (elements.fileInfo) {
-                    elements.fileInfo.style.display = 'block';
-                    if (elements.fileSize) elements.fileSize.textContent = formatFileSize(pdfFile.size);
-                    if (elements.filePath) elements.filePath.textContent = pdfFile.name;
-                }
-
-                if (fileURL) URL.revokeObjectURL(fileURL);
-                fileURL = URL.createObjectURL(pdfFile);
-                
-                if (elements.dropzone) {
-                    elements.dropzone.textContent = `✓ ${pdfFile.name}`;
-                }
-                if (elements.pdfViewer) elements.pdfViewer.style.display = 'none';
-                if (elements.viewPdfBtn) {
-                    elements.viewPdfBtn.style.display = 'inline-flex';
-                }
-
-                const loadingTask = pdfjsLib.getDocument(fileURL);
-                const pdf = await loadingTask.promise;
-                totalPages = pdf.numPages;
-                if (elements.pageCount) {
-                    elements.pageCount.textContent = `📄 ${totalPages} page(s)`;
-                }
-                updateRecentFiles(pdfFile);
-                return true;
-
-            } catch (error) {
-                console.error('Erreur chargement PDF:', error);
-                let errorMsg = 'Erreur lors du chargement du PDF';
-                if (error.name === 'PasswordException') errorMsg = 'Le PDF est protégé par un mot de passe';
-                else if (error.message.includes('Invalid PDF')) errorMsg = 'Le PDF semble corrompu';
-                showMessage(errorMsg, 'error');
+        } catch (error) {
+            console.error(`Erreur page ${pageNum}:`, error);
+            if (stopConversion) return false;
+            if (retryAttempt < MAX_RETRY_ATTEMPTS) {
+                console.log(`Nouvel essai page ${pageNum}...`);
+                return await convertPage(pageNum, retryAttempt + 1);
+            } else {
+                const errorMsg = `Page ${pageNum}: ${error.message || 'Erreur inconnue'}`;
+                conversionErrors.push(errorMsg);
+                const tabContent = document.getElementById(`tab-${pageNum}`);
+                if (tabContent) tabContent.textContent = `❌ ${errorMsg}`;
                 return false;
             }
         }
+    }
 
-        // Historique des fichiers
-        function updateRecentFiles(file) {
-            const recentFiles = JSON.parse(localStorage.getItem('recentFiles')) || [];
-            const existingIndex = recentFiles.findIndex(f => f.name === file.name && f.size === file.size);
-            if (existingIndex !== -1) recentFiles.splice(existingIndex, 1);
-            recentFiles.unshift({ name: file.name, size: file.size, lastOpened: new Date().toISOString(), dataURL: fileURL });
-            localStorage.setItem('recentFiles', JSON.stringify(recentFiles.slice(0, 5)));
-            displayRecentFiles();
-            if (elements.showHistoryBtn) elements.showHistoryBtn.style.display = 'inline-flex';
-        }
+    // Conversion complète du PDF
+    async function convertPdf() {
+        if (!pdfFile) { showMessage('Veuillez d\'abord sélectionner un fichier PDF', 'error'); return; }
 
-        function displayRecentFiles() {
-            const recentFiles = JSON.parse(localStorage.getItem('recentFiles')) || [];
-            if (elements.recentFilesList) {
-                elements.recentFilesList.innerHTML = recentFiles.map(file => `
-                    <li>
-                        <span class="file-name">${file.name}</span>
-                        <span class="file-size">(${formatFileSize(file.size)})</span>
-                        <button class="open-recent" data-url="${file.dataURL}" title="Ouvrir">
-                            <i class="fas fa-folder-open"></i>
-                        </button>
-                    </li>
-                `).join('');
-            }
-        }
+        conversionErrors = [];
+        if (elements.tabsContainer) elements.tabsContainer.innerHTML = '';
+        if (elements.tabContentsContainer) elements.tabContentsContainer.innerHTML = '';
+        if (elements.copyBtn) elements.copyBtn.style.display = 'none';
+        if (elements.exportBtn) elements.exportBtn.style.display = 'none';
+        if (elements.exportDocxBtn) elements.exportDocxBtn.style.display = 'none';
+        if (elements.searchContainer) elements.searchContainer.style.display = 'none';
+        if (elements.editorToolbar) elements.editorToolbar.style.display = 'none';
+        if (elements.stopBtn) elements.stopBtn.style.display = 'inline-flex';
+        if (elements.convertBtn) elements.convertBtn.disabled = true;
+        if (elements.pdfViewer) elements.pdfViewer.style.display = 'none';
+        if (elements.loading) elements.loading.style.display = 'block';
+        if (elements.progressBar) elements.progressBar.style.display = 'block';
+        if (elements.progress) elements.progress.style.width = '0%';
+        
+        stopConversion = false;
+        if (elements.tabsContainer) elements.tabsContainer.style.display = 'flex';
+        if (elements.tabContentsContainer) elements.tabContentsContainer.style.display = 'block';
 
-        // Visualisation du PDF
-        function togglePdfViewer() {
-            if (!pdfFile || !fileURL) {
-                showMessage('Veuillez d\'abord sélectionner un fichier PDF', 'error');
-                return;
-            }
-            if (elements.pdfViewer) {
-                if (elements.pdfViewer.style.display === 'block') {
-                    elements.pdfViewer.style.display = 'none';
-                    if (elements.viewPdfBtn) elements.viewPdfBtn.innerHTML = '<i class="fas fa-eye"></i> Visualiser';
-                } else {
-                    elements.pdfViewer.src = fileURL + '#toolbar=1';
-                    elements.pdfViewer.style.display = 'block';
-                    if (elements.viewPdfBtn) elements.viewPdfBtn.innerHTML = '<i class="fas fa-eye-slash"></i> Cacher';
-                }
-            }
-        }
-
-        // Conversion OCR d'une page
-        async function convertPage(pageNum, retryAttempt = 0) {
-            try {
-                const arrayBuffer = await pdfFile.arrayBuffer();
-                const loadingTask = pdfjsLib.getDocument({data: arrayBuffer});
-                const pdf = await loadingTask.promise;
-                
-                if (!document.getElementById(`tab-${pageNum}`)) createTab(pageNum);
-                const tabContent = document.getElementById(`tab-${pageNum}`);
-                if (tabContent) tabContent.textContent = `🔄 Conversion page ${pageNum}...`;
-
-                const page = await pdf.getPage(pageNum);
-                const viewport = page.getViewport({scale: 2.0});
-                const canvas = document.createElement('canvas');
-                const context = canvas.getContext('2d');
-                canvas.height = viewport.height;
-                canvas.width = viewport.width;
-
-                await page.render({ canvasContext: context, viewport }).promise;
-
-                const { data: { text } } = await Tesseract.recognize(canvas, 'fra', {
-                    logger: m => console.log(m),
-                    tessedit_pageseg_mode: 6
-                });
-                
-                if (text.trim().length < 10) throw new Error("Texte reconnu trop court");
-
-                if (tabContent) {
-                    tabContent.textContent = text;
-                    enhanceTables(tabContent);
-                }
-                showTab(pageNum);
-                updateProgress(pageNum, totalPages);
-                return true;
-
-            } catch (error) {
-                console.error(`Erreur page ${pageNum}:`, error);
-                if (stopConversion) return false;
-                if (retryAttempt < MAX_RETRY_ATTEMPTS) {
-                    console.log(`Nouvel essai page ${pageNum}...`);
-                    return await convertPage(pageNum, retryAttempt + 1);
-                } else {
-                    const errorMsg = `Page ${pageNum}: ${error.message || 'Erreur inconnue'}`;
-                    conversionErrors.push(errorMsg);
-                    const tabContent = document.getElementById(`tab-${pageNum}`);
-                    if (tabContent) tabContent.textContent = `❌ ${errorMsg}`;
-                    return false;
-                }
-            }
-        }
-
-        // Conversion complète du PDF
-        async function convertPdf() {
-            if (!pdfFile) { showMessage('Veuillez d\'abord sélectionner un fichier PDF', 'error'); return; }
-
-            conversionErrors = [];
-            if (elements.tabsContainer) elements.tabsContainer.innerHTML = '';
-            if (elements.tabContentsContainer) elements.tabContentsContainer.innerHTML = '';
-            if (elements.copyBtn) elements.copyBtn.style.display = 'none';
-            if (elements.exportBtn) elements.exportBtn.style.display = 'none';
-            if (elements.exportDocxBtn) elements.exportDocxBtn.style.display = 'none';
-            if (elements.searchContainer) elements.searchContainer.style.display = 'none';
-            if (elements.editorToolbar) elements.editorToolbar.style.display = 'none';
-            if (elements.stopBtn) elements.stopBtn.style.display = 'inline-flex';
-            if (elements.convertBtn) elements.convertBtn.disabled = true;
-            if (elements.pdfViewer) elements.pdfViewer.style.display = 'none';
-            if (elements.loading) elements.loading.style.display = 'block';
-            if (elements.progressBar) elements.progressBar.style.display = 'block';
-            if (elements.progress) elements.progress.style.width = '0%';
+        try {
+            const arrayBuffer = await pdfFile.arrayBuffer();
+            const loadingTask = pdfjsLib.getDocument({data: arrayBuffer});
+            const pdf = await loadingTask.promise;
             
-            stopConversion = false;
-            if (elements.tabsContainer) elements.tabsContainer.style.display = 'flex';
-            if (elements.tabContentsContainer) elements.tabContentsContainer.style.display = 'block';
-
-            try {
-                const arrayBuffer = await pdfFile.arrayBuffer();
-                const loadingTask = pdfjsLib.getDocument({data: arrayBuffer});
-                const pdf = await loadingTask.promise;
-                
-                let successfulConversions = 0;
-                for (let i = 1; i <= pdf.numPages; i++) {
-                    if (stopConversion) break;
-                    const success = await convertPage(i);
-                    if (success) successfulConversions++;
-                    if (elements.loading) {
-                        elements.loading.innerHTML = `<div class="spinner"></div><p>Page ${i}/${pdf.numPages}</p><p>${Math.round((i/pdf.numPages)*100)}%</p>`;
-                    }
+            let successfulConversions = 0;
+            for (let i = 1; i <= pdf.numPages; i++) {
+                if (stopConversion) break;
+                const success = await convertPage(i);
+                if (success) successfulConversions++;
+                if (elements.loading) {
+                    elements.loading.innerHTML = `<div class="spinner"></div><p>Page ${i}/${pdf.numPages}</p><p>${Math.round((i/pdf.numPages)*100)}%</p>`;
                 }
-                
-                if (successfulConversions > 0) {
-                    if (elements.copyBtn) elements.copyBtn.style.display = 'inline-flex';
-                    if (elements.exportBtn) elements.exportBtn.style.display = 'inline-flex';
-                    if (elements.exportDocxBtn) elements.exportDocxBtn.style.display = 'inline-flex';
-                    if (elements.searchContainer) elements.searchContainer.style.display = 'flex';
-                    if (elements.editorToolbar) elements.editorToolbar.style.display = 'flex';
-                }
-                
-                if (conversionErrors.length > 0) {
-                    showMessage(`✅ ${successfulConversions} page(s) converties. ⚠️ ${conversionErrors.length} erreur(s).`, 'info');
-                } else {
-                    showMessage(`✅ Conversion réussie : ${successfulConversions} page(s).`, 'success');
-                }
-
-            } catch (error) {
-                console.error('Erreur conversion:', error);
-                showMessage(`❌ Erreur : ${error.message || 'Erreur inconnue'}`, 'error');
-            } finally {
-                if (elements.convertBtn) elements.convertBtn.disabled = false;
-                if (elements.stopBtn) elements.stopBtn.style.display = 'none';
-                if (elements.loading) elements.loading.style.display = 'none';
-                if (elements.progressBar) elements.progressBar.style.display = 'none';
             }
-        }
-
-        // Gestion des onglets
-        function createTab(pageNum) {
-            if (!elements.tabsContainer || !elements.tabContentsContainer) return;
-            const tabButton = document.createElement('button');
-            tabButton.textContent = `Page ${pageNum}`;
-            tabButton.classList.add('tab-button');
-            tabButton.onclick = () => showTab(pageNum);
-            elements.tabsContainer.appendChild(tabButton);
-
-            const tabContent = document.createElement('div');
-            tabContent.id = `tab-${pageNum}`;
-            tabContent.classList.add('tab-content');
-            tabContent.contentEditable = true;
-            elements.tabContentsContainer.appendChild(tabContent);
-        }
-
-        function showTab(pageNum) {
-            document.querySelectorAll('.tab-button').forEach((btn, i) => btn.classList.toggle('active', i+1 === pageNum));
-            document.querySelectorAll('.tab-content').forEach((cnt, i) => cnt.classList.toggle('active', i+1 === pageNum));
-        }
-
-        function updateProgress(currentPage, totalPages) {
-            if (elements.progress) elements.progress.style.width = `${(currentPage/totalPages)*100}%`;
-        }
-
-        // Détection et formatage des tableaux
-        function enhanceTables(tabContent) {
-            const text = tabContent.textContent;
-            const tables = detectTables(text);
-            if (tables.length > 0) {
-                let newContent = text;
-                tables.forEach(table => {
-                    const htmlTable = convertTableToHTML(table);
-                    newContent = newContent.replace(table.join('\n'), htmlTable);
-                });
-                tabContent.innerHTML = newContent;
+            
+            if (successfulConversions > 0) {
+                if (elements.copyBtn) elements.copyBtn.style.display = 'inline-flex';
+                if (elements.exportBtn) elements.exportBtn.style.display = 'inline-flex';
+                if (elements.exportDocxBtn) elements.exportDocxBtn.style.display = 'inline-flex';
+                if (elements.searchContainer) elements.searchContainer.style.display = 'flex';
+                if (elements.editorToolbar) elements.editorToolbar.style.display = 'flex';
             }
-        }
-
-        function detectTables(text) {
-            const lines = text.split('\n');
-            const tables = [];
-            let currentTable = [];
-            let inTable = false;
-            lines.forEach(line => {
-                const isTableLine = line.trim().match(/^(\+|-|_|\|).*[\+|\||-|_]$/) || (line.includes('|') && line.split('|').length > 2);
-                if (isTableLine) {
-                    if (!inTable && currentTable.length > 0) { tables.push([...currentTable]); currentTable = []; }
-                    currentTable.push(line);
-                    inTable = true;
-                } else {
-                    if (inTable && currentTable.length > 1) tables.push([...currentTable]);
-                    currentTable = [];
-                    inTable = false;
-                }
-            });
-            return tables;
-        }
-
-        function convertTableToHTML(tableLines) {
-            const isPrettyTable = tableLines[0]?.trim().startsWith('+');
-            let html = '<div class="table-container"><table>';
-            if (isPrettyTable) {
-                const headers = tableLines[0].split('|').map(c => c.trim()).filter(Boolean);
-                html += '<thead><tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</thead><tbody>';
-                for (let i = 2; i < tableLines.length; i++) {
-                    if (!tableLines[i].includes('|')) continue;
-                    const cells = tableLines[i].split('|').map(c => c.trim()).filter(Boolean);
-                    html += '<tr>' + cells.map(c => `<td>${c}</td>`).join('') + '</tr>';
-                }
+            
+            if (conversionErrors.length > 0) {
+                showMessage(`✅ ${successfulConversions} page(s) converties. ⚠️ ${conversionErrors.length} erreur(s).`, 'info');
             } else {
-                tableLines.forEach(line => {
-                    if (line.trim().startsWith('|')) {
-                        const cells = line.split('|').map(c => c.trim()).filter(Boolean);
-                        if (cells.length) html += '</table>' + cells.map(c => `<td>${c}</td>`).join('') + '</tr>';
-                    }
-                });
+                showMessage(`✅ Conversion réussie : ${successfulConversions} page(s).`, 'success');
             }
-            html += '</tbody></table></div>';
-            return html;
-        }
 
-        // Recherche dans le texte
-        function performSearch() {
-            const term = elements.searchText?.value.trim() || '';
-            if (!term) { clearSearch(); return; }
-            let matchCount = 0;
-            const regex = new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                const content = tab.textContent;
-                const highlighted = content.replace(regex, match => { matchCount++; return `<span class="search-highlight">${match}</span>`; });
-                tab.innerHTML = highlighted;
+        } catch (error) {
+            console.error('Erreur conversion:', error);
+            showMessage(`❌ Erreur : ${error.message || 'Erreur inconnue'}`, 'error');
+        } finally {
+            if (elements.convertBtn) elements.convertBtn.disabled = false;
+            if (elements.stopBtn) elements.stopBtn.style.display = 'none';
+            if (elements.loading) elements.loading.style.display = 'none';
+            if (elements.progressBar) elements.progressBar.style.display = 'none';
+        }
+    }
+
+    // Gestion des onglets
+    function createTab(pageNum) {
+        if (!elements.tabsContainer || !elements.tabContentsContainer) return;
+        const tabButton = document.createElement('button');
+        tabButton.textContent = `Page ${pageNum}`;
+        tabButton.classList.add('tab-button');
+        tabButton.onclick = () => showTab(pageNum);
+        elements.tabsContainer.appendChild(tabButton);
+
+        const tabContent = document.createElement('div');
+        tabContent.id = `tab-${pageNum}`;
+        tabContent.classList.add('tab-content');
+        tabContent.contentEditable = true;
+        elements.tabContentsContainer.appendChild(tabContent);
+    }
+
+    function showTab(pageNum) {
+        document.querySelectorAll('.tab-button').forEach((btn, i) => btn.classList.toggle('active', i+1 === pageNum));
+        document.querySelectorAll('.tab-content').forEach((cnt, i) => cnt.classList.toggle('active', i+1 === pageNum));
+    }
+
+    function updateProgress(currentPage, totalPages) {
+        if (elements.progress) elements.progress.style.width = `${(currentPage/totalPages)*100}%`;
+    }
+
+    // Détection et formatage des tableaux
+    function enhanceTables(tabContent) {
+        const text = tabContent.textContent;
+        const tables = detectTables(text);
+        if (tables.length > 0) {
+            let newContent = text;
+            tables.forEach(table => {
+                const htmlTable = convertTableToHTML(table);
+                newContent = newContent.replace(table.join('\n'), htmlTable);
             });
-            if (elements.searchCount) elements.searchCount.textContent = matchCount > 0 ? `${matchCount} résultat(s)` : 'Aucun résultat';
-            scrollToFirstHighlight();
+            tabContent.innerHTML = newContent;
         }
+    }
 
-        function clearSearch() {
-            document.querySelectorAll('.search-highlight').forEach(hl => {
-                const parent = hl.parentNode;
-                parent.replaceChild(document.createTextNode(hl.textContent), hl);
-                parent.normalize();
-            });
-            if (elements.searchCount) elements.searchCount.textContent = '';
-        }
-
-        function scrollToFirstHighlight() {
-            const first = document.querySelector('.search-highlight');
-            if (first) {
-                first.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                first.classList.add('first-highlight');
-                setTimeout(() => first.classList.remove('first-highlight'), 2000);
+    function detectTables(text) {
+        const lines = text.split('\n');
+        const tables = [];
+        let currentTable = [];
+        let inTable = false;
+        lines.forEach(line => {
+            const isTableLine = line.trim().match(/^(\+|-|_|\|).*[\+|\||-|_]$/) || (line.includes('|') && line.split('|').length > 2);
+            if (isTableLine) {
+                if (!inTable && currentTable.length > 0) { tables.push([...currentTable]); currentTable = []; }
+                currentTable.push(line);
+                inTable = true;
+            } else {
+                if (inTable && currentTable.length > 1) tables.push([...currentTable]);
+                currentTable = [];
+                inTable = false;
             }
-        }
+        });
+        return tables;
+    }
 
-        // Exportation
-        function copyText() {
-            const allText = Array.from(document.querySelectorAll('.tab-content')).map(tab => tab.textContent).join('\n\n--- Page suivante ---\n\n');
-            navigator.clipboard.writeText(allText).then(() => showMessage('📋 Texte copié !', 'success')).catch(() => showMessage('❌ Erreur de copie', 'error'));
+    function convertTableToHTML(tableLines) {
+        const isPrettyTable = tableLines[0]?.trim().startsWith('+');
+        let html = '<div class="table-container"><table>';
+        if (isPrettyTable) {
+            const headers = tableLines[0].split('|').map(c => c.trim()).filter(Boolean);
+            html += '<thead><tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</thead><tbody>';
+            for (let i = 2; i < tableLines.length; i++) {
+                if (!tableLines[i].includes('|')) continue;
+                const cells = tableLines[i].split('|').map(c => c.trim()).filter(Boolean);
+                html += '<tr>' + cells.map(c => `<td>${c}</td>`).join('') + '</tr>';
+            }
+        } else {
+            tableLines.forEach(line => {
+                if (line.trim().startsWith('|')) {
+                    const cells = line.split('|').map(c => c.trim()).filter(Boolean);
+                    if (cells.length) html += '</table>' + cells.map(c => `<td>${c}</td>`).join('') + '</tr>';
+                }
+            });
         }
+        html += '</tbody></table></div>';
+        return html;
+    }
 
-        function exportText() {
-            const allText = Array.from(document.querySelectorAll('.tab-content')).map(tab => tab.textContent).join('\n\n--- Page suivante ---\n\n');
-            const blob = new Blob([allText], { type: 'text/plain;charset=utf-8' });
+    // Recherche dans le texte
+    function performSearch() {
+        const term = elements.searchText?.value.trim() || '';
+        if (!term) { clearSearch(); return; }
+        let matchCount = 0;
+        const regex = new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+        document.querySelectorAll('.tab-content').forEach(tab => {
+            const content = tab.textContent;
+            const highlighted = content.replace(regex, match => { matchCount++; return `<span class="search-highlight">${match}</span>`; });
+            tab.innerHTML = highlighted;
+        });
+        if (elements.searchCount) elements.searchCount.textContent = matchCount > 0 ? `${matchCount} résultat(s)` : 'Aucun résultat';
+        scrollToFirstHighlight();
+    }
+
+    function clearSearch() {
+        document.querySelectorAll('.search-highlight').forEach(hl => {
+            const parent = hl.parentNode;
+            parent.replaceChild(document.createTextNode(hl.textContent), hl);
+            parent.normalize();
+        });
+        if (elements.searchCount) elements.searchCount.textContent = '';
+    }
+
+    function scrollToFirstHighlight() {
+        const first = document.querySelector('.search-highlight');
+        if (first) {
+            first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            first.classList.add('first-highlight');
+            setTimeout(() => first.classList.remove('first-highlight'), 2000);
+        }
+    }
+
+    // Exportation
+    function copyText() {
+        const allText = Array.from(document.querySelectorAll('.tab-content')).map(tab => tab.textContent).join('\n\n--- Page suivante ---\n\n');
+        navigator.clipboard.writeText(allText).then(() => showMessage('📋 Texte copié !', 'success')).catch(() => showMessage('❌ Erreur de copie', 'error'));
+    }
+
+    function exportText() {
+        const allText = Array.from(document.querySelectorAll('.tab-content')).map(tab => tab.textContent).join('\n\n--- Page suivante ---\n\n');
+        const blob = new Blob([allText], { type: 'text/plain;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = pdfFile ? `${pdfFile.name.replace('.pdf','')}_ocr.txt` : 'ocr_text.txt';
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 100);
+    }
+
+    async function exportAsDocx() {
+        try {
+            const { Document, Paragraph, TextRun, Packer } = await import('https://unpkg.com/docx@7.1.0/build/index.js');
+            const doc = new Document({ sections: [{ properties: {}, children: Array.from(document.querySelectorAll('.tab-content')).map((tab, idx) => new Paragraph({ children: [ new TextRun({ text: `Page ${idx+1}`, bold: true, size: 24 }), new TextRun({ text: '\n' + tab.textContent, size: 20 }), new TextRun({ text: '\n\n', break: 1 }) ]})) }] });
+            const blob = await Packer.toBlob(doc);
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
-            a.download = pdfFile ? `${pdfFile.name.replace('.pdf','')}_ocr.txt` : 'ocr_text.txt';
+            a.download = pdfFile ? `${pdfFile.name.replace('.pdf','')}.docx` : 'document.docx';
             a.click();
             setTimeout(() => URL.revokeObjectURL(a.href), 100);
+        } catch (error) {
+            console.error('Erreur export DOCX:', error);
+            showMessage('❌ Erreur export DOCX', 'error');
         }
+    }
 
-        async function exportAsDocx() {
-            try {
-                const { Document, Paragraph, TextRun, Packer } = await import('https://unpkg.com/docx@7.1.0/build/index.js');
-                const doc = new Document({ sections: [{ properties: {}, children: Array.from(document.querySelectorAll('.tab-content')).map((tab, idx) => new Paragraph({ children: [ new TextRun({ text: `Page ${idx+1}`, bold: true, size: 24 }), new TextRun({ text: '\n' + tab.textContent, size: 20 }), new TextRun({ text: '\n\n', break: 1 }) ]})) }] });
-                const blob = await Packer.toBlob(doc);
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(blob);
-                a.download = pdfFile ? `${pdfFile.name.replace('.pdf','')}.docx` : 'document.docx';
-                a.click();
-                setTimeout(() => URL.revokeObjectURL(a.href), 100);
-            } catch (error) {
-                console.error('Erreur export DOCX:', error);
-                showMessage('❌ Erreur export DOCX', 'error');
+    // Aperçu formaté
+    function showPreview() {
+        const format = elements.formatStyle?.value || 'plain';
+        let content = Array.from(document.querySelectorAll('.tab-content')).map(tab => tab.textContent).join('\n\n--- Page suivante ---\n\n');
+        if (elements.previewContent) {
+            switch(format) {
+                case 'markdown': elements.previewContent.innerHTML = `<pre>${convertToMarkdown(content)}</pre>`; break;
+                case 'html': elements.previewContent.innerHTML = convertToHTML(content); break;
+                default: elements.previewContent.textContent = content;
             }
         }
+        if (elements.previewModal) elements.previewModal.style.display = 'flex';
+    }
+    function hidePreview() { if (elements.previewModal) elements.previewModal.style.display = 'none'; }
+    function convertToMarkdown(t) { return t.replace(/\n\s*\n/g, '\n\n').replace(/^(#+)\s*(.*?)\s*$/gm, '$1 $2\n').replace(/\*\*(.*?)\*\*/g, '**$1**').replace(/\*(.*?)\*/g, '*$1*'); }
+    function convertToHTML(t) { return t.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>'); }
 
-        // Aperçu formaté
-        function showPreview() {
-            const format = elements.formatStyle?.value || 'plain';
-            let content = Array.from(document.querySelectorAll('.tab-content')).map(tab => tab.textContent).join('\n\n--- Page suivante ---\n\n');
-            if (elements.previewContent) {
-                switch(format) {
-                    case 'markdown': elements.previewContent.innerHTML = `<pre>${convertToMarkdown(content)}</pre>`; break;
-                    case 'html': elements.previewContent.innerHTML = convertToHTML(content); break;
-                    default: elements.previewContent.textContent = content;
-                }
-            }
-            if (elements.previewModal) elements.previewModal.style.display = 'flex';
+    // Historique
+    function toggleHistoryPanel() {
+        if (elements.recentFilesPanel) {
+            const isShown = elements.recentFilesPanel.style.display === 'block';
+            elements.recentFilesPanel.style.display = isShown ? 'none' : 'block';
+            if (!isShown) displayRecentFiles();
         }
-        function hidePreview() { if (elements.previewModal) elements.previewModal.style.display = 'none'; }
-        function convertToMarkdown(t) { return t.replace(/\n\s*\n/g, '\n\n').replace(/^(#+)\s*(.*?)\s*$/gm, '$1 $2\n').replace(/\*\*(.*?)\*\*/g, '**$1**').replace(/\*(.*?)\*/g, '*$1*'); }
-        function convertToHTML(t) { return t.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>'); }
-
-        // Historique
-        function toggleHistoryPanel() {
-            if (elements.recentFilesPanel) {
-                const isShown = elements.recentFilesPanel.style.display === 'block';
-                elements.recentFilesPanel.style.display = isShown ? 'none' : 'block';
-                if (!isShown) displayRecentFiles();
-            }
-        }
-        function openRecentFile(e) {
-            const btn = e.target.closest('.open-recent');
-            if (btn?.dataset.url) {
-                const dataURL = btn.dataset.url;
-                const fileName = btn.closest('li').querySelector('.file-name').textContent;
-                pdfFile = { name: fileName };
-                fileURL = dataURL;
-                handleFileUpload();
-                if (elements.recentFilesPanel) elements.recentFilesPanel.style.display = 'none';
-            }
-        }
-
-        // Arrêt / Reset
-        function stopConversionProcess() { stopConversion = true; showMessage('⏹️ Conversion arrêtée', 'info'); if (elements.stopBtn) elements.stopBtn.style.display = 'none'; if (elements.convertBtn) elements.convertBtn.disabled = false; if (elements.loading) elements.loading.style.display = 'none'; }
-        function resetApplication() {
-            stopConversion = true;
-            if (fileURL) { URL.revokeObjectURL(fileURL); fileURL = null; }
-            pdfFile = null;
-            if (elements.dropzone) elements.dropzone.textContent = '📁 Glissez-déposez ou cliquez pour sélectionner un PDF';
-            if (elements.fileInfo) elements.fileInfo.style.display = 'none';
-            if (elements.pdfViewer) { elements.pdfViewer.style.display = 'none'; elements.pdfViewer.src = ''; }
-            if (elements.viewPdfBtn) { elements.viewPdfBtn.style.display = 'none'; elements.viewPdfBtn.innerHTML = '<i class="fas fa-eye"></i> Visualiser'; }
-            if (elements.tabsContainer) { elements.tabsContainer.innerHTML = ''; elements.tabsContainer.style.display = 'none'; }
-            if (elements.tabContentsContainer) { elements.tabContentsContainer.innerHTML = ''; elements.tabContentsContainer.style.display = 'none'; }
-            totalPages = 0; conversionErrors = [];
-            showMessage('', 'info');
-            if (elements.pageCount) elements.pageCount.textContent = '';
-            if (elements.progress) elements.progress.style.width = '0%';
-            if (elements.progressBar) elements.progressBar.style.display = 'none';
-            [elements.copyBtn, elements.exportBtn, elements.exportDocxBtn, elements.searchContainer, elements.editorToolbar, elements.stopBtn].forEach(el => { if (el) el.style.display = 'none'; });
-            if (elements.convertBtn) elements.convertBtn.disabled = false;
-            if (elements.loading) elements.loading.style.display = 'none';
-            if (elements.showHistoryBtn) elements.showHistoryBtn.style.display = 'none';
+    }
+    function openRecentFile(e) {
+        const btn = e.target.closest('.open-recent');
+        if (btn?.dataset.url) {
+            const dataURL = btn.dataset.url;
+            const fileName = btn.closest('li').querySelector('.file-name').textContent;
+            pdfFile = { name: fileName };
+            fileURL = dataURL;
+            handleFileUpload();
             if (elements.recentFilesPanel) elements.recentFilesPanel.style.display = 'none';
-            clearSearch();
         }
+    }
 
-        // Initialisation des événements
-        function setupEventListeners() {
-            if (elements.dropzone) {
-                elements.dropzone.addEventListener('dragover', handleDragOver);
-                elements.dropzone.addEventListener('dragleave', handleDragLeave);
-                elements.dropzone.addEventListener('drop', handleDrop);
-                elements.dropzone.addEventListener('click', handleFileSelect);
-            }
-            if (elements.viewPdfBtn) elements.viewPdfBtn.addEventListener('click', togglePdfViewer);
-            if (elements.convertBtn) elements.convertBtn.addEventListener('click', convertPdf);
-            if (elements.resetBtn) elements.resetBtn.addEventListener('click', resetApplication);
-            if (elements.stopBtn) elements.stopBtn.addEventListener('click', stopConversionProcess);
-            if (elements.copyBtn) elements.copyBtn.addEventListener('click', copyText);
-            if (elements.exportBtn) elements.exportBtn.addEventListener('click', exportText);
-            if (elements.exportDocxBtn) elements.exportDocxBtn.addEventListener('click', exportAsDocx);
-            if (elements.showHistoryBtn) elements.showHistoryBtn.addEventListener('click', toggleHistoryPanel);
-            if (elements.searchText) elements.searchText.addEventListener('input', performSearch);
-            if (elements.clearSearch) elements.clearSearch.addEventListener('click', clearSearch);
-            if (elements.previewBtn) elements.previewBtn.addEventListener('click', showPreview);
-            if (elements.closeModal) elements.closeModal.addEventListener('click', hidePreview);
-            if (elements.recentFilesList) elements.recentFilesList.addEventListener('click', openRecentFile);
-            window.addEventListener('click', e => { if (elements.previewModal && e.target === elements.previewModal) hidePreview(); });
+    // Arrêt / Reset
+    function stopConversionProcess() { stopConversion = true; showMessage('⏹️ Conversion arrêtée', 'info'); if (elements.stopBtn) elements.stopBtn.style.display = 'none'; if (elements.convertBtn) elements.convertBtn.disabled = false; if (elements.loading) elements.loading.style.display = 'none'; }
+    function resetApplication() {
+        stopConversion = true;
+        if (fileURL) { URL.revokeObjectURL(fileURL); fileURL = null; }
+        pdfFile = null;
+        if (elements.dropzone) elements.dropzone.textContent = '📁 Glissez-déposez ou cliquez pour sélectionner un PDF';
+        if (elements.fileInfo) elements.fileInfo.style.display = 'none';
+        if (elements.pdfViewer) { elements.pdfViewer.style.display = 'none'; elements.pdfViewer.src = ''; }
+        if (elements.viewPdfBtn) { elements.viewPdfBtn.style.display = 'none'; elements.viewPdfBtn.innerHTML = '<i class="fas fa-eye"></i> Visualiser'; }
+        if (elements.tabsContainer) { elements.tabsContainer.innerHTML = ''; elements.tabsContainer.style.display = 'none'; }
+        if (elements.tabContentsContainer) { elements.tabContentsContainer.innerHTML = ''; elements.tabContentsContainer.style.display = 'none'; }
+        totalPages = 0; conversionErrors = [];
+        showMessage('', 'info');
+        if (elements.pageCount) elements.pageCount.textContent = '';
+        if (elements.progress) elements.progress.style.width = '0%';
+        if (elements.progressBar) elements.progressBar.style.display = 'none';
+        [elements.copyBtn, elements.exportBtn, elements.exportDocxBtn, elements.searchContainer, elements.editorToolbar, elements.stopBtn].forEach(el => { if (el) el.style.display = 'none'; });
+        if (elements.convertBtn) elements.convertBtn.disabled = false;
+        if (elements.loading) elements.loading.style.display = 'none';
+        if (elements.showHistoryBtn) elements.showHistoryBtn.style.display = 'none';
+        if (elements.recentFilesPanel) elements.recentFilesPanel.style.display = 'none';
+        clearSearch();
+    }
+
+    // Initialisation des événements
+    function setupEventListeners() {
+        if (elements.dropzone) {
+            elements.dropzone.addEventListener('dragover', handleDragOver);
+            elements.dropzone.addEventListener('dragleave', handleDragLeave);
+            elements.dropzone.addEventListener('drop', handleDrop);
+            elements.dropzone.addEventListener('click', handleFileSelect);
         }
+        if (elements.viewPdfBtn) elements.viewPdfBtn.addEventListener('click', togglePdfViewer);
+        if (elements.convertBtn) elements.convertBtn.addEventListener('click', convertPdf);
+        if (elements.resetBtn) elements.resetBtn.addEventListener('click', resetApplication);
+        if (elements.stopBtn) elements.stopBtn.addEventListener('click', stopConversionProcess);
+        if (elements.copyBtn) elements.copyBtn.addEventListener('click', copyText);
+        if (elements.exportBtn) elements.exportBtn.addEventListener('click', exportText);
+        if (elements.exportDocxBtn) elements.exportDocxBtn.addEventListener('click', exportAsDocx);
+        if (elements.showHistoryBtn) elements.showHistoryBtn.addEventListener('click', toggleHistoryPanel);
+        if (elements.searchText) elements.searchText.addEventListener('input', performSearch);
+        if (elements.clearSearch) elements.clearSearch.addEventListener('click', clearSearch);
+        if (elements.previewBtn) elements.previewBtn.addEventListener('click', showPreview);
+        if (elements.closeModal) elements.closeModal.addEventListener('click', hidePreview);
+        if (elements.recentFilesList) elements.recentFilesList.addEventListener('click', openRecentFile);
+        window.addEventListener('click', e => { if (elements.previewModal && e.target === elements.previewModal) hidePreview(); });
+    }
 
-        // Lancement
-        setupEventListeners();
-        resetApplication();
-    });
+    // Lancement final
+    setupEventListeners();
+    resetApplication();
 }
 
 // LANCER LA VÉRIFICATION PREMIUM
