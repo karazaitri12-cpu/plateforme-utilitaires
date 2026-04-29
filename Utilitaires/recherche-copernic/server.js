@@ -7,10 +7,13 @@ const os = require('os');
 const PORT = 3456;
 
 const server = http.createServer((req, res) => {
-    // SÉCURITÉ : Autorise GitHub à parler au PC
+    // =========================================================
+    // LES 4 LAISSEZ-PASSER DE SÉCURITÉ POUR CHROME / EDGE
+    // =========================================================
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Private-Network', 'true'); // <-- LA CLÉ EST ICI !
 
     if (req.method === 'OPTIONS') {
         res.writeHead(200);
@@ -57,11 +60,11 @@ const server = http.createServer((req, res) => {
     res.end('Not Found');
 });
 
-// IMPORTANT : On force l'écoute sur 127.0.0.1 pour être en phase avec le site web
 server.listen(PORT, '127.0.0.1', () => {
     console.log('\n======================================================');
     console.log(' 🔌 Moteur de recherche Copernic activé !');
     console.log(` 👤 Utilisateur détecté : ${os.userInfo().username}`);
+    console.log(' 🔓 Sécurité PNA : Désactivée (Liaison GitHub autorisée)');
     console.log(' 🌐 Allez sur votre site Web pour faire vos recherches.');
     console.log('======================================================\n');
     console.log('Laissez cette fenêtre ouverte.\n');
