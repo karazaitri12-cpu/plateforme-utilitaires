@@ -7,14 +7,18 @@ const os = require('os');
 const PORT = 3456;
 
 const server = http.createServer((req, res) => {
-    // SÉCURITÉ : Autorise GitHub à parler au PC
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    
+    // 🛡️ CORRECTION SÉCURITÉ (PNA) : La poignée de main parfaite pour GitHub Pages
+    // Au lieu de dire "*", on renvoie exactement l'adresse du site qui nous appelle
+    const origin = req.headers.origin || '*';
+    res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Access-Control-Request-Private-Network');
     res.setHeader('Access-Control-Allow-Private-Network', 'true');
 
+    // Réponse immédiate pour la vérification de sécurité (Preflight Chrome)
     if (req.method === 'OPTIONS') {
-        res.writeHead(200);
+        res.writeHead(204); // 204 (No Content) est le code standard pour OPTIONS
         return res.end();
     }
 
@@ -63,8 +67,8 @@ server.listen(PORT, '127.0.0.1', () => {
     console.log('\n======================================================');
     console.log(' 🔌 Moteur de recherche Copernic activé !');
     console.log(` 👤 Utilisateur détecté : ${os.userInfo().username}`);
-    console.log(' 🔓 Sécurité PNA : Désactivée (Liaison GitHub autorisée)');
+    console.log(' 🔓 Sécurité PNA : Désactivée (Liaison GitHub Parfaite)');
     console.log(' 🌐 Allez sur votre site Web pour faire vos recherches.');
     console.log('======================================================\n');
-    console.log('Laissez cette fenêtre ouverte.\n');
+    console.log('Laissez cette fenêtre noire ouverte pour que le site fonctionne.\n');
 });
