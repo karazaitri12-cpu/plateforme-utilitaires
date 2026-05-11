@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fusion AVI — Générateur de commande FFmpeg</title>
+<title>Fusion Vidéo — Générateur de commande FFmpeg</title>
 <style>
 /* ============================================================
-   FUSION AVI v2 — Outil local PC
+   FUSION VIDEO v3 — AVI + MP4 — Outil local PC
    ============================================================ */
 
 :root {
@@ -26,6 +26,9 @@
   --danger-bg:  #fee2e2;
   --mono:       'Courier New', Courier, monospace;
   --radius:     6px;
+  --mixed-bg:   #fdf2f8;
+  --mixed:      #86198f;
+  --mixed-border: #e879f9;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -57,6 +60,24 @@ header p.sub {
   font-size: 12.5px;
   color: var(--muted);
 }
+
+/* ── Badges format ── */
+.fmt-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.fmt-avi  { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
+.fmt-mp4  { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+.fmt-mixed { background: var(--mixed-bg); color: var(--mixed); border: 1px solid var(--mixed-border); }
 
 /* ── Carte principale ── */
 .card {
@@ -122,11 +143,22 @@ header p.sub {
   margin-left: auto;
 }
 
-/* ── Alerte espaces ── */
-#spaces-alert {
-  display: none;
+/* ── Alertes ── */
+.alert {
+  display: flex;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  font-size: 12.5px;
+  line-height: 1.5;
   margin-top: 12px;
 }
+.alert.warn    { background: var(--warn-bg);    color: var(--warn);    border: 1px solid #fcd34d; }
+.alert.info    { background: var(--accent-lt);  color: var(--accent);  border: 1px solid #93c5fd; }
+.alert.error   { background: var(--danger-bg);  color: var(--danger);  border: 1px solid #fca5a5; }
+.alert.success { background: var(--success-bg); color: var(--success); border: 1px solid #86efac; }
+.alert.mixed   { background: var(--mixed-bg);   color: var(--mixed);   border: 1px solid var(--mixed-border); }
+.alert-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
 
 /* ── Liste des fichiers ── */
 #file-list {
@@ -146,11 +178,10 @@ header p.sub {
   cursor: grab;
   transition: border-color 0.15s;
 }
-.file-item.has-space {
-  border-color: #fcd34d;
-  background: #fffbeb;
-}
-.file-item.dragging { opacity: 0.4; }
+.file-item.has-space  { border-color: #fcd34d; background: #fffbeb; }
+.file-item.is-mp4     { border-left: 3px solid #6ee7b7; }
+.file-item.is-avi     { border-left: 3px solid #93c5fd; }
+.file-item.dragging   { opacity: 0.4; }
 .file-item.drag-target { border-color: var(--accent); background: var(--accent-lt); }
 
 .drag-handle {
@@ -211,6 +242,22 @@ header p.sub {
 }
 .btn-remove:hover { color: var(--danger); }
 
+/* ── Résumé formats ── */
+#format-summary {
+  display: none;
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 12.5px;
+  display: none;
+  gap: 14px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+#format-summary span { color: var(--muted); }
+
 /* ── Options ── */
 .options-grid {
   display: grid;
@@ -246,7 +293,6 @@ header p.sub {
 
 .field-full { grid-column: 1 / -1; }
 
-/* ── Hint info ── */
 .hint {
   font-size: 11.5px;
   color: var(--muted);
@@ -274,7 +320,6 @@ header p.sub {
   background: #9ca3af;
   cursor: not-allowed;
 }
-
 .btn-secondary {
   display: inline-flex;
   align-items: center;
@@ -312,7 +357,7 @@ header p.sub {
   flex-wrap: wrap;
 }
 
-/* ── Résultat commande ── */
+/* ── Résultat ── */
 #result-section { display: none; }
 
 .cmd-header {
@@ -332,7 +377,6 @@ header p.sub {
   color: var(--muted);
 }
 
-/* ── Blocs CMD ── */
 .cmd-block {
   background: #1e2432;
   color: #a8d8a8;
@@ -377,23 +421,18 @@ header p.sub {
   background: var(--warn-bg);
   color: var(--warn);
 }
-
-/* ── Alerte / Info ── */
-.alert {
-  display: flex;
-  gap: 10px;
-  padding: 12px 14px;
-  border-radius: var(--radius);
-  font-size: 12.5px;
-  line-height: 1.5;
+.badge-mixed {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: var(--mixed-bg);
+  color: var(--mixed);
 }
-.alert.warn  { background: var(--warn-bg);    color: var(--warn);    border: 1px solid #fcd34d; }
-.alert.info  { background: var(--accent-lt);  color: var(--accent);  border: 1px solid #93c5fd; }
-.alert.error { background: var(--danger-bg);  color: var(--danger);  border: 1px solid #fca5a5; }
-.alert.success { background: var(--success-bg); color: var(--success); border: 1px solid #86efac; }
-.alert-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
 
-/* ── Guide steps ── */
 .guide-step {
   display: flex;
   gap: 14px;
@@ -442,7 +481,7 @@ header p.sub {
   margin: 0 auto 20px;
 }
 
-/* ── Scrollbar hide ── */
+/* ── Scrollbar hide (style App native) ── */
 html { scrollbar-width: none; }
 body { -ms-overflow-style: none; overflow-y: auto; }
 ::-webkit-scrollbar { display: none; }
@@ -451,28 +490,48 @@ body { -ms-overflow-style: none; overflow-y: auto; }
 <body>
 
 <header>
-  <h1>&#9654;&#65038; Fusion AVI — Générateur de commande FFmpeg</h1>
-  <p class="sub">Outil local &bull; Concaténation de séquences vidéo AVI sans réencodage &bull; Génère la commande à exécuter dans le terminal</p>
+  <h1>&#9654;&#65038; Fusion Vidéo AVI / MP4 — Générateur de commande FFmpeg</h1>
+  <p class="sub">Outil local &bull; Concaténation sans réencodage (AVI ou MP4) &bull; Détection automatique du format &bull; Génère la commande à exécuter dans le terminal</p>
 </header>
 
 <!-- Étape 1 : Fichiers -->
 <div class="card">
-  <h2>1 — Séquences AVI à fusionner</h2>
+  <h2>1 — Séquences vidéo à fusionner</h2>
 
-  <div id="drop-zone" role="button" tabindex="0" aria-label="Zone de dépôt de fichiers AVI">
+  <div id="drop-zone" role="button" tabindex="0" aria-label="Zone de dépôt de fichiers AVI ou MP4">
     <span class="icon">&#128250;</span>
-    <p><strong>Glissez-déposez vos fichiers AVI ici</strong></p>
+    <p><strong>Glissez-déposez vos fichiers AVI ou MP4 ici</strong></p>
     <p>ou cliquez pour sélectionner</p>
-    <small>Tri alphabétique automatique au dépôt &bull; Réorganisable ensuite par glisser-déposer</small>
+    <small>Formats acceptés : .avi &bull; .mp4 &bull; Tri alphabétique automatique &bull; Réorganisable par glisser-déposer</small>
   </div>
-  <input type="file" id="file-input" accept=".avi,video/avi,video/x-msvideo" multiple>
+  <input type="file" id="file-input" accept=".avi,.mp4,video/avi,video/x-msvideo,video/mp4" multiple>
 
-  <!-- Alerte noms avec espaces -->
-  <div id="spaces-alert" class="alert warn">
+  <!-- Résumé formats détectés -->
+  <div id="format-summary" style="display:none; margin-top:12px; padding:10px 14px; background:var(--bg); border:1px solid var(--border); border-radius:var(--radius); font-size:12.5px; display:none; gap:14px; flex-wrap:wrap; align-items:center;">
+    <span>Formats détectés :</span>
+    <span id="fmt-avi-count" style="display:none;"></span>
+    <span id="fmt-mp4-count" style="display:none;"></span>
+    <span id="fmt-dominant" style="display:none;"></span>
+  </div>
+
+  <!-- Alerte mélange AVI + MP4 -->
+  <div id="mixed-alert" class="alert mixed" style="display:none;">
     <span class="alert-icon">&#9888;&#65039;</span>
     <div>
-      <strong>Noms avec espaces détectés</strong> — les fichiers marqués <span style="background:#fef3c7;color:#92400e;border:1px solid #fcd34d;font-size:10px;font-weight:700;padding:1px 5px;border-radius:10px;">ESPACE</span> risquent de faire échouer FFmpeg si vous utilisez une méthode de chemin direct.
-      La méthode recommandée est le fichier <code>concat.txt</code> avec des guillemets simples — la commande générée en tient compte automatiquement.
+      <strong>Formats hétérogènes (AVI + MP4 mélangés) — Réencodage obligatoire.</strong><br>
+      La fusion <em>sans réencodage</em> («copy») est impossible entre des conteneurs différents.
+      Deux solutions : (1) convertissez tous les fichiers dans le même format avant de fusionner,
+      ou (2) utilisez la méthode avec <strong>réencodage</strong> (option sélectionnable ci-dessous).
+      Le mode sera automatiquement forcé en réencodage si vous générez avec des formats mélangés.
+    </div>
+  </div>
+
+  <!-- Alerte espaces -->
+  <div id="spaces-alert" class="alert warn" style="display:none;">
+    <span class="alert-icon">&#9888;&#65039;</span>
+    <div>
+      <strong>Noms avec espaces détectés</strong> — les fichiers marqués <span style="background:#fef3c7;color:#92400e;border:1px solid #fcd34d;font-size:10px;font-weight:700;padding:1px 5px;border-radius:10px;">ESPACE</span> risquent de faire échouer FFmpeg en chemin direct.
+      La méthode <code>concat.txt</code> avec guillemets simples gère cela automatiquement.
     </div>
   </div>
 
@@ -493,17 +552,18 @@ body { -ms-overflow-style: none; overflow-y: auto; }
 
     <div class="field">
       <label>Nom du fichier de sortie</label>
-      <input type="text" id="output-name" value="fusion_finale.avi" placeholder="nom_sortie.avi">
-      <p class="hint">Extension .avi conservée automatiquement</p>
+      <input type="text" id="output-name" value="fusion_finale.mp4" placeholder="nom_sortie.mp4">
+      <p class="hint" id="output-name-hint">Mis à jour automatiquement selon le format déposé</p>
     </div>
 
     <div class="field">
       <label>Méthode de fusion</label>
       <select id="method">
         <option value="copy" selected>Sans réencodage (copy) — recommandé</option>
-        <option value="reencode">Avec réencodage (MPEG-4 + MP3)</option>
+        <option value="reencode-mp4">Réencodage MP4 (H.264 + AAC)</option>
+        <option value="reencode-avi">Réencodage AVI (MPEG-4 + MP3)</option>
       </select>
-      <p class="hint">«&nbsp;copy&nbsp;» est instantané si les flux sont identiques</p>
+      <p class="hint" id="method-hint">«copy» est instantané si les flux sont identiques et de même format</p>
     </div>
 
     <div class="field field-full">
@@ -512,6 +572,12 @@ body { -ms-overflow-style: none; overflow-y: auto; }
       <p class="hint">Laissez vide pour utiliser le dossier courant du terminal</p>
     </div>
 
+  </div>
+
+  <!-- Alerte méthode incompatible -->
+  <div id="method-warn" class="alert warn" style="display:none; margin-top:14px;">
+    <span class="alert-icon">&#9888;&#65039;</span>
+    <div id="method-warn-text"></div>
   </div>
 </div>
 
@@ -523,7 +589,7 @@ body { -ms-overflow-style: none; overflow-y: auto; }
     <span class="alert-icon">&#9888;&#65039;</span>
     <div>
       <strong>Pré-requis :</strong> FFmpeg doit être installé sur votre PC.
-      Téléchargement gratuit : <strong>ffmpeg.org</strong> — ajoutez-le au PATH système pour l'utiliser depuis n'importe quel dossier.
+      Téléchargement gratuit : <strong>ffmpeg.org</strong> — ajoutez-le au PATH système pour l’utiliser depuis n’importe quel dossier.
     </div>
   </div>
 
@@ -543,6 +609,12 @@ body { -ms-overflow-style: none; overflow-y: auto; }
     <div class="cmd-header">
       <h2>Commandes générées</h2>
       <span id="result-badge" class="badge-ok">&#10003; Prêtes à coller</span>
+    </div>
+
+    <!-- Bandeau contexte format -->
+    <div id="result-format-ctx" class="alert info" style="margin-bottom:14px; display:none;">
+      <span class="alert-icon">&#8505;&#65039;</span>
+      <span id="result-format-ctx-text"></span>
     </div>
 
     <!-- ÉTAPE A : Créer concat.txt -->
@@ -572,7 +644,7 @@ body { -ms-overflow-style: none; overflow-y: auto; }
       </div>
     </div>
 
-    <!-- ÉTAPE C : Contenu concat.txt (aperçu) -->
+    <!-- ÉTAPE C : Aperçu concat.txt -->
     <div class="cmd-section">
       <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--accent);margin-bottom:10px;">
         &#9314; Contenu attendu du concat.txt (aperçu)
@@ -590,7 +662,7 @@ body { -ms-overflow-style: none; overflow-y: auto; }
     <p id="copy-feedback" style="font-size:12px;color:var(--success);margin-top:10px;display:none;">&#10003; Copié dans le presse-papiers</p>
   </div>
 
-  <!-- Instructions d'exécution -->
+  <!-- Guide -->
   <div class="card">
     <h2>4 — Guide complet Windows (A à Z)</h2>
 
@@ -613,8 +685,7 @@ body { -ms-overflow-style: none; overflow-y: auto; }
       <span class="gs-num">2</span>
       <div class="gs-body">
         <p class="gs-title">Installer dans C:\ffmpeg</p>
-        <p>Décompressez l'archive. Vous obtenez un dossier nommé <code>ffmpeg-8.x.x-essentials_build</code>.</p>
-        <p>Renommez-le en <code>ffmpeg</code> et déplacez-le à la racine du disque C.</p>
+        <p>Décompressez l’archive. Renommez le dossier en <code>ffmpeg</code> et déplacez-le à la racine de C.</p>
         <p>Le chemin final doit être : <code>C:\ffmpeg\bin\ffmpeg.exe</code></p>
       </div>
     </div>
@@ -624,20 +695,15 @@ body { -ms-overflow-style: none; overflow-y: auto; }
       <div class="gs-body">
         <p class="gs-title">Ajouter C:\ffmpeg\bin au PATH Windows</p>
         <p>Appuyez sur <code>Win + R</code>, tapez <code>SystemPropertiesAdvanced</code> et appuyez sur Entrée.</p>
-        <p>Cliquez sur le bouton <strong>«&nbsp;Variables d'environnement…&nbsp;»</strong> en bas de la fenêtre.</p>
-        <p>Dans la section <strong>«&nbsp;Variables système&nbsp;»</strong> (partie basse), double-cliquez sur <strong>Path</strong>.</p>
-        <p>Cliquez sur <strong>«&nbsp;Nouveau&nbsp;»</strong> et collez exactement : <code>C:\ffmpeg\bin</code></p>
-        <p>Cliquez <strong>OK</strong> sur toutes les fenêtres (3 fois de suite).</p>
+        <p>Cliquez sur <strong>«&nbsp;Variables d’environnement…&nbsp;»</strong> → dans la section <strong>Variables système</strong>, double-cliquez sur <strong>Path</strong> → <strong>Nouveau</strong> → collez <code>C:\ffmpeg\bin</code> → OK (3 fois).</p>
       </div>
     </div>
 
     <div class="guide-step" style="margin-bottom:0;">
       <span class="gs-num">4</span>
       <div class="gs-body">
-        <p class="gs-title">Vérifier l'installation</p>
-        <p>Ouvrez un nouveau CMD : <code>Win + R</code> → tapez <code>cmd</code> → Entrée.</p>
-        <p>Tapez : <code>ffmpeg -version</code></p>
-        <p>Si vous voyez <code>ffmpeg version 8.x.x</code>, FFmpeg est prêt.</p>
+        <p class="gs-title">Vérifier l’installation</p>
+        <p>Ouvrez un nouveau CMD : <code>Win + R</code> → <code>cmd</code> → tapez <code>ffmpeg -version</code>. Vous devez voir le numéro de version.</p>
       </div>
     </div>
 
@@ -649,8 +715,7 @@ body { -ms-overflow-style: none; overflow-y: auto; }
       <span class="gs-num">1</span>
       <div class="gs-body">
         <p class="gs-title">Préparer les fichiers</p>
-        <p>Placez toutes vos séquences AVI dans un même dossier.
-        Si vos fichiers ont des espaces dans leurs noms (ex : <code>echographie abdomen.avi</code>), cela fonctionne — la commande CMD générée les prend en charge avec des guillemets.</p>
+        <p>Placez vos séquences dans un même dossier. <strong>Ne mélangez pas AVI et MP4</strong> si vous souhaitez utiliser le mode «copy» (sans réencodage). Si mélange inévitable, utilisez le mode réencodage MP4 (H.264).</p>
       </div>
     </div>
 
@@ -658,8 +723,7 @@ body { -ms-overflow-style: none; overflow-y: auto; }
       <span class="gs-num">2</span>
       <div class="gs-body">
         <p class="gs-title">Générer les commandes dans cet outil</p>
-        <p>Glissez-déposez vos fichiers AVI. Ils sont triés alphabétiquement automatiquement — réorganisez si besoin.
-        Vérifiez l'ordre final. Cliquez sur <strong>«&nbsp;Générer les commandes FFmpeg&nbsp;»</strong>.</p>
+        <p>Glissez-déposez vos fichiers. Le format est détecté automatiquement. Cliquez sur <strong>«&nbsp;Générer les commandes FFmpeg&nbsp;»</strong>.</p>
       </div>
     </div>
 
@@ -667,28 +731,24 @@ body { -ms-overflow-style: none; overflow-y: auto; }
       <span class="gs-num">3</span>
       <div class="gs-body">
         <p class="gs-title">Naviguer vers le dossier vidéos dans CMD</p>
-        <p>Ouvrez le CMD (<code>Win + R</code> → <code>cmd</code>). Tapez :</p>
-        <p><code>cd C:\Users\VotreNom\Videos</code></p>
-        <p>Ou : dans l'Explorateur Windows, ouvrez votre dossier vidéos, cliquez dans la barre d'adresse, tapez <code>cmd</code> et appuyez sur Entrée — le CMD s'ouvre directement dans ce dossier.</p>
+        <p>Dans l’Explorateur Windows, ouvrez votre dossier vidéos, cliquez dans la barre d’adresse, tapez <code>cmd</code> et appuyez sur Entrée.</p>
       </div>
     </div>
 
     <div class="guide-step">
       <span class="gs-num">4</span>
       <div class="gs-body">
-        <p class="gs-title">Créer le concat.txt (commande &#9312;)</p>
-        <p class="gs-warn">&#9888; Cette commande est générée automatiquement avec vos vrais noms de fichiers — plus besoin de les retaper manuellement.</p>
-        <p>Copiez la commande de l'étape ① (bouton orange), collez-la dans le CMD, appuyez sur Entrée.</p>
-        <p>Vérifiez avec <code>type concat.txt</code> — chaque ligne doit afficher <code>file 'nom.avi'</code>.</p>
+        <p class="gs-title">Créer le concat.txt (commande ①)</p>
+        <p class="gs-warn">&#9888; Commande générée automatiquement avec vos vrais noms de fichiers.</p>
+        <p>Copiez et collez dans le CMD. Vérifiez avec <code>type concat.txt</code>.</p>
       </div>
     </div>
 
     <div class="guide-step">
       <span class="gs-num">5</span>
       <div class="gs-body">
-        <p class="gs-title">Lancer la fusion (commande &#9313;)</p>
-        <p>Copiez la commande FFmpeg (bouton vert de l'étape ②), collez-la dans le CMD et appuyez sur Entrée.</p>
-        <p>FFmpeg affiche la progression. La fusion sans réencodage est quasi-instantanée.</p>
+        <p class="gs-title">Lancer la fusion (commande ②)</p>
+        <p>Copiez la commande FFmpeg et collez-la dans le CMD. La fusion sans réencodage est quasi-instantanée.</p>
       </div>
     </div>
 
@@ -696,7 +756,7 @@ body { -ms-overflow-style: none; overflow-y: auto; }
       <span class="gs-num">6</span>
       <div class="gs-body">
         <p class="gs-title">Vérifier le résultat</p>
-        <p>Le fichier fusionné (<code>fusion_finale.avi</code> ou le nom choisi) apparaît dans votre dossier. Ouvrez-le avec VLC ou Windows Media Player.</p>
+        <p>Le fichier fusionné apparaît dans votre dossier. Ouvrez-le avec VLC pour vérifier.</p>
       </div>
     </div>
   </div>
@@ -707,10 +767,11 @@ body { -ms-overflow-style: none; overflow-y: auto; }
     <div class="alert info">
       <span class="alert-icon">&#8505;&#65039;</span>
       <div>
-        <p style="margin-bottom:6px;"><strong>Sans réencodage (copy) :</strong> fusion quasi-instantanée, zéro perte de qualité. Fonctionne si toutes les séquences ont le même codec, la même résolution et la même fréquence d'images — cas typique des séquences issues du même appareil.</p>
-        <p style="margin-bottom:6px;"><strong>Avec réencodage (MPEG-4) :</strong> plus lent, mais fusionne des séquences hétérogènes. Légère perte de qualité due à la recompression.</p>
-        <p style="margin-bottom:6px;"><strong>Noms avec espaces :</strong> la méthode concat.txt avec guillemets simples les gère correctement. La commande CMD générée par cet outil utilise systématiquement les guillemets dans le <code>echo file '...'</code> — compatible FFmpeg.</p>
-        <p style="margin-bottom:0;"><strong>Erreur «&nbsp;unknown keyword file&nbsp;» :</strong> le concat.txt a été créé avec Notepad (BOM invisible). Toujours utiliser la méthode CMD avec <code>echo</code> générée par cet outil.</p>
+        <p style="margin-bottom:6px;"><strong>Sans réencodage (copy) :</strong> quasi-instantané, zéro perte de qualité. Nécessite des séquences du même format, même codec, même résolution et même fréquence d’images.</p>
+        <p style="margin-bottom:6px;"><strong>Réencodage MP4 (H.264 + AAC) :</strong> format universel, compatible tous lecteurs. Recommandé pour les mélanges ou si le «copy» génère des artefacts.</p>
+        <p style="margin-bottom:6px;"><strong>Réencodage AVI (MPEG-4 + MP3) :</strong> préserver le conteneur AVI en cas de contrainte spécifique (logiciel legacy, exportation particulière).</p>
+        <p style="margin-bottom:6px;"><strong>Mélange AVI + MP4 :</strong> FFmpeg ne peut pas concaténer des conteneurs différents en mode copy. Le réencodage MP4 est la solution universelle.</p>
+        <p style="margin-bottom:0;"><strong>Erreur «&nbsp;unknown keyword file&nbsp;» :</strong> le concat.txt a été créé avec Notepad (BOM). Toujours utiliser la méthode CMD avec <code>echo</code> générée par cet outil.</p>
       </div>
     </div>
   </div>
@@ -731,6 +792,9 @@ body { -ms-overflow-style: none; overflow-y: auto; }
   var listActions     = document.getElementById('list-actions');
   var listCount       = document.getElementById('list-count');
   var spacesAlert     = document.getElementById('spaces-alert');
+  var mixedAlert      = document.getElementById('mixed-alert');
+  var methodWarn      = document.getElementById('method-warn');
+  var methodWarnText  = document.getElementById('method-warn-text');
   var btnGenerate     = document.getElementById('btn-generate');
   var btnReset        = document.getElementById('btn-reset');
   var btnSortAlpha    = document.getElementById('btn-sort-alpha');
@@ -747,6 +811,31 @@ body { -ms-overflow-style: none; overflow-y: auto; }
   var outputDir       = document.getElementById('output-dir');
   var methodSel       = document.getElementById('method');
   var resultBadge     = document.getElementById('result-badge');
+  var resultFmtCtx    = document.getElementById('result-format-ctx');
+  var resultFmtCtxTxt = document.getElementById('result-format-ctx-text');
+
+  /* ── Utilitaires format ── */
+  function getExt(filename) {
+    return filename.split('.').pop().toLowerCase();
+  }
+  function countFormats() {
+    var avi = 0, mp4 = 0;
+    files.forEach(function (f) {
+      if (getExt(f.name) === 'avi') avi++;
+      else mp4++;
+    });
+    return { avi: avi, mp4: mp4 };
+  }
+  function isMixed() {
+    var c = countFormats();
+    return c.avi > 0 && c.mp4 > 0;
+  }
+  function dominantExt() {
+    var c = countFormats();
+    if (c.avi === 0) return 'mp4';
+    if (c.mp4 === 0) return 'avi';
+    return c.mp4 >= c.avi ? 'mp4' : 'avi'; // en cas de mélange, MP4 prioritaire
+  }
 
   /* ── Drop zone ── */
   dropZone.addEventListener('click', function () { fileInput.click(); });
@@ -760,28 +849,66 @@ body { -ms-overflow-style: none; overflow-y: auto; }
   });
   fileInput.addEventListener('change', function () { addFiles(fileInput.files); fileInput.value = ''; });
 
-  /* ── Ajout + tri alphabétique automatique ── */
+  /* ── Ajout + tri alphabétique ── */
   function addFiles(fileObjs) {
     var newEntries = [];
     for (var i = 0; i < fileObjs.length; i++) {
       var f = fileObjs[i];
-      var ext = f.name.split('.').pop().toLowerCase();
-      if (ext !== 'avi') continue;
-      // dédoublonnage
+      var ext = getExt(f.name);
+      if (ext !== 'avi' && ext !== 'mp4') continue;
       var exists = false;
       for (var j = 0; j < files.length; j++) {
         if (files[j].name === f.name) { exists = true; break; }
       }
-      if (!exists) newEntries.push({ name: f.name, size: f.size });
+      if (!exists) newEntries.push({ name: f.name, size: f.size, ext: ext });
     }
     if (newEntries.length === 0) return;
-
-    // ajout puis tri alphabétique global
     files = files.concat(newEntries);
     sortFiles('alpha');
+    updateOutputName();
     renderList();
     updateBtn();
+    updateMethodWarning();
   }
+
+  /* ── Mise à jour automatique nom de sortie ── */
+  function updateOutputName() {
+    if (files.length === 0) return;
+    var ext = dominantExt();
+    var current = outputName.value.trim();
+    // Remplacer uniquement l'extension, pas le nom
+    if (current.match(/\.(avi|mp4)$/i)) {
+      outputName.value = current.replace(/\.(avi|mp4)$/i, '.' + ext);
+    } else {
+      outputName.value = 'fusion_finale.' + ext;
+    }
+  }
+
+  /* ── Avertissement méthode ── */
+  function updateMethodWarning() {
+    if (files.length === 0) {
+      methodWarn.style.display = 'none';
+      mixedAlert.style.display = 'none';
+      return;
+    }
+    var mixed = isMixed();
+    var method = methodSel.value;
+    mixedAlert.style.display = mixed ? 'flex' : 'none';
+
+    if (mixed && method === 'copy') {
+      methodWarnText.innerHTML = '<strong>Incompatibilité détectée :</strong> le mode «copy» ne peut pas mélanger AVI et MP4. La commande générée utilisera automatiquement le <strong>réencodage MP4 (H.264 + AAC)</strong>.';
+      methodWarn.style.display = 'flex';
+    } else if (!mixed && method !== 'copy') {
+      var c = countFormats();
+      var fmt = c.avi > 0 ? 'AVI' : 'MP4';
+      methodWarnText.innerHTML = 'Vous avez sélectionné le réencodage alors que tous vos fichiers sont en <strong>' + fmt + '</strong>. Le mode «copy» serait plus rapide et sans perte de qualité.';
+      methodWarn.style.display = 'flex';
+    } else {
+      methodWarn.style.display = 'none';
+    }
+  }
+
+  methodSel.addEventListener('change', updateMethodWarning);
 
   /* ── Tri ── */
   function sortFiles(dir) {
@@ -792,11 +919,9 @@ body { -ms-overflow-style: none; overflow-y: auto; }
       return na > nb ? -1 : na < nb ? 1 : 0;
     });
   }
-
   btnSortAlpha.addEventListener('click', function () { sortFiles('alpha'); renderList(); });
   btnSortRev.addEventListener('click',   function () { sortFiles('rev');   renderList(); });
 
-  /* ── Détection espaces ── */
   function hasSpaceFiles() {
     return files.some(function (f) { return f.name.indexOf(' ') !== -1; });
   }
@@ -805,37 +930,30 @@ body { -ms-overflow-style: none; overflow-y: auto; }
   function renderList() {
     fileList.innerHTML = '';
 
-    // alerte espaces
-    if (files.length > 0 && hasSpaceFiles()) {
-      spacesAlert.style.display = 'flex';
-    } else {
-      spacesAlert.style.display = 'none';
-    }
-
-    // barre d'actions
+    spacesAlert.style.display = (files.length > 0 && hasSpaceFiles()) ? 'flex' : 'none';
+    listActions.style.display = files.length > 0 ? 'flex' : 'none';
     if (files.length > 0) {
-      listActions.style.display = 'flex';
       listCount.textContent = files.length + (files.length > 1 ? ' fichiers' : ' fichier');
-    } else {
-      listActions.style.display = 'none';
     }
 
     files.forEach(function (f, idx) {
       var hasSpace = f.name.indexOf(' ') !== -1;
+      var ext = getExt(f.name);
       var item = document.createElement('div');
-      item.className = 'file-item' + (hasSpace ? ' has-space' : '');
+      item.className = 'file-item is-' + ext + (hasSpace ? ' has-space' : '');
       item.draggable = true;
       item.dataset.index = idx;
 
       item.innerHTML =
-        '<span class="drag-handle" title="R\u00e9organiser">\u2630</span>' +
+        '<span class="drag-handle" title="Réorganiser">☰</span>' +
         '<span class="file-num">' + (idx + 1) + '</span>' +
+        '<span class="fmt-badge fmt-' + ext + '">' + ext.toUpperCase() + '</span>' +
         '<span class="file-name" title="' + escHtml(f.name) + '">' + escHtml(f.name) + '</span>' +
         (hasSpace ? '<span class="space-badge">ESPACE</span>' : '') +
         '<span class="file-size">' + fmtSize(f.size) + '</span>' +
-        '<button class="btn-remove" data-idx="' + idx + '" title="Retirer">\u00d7</button>';
+        '<button class="btn-remove" data-idx="' + idx + '" title="Retirer">×</button>';
 
-      /* Drag & drop réordonner */
+      /* Drag & drop */
       item.addEventListener('dragstart', function (e) {
         dragSrcIndex = +this.dataset.index;
         this.classList.add('dragging');
@@ -859,13 +977,16 @@ body { -ms-overflow-style: none; overflow-y: auto; }
         files.splice(targetIndex, 0, moved);
         dragSrcIndex = null;
         renderList();
+        updateMethodWarning();
       });
 
       /* Supprimer */
       item.querySelector('.btn-remove').addEventListener('click', function () {
         files.splice(+this.dataset.idx, 1);
+        updateOutputName();
         renderList();
         updateBtn();
+        updateMethodWarning();
         resultSec.style.display = 'none';
       });
 
@@ -877,58 +998,78 @@ body { -ms-overflow-style: none; overflow-y: auto; }
     btnGenerate.disabled = files.length < 2;
   }
 
-  /* ── Génération des commandes ── */
+  /* ── Génération ── */
   btnGenerate.addEventListener('click', function () {
     if (files.length < 2) return;
 
+    var mixed   = isMixed();
     var method  = methodSel.value;
-    var outName = sanitizeFilename(outputName.value.trim() || 'fusion_finale.avi');
-    if (!outName.toLowerCase().endsWith('.avi')) outName += '.avi';
 
-    var dirRaw  = outputDir.value.trim();
-    var sep     = (dirRaw && dirRaw.indexOf('\\') !== -1) ? '\\' : '/';
+    // Si mélange + copy : forcer réencodage MP4
+    if (mixed && method === 'copy') method = 'reencode-mp4';
+
+    var outName = sanitizeFilename(outputName.value.trim() || ('fusion_finale.' + dominantExt()));
+    // Sécurité extension selon méthode
+    if (method === 'reencode-avi') {
+      outName = outName.replace(/\.(mp4|avi)$/i, '') + '.avi';
+    } else {
+      outName = outName.replace(/\.(mp4|avi)$/i, '') + '.mp4';
+      // Sauf si copy et tous AVI
+      if (method === 'copy' && !mixed && countFormats().avi > 0) {
+        outName = outName.replace(/\.mp4$/i, '.avi');
+      }
+    }
+
+    var dirRaw = outputDir.value.trim();
+    var sep    = (dirRaw && dirRaw.indexOf('\\') !== -1) ? '\\' : '/';
     var outPath = dirRaw
       ? (dirRaw.replace(/[\/\\]$/, '') + sep + outName)
       : outName;
 
-    /* ── 1. Commande CMD pour créer concat.txt ── */
-    // Syntaxe Windows CMD : (echo file 'f1.avi' & echo file 'f2.avi') > concat.txt
-    // Les guillemets simples autour du nom gèrent les espaces côté FFmpeg
+    /* Commande concat.txt */
     var echoParts = files.map(function (f) {
-      // On échappe les apostrophes éventuelles dans le nom de fichier
       var safeName = f.name.replace(/'/g, "''");
       return "echo file '" + safeName + "'";
     });
-    var concatCreateCmd;
-    if (echoParts.length === 1) {
-      concatCreateCmd = echoParts[0] + ' > concat.txt';
-    } else {
-      concatCreateCmd = '(' + echoParts.join(' & ') + ') > concat.txt';
-    }
+    var concatCreateCmd = echoParts.length === 1
+      ? echoParts[0] + ' > concat.txt'
+      : '(' + echoParts.join(' & ') + ') > concat.txt';
     cmdConcatCreate.textContent = concatCreateCmd;
 
-    /* ── 2. Commande FFmpeg ── */
+    /* Commande FFmpeg */
     var ffmpegCmd;
     if (method === 'copy') {
       ffmpegCmd = 'ffmpeg -f concat -safe 0 -i concat.txt -c copy "' + outPath + '"';
+    } else if (method === 'reencode-mp4') {
+      ffmpegCmd = 'ffmpeg -f concat -safe 0 -i concat.txt -vcodec libx264 -crf 23 -preset medium -acodec aac -b:a 192k "' + outPath + '"';
     } else {
+      // reencode-avi
       ffmpegCmd = 'ffmpeg -f concat -safe 0 -i concat.txt -vcodec mpeg4 -acodec mp3 "' + outPath + '"';
     }
     cmdDisplay.textContent = ffmpegCmd;
 
-    /* ── 3. Contenu aperçu concat.txt ── */
+    /* Contenu concat.txt */
     var concatContent = files.map(function (f) {
       return "file '" + f.name.replace(/'/g, "\\'") + "'";
     }).join('\n');
     concatDisp.textContent = concatContent;
 
-    /* ── Badge avertissement si espaces ── */
-    if (hasSpaceFiles()) {
+    /* Badge + contexte format */
+    var c = countFormats();
+    if (mixed) {
+      resultBadge.className = 'badge-mixed';
+      resultBadge.textContent = '⚠ Formats mélangés — réencodage MP4 appliqué';
+      resultFmtCtxTxt.innerHTML = 'Formats détectés : <strong>' + c.avi + ' AVI</strong> + <strong>' + c.mp4 + ' MP4</strong>. Les fichiers hétérogènes sont fusionnés en MP4 via réencodage H.264/AAC.';
+      resultFmtCtx.style.display = 'flex';
+    } else if (hasSpaceFiles()) {
       resultBadge.className = 'badge-warn';
-      resultBadge.textContent = '\u26A0 Noms avec espaces — lisez la note';
+      resultBadge.textContent = '⚠ Noms avec espaces — lisez la note';
+      resultFmtCtx.style.display = 'none';
     } else {
+      var fmt = c.avi > 0 ? 'AVI' : 'MP4';
       resultBadge.className = 'badge-ok';
-      resultBadge.textContent = '\u2713 Pr\u00eates \u00e0 coller';
+      resultBadge.textContent = '✓ ' + files.length + ' fichiers ' + fmt + ' — prêtes à coller';
+      resultFmtCtx.style.display = 'none';
     }
 
     resultSec.style.display = 'block';
@@ -956,7 +1097,6 @@ body { -ms-overflow-style: none; overflow-y: auto; }
       showFeedback();
     }
   }
-
   function showFeedback() {
     copyFeedback.style.display = 'block';
     setTimeout(function () { copyFeedback.style.display = 'none'; }, 2500);
@@ -968,9 +1108,11 @@ body { -ms-overflow-style: none; overflow-y: auto; }
     dragSrcIndex = null;
     renderList();
     updateBtn();
-    resultSec.style.display = 'none';
+    resultSec.style.display  = 'none';
     spacesAlert.style.display = 'none';
-    outputName.value = 'fusion_finale.avi';
+    mixedAlert.style.display  = 'none';
+    methodWarn.style.display  = 'none';
+    outputName.value = 'fusion_finale.mp4';
     outputDir.value  = '';
     methodSel.value  = 'copy';
   });
@@ -979,7 +1121,7 @@ body { -ms-overflow-style: none; overflow-y: auto; }
   function fmtSize(bytes) {
     if (!bytes) return '';
     var mb = bytes / (1024 * 1024);
-    return mb >= 1 ? mb.toFixed(1) + '\u00a0Mo' : (bytes / 1024).toFixed(0) + '\u00a0Ko';
+    return mb >= 1 ? mb.toFixed(1) + ' Mo' : (bytes / 1024).toFixed(0) + ' Ko';
   }
   function escHtml(s) {
     return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
