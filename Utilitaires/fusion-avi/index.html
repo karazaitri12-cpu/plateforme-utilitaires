@@ -3,581 +3,995 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fusion AVI | Dr KARA-ZAITRI</title>
+<title>Fusion AVI — Générateur de commande FFmpeg</title>
 <style>
 /* ============================================================
-   DESIGN INSTITUTIONNEL COMPLET
+   FUSION AVI v2 — Outil local PC
    ============================================================ */
+
 :root {
-  --primary: #1a3a5c;
-  --primary-light: #345a7a;
-  --primary-dark: #0d2538;
-  --text: #37474f;
-  --text-light: #607d8b;
-  --border: #cfd8dc;
-  --bg-page: #f4f7f9;
-  --bg-card: #ffffff;
-  --bg-input: #f8f9fa;
-  --success: #2e7d32;
-  --warning: #ed6c02;
-  --error: #c62828;
-  --premium: #C9A961;
-  --mono: 'Courier New', Courier, monospace;
-  --radius: 8px;
-  --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  --bg:         #f5f6f8;
+  --surface:    #ffffff;
+  --border:     #dde1e7;
+  --accent:     #1a56a0;
+  --accent-h:   #174890;
+  --accent-lt:  #e8f0fb;
+  --text:       #1c2333;
+  --muted:      #6b7280;
+  --success:    #166534;
+  --success-bg: #dcfce7;
+  --warn:       #92400e;
+  --warn-bg:    #fef3c7;
+  --danger:     #991b1b;
+  --danger-bg:  #fee2e2;
+  --mono:       'Courier New', Courier, monospace;
+  --radius:     6px;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: var(--font-ui);
-  background: var(--bg-page);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 14px;
+  background: var(--bg);
   color: var(--text);
   min-height: 100vh;
-  padding: 0 16px 40px;
+  padding: 24px 16px 48px;
 }
 
-/* ✅ BANDEAU DE NAVIGATION */
-.nav-bar {
-  position: sticky;
-  top: 0;
-  z-index: 2000;
-  background: #fff;
-  border-bottom: 1px solid var(--border);
-  padding: 12px 20px;
-  display: flex;
-  align-items: center;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-.back-link {
-  text-decoration: none;
-  color: var(--primary);
-  font-weight: 600;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: color 0.2s;
-}
-.back-link:hover { color: var(--primary-light); text-decoration: underline; }
-
-/* HEADER */
+/* ── En-tête ── */
 header {
-  max-width: 800px;
-  margin: 24px auto 20px;
-  padding: 20px;
-  background: linear-gradient(135deg, var(--primary), var(--primary-light));
-  color: #fff;
-  border-radius: 10px;
-  position: relative;
+  max-width: 760px;
+  margin: 0 auto 28px;
+  border-bottom: 2px solid var(--accent);
+  padding-bottom: 14px;
 }
 header h1 {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
-  margin: 0 0 5px;
+  color: var(--accent);
+  letter-spacing: -0.3px;
 }
 header p.sub {
-  font-size: 13px;
-  opacity: 0.9;
-  margin: 0;
-}
-.premium-badge {
-  position: absolute;
-  top: 12px;
-  right: 16px;
-  color: var(--premium);
-  font-size: 24px;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  margin-top: 4px;
+  font-size: 12.5px;
+  color: var(--muted);
 }
 
-/* CARD */
+/* ── Carte principale ── */
 .card {
-  max-width: 800px;
-  margin: 0 auto 16px;
-  background: var(--bg-card);
+  max-width: 760px;
+  margin: 0 auto 20px;
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  padding: 22px 24px;
 }
 .card h2 {
-  font-size: 14px;
-  font-weight: 700;
+  font-size: 13px;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: var(--primary);
-  margin: 0 0 16px;
-  padding-bottom: 10px;
-  border-bottom: 2px solid var(--border);
+  color: var(--muted);
+  margin-bottom: 14px;
 }
 
-/* DROP ZONE */
+/* ── Zone de dépôt ── */
 #drop-zone {
   border: 2px dashed var(--border);
   border-radius: var(--radius);
-  padding: 28px 20px;
+  padding: 32px 20px;
   text-align: center;
   cursor: pointer;
   transition: border-color 0.2s, background 0.2s;
-  background: var(--bg-input);
+  background: var(--bg);
 }
-#drop-zone:hover, #drop-zone.drag-over {
-  border-color: var(--primary);
-  background: #e3f2fd;
+#drop-zone:hover,
+#drop-zone.drag-over {
+  border-color: var(--accent);
+  background: var(--accent-lt);
 }
-#drop-zone .icon { font-size: 28px; margin-bottom: 8px; display: block; color: var(--primary); }
-#drop-zone p { font-size: 14px; color: var(--text); margin-bottom: 4px; }
-#drop-zone small { font-size: 11px; color: var(--text-light); }
+#drop-zone .icon {
+  font-size: 32px;
+  margin-bottom: 10px;
+  display: block;
+  color: var(--accent);
+}
+#drop-zone p {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+#drop-zone p strong { color: var(--text); }
+#drop-zone small { font-size: 12px; color: #9ca3af; }
+
 #file-input { display: none; }
 
-/* FILE LIST */
-#file-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+/* ── Barre d'actions liste ── */
+.list-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+.list-count {
+  font-size: 12px;
+  color: var(--muted);
+  margin-left: auto;
+}
+
+/* ── Alerte espaces ── */
+#spaces-alert {
+  display: none;
+  margin-top: 12px;
+}
+
+/* ── Liste des fichiers ── */
+#file-list {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 .file-item {
-  display: flex; align-items: center; gap: 8px;
-  padding: 8px 10px; background: var(--bg-input);
-  border: 1px solid var(--border); border-radius: 6px;
-  cursor: grab; font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: grab;
+  transition: border-color 0.15s;
+}
+.file-item.has-space {
+  border-color: #fcd34d;
+  background: #fffbeb;
 }
 .file-item.dragging { opacity: 0.4; }
-.file-item.drag-target { border-color: var(--primary); background: #e3f2fd; }
-.drag-handle { color: var(--text-light); font-size: 14px; cursor: grab; user-select: none; flex-shrink: 0; }
+.file-item.drag-target { border-color: var(--accent); background: var(--accent-lt); }
+
+.drag-handle {
+  color: #9ca3af;
+  font-size: 16px;
+  cursor: grab;
+  user-select: none;
+  flex-shrink: 0;
+}
 .file-num {
-  background: var(--primary); color: #fff; font-size: 11px; font-weight: 700;
-  width: 20px; height: 20px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  background: var(--accent);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 .file-name {
-  flex: 1; font-family: var(--mono); overflow: hidden;
-  text-overflow: ellipsis; white-space: nowrap;
+  flex: 1;
+  font-size: 13px;
+  font-family: var(--mono);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-.file-size { font-size: 11px; color: var(--text-light); flex-shrink: 0; }
+.space-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 10px;
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fcd34d;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.file-size {
+  font-size: 11px;
+  color: var(--muted);
+  flex-shrink: 0;
+}
 .btn-remove {
-  background: none; border: none; color: var(--text-light);
-  font-size: 14px; cursor: pointer; padding: 2px 4px;
-  border-radius: 3px; transition: color 0.15s; flex-shrink: 0;
+  background: none;
+  border: none;
+  color: #d1d5db;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 3px;
+  line-height: 1;
+  transition: color 0.15s;
+  flex-shrink: 0;
 }
-.btn-remove:hover { color: var(--error); }
+.btn-remove:hover { color: var(--danger); }
 
-/* OPTIONS */
-.options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+/* ── Options ── */
+.options-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
 @media (max-width: 500px) { .options-grid { grid-template-columns: 1fr; } }
-.field label {
-  display: block; font-size: 11px; font-weight: 700;
-  color: var(--text); text-transform: uppercase;
-  margin-bottom: 4px; letter-spacing: 0.04em;
-}
-.field input[type="text"], .field select {
-  width: 100%; padding: 8px 10px; border: 1px solid var(--border);
-  border-radius: 6px; font-size: 13px; font-family: var(--mono);
-  background: var(--bg-input); color: var(--text); outline: none;
-  transition: border-color 0.2s;
-}
-.field input:focus, .field select:focus { border-color: var(--primary); background: #fff; }
-.field-full { grid-column: 1 / -1; }
-.hint { font-size: 11px; color: var(--text-light); margin-top: 4px; line-height: 1.4; }
 
-/* BUTTONS */
-.btn-primary {
-  display: inline-flex; align-items: center; gap: 6px;
-  background: var(--primary); color: #fff; border: none;
-  border-radius: 6px; padding: 9px 18px; font-size: 13px;
-  font-weight: 600; cursor: pointer; transition: background 0.2s;
+.field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 5px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
 }
-.btn-primary:hover:not(:disabled) { background: var(--primary-light); }
-.btn-primary:disabled { background: var(--text-light); cursor: not-allowed; }
+.field input[type="text"],
+.field select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-family: var(--mono);
+  background: var(--surface);
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s;
+}
+.field input:focus,
+.field select:focus { border-color: var(--accent); }
+
+.field-full { grid-column: 1 / -1; }
+
+/* ── Hint info ── */
+.hint {
+  font-size: 11.5px;
+  color: var(--muted);
+  margin-top: 5px;
+  line-height: 1.5;
+}
+
+/* ── Boutons ── */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  padding: 10px 20px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-primary:hover { background: var(--accent-h); }
+.btn-primary:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
 
 .btn-secondary {
-  display: inline-flex; align-items: center; gap: 5px;
-  background: none; color: var(--primary); border: 1px solid var(--border);
-  border-radius: 6px; padding: 8px 14px; font-size: 12px;
-  cursor: pointer; transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 14px;
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
 }
-.btn-secondary:hover { background: var(--bg-input); }
+.btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
 
-.actions-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+.btn-sm {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 5px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.btn-sm:hover { border-color: var(--accent); color: var(--accent); }
 
-/* RESULT */
+.actions-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* ── Résultat commande ── */
 #result-section { display: none; }
+
 .cmd-header {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 10px; flex-wrap: wrap; gap: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 .cmd-header h2 {
-  margin: 0; font-size: 13px; font-weight: 700;
-  text-transform: uppercase; letter-spacing: 0.5px; color: var(--primary);
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--muted);
 }
+
+/* ── Blocs CMD ── */
 .cmd-block {
-  background: #1e293b; color: #a8d8a8; font-family: var(--mono);
-  font-size: 12px; line-height: 1.6; padding: 14px 16px;
-  border-radius: 6px; overflow-x: auto; white-space: pre-wrap;
-  word-break: break-all; user-select: all;
+  background: #1e2432;
+  color: #a8d8a8;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.6;
+  padding: 16px 18px;
+  border-radius: var(--radius);
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  user-select: all;
 }
+.cmd-block.amber { color: #ffd580; }
+.cmd-block.blue  { color: #93c5fd; }
+
+.cmd-section {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+
 .badge-ok {
-  display: inline-flex; align-items: center; gap: 4px;
-  font-size: 11px; font-weight: 600; padding: 3px 10px;
-  border-radius: 20px; background: #dcfce7; color: var(--success);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: var(--success-bg);
+  color: var(--success);
 }
-#copy-feedback { font-size: 12px; color: var(--success); margin-top: 6px; display: none; }
+.badge-warn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: var(--warn-bg);
+  color: var(--warn);
+}
 
-/* ALERTS */
+/* ── Alerte / Info ── */
 .alert {
-  display: flex; gap: 8px; padding: 10px 12px; border-radius: 6px;
-  font-size: 12px; line-height: 1.5; margin-bottom: 12px;
+  display: flex;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  font-size: 12.5px;
+  line-height: 1.5;
 }
-.alert.warn { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
-.alert.info { background: #e3f2fd; color: var(--primary); border: 1px solid #bbdefb; }
-.alert-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+.alert.warn  { background: var(--warn-bg);    color: var(--warn);    border: 1px solid #fcd34d; }
+.alert.info  { background: var(--accent-lt);  color: var(--accent);  border: 1px solid #93c5fd; }
+.alert.error { background: var(--danger-bg);  color: var(--danger);  border: 1px solid #fca5a5; }
+.alert.success { background: var(--success-bg); color: var(--success); border: 1px solid #86efac; }
+.alert-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
 
-/* GUIDE */
-.guide-step { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 12px; }
+/* ── Guide steps ── */
+.guide-step {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
 .gs-num {
-  background: var(--primary); color: #fff; font-size: 11px; font-weight: 700;
-  width: 22px; height: 22px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
 }
 .gs-body { flex: 1; min-width: 0; }
-.gs-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
-.gs-body p { font-size: 13px; line-height: 1.6; color: var(--text); margin-bottom: 4px; }
+.gs-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.gs-body p {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text);
+  margin-bottom: 4px;
+}
 .gs-body p:last-child { margin-bottom: 0; }
 .gs-warn {
-  background: #fff3cd; color: #856404; border-radius: 6px;
-  padding: 5px 8px; font-size: 12px; margin-bottom: 6px !important;
-}
-.guide-step code {
-  background: var(--bg-input); border: 1px solid var(--border);
-  padding: 2px 5px; border-radius: 4px; font-family: var(--mono); font-size: 12px;
-}
-
-/* FOOTER */
-.footer {
-  text-align: center; padding: 16px 20px;
-  font-size: 11px; color: var(--text-light);
-  margin-top: 24px; border-top: 1px solid var(--border);
-}
-.disclaimer {
-  background: #fff3cd; color: #856404; padding: 10px;
-  border-radius: 6px; border: 1px solid #ffeeba;
-  margin-top: 12px; font-size: 10px; line-height: 1.4;
+  background: var(--warn-bg);
+  color: var(--warn);
+  border-radius: var(--radius);
+  padding: 6px 10px;
+  font-size: 12.5px;
+  margin-bottom: 6px !important;
 }
 
-/* RESPONSIVE */
-@media (max-width: 600px) {
-  .actions-row { flex-direction: column; }
-  .btn-primary, .btn-secondary { width: 100%; justify-content: center; }
-  header { padding: 16px; }
-  .card { padding: 16px; }
+.section-sep {
+  max-width: 760px;
+  margin: 0 auto 20px;
 }
+
+/* ── Scrollbar hide ── */
+html { scrollbar-width: none; }
+body { -ms-overflow-style: none; overflow-y: auto; }
+::-webkit-scrollbar { display: none; }
 </style>
 </head>
 <body>
 
-  <!-- ✅ BANDEAU DE NAVIGATION -->
-  <nav class="nav-bar">
-    <a href="https://karazaitri12-cpu.github.io/plateforme-utilitaires/" class="back-link">← Retour aux Utilitaires</a>
-  </nav>
+<header>
+  <h1>&#9654;&#65038; Fusion AVI — Générateur de commande FFmpeg</h1>
+  <p class="sub">Outil local &bull; Concaténation de séquences vidéo AVI sans réencodage &bull; Génère la commande à exécuter dans le terminal</p>
+</header>
 
-  <!-- HEADER -->
-  <header>
-    <span class="premium-badge">★</span>
-    <h1>▶️ Fusion AVI — Générateur FFmpeg</h1>
-    <p class="sub">Outil local · Concaténation de séquences vidéo AVI sans réencodage</p>
-  </header>
+<!-- Étape 1 : Fichiers -->
+<div class="card">
+  <h2>1 — Séquences AVI à fusionner</h2>
 
-  <!-- ÉTAPE 1 : FICHIERS -->
-  <div class="card">
-    <h2>1 — Séquences AVI à fusionner</h2>
-    <div id="drop-zone" role="button" tabindex="0" aria-label="Zone de dépôt de fichiers AVI">
-      <span class="icon">📹</span>
-      <p><strong>Glissez-déposez vos fichiers AVI ici</strong></p>
-      <p>ou cliquez pour sélectionner</p>
-      <small>Ordre de fusion = ordre dans la liste (réorganisable par glisser-déposer)</small>
-    </div>
-    <input type="file" id="file-input" accept=".avi,video/avi,video/x-msvideo" multiple>
-    <div id="file-list"></div>
+  <div id="drop-zone" role="button" tabindex="0" aria-label="Zone de dépôt de fichiers AVI">
+    <span class="icon">&#128250;</span>
+    <p><strong>Glissez-déposez vos fichiers AVI ici</strong></p>
+    <p>ou cliquez pour sélectionner</p>
+    <small>Tri alphabétique automatique au dépôt &bull; Réorganisable ensuite par glisser-déposer</small>
   </div>
+  <input type="file" id="file-input" accept=".avi,video/avi,video/x-msvideo" multiple>
 
-  <!-- ÉTAPE 2 : OPTIONS -->
-  <div class="card">
-    <h2>2 — Options de sortie</h2>
-    <div class="options-grid">
-      <div class="field">
-        <label>Nom du fichier de sortie</label>
-        <input type="text" id="output-name" value="fusion_finale.avi" placeholder="nom_sortie.avi">
-        <p class="hint">Extension .avi conservée automatiquement</p>
-      </div>
-      <div class="field">
-        <label>Méthode de fusion</label>
-        <select id="method">
-          <option value="copy" selected>Sans réencodage (copy) — recommandé</option>
-          <option value="reencode">Avec réencodage (MPEG-4 + MP3)</option>
-        </select>
-        <p class="hint">« copy » est instantané si les flux sont identiques</p>
-      </div>
-      <div class="field field-full">
-        <label>Dossier de sortie (chemin complet)</label>
-        <input type="text" id="output-dir" placeholder="Ex : C:\Users\Anouar\Videos">
-        <p class="hint">Laissez vide pour utiliser le dossier courant du terminal</p>
-      </div>
+  <!-- Alerte noms avec espaces -->
+  <div id="spaces-alert" class="alert warn">
+    <span class="alert-icon">&#9888;&#65039;</span>
+    <div>
+      <strong>Noms avec espaces détectés</strong> — les fichiers marqués <span style="background:#fef3c7;color:#92400e;border:1px solid #fcd34d;font-size:10px;font-weight:700;padding:1px 5px;border-radius:10px;">ESPACE</span> risquent de faire échouer FFmpeg si vous utilisez une méthode de chemin direct.
+      La méthode recommandée est le fichier <code>concat.txt</code> avec des guillemets simples — la commande générée en tient compte automatiquement.
     </div>
   </div>
 
-  <!-- ÉTAPE 3 : GÉNÉRATION -->
-  <div class="card">
-    <h2>3 — Générer la commande</h2>
-    <div class="alert warn" style="margin-bottom:14px;">
-      <span class="alert-icon">⚠️</span>
-      <div>
-        <strong>Pré-requis :</strong> FFmpeg doit être installé sur votre PC.
-        Téléchargement gratuit : <strong>ffmpeg.org</strong> — ajoutez-le au PATH système pour l'utiliser depuis n'importe quel dossier.
-      </div>
+  <!-- Actions liste -->
+  <div class="list-actions" id="list-actions" style="display:none;">
+    <button class="btn-sm" id="btn-sort-alpha">&#8645; Trier A→Z</button>
+    <button class="btn-sm" id="btn-sort-rev">&#8645; Trier Z→A</button>
+    <span class="list-count" id="list-count"></span>
+  </div>
+
+  <div id="file-list"></div>
+</div>
+
+<!-- Étape 2 : Options -->
+<div class="card">
+  <h2>2 — Options de sortie</h2>
+  <div class="options-grid">
+
+    <div class="field">
+      <label>Nom du fichier de sortie</label>
+      <input type="text" id="output-name" value="fusion_finale.avi" placeholder="nom_sortie.avi">
+      <p class="hint">Extension .avi conservée automatiquement</p>
     </div>
-    <div class="actions-row">
-      <button class="btn-primary" id="btn-generate" disabled>⚙️ Générer la commande FFmpeg</button>
-      <button class="btn-secondary" id="btn-reset">🗑️ Réinitialiser</button>
+
+    <div class="field">
+      <label>Méthode de fusion</label>
+      <select id="method">
+        <option value="copy" selected>Sans réencodage (copy) — recommandé</option>
+        <option value="reencode">Avec réencodage (MPEG-4 + MP3)</option>
+      </select>
+      <p class="hint">«&nbsp;copy&nbsp;» est instantané si les flux sont identiques</p>
+    </div>
+
+    <div class="field field-full">
+      <label>Dossier de sortie (chemin complet)</label>
+      <input type="text" id="output-dir" placeholder="Ex : C:\Users\Anouar\Videos  ou  /home/user/videos">
+      <p class="hint">Laissez vide pour utiliser le dossier courant du terminal</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- Étape 3 : Génération -->
+<div class="card">
+  <h2>3 — Générer la commande</h2>
+
+  <div class="alert warn" style="margin-bottom:14px;">
+    <span class="alert-icon">&#9888;&#65039;</span>
+    <div>
+      <strong>Pré-requis :</strong> FFmpeg doit être installé sur votre PC.
+      Téléchargement gratuit : <strong>ffmpeg.org</strong> — ajoutez-le au PATH système pour l'utiliser depuis n'importe quel dossier.
     </div>
   </div>
 
-  <!-- RÉSULTAT -->
-  <div id="result-section">
-    <div class="card">
-      <div class="cmd-header">
-        <h2>Commande générée</h2>
-        <span class="badge-ok" id="badge-ok">✓ Prête à coller</span>
-      </div>
+  <div class="actions-row">
+    <button class="btn-primary" id="btn-generate" disabled>
+      &#9881; Générer les commandes FFmpeg
+    </button>
+    <button class="btn-secondary" id="btn-reset">
+      &#128465; Réinitialiser
+    </button>
+  </div>
+</div>
+
+<!-- Résultat -->
+<div id="result-section" class="section-sep">
+  <div class="card">
+    <div class="cmd-header">
+      <h2>Commandes générées</h2>
+      <span id="result-badge" class="badge-ok">&#10003; Prêtes à coller</span>
+    </div>
+
+    <!-- ÉTAPE A : Créer concat.txt -->
+    <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--accent);margin-bottom:10px;">
+      &#9312; Créer le fichier concat.txt (dans CMD)
+    </p>
+    <p style="font-size:12.5px;color:var(--muted);margin-bottom:8px;line-height:1.5;">
+      Copiez cette commande et collez-la dans le CMD <strong>depuis le dossier de vos vidéos</strong>.
+      Elle crée automatiquement le fichier <code>concat.txt</code> avec vos fichiers dans le bon ordre.
+    </p>
+    <div class="cmd-block amber" id="cmd-concat-create"></div>
+    <div style="margin-top:10px;" class="actions-row">
+      <button class="btn-primary" id="btn-copy-concat-cmd">&#128203; Copier (création concat.txt)</button>
+    </div>
+
+    <!-- ÉTAPE B : Lancer FFmpeg -->
+    <div class="cmd-section">
+      <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--accent);margin-bottom:10px;">
+        &#9313; Lancer la fusion FFmpeg
+      </p>
+      <p style="font-size:12.5px;color:var(--muted);margin-bottom:8px;line-height:1.5;">
+        Copiez cette commande et collez-la dans le CMD (même dossier).
+      </p>
       <div class="cmd-block" id="cmd-display"></div>
-      <div style="margin-top:12px;" class="actions-row">
-        <button class="btn-primary" id="btn-copy">📋 Copier la commande</button>
-        <button class="btn-secondary" id="btn-copy-list">📄 Copier la liste concat</button>
-      </div>
-      <p id="copy-feedback" style="font-size:12px;color:var(--success);margin-top:6px;display:none;">✓ Copié dans le presse-papiers</p>
-      <div id="concat-list-block" style="margin-top:16px;display:none;">
-        <div class="cmd-header"><h2>Contenu du fichier concat.txt</h2></div>
-        <div class="cmd-block" id="concat-list-display" style="color:#ffd580;"></div>
-        <p class="hint" style="margin-top:8px;">
-          Enregistrez ce texte dans un fichier <strong>concat.txt</strong> dans le même dossier que vos vidéos.
-          La commande FFmpeg lit ce fichier pour savoir quelles séquences fusionner et dans quel ordre.
-        </p>
+      <div style="margin-top:10px;" class="actions-row">
+        <button class="btn-primary" id="btn-copy-ffmpeg">&#128203; Copier (commande FFmpeg)</button>
       </div>
     </div>
 
-    <!-- GUIDE COMPLET -->
-    <div class="card">
-      <h2>4 — Guide complet Windows (A à Z)</h2>
-      <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--primary);margin-bottom:10px;">① Installer FFmpeg — une seule fois</p>
-      <div class="alert warn" style="margin-bottom:14px;">
-        <span class="alert-icon">⚠️</span>
-        <div>Si <code>ffmpeg -version</code> fonctionne déjà dans votre CMD, passez directement à la phase ②.</div>
+    <!-- ÉTAPE C : Contenu concat.txt (aperçu) -->
+    <div class="cmd-section">
+      <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--accent);margin-bottom:10px;">
+        &#9314; Contenu attendu du concat.txt (aperçu)
+      </p>
+      <div class="cmd-block blue" id="concat-list-display"></div>
+      <div style="margin-top:10px;" class="actions-row">
+        <button class="btn-secondary" id="btn-copy-list">&#128196; Copier le contenu (solution de secours)</button>
       </div>
-      <div class="guide-step">
-        <span class="gs-num">1</span>
-        <div class="gs-body">
-          <p class="gs-title">Télécharger FFmpeg</p>
-          <p>Allez sur <strong>https://www.gyan.dev/ffmpeg/builds/</strong> et téléchargez le fichier <code>ffmpeg-release-essentials.zip</code> (environ 103 Mo).</p>
-        </div>
-      </div>
-      <div class="guide-step">
-        <span class="gs-num">2</span>
-        <div class="gs-body">
-          <p class="gs-title">Installer dans C:\ffmpeg</p>
-          <p>Décompressez l'archive. Vous obtenez un dossier nommé <code>ffmpeg-8.x.x-essentials_build</code>.</p>
-          <p>Renommez-le en <code>ffmpeg</code> et déplacez-le à la racine du disque C.</p>
-          <p>Le chemin final doit être : <code>C:\ffmpeg\bin\ffmpeg.exe</code></p>
-        </div>
-      </div>
-      <div class="guide-step">
-        <span class="gs-num">3</span>
-        <div class="gs-body">
-          <p class="gs-title">Ajouter C:\ffmpeg\bin au PATH Windows</p>
-          <p>Appuyez sur <code>Win + R</code>, tapez <code>SystemPropertiesAdvanced</code> et appuyez sur Entrée.</p>
-          <p>Cliquez sur le bouton <strong>« Variables d'environnement… »</strong> en bas de la fenêtre.</p>
-          <p>Dans la section <strong>« Variables système »</strong> (partie basse), double-cliquez sur <strong>Path</strong>.</p>
-          <p>Cliquez sur <strong>« Nouveau »</strong> et collez exactement : <code>C:\ffmpeg\bin</code></p>
-          <p>Cliquez <strong>OK</strong> sur toutes les fenêtres (3 fois de suite).</p>
-        </div>
-      </div>
-      <div class="guide-step" style="margin-bottom:0;">
-        <span class="gs-num">4</span>
-        <div class="gs-body">
-          <p class="gs-title">Vérifier l'installation</p>
-          <p>Ouvrez un nouveau CMD : <code>Win + R</code> → tapez <code>cmd</code> → Entrée.</p>
-          <p>Tapez : <code>ffmpeg -version</code></p>
-          <p>Si vous voyez <code>ffmpeg version 8.x.x</code>, FFmpeg est prêt.</p>
-        </div>
-      </div>
-      <div style="height:1px;background:var(--border);margin:20px 0;"></div>
-      <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--primary);margin-bottom:10px;">② Fusionner les vidéos — à chaque utilisation</p>
-      <div class="guide-step">
-        <span class="gs-num">1</span>
-        <div class="gs-body">
-          <p class="gs-title">Préparer les fichiers</p>
-          <p>Placez toutes vos séquences AVI dans un même dossier. Renommez-les simplement : <code>video1.avi</code>, <code>video2.avi</code>, <code>video3.avi</code>, etc.</p>
-        </div>
-      </div>
-      <div class="guide-step">
-        <span class="gs-num">2</span>
-        <div class="gs-body">
-          <p class="gs-title">Générer la commande dans cet outil</p>
-          <p>Glissez-déposez vos fichiers AVI dans la zone ci-dessus. Vérifiez l'ordre. Choisissez le nom du fichier de sortie. Cliquez sur <strong>« Générer la commande FFmpeg »</strong>.</p>
-        </div>
-      </div>
-      <div class="guide-step">
-        <span class="gs-num">3</span>
-        <div class="gs-body">
-          <p class="gs-title">Créer le fichier concat.txt via CMD</p>
-          <p class="gs-warn">⚠️ Ne pas utiliser le Bloc-notes (Notepad) — il ajoute un marqueur invisible (BOM) qui casse FFmpeg.</p>
-          <p>Ouvrez le CMD (<code>Win + R</code> → <code>cmd</code>). Naviguez vers votre dossier vidéos :</p>
-          <p><code>cd C:\Users\VotreNom\Videos</code></p>
-          <p>Créez le concat.txt avec la commande suivante (adaptez les noms de fichiers) :</p>
-          <p><code>(echo file 'video1.avi' &amp; echo file 'video2.avi' &amp; echo file 'video3.avi') &gt; concat.txt</code></p>
-          <p>Vérifiez avec <code>type concat.txt</code> — chaque ligne doit afficher <code>file 'nom.avi'</code>.</p>
-        </div>
-      </div>
-      <div class="guide-step">
-        <span class="gs-num">4</span>
-        <div class="gs-body">
-          <p class="gs-title">Lancer la fusion</p>
-          <p>Copiez la commande générée (bouton « Copier la commande »), collez-la dans le CMD et appuyez sur Entrée.</p>
-          <p>FFmpeg affiche la progression. La fusion sans réencodage est quasi-instantanée.</p>
-        </div>
-      </div>
-      <div class="guide-step" style="margin-bottom:0;">
-        <span class="gs-num">5</span>
-        <div class="gs-body">
-          <p class="gs-title">Vérifier le résultat</p>
-          <p>Le fichier fusionné (<code>fusion_finale.avi</code> ou le nom choisi) apparaît dans votre dossier. Ouvrez-le avec VLC ou Windows Media Player.</p>
-        </div>
+      <p class="hint" style="margin-top:8px;">
+        Ce bloc montre ce que le fichier <code>concat.txt</code> doit contenir.
+        Utilisez le bouton ci-dessus uniquement si la commande CMD automatique échoue.
+      </p>
+    </div>
+
+    <p id="copy-feedback" style="font-size:12px;color:var(--success);margin-top:10px;display:none;">&#10003; Copié dans le presse-papiers</p>
+  </div>
+
+  <!-- Instructions d'exécution -->
+  <div class="card">
+    <h2>4 — Guide complet Windows (A à Z)</h2>
+
+    <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--accent);margin-bottom:10px;">&#9312; Installer FFmpeg — une seule fois</p>
+
+    <div class="alert warn" style="margin-bottom:14px;">
+      <span class="alert-icon">&#9888;&#65039;</span>
+      <div>Si <code>ffmpeg -version</code> fonctionne déjà dans votre CMD, passez directement à la phase ②.</div>
+    </div>
+
+    <div class="guide-step">
+      <span class="gs-num">1</span>
+      <div class="gs-body">
+        <p class="gs-title">Télécharger FFmpeg</p>
+        <p>Allez sur <strong>https://www.gyan.dev/ffmpeg/builds/</strong> et téléchargez le fichier <code>ffmpeg-release-essentials.zip</code> (environ 103&nbsp;Mo).</p>
       </div>
     </div>
 
-    <!-- NOTE TECHNIQUE -->
-    <div class="card">
-      <h2>Note technique</h2>
-      <div class="alert info">
-        <span class="alert-icon">ℹ️</span>
-        <div>
-          <p style="margin-bottom:6px;"><strong>Sans réencodage (copy) :</strong> fusion quasi-instantanée, zéro perte de qualité. Fonctionne si toutes les séquences ont le même codec, la même résolution et la même fréquence d'images — cas typique des séquences issues du même appareil.</p>
-          <p style="margin-bottom:6px;"><strong>Avec réencodage (MPEG-4) :</strong> plus lent, mais fusionne des séquences hétérogènes. Légère perte de qualité due à la recompression.</p>
-          <p style="margin-bottom:0;"><strong>Erreur « unknown keyword file » :</strong> le concat.txt a été créé avec Notepad (BOM invisible). Toujours utiliser la méthode CMD avec <code>echo</code>.</p>
-        </div>
+    <div class="guide-step">
+      <span class="gs-num">2</span>
+      <div class="gs-body">
+        <p class="gs-title">Installer dans C:\ffmpeg</p>
+        <p>Décompressez l'archive. Vous obtenez un dossier nommé <code>ffmpeg-8.x.x-essentials_build</code>.</p>
+        <p>Renommez-le en <code>ffmpeg</code> et déplacez-le à la racine du disque C.</p>
+        <p>Le chemin final doit être : <code>C:\ffmpeg\bin\ffmpeg.exe</code></p>
+      </div>
+    </div>
+
+    <div class="guide-step">
+      <span class="gs-num">3</span>
+      <div class="gs-body">
+        <p class="gs-title">Ajouter C:\ffmpeg\bin au PATH Windows</p>
+        <p>Appuyez sur <code>Win + R</code>, tapez <code>SystemPropertiesAdvanced</code> et appuyez sur Entrée.</p>
+        <p>Cliquez sur le bouton <strong>«&nbsp;Variables d'environnement…&nbsp;»</strong> en bas de la fenêtre.</p>
+        <p>Dans la section <strong>«&nbsp;Variables système&nbsp;»</strong> (partie basse), double-cliquez sur <strong>Path</strong>.</p>
+        <p>Cliquez sur <strong>«&nbsp;Nouveau&nbsp;»</strong> et collez exactement : <code>C:\ffmpeg\bin</code></p>
+        <p>Cliquez <strong>OK</strong> sur toutes les fenêtres (3 fois de suite).</p>
+      </div>
+    </div>
+
+    <div class="guide-step" style="margin-bottom:0;">
+      <span class="gs-num">4</span>
+      <div class="gs-body">
+        <p class="gs-title">Vérifier l'installation</p>
+        <p>Ouvrez un nouveau CMD : <code>Win + R</code> → tapez <code>cmd</code> → Entrée.</p>
+        <p>Tapez : <code>ffmpeg -version</code></p>
+        <p>Si vous voyez <code>ffmpeg version 8.x.x</code>, FFmpeg est prêt.</p>
+      </div>
+    </div>
+
+    <div style="height:1px;background:var(--border);margin:20px 0;"></div>
+
+    <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--accent);margin-bottom:10px;">&#9313; Fusionner les vidéos — à chaque utilisation</p>
+
+    <div class="guide-step">
+      <span class="gs-num">1</span>
+      <div class="gs-body">
+        <p class="gs-title">Préparer les fichiers</p>
+        <p>Placez toutes vos séquences AVI dans un même dossier.
+        Si vos fichiers ont des espaces dans leurs noms (ex : <code>echographie abdomen.avi</code>), cela fonctionne — la commande CMD générée les prend en charge avec des guillemets.</p>
+      </div>
+    </div>
+
+    <div class="guide-step">
+      <span class="gs-num">2</span>
+      <div class="gs-body">
+        <p class="gs-title">Générer les commandes dans cet outil</p>
+        <p>Glissez-déposez vos fichiers AVI. Ils sont triés alphabétiquement automatiquement — réorganisez si besoin.
+        Vérifiez l'ordre final. Cliquez sur <strong>«&nbsp;Générer les commandes FFmpeg&nbsp;»</strong>.</p>
+      </div>
+    </div>
+
+    <div class="guide-step">
+      <span class="gs-num">3</span>
+      <div class="gs-body">
+        <p class="gs-title">Naviguer vers le dossier vidéos dans CMD</p>
+        <p>Ouvrez le CMD (<code>Win + R</code> → <code>cmd</code>). Tapez :</p>
+        <p><code>cd C:\Users\VotreNom\Videos</code></p>
+        <p>Ou : dans l'Explorateur Windows, ouvrez votre dossier vidéos, cliquez dans la barre d'adresse, tapez <code>cmd</code> et appuyez sur Entrée — le CMD s'ouvre directement dans ce dossier.</p>
+      </div>
+    </div>
+
+    <div class="guide-step">
+      <span class="gs-num">4</span>
+      <div class="gs-body">
+        <p class="gs-title">Créer le concat.txt (commande &#9312;)</p>
+        <p class="gs-warn">&#9888; Cette commande est générée automatiquement avec vos vrais noms de fichiers — plus besoin de les retaper manuellement.</p>
+        <p>Copiez la commande de l'étape ① (bouton orange), collez-la dans le CMD, appuyez sur Entrée.</p>
+        <p>Vérifiez avec <code>type concat.txt</code> — chaque ligne doit afficher <code>file 'nom.avi'</code>.</p>
+      </div>
+    </div>
+
+    <div class="guide-step">
+      <span class="gs-num">5</span>
+      <div class="gs-body">
+        <p class="gs-title">Lancer la fusion (commande &#9313;)</p>
+        <p>Copiez la commande FFmpeg (bouton vert de l'étape ②), collez-la dans le CMD et appuyez sur Entrée.</p>
+        <p>FFmpeg affiche la progression. La fusion sans réencodage est quasi-instantanée.</p>
+      </div>
+    </div>
+
+    <div class="guide-step" style="margin-bottom:0;">
+      <span class="gs-num">6</span>
+      <div class="gs-body">
+        <p class="gs-title">Vérifier le résultat</p>
+        <p>Le fichier fusionné (<code>fusion_finale.avi</code> ou le nom choisi) apparaît dans votre dossier. Ouvrez-le avec VLC ou Windows Media Player.</p>
       </div>
     </div>
   </div>
 
-  <!-- FOOTER -->
-  <footer class="footer">
-    <span>Dr KARA-ZAITRI M.A © 2026</span>
-    <div class="disclaimer">
-      ⚠️ <strong>Usage bureautique</strong> : Génération de commande FFmpeg locale. Aucun fichier vidéo n'est envoyé sur un serveur. FFmpeg doit être installé séparément sur votre PC.
+  <!-- Note technique -->
+  <div class="card">
+    <h2>Note technique</h2>
+    <div class="alert info">
+      <span class="alert-icon">&#8505;&#65039;</span>
+      <div>
+        <p style="margin-bottom:6px;"><strong>Sans réencodage (copy) :</strong> fusion quasi-instantanée, zéro perte de qualité. Fonctionne si toutes les séquences ont le même codec, la même résolution et la même fréquence d'images — cas typique des séquences issues du même appareil.</p>
+        <p style="margin-bottom:6px;"><strong>Avec réencodage (MPEG-4) :</strong> plus lent, mais fusionne des séquences hétérogènes. Légère perte de qualité due à la recompression.</p>
+        <p style="margin-bottom:6px;"><strong>Noms avec espaces :</strong> la méthode concat.txt avec guillemets simples les gère correctement. La commande CMD générée par cet outil utilise systématiquement les guillemets dans le <code>echo file '...'</code> — compatible FFmpeg.</p>
+        <p style="margin-bottom:0;"><strong>Erreur «&nbsp;unknown keyword file&nbsp;» :</strong> le concat.txt a été créé avec Notepad (BOM invisible). Toujours utiliser la méthode CMD avec <code>echo</code> générée par cet outil.</p>
+      </div>
     </div>
-  </footer>
+  </div>
+</div>
 
-  <!-- LOGIQUE JAVASCRIPT -->
-  <script>
-  (function () {
-    'use strict';
-    var files = [], dragSrcIndex = null;
-    var dropZone = document.getElementById('drop-zone'), fileInput = document.getElementById('file-input');
-    var fileList = document.getElementById('file-list'), btnGenerate = document.getElementById('btn-generate');
-    var btnReset = document.getElementById('btn-reset'), btnCopy = document.getElementById('btn-copy');
-    var btnCopyList = document.getElementById('btn-copy-list'), resultSec = document.getElementById('result-section');
-    var cmdDisplay = document.getElementById('cmd-display'), concatBlock = document.getElementById('concat-list-block');
-    var concatDisp = document.getElementById('concat-list-display'), copyFeedback = document.getElementById('copy-feedback');
-    var outputName = document.getElementById('output-name'), outputDir = document.getElementById('output-dir');
-    var methodSel = document.getElementById('method');
+<script>
+(function () {
+  'use strict';
 
-    dropZone.addEventListener('click', function () { fileInput.click(); });
-    dropZone.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') fileInput.click(); });
-    dropZone.addEventListener('dragover', function (e) { e.preventDefault(); dropZone.classList.add('drag-over'); });
-    dropZone.addEventListener('dragleave', function () { dropZone.classList.remove('drag-over'); });
-    dropZone.addEventListener('drop', function (e) {
-      e.preventDefault(); dropZone.classList.remove('drag-over'); addFiles(e.dataTransfer.files);
-    });
-    fileInput.addEventListener('change', function () { addFiles(fileInput.files); fileInput.value = ''; });
+  /* ── État ── */
+  var files = [];
+  var dragSrcIndex = null;
 
-    function addFiles(fileObjs) {
-      for (var i = 0; i < fileObjs.length; i++) {
-        var f = fileObjs[i], ext = f.name.split('.').pop().toLowerCase();
-        if (ext !== 'avi') continue;
-        files.push({ name: f.name, size: f.size });
+  /* ── Éléments DOM ── */
+  var dropZone        = document.getElementById('drop-zone');
+  var fileInput       = document.getElementById('file-input');
+  var fileList        = document.getElementById('file-list');
+  var listActions     = document.getElementById('list-actions');
+  var listCount       = document.getElementById('list-count');
+  var spacesAlert     = document.getElementById('spaces-alert');
+  var btnGenerate     = document.getElementById('btn-generate');
+  var btnReset        = document.getElementById('btn-reset');
+  var btnSortAlpha    = document.getElementById('btn-sort-alpha');
+  var btnSortRev      = document.getElementById('btn-sort-rev');
+  var btnCopyConcatCmd= document.getElementById('btn-copy-concat-cmd');
+  var btnCopyFfmpeg   = document.getElementById('btn-copy-ffmpeg');
+  var btnCopyList     = document.getElementById('btn-copy-list');
+  var resultSec       = document.getElementById('result-section');
+  var cmdDisplay      = document.getElementById('cmd-display');
+  var cmdConcatCreate = document.getElementById('cmd-concat-create');
+  var concatDisp      = document.getElementById('concat-list-display');
+  var copyFeedback    = document.getElementById('copy-feedback');
+  var outputName      = document.getElementById('output-name');
+  var outputDir       = document.getElementById('output-dir');
+  var methodSel       = document.getElementById('method');
+  var resultBadge     = document.getElementById('result-badge');
+
+  /* ── Drop zone ── */
+  dropZone.addEventListener('click', function () { fileInput.click(); });
+  dropZone.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') fileInput.click(); });
+  dropZone.addEventListener('dragover', function (e) { e.preventDefault(); dropZone.classList.add('drag-over'); });
+  dropZone.addEventListener('dragleave', function () { dropZone.classList.remove('drag-over'); });
+  dropZone.addEventListener('drop', function (e) {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    addFiles(e.dataTransfer.files);
+  });
+  fileInput.addEventListener('change', function () { addFiles(fileInput.files); fileInput.value = ''; });
+
+  /* ── Ajout + tri alphabétique automatique ── */
+  function addFiles(fileObjs) {
+    var newEntries = [];
+    for (var i = 0; i < fileObjs.length; i++) {
+      var f = fileObjs[i];
+      var ext = f.name.split('.').pop().toLowerCase();
+      if (ext !== 'avi') continue;
+      // dédoublonnage
+      var exists = false;
+      for (var j = 0; j < files.length; j++) {
+        if (files[j].name === f.name) { exists = true; break; }
       }
-      renderList(); updateBtn();
+      if (!exists) newEntries.push({ name: f.name, size: f.size });
+    }
+    if (newEntries.length === 0) return;
+
+    // ajout puis tri alphabétique global
+    files = files.concat(newEntries);
+    sortFiles('alpha');
+    renderList();
+    updateBtn();
+  }
+
+  /* ── Tri ── */
+  function sortFiles(dir) {
+    files.sort(function (a, b) {
+      var na = a.name.toLowerCase();
+      var nb = b.name.toLowerCase();
+      if (dir === 'alpha') return na < nb ? -1 : na > nb ? 1 : 0;
+      return na > nb ? -1 : na < nb ? 1 : 0;
+    });
+  }
+
+  btnSortAlpha.addEventListener('click', function () { sortFiles('alpha'); renderList(); });
+  btnSortRev.addEventListener('click',   function () { sortFiles('rev');   renderList(); });
+
+  /* ── Détection espaces ── */
+  function hasSpaceFiles() {
+    return files.some(function (f) { return f.name.indexOf(' ') !== -1; });
+  }
+
+  /* ── Rendu liste ── */
+  function renderList() {
+    fileList.innerHTML = '';
+
+    // alerte espaces
+    if (files.length > 0 && hasSpaceFiles()) {
+      spacesAlert.style.display = 'flex';
+    } else {
+      spacesAlert.style.display = 'none';
     }
 
-    function renderList() {
-      fileList.innerHTML = '';
-      files.forEach(function (f, idx) {
-        var item = document.createElement('div');
-        item.className = 'file-item'; item.draggable = true; item.dataset.index = idx;
-        item.innerHTML = '<span class="drag-handle" title="Réorganiser">☰</span>' +
-          '<span class="file-num">' + (idx + 1) + '</span>' +
-          '<span class="file-name" title="' + escHtml(f.name) + '">' + escHtml(f.name) + '</span>' +
-          '<span class="file-size">' + fmtSize(f.size) + '</span>' +
-          '<button class="btn-remove" data-idx="' + idx + '" title="Retirer">×</button>';
-        item.addEventListener('dragstart', function (e) {
-          dragSrcIndex = +this.dataset.index; this.classList.add('dragging');
-          e.dataTransfer.effectAllowed = 'move';
-        });
-        item.addEventListener('dragend', function () {
-          this.classList.remove('dragging');
-          document.querySelectorAll('.file-item').forEach(function (el) { el.classList.remove('drag-target'); });
-        });
-        item.addEventListener('dragover', function (e) {
-          e.preventDefault(); e.dataTransfer.dropEffect = 'move';
-          document.querySelectorAll('.file-item').forEach(function (el) { el.classList.remove('drag-target'); });
-          this.classList.add('drag-target');
-        });
-        item.addEventListener('drop', function (e) {
-          e.preventDefault(); var targetIndex = +this.dataset.index;
-          if (dragSrcIndex === null || dragSrcIndex === targetIndex) return;
-          var moved = files.splice(dragSrcIndex, 1)[0]; files.splice(targetIndex, 0, moved);
-          dragSrcIndex = null; renderList(); updateBtn();
-        });
-        item.querySelector('.btn-remove').addEventListener('click', function () {
-          files.splice(+this.dataset.idx, 1); renderList(); updateBtn(); resultSec.style.display = 'none';
-        });
-        fileList.appendChild(item);
+    // barre d'actions
+    if (files.length > 0) {
+      listActions.style.display = 'flex';
+      listCount.textContent = files.length + (files.length > 1 ? ' fichiers' : ' fichier');
+    } else {
+      listActions.style.display = 'none';
+    }
+
+    files.forEach(function (f, idx) {
+      var hasSpace = f.name.indexOf(' ') !== -1;
+      var item = document.createElement('div');
+      item.className = 'file-item' + (hasSpace ? ' has-space' : '');
+      item.draggable = true;
+      item.dataset.index = idx;
+
+      item.innerHTML =
+        '<span class="drag-handle" title="R\u00e9organiser">\u2630</span>' +
+        '<span class="file-num">' + (idx + 1) + '</span>' +
+        '<span class="file-name" title="' + escHtml(f.name) + '">' + escHtml(f.name) + '</span>' +
+        (hasSpace ? '<span class="space-badge">ESPACE</span>' : '') +
+        '<span class="file-size">' + fmtSize(f.size) + '</span>' +
+        '<button class="btn-remove" data-idx="' + idx + '" title="Retirer">\u00d7</button>';
+
+      /* Drag & drop réordonner */
+      item.addEventListener('dragstart', function (e) {
+        dragSrcIndex = +this.dataset.index;
+        this.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
       });
+      item.addEventListener('dragend', function () {
+        this.classList.remove('dragging');
+        document.querySelectorAll('.file-item').forEach(function (el) { el.classList.remove('drag-target'); });
+      });
+      item.addEventListener('dragover', function (e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        document.querySelectorAll('.file-item').forEach(function (el) { el.classList.remove('drag-target'); });
+        this.classList.add('drag-target');
+      });
+      item.addEventListener('drop', function (e) {
+        e.preventDefault();
+        var targetIndex = +this.dataset.index;
+        if (dragSrcIndex === null || dragSrcIndex === targetIndex) return;
+        var moved = files.splice(dragSrcIndex, 1)[0];
+        files.splice(targetIndex, 0, moved);
+        dragSrcIndex = null;
+        renderList();
+      });
+
+      /* Supprimer */
+      item.querySelector('.btn-remove').addEventListener('click', function () {
+        files.splice(+this.dataset.idx, 1);
+        renderList();
+        updateBtn();
+        resultSec.style.display = 'none';
+      });
+
+      fileList.appendChild(item);
+    });
+  }
+
+  function updateBtn() {
+    btnGenerate.disabled = files.length < 2;
+  }
+
+  /* ── Génération des commandes ── */
+  btnGenerate.addEventListener('click', function () {
+    if (files.length < 2) return;
+
+    var method  = methodSel.value;
+    var outName = sanitizeFilename(outputName.value.trim() || 'fusion_finale.avi');
+    if (!outName.toLowerCase().endsWith('.avi')) outName += '.avi';
+
+    var dirRaw  = outputDir.value.trim();
+    var sep     = (dirRaw && dirRaw.indexOf('\\') !== -1) ? '\\' : '/';
+    var outPath = dirRaw
+      ? (dirRaw.replace(/[\/\\]$/, '') + sep + outName)
+      : outName;
+
+    /* ── 1. Commande CMD pour créer concat.txt ── */
+    // Syntaxe Windows CMD : (echo file 'f1.avi' & echo file 'f2.avi') > concat.txt
+    // Les guillemets simples autour du nom gèrent les espaces côté FFmpeg
+    var echoParts = files.map(function (f) {
+      // On échappe les apostrophes éventuelles dans le nom de fichier
+      var safeName = f.name.replace(/'/g, "''");
+      return "echo file '" + safeName + "'";
+    });
+    var concatCreateCmd;
+    if (echoParts.length === 1) {
+      concatCreateCmd = echoParts[0] + ' > concat.txt';
+    } else {
+      concatCreateCmd = '(' + echoParts.join(' & ') + ') > concat.txt';
+    }
+    cmdConcatCreate.textContent = concatCreateCmd;
+
+    /* ── 2. Commande FFmpeg ── */
+    var ffmpegCmd;
+    if (method === 'copy') {
+      ffmpegCmd = 'ffmpeg -f concat -safe 0 -i concat.txt -c copy "' + outPath + '"';
+    } else {
+      ffmpegCmd = 'ffmpeg -f concat -safe 0 -i concat.txt -vcodec mpeg4 -acodec mp3 "' + outPath + '"';
+    }
+    cmdDisplay.textContent = ffmpegCmd;
+
+    /* ── 3. Contenu aperçu concat.txt ── */
+    var concatContent = files.map(function (f) {
+      return "file '" + f.name.replace(/'/g, "\\'") + "'";
+    }).join('\n');
+    concatDisp.textContent = concatContent;
+
+    /* ── Badge avertissement si espaces ── */
+    if (hasSpaceFiles()) {
+      resultBadge.className = 'badge-warn';
+      resultBadge.textContent = '\u26A0 Noms avec espaces — lisez la note';
+    } else {
+      resultBadge.className = 'badge-ok';
+      resultBadge.textContent = '\u2713 Pr\u00eates \u00e0 coller';
     }
 
-    function updateBtn() { btnGenerate.disabled = files.length < 2; }
+    resultSec.style.display = 'block';
+    copyFeedback.style.display = 'none';
+    resultSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
 
-    btnGenerate.addEventListener('click', function () {
-      if (files.length < 2) return;
-      var method = methodSel.value, outName = sanitizeFilename(outputName.value.trim() || 'fusion_finale.avi');
-      if (!outName.toLowerCase().endsWith('.avi')) outName += '.avi';
-      var dirRaw = outputDir.value.trim();
-      var outPath = dirRaw ? (dirRaw.replace(/[\/\\]$/, '') + (dirRaw.includes('\\') ? '\\' : '/') + outName) : outName;
-      var concatContent = files.map(function (f) { return "file '" + f.name.replace(/'/g, "\\'") + "'"; }).join('\n');
-      var cmd = method === 'copy'
-        ? 'ffmpeg -f concat -safe 0 -i concat.txt -c copy "' + outPath + '"'
-        : 'ffmpeg -f concat -safe 0 -i concat.txt -vcodec mpeg4 -acodec mp3 "' + outPath + '"';
-      cmdDisplay.textContent = cmd; concatDisp.textContent = concatContent;
-      concatBlock.style.display = 'block'; resultSec.style.display = 'block';
-      copyFeedback.style.display = 'none'; resultSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
+  /* ── Copier ── */
+  btnCopyConcatCmd.addEventListener('click', function () { copyText(cmdConcatCreate.textContent); });
+  btnCopyFfmpeg.addEventListener('click',    function () { copyText(cmdDisplay.textContent); });
+  btnCopyList.addEventListener('click',      function () { copyText(concatDisp.textContent); });
 
-    btnCopy.addEventListener('click', function () { copyText(cmdDisplay.textContent); });
-    btnCopyList.addEventListener('click', function () { copyText(concatDisp.textContent); });
-
-    function copyText(txt) {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(txt).then(showFeedback);
-      } else {
-        var ta = document.createElement('textarea'); ta.value = txt; ta.style.position = 'fixed'; ta.style.opacity = '0';
-        document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); showFeedback();
-      }
+  function copyText(txt) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(showFeedback);
+    } else {
+      var ta = document.createElement('textarea');
+      ta.value = txt;
+      ta.style.position = 'fixed';
+      ta.style.opacity  = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showFeedback();
     }
-    function showFeedback() { copyFeedback.style.display = 'block'; setTimeout(function () { copyFeedback.style.display = 'none'; }, 2500); }
+  }
 
-    btnReset.addEventListener('click', function () {
-      files = []; renderList(); updateBtn(); resultSec.style.display = 'none';
-      outputName.value = 'fusion_finale.avi'; outputDir.value = ''; methodSel.value = 'copy';
-    });
+  function showFeedback() {
+    copyFeedback.style.display = 'block';
+    setTimeout(function () { copyFeedback.style.display = 'none'; }, 2500);
+  }
 
-    function fmtSize(bytes) { if (!bytes) return ''; var mb = bytes / (1024 * 1024); return mb >= 1 ? mb.toFixed(1) + ' Mo' : (bytes / 1024).toFixed(0) + ' Ko'; }
-    function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-    function sanitizeFilename(s) { return s.replace(/[<>:"|?*]/g, '_'); }
-  })();
-  </script>
+  /* ── Reset ── */
+  btnReset.addEventListener('click', function () {
+    files = [];
+    dragSrcIndex = null;
+    renderList();
+    updateBtn();
+    resultSec.style.display = 'none';
+    spacesAlert.style.display = 'none';
+    outputName.value = 'fusion_finale.avi';
+    outputDir.value  = '';
+    methodSel.value  = 'copy';
+  });
+
+  /* ── Utils ── */
+  function fmtSize(bytes) {
+    if (!bytes) return '';
+    var mb = bytes / (1024 * 1024);
+    return mb >= 1 ? mb.toFixed(1) + '\u00a0Mo' : (bytes / 1024).toFixed(0) + '\u00a0Ko';
+  }
+  function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function sanitizeFilename(s) {
+    return s.replace(/[<>:"|?*]/g, '_');
+  }
+
+})();
+</script>
+
+<!-- TRACKING UMAMI (RGPD compliant, no cookies) -->
+<script defer src="https://cloud.umami.is/script.js" data-website-id="b182aba6-225e-47ac-b6be-892e033a6013"></script>
 </body>
 </html>
