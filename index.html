@@ -1,1351 +1,507 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fusion Vidéo — Générateur de commande FFmpeg</title>
-<style>
-/* ============================================================
-   FUSION VIDEO v3 — AVI + MP4 — Outil local PC
-   ============================================================ */
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plateforme Utilitaires | Dr KARA-ZAITRI M.A</title>
+    <meta name="description" content="Utilitaires techniques et bureautiques pour professionnels de santé.">
+    <style>
+        /* --- BASE & DESIGN SYSTEM INSTITUTIONNEL --- */
+        #med-hub-full {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif !important;
+            color: #4a6977 !important;
+            background-color: #ffffff !important;
+            width: 100% !important;
+            margin: 0 auto !important;
+        }
 
-:root {
-  --bg:         #f5f6f8;
-  --surface:    #ffffff;
-  --border:     #dde1e7;
-  --accent:     #1a56a0;
-  --accent-h:   #174890;
-  --accent-lt:  #e8f0fb;
-  --text:       #1c2333;
-  --muted:      #6b7280;
-  --success:    #166534;
-  --success-bg: #dcfce7;
-  --warn:       #92400e;
-  --warn-bg:    #fef3c7;
-  --danger:     #991b1b;
-  --danger-bg:  #fee2e2;
-  --mono:       'Courier New', Courier, monospace;
-  --radius:     6px;
-  --mixed-bg:   #fdf2f8;
-  --mixed:      #86198f;
-  --mixed-border: #e879f9;
-}
+        /* EN-TÊTE PRINCIPAL */
+        #med-hub-full .main-header {
+            background: #fff !important;
+            border-bottom: 3px solid #1a3a5c !important;
+            padding: 25px 20px !important;
+            text-align: center !important;
+        }
+        #med-hub-full .main-header h1 {
+            font-size: 20px !important;
+            color: #1a3a5c !important;
+            margin: 0 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.5px !important;
+            font-weight: 700 !important;
+        }
+        #med-hub-full .main-header .subtitle {
+            font-size: 13px !important;
+            color: #607d8b !important;
+            margin: 5px 0 0 0 !important;
+        }
+        #med-hub-full .main-header .subtitle a {
+            color: #1a3a5c !important;
+            text-decoration: none !important;
+            border-bottom: 1px dotted #1a3a5c !important;
+        }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        /* BARRE DE RECHERCHE */
+        #med-hub-full .search-section {
+            background: #f4f7f9 !important;
+            padding: 20px !important;
+            border-bottom: 1px solid #cfd8dc !important;
+        }
+        #med-hub-full .search-wrapper {
+            position: relative !important;
+            max-width: 500px !important;
+            margin: 0 auto !important;
+        }
+        #med-hub-full #tool-search {
+            width: 100% !important;
+            height: 44px !important;
+            padding: 0 45px !important;
+            border: 1px solid #cfd8dc !important;
+            border-radius: 8px !important;
+            outline: none !important;
+            font-size: 16px !important;
+        }
+        #med-hub-full #tool-search:focus { border-color: #1a3a5c !important; }
+        #med-hub-full .search-icon { position: absolute !important; left: 15px; top: 13px; font-size: 18px; color: #90a4ae; }
+        #med-hub-full #clear-search { position: absolute !important; right: 12px; top: 5px; font-size: 28px; color: #cfd8dc; cursor: pointer; display: none; }
 
-body {
-  font-family: 'Segoe UI', system-ui, sans-serif;
-  font-size: 14px;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  padding: 24px 16px 48px;
-}
+        /* SECTIONS PAR CATÉGORIE */
+        .category-section {
+            padding: 25px 20px !important;
+            border-bottom: 1px solid #f0f0f0 !important;
+        }
+        .category-section:last-child { border-bottom: none !important; }
+        
+        .category-title {
+            font-size: 16px !important;
+            font-weight: 700 !important;
+            color: #546e7a !important;
+            margin: 0 0 20px 0 !important;
+            padding-bottom: 8px !important;
+            border-bottom: 2px solid #cfd8dc !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.5px !important;
+        }
 
-/* ── En-tête ── */
-header {
-  max-width: 760px;
-  margin: 0 auto 28px;
-  border-bottom: 2px solid var(--accent);
-  padding-bottom: 14px;
-}
-header h1 {
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--accent);
-  letter-spacing: -0.3px;
-}
-header p.sub {
-  margin-top: 4px;
-  font-size: 12.5px;
-  color: var(--muted);
-}
+        /* GRILLE */
+        #med-hub-full .tools-grid {
+            display: grid !important;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+            gap: 15px !important;
+        }
 
-/* ── Badges format ── */
-.fmt-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 10.5px;
-  font-weight: 700;
-  padding: 2px 7px;
-  border-radius: 10px;
-  flex-shrink: 0;
-  white-space: nowrap;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-}
-.fmt-avi  { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
-.fmt-mp4  { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
-.fmt-mixed { background: var(--mixed-bg); color: var(--mixed); border: 1px solid var(--mixed-border); }
+        .tool-card-med {
+            display: flex !important;
+            flex-direction: column !important;
+            text-decoration: none !important;
+            background: #ffffff !important;
+            border: 1px solid #e0e6ed !important;
+            padding: 20px !important;
+            position: relative !important;
+            border-radius: 10px !important;
+            transition: all 0.3s ease !important;
+        }
 
-/* ── Carte principale ── */
-.card {
-  max-width: 760px;
-  margin: 0 auto 20px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 22px 24px;
-}
-.card h2 {
-  font-size: 13px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--muted);
-  margin-bottom: 14px;
-}
+        .tool-card-med:hover { 
+            border-color: #1a3a5c !important; 
+            box-shadow: 0 6px 15px rgba(0,0,0,0.08) !important; 
+            transform: translateY(-3px) !important; 
+        }
 
-/* ── Zone de dépôt ── */
-#drop-zone {
-  border: 2px dashed var(--border);
-  border-radius: var(--radius);
-  padding: 32px 20px;
-  text-align: center;
-  cursor: pointer;
-  transition: border-color 0.2s, background 0.2s;
-  background: var(--bg);
-}
-#drop-zone:hover,
-#drop-zone.drag-over {
-  border-color: var(--accent);
-  background: var(--accent-lt);
-}
-#drop-zone .icon {
-  font-size: 32px;
-  margin-bottom: 10px;
-  display: block;
-  color: var(--accent);
-}
-#drop-zone p {
-  font-size: 14px;
-  color: var(--muted);
-  margin-bottom: 6px;
-}
-#drop-zone p strong { color: var(--text); }
-#drop-zone small { font-size: 12px; color: #9ca3af; }
+        .tool-card-med.hidden { display: none !important; }
 
-#file-input { display: none; }
+        /* ✅ CARTES PREMIUM VERROUILLÉES pour les non-membres */
+        .tool-card-med[data-premium="true"].kz-locked {
+            opacity: 0.6 !important;
+            cursor: not-allowed !important;
+            pointer-events: none !important;
+            filter: grayscale(30%) !important;
+        }
 
-/* ── Barre d'actions liste ── */
-.list-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 14px;
-  margin-bottom: 4px;
-  flex-wrap: wrap;
-}
-.list-count {
-  font-size: 12px;
-  color: var(--muted);
-  margin-left: auto;
-}
+        .tool-header-flex { display: flex !important; align-items: center !important; margin-bottom: 10px !important; }
+        .tool-icon-small { height: 35px !important; width: 35px !important; object-fit: contain !important; margin-right: 15px !important; flex-shrink: 0 !important; }
+        .tool-name-med { font-size: 16px !important; font-weight: 700 !important; color: #1a3a5c !important; margin: 0 !important; line-height: 1.2 !important; }
+        .tool-desc-med { font-size: 13.5px !important; color: #546e7a !important; font-weight: 400; margin: 0 !important; line-height: 1.4 !important; }
 
-/* ── Alertes ── */
-.alert {
-  display: flex;
-  gap: 10px;
-  padding: 12px 14px;
-  border-radius: var(--radius);
-  font-size: 12.5px;
-  line-height: 1.5;
-  margin-top: 12px;
-}
-.alert.warn    { background: var(--warn-bg);    color: var(--warn);    border: 1px solid #fcd34d; }
-.alert.info    { background: var(--accent-lt);  color: var(--accent);  border: 1px solid #93c5fd; }
-.alert.error   { background: var(--danger-bg);  color: var(--danger);  border: 1px solid #fca5a5; }
-.alert.success { background: var(--success-bg); color: var(--success); border: 1px solid #86efac; }
-.alert.mixed   { background: var(--mixed-bg);   color: var(--mixed);   border: 1px solid var(--mixed-border); }
-.alert-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+        /* BADGES */
+        .premium-ribbon {
+            position: absolute !important;
+            top: 8px !important;
+            right: 10px !important;
+            color: #C9A961 !important;
+            font-size: 20px !important;
+        }
+        .badge-coming {
+            position: absolute !important;
+            top: 12px !important;
+            right: 12px !important;
+            background: #ff9800 !important;
+            color: #fff !important;
+            padding: 3px 10px !important;
+            border-radius: 12px !important;
+            font-size: 11px !important;
+            font-weight: 700 !important;
+        }
 
-/* ── Liste des fichiers ── */
-#file-list {
-  margin-top: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+        /* BANDEAU NON-MEMBRE */
+        #kz-guest-banner {
+            display: none;
+            background: #c62828;
+            color: #fff;
+            text-align: center;
+            padding: 12px 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+       #kz-guest-banner a {
+    color: #ffffff;
+    text-decoration: underline;
+    font-weight: 800;
+    margin-left: 8px;
+    background: rgba(0,0,0,0.25);
+    padding: 2px 8px;
+    border-radius: 4px;
 }
-.file-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  cursor: grab;
-  transition: border-color 0.15s;
-}
-.file-item.has-space  { border-color: #fcd34d; background: #fffbeb; }
-.file-item.is-mp4     { border-left: 3px solid #6ee7b7; }
-.file-item.is-avi     { border-left: 3px solid #93c5fd; }
-.file-item.dragging   { opacity: 0.4; }
-.file-item.drag-target { border-color: var(--accent); background: var(--accent-lt); }
+        .portal-disclaimer { 
+            margin: 0 20px 40px 20px !important; 
+            padding: 15px !important; 
+            background: #fbfbfb !important; 
+            border: 1px dashed #cfd8dc !important; 
+            border-radius: 8px !important;
+            font-size: 11px !important; 
+            color: #78909c !important; 
+            text-align: center !important;
+        }
 
-.drag-handle {
-  color: #9ca3af;
-  font-size: 16px;
-  cursor: grab;
-  user-select: none;
-  flex-shrink: 0;
-}
-.file-num {
-  background: var(--accent);
-  color: #fff;
-  font-size: 11px;
-  font-weight: 700;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-.file-name {
-  flex: 1;
-  font-size: 13px;
-  font-family: var(--mono);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.space-badge {
-  font-size: 10px;
-  font-weight: 700;
-  padding: 2px 6px;
-  border-radius: 10px;
-  background: #fef3c7;
-  color: #92400e;
-  border: 1px solid #fcd34d;
-  flex-shrink: 0;
-  white-space: nowrap;
-}
-.file-size {
-  font-size: 11px;
-  color: var(--muted);
-  flex-shrink: 0;
-}
-.btn-remove {
-  background: none;
-  border: none;
-  color: #d1d5db;
-  font-size: 16px;
-  cursor: pointer;
-  padding: 2px 4px;
-  border-radius: 3px;
-  line-height: 1;
-  transition: color 0.15s;
-  flex-shrink: 0;
-}
-.btn-remove:hover { color: var(--danger); }
-
-/* ── Badge doublon ── */
-.dup-badge {
-  font-size: 10px;
-  font-weight: 700;
-  padding: 2px 6px;
-  border-radius: 10px;
-  background: var(--danger-bg);
-  color: var(--danger);
-  border: 1px solid #fca5a5;
-  flex-shrink: 0;
-  white-space: nowrap;
-}
-.file-item.is-dup {
-  border-color: #fca5a5;
-  background: #fff5f5;
-}
-
-/* ── Prévisualisation ordre de fusion ── */
-#preview-section {
-  display: none;
-  margin-top: 16px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
-}
-#preview-section .preview-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 9px 14px;
-  background: var(--accent-lt);
-  border-bottom: 1px solid #c7d9f5;
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--accent);
-  gap: 8px;
-}
-#preview-section .preview-header span.total-size {
-  font-size: 11.5px;
-  font-weight: 400;
-  color: var(--muted);
-  text-transform: none;
-  letter-spacing: 0;
-  margin-left: auto;
-}
-#preview-list {
-  display: flex;
-  flex-direction: column;
-}
-.preview-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 7px 14px;
-  font-size: 12.5px;
-  border-bottom: 1px solid var(--border);
-}
-.preview-row:last-child { border-bottom: none; }
-.preview-row.pr-dup { background: #fff5f5; }
-.pr-idx {
-  font-size: 11px;
-  font-weight: 700;
-  color: #fff;
-  background: var(--accent);
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-.pr-arrow {
-  font-size: 11px;
-  color: #c0c8d4;
-  flex-shrink: 0;
-}
-.pr-name {
-  flex: 1;
-  font-family: var(--mono);
-  font-size: 12px;
-  color: var(--text);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.pr-fmt {
-  font-size: 10px;
-  font-weight: 700;
-  padding: 1px 5px;
-  border-radius: 8px;
-  flex-shrink: 0;
-}
-.pr-fmt.avi { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
-.pr-fmt.mp4 { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
-.pr-size {
-  font-size: 11px;
-  color: var(--muted);
-  flex-shrink: 0;
-}
-.pr-dup-flag {
-  font-size: 10px;
-  font-weight: 700;
-  padding: 1px 5px;
-  border-radius: 8px;
-  background: var(--danger-bg);
-  color: var(--danger);
-  border: 1px solid #fca5a5;
-  flex-shrink: 0;
-}
-
-/* ── Résumé formats ── */
-#format-summary {
-  display: none;
-  margin-top: 12px;
-  padding: 10px 14px;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  font-size: 12.5px;
-  display: none;
-  gap: 14px;
-  flex-wrap: wrap;
-  align-items: center;
-}
-#format-summary span { color: var(--muted); }
-
-/* ── Options ── */
-.options-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-}
-@media (max-width: 500px) { .options-grid { grid-template-columns: 1fr; } }
-
-.field label {
-  display: block;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--muted);
-  margin-bottom: 5px;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-}
-.field input[type="text"],
-.field select {
-  width: 100%;
-  padding: 8px 10px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  font-size: 13px;
-  font-family: var(--mono);
-  background: var(--surface);
-  color: var(--text);
-  outline: none;
-  transition: border-color 0.15s;
-}
-.field input:focus,
-.field select:focus { border-color: var(--accent); }
-
-.field-full { grid-column: 1 / -1; }
-
-.hint {
-  font-size: 11.5px;
-  color: var(--muted);
-  margin-top: 5px;
-  line-height: 1.5;
-}
-
-/* ── Boutons ── */
-.btn-primary {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--accent);
-  color: #fff;
-  border: none;
-  border-radius: var(--radius);
-  padding: 10px 20px;
-  font-size: 13.5px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-.btn-primary:hover { background: var(--accent-h); }
-.btn-primary:disabled {
-  background: #9ca3af;
-  cursor: not-allowed;
-}
-.btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: none;
-  color: var(--muted);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 8px 14px;
-  font-size: 12.5px;
-  cursor: pointer;
-  transition: border-color 0.15s, color 0.15s;
-}
-.btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
-
-.btn-sm {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  background: none;
-  color: var(--muted);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 5px 10px;
-  font-size: 12px;
-  cursor: pointer;
-  transition: border-color 0.15s, color 0.15s;
-}
-.btn-sm:hover { border-color: var(--accent); color: var(--accent); }
-
-.actions-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-/* ── Résultat ── */
-#result-section { display: none; }
-
-.cmd-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 10px;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.cmd-header h2 {
-  margin: 0;
-  font-size: 13px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--muted);
-}
-
-.cmd-block {
-  background: #1e2432;
-  color: #a8d8a8;
-  font-family: var(--mono);
-  font-size: 12.5px;
-  line-height: 1.6;
-  padding: 16px 18px;
-  border-radius: var(--radius);
-  overflow-x: auto;
-  white-space: pre-wrap;
-  word-break: break-all;
-  user-select: all;
-}
-.cmd-block.amber { color: #ffd580; }
-.cmd-block.blue  { color: #93c5fd; }
-
-.cmd-section {
-  margin-top: 18px;
-  padding-top: 18px;
-  border-top: 1px solid var(--border);
-}
-
-.badge-ok {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 11.5px;
-  font-weight: 600;
-  padding: 3px 10px;
-  border-radius: 20px;
-  background: var(--success-bg);
-  color: var(--success);
-}
-.badge-warn {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 11.5px;
-  font-weight: 600;
-  padding: 3px 10px;
-  border-radius: 20px;
-  background: var(--warn-bg);
-  color: var(--warn);
-}
-.badge-mixed {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 11.5px;
-  font-weight: 600;
-  padding: 3px 10px;
-  border-radius: 20px;
-  background: var(--mixed-bg);
-  color: var(--mixed);
-}
-
-.guide-step {
-  display: flex;
-  gap: 14px;
-  align-items: flex-start;
-  margin-bottom: 14px;
-}
-.gs-num {
-  background: var(--accent);
-  color: #fff;
-  font-size: 12px;
-  font-weight: 700;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  margin-top: 2px;
-}
-.gs-body { flex: 1; min-width: 0; }
-.gs-title {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text);
-  margin-bottom: 4px;
-}
-.gs-body p {
-  font-size: 13px;
-  line-height: 1.6;
-  color: var(--text);
-  margin-bottom: 4px;
-}
-.gs-body p:last-child { margin-bottom: 0; }
-.gs-warn {
-  background: var(--warn-bg);
-  color: var(--warn);
-  border-radius: var(--radius);
-  padding: 6px 10px;
-  font-size: 12.5px;
-  margin-bottom: 6px !important;
-}
-
-.section-sep {
-  max-width: 760px;
-  margin: 0 auto 20px;
-}
-
-/* ── Scrollbar hide (style App native) ── */
-html { scrollbar-width: none; }
-body { -ms-overflow-style: none; overflow-y: auto; }
-::-webkit-scrollbar { display: none; }
-</style>
+        @media (max-width: 600px) {
+            #med-hub-full .main-header { padding: 20px 15px !important; }
+            #med-hub-full .tools-grid { grid-template-columns: 1fr !important; }
+        }
+    </style>
 </head>
 <body>
 
-<header>
-  <h1>&#9654;&#65038; Fusion Vidéo AVI / MP4 — Générateur de commande FFmpeg</h1>
-  <p class="sub">Outil local &bull; Concaténation sans réencodage (AVI ou MP4) &bull; Détection automatique du format &bull; Génère la commande à exécuter dans le terminal</p>
-</header>
+<div id="med-hub-full">
 
-<!-- Étape 1 : Fichiers -->
-<div class="card">
-  <h2>1 — Séquences vidéo à fusionner</h2>
-
-  <div id="drop-zone" role="button" tabindex="0" aria-label="Zone de dépôt de fichiers AVI ou MP4">
-    <span class="icon">&#128250;</span>
-    <p><strong>Glissez-déposez vos fichiers AVI ou MP4 ici</strong></p>
-    <p>ou cliquez pour sélectionner</p>
-    <small>Formats acceptés : .avi &bull; .mp4 &bull; Tri alphabétique automatique &bull; Réorganisable par glisser-déposer</small>
-  </div>
-  <input type="file" id="file-input" accept=".avi,.mp4,video/avi,video/x-msvideo,video/mp4" multiple>
-
-  <!-- Résumé formats détectés -->
-  <div id="format-summary" style="display:none; margin-top:12px; padding:10px 14px; background:var(--bg); border:1px solid var(--border); border-radius:var(--radius); font-size:12.5px; display:none; gap:14px; flex-wrap:wrap; align-items:center;">
-    <span>Formats détectés :</span>
-    <span id="fmt-avi-count" style="display:none;"></span>
-    <span id="fmt-mp4-count" style="display:none;"></span>
-    <span id="fmt-dominant" style="display:none;"></span>
-  </div>
-
-  <!-- Alerte mélange AVI + MP4 -->
-  <div id="mixed-alert" class="alert mixed" style="display:none;">
-    <span class="alert-icon">&#9888;&#65039;</span>
-    <div>
-      <strong>Formats hétérogènes (AVI + MP4 mélangés) — Réencodage obligatoire.</strong><br>
-      La fusion <em>sans réencodage</em> («copy») est impossible entre des conteneurs différents.
-      Deux solutions : (1) convertissez tous les fichiers dans le même format avant de fusionner,
-      ou (2) utilisez la méthode avec <strong>réencodage</strong> (option sélectionnable ci-dessous).
-      Le mode sera automatiquement forcé en réencodage si vous générez avec des formats mélangés.
-    </div>
-  </div>
-
-  <!-- Alerte espaces -->
-  <div id="spaces-alert" class="alert warn" style="display:none;">
-    <span class="alert-icon">&#9888;&#65039;</span>
-    <div>
-      <strong>Noms avec espaces détectés</strong> — les fichiers marqués <span style="background:#fef3c7;color:#92400e;border:1px solid #fcd34d;font-size:10px;font-weight:700;padding:1px 5px;border-radius:10px;">ESPACE</span> risquent de faire échouer FFmpeg en chemin direct.
-      La méthode <code>concat.txt</code> avec guillemets simples gère cela automatiquement.
-    </div>
-  </div>
-
-  <!-- Actions liste -->
-  <div class="list-actions" id="list-actions" style="display:none;">
-    <button class="btn-sm" id="btn-sort-alpha">&#8645; Trier A→Z</button>
-    <button class="btn-sm" id="btn-sort-rev">&#8645; Trier Z→A</button>
-    <span class="list-count" id="list-count"></span>
-  </div>
-
-  <div id="file-list"></div>
-
-  <!-- Alerte doublons -->
-  <div id="dup-alert" class="alert error" style="display:none;">
-    <span class="alert-icon">&#9888;&#65039;</span>
-    <div id="dup-alert-text"></div>
-  </div>
-
-  <!-- Prévisualisation ordre de fusion -->
-  <div id="preview-section">
-    <div class="preview-header">
-      <span>&#128065;&#65039; Ordre de fusion &#8212; vérification avant génération</span>
-      <span class="total-size" id="preview-total-size"></span>
-    </div>
-    <div id="preview-list"></div>
-  </div>
-</div>
-
-<!-- Étape 2 : Options -->
-<div class="card">
-  <h2>2 — Options de sortie</h2>
-  <div class="options-grid">
-
-    <div class="field">
-      <label>Nom du fichier de sortie</label>
-      <input type="text" id="output-name" value="fusion_finale.mp4" placeholder="nom_sortie.mp4">
-      <p class="hint" id="output-name-hint">Mis à jour automatiquement selon le format déposé</p>
+    <!-- BANDEAU VISIBLE UNIQUEMENT AUX NON-MEMBRES -->
+    <div id="kz-guest-banner">
+        ★ Certains outils sont réservés aux membres premium.
+        <a href="https://www.dr-karazaitri-ma.net/compte-dadherent/paiement-dadhesion/">Activer mon accès</a>
+        &nbsp;|&nbsp;
+        <a href="https://www.dr-karazaitri-ma.net/connexion-membres/">Se connecter</a>
     </div>
 
-    <div class="field">
-      <label>Méthode de fusion</label>
-      <select id="method">
-        <option value="copy" selected>Sans réencodage (copy) — recommandé</option>
-        <option value="reencode-mp4">Réencodage MP4 (H.264 + AAC)</option>
-        <option value="reencode-avi">Réencodage AVI (MPEG-4 + MP3)</option>
-      </select>
-      <p class="hint" id="method-hint">«copy» est instantané si les flux sont identiques et de même format</p>
+    <!-- EN-TÊTE -->
+    <header class="main-header">
+        <h1>Plateforme Utilitaires Techniques</h1>
+        <p class="subtitle">Outils bureautiques et productivité | Site FemCare Hub sur <a href="https://www.dr-karazaitri-ma.net">www.dr-karazaitri-ma.net</a></p>
+    </header>
+
+    <!-- RECHERCHE -->
+    <div class="search-section">
+        <div class="search-wrapper">
+            <span class="search-icon">&#128269;</span>
+            <input type="text" id="tool-search" placeholder="Rechercher un utilitaire...">
+            <span id="clear-search">&times;</span>
+        </div>
     </div>
 
-    <div class="field field-full">
-      <label>Dossier de sortie (chemin complet)</label>
-      <input type="text" id="output-dir" placeholder="Ex : C:\Users\Anouar\Videos  ou  /home/user/videos">
-      <p class="hint">Laissez vide pour utiliser le dossier courant du terminal</p>
+    <!-- ========== SECTION 1: CALCUL & CONVERSION ========== -->
+    <section class="category-section">
+        <h2 class="category-title">📊 CALCUL & CONVERSION</h2>
+        <div class="tools-grid">
+
+            <a href="Utilitaires/calculatrice/" class="tool-card-med" data-cat="util" data-search="calculatrice mémoire trigonométrie scientifique pourcentage">
+                <div class="tool-header-flex">
+                    <span class="tool-icon-small" style="font-size:28px">🧮</span>
+                    <h3 class="tool-name-med">Calculatrice Clinique</h3>
+                </div>
+                <p class="tool-desc-med">Opérations avancées, mémoire, fonctions scientifiques, pourcentages contextuels.</p>
+            </a>
+
+            <a href="Utilitaires/convertisseur/" class="tool-card-med" data-cat="util" data-search="convertisseur unités température poids volume vitesse pression énergie">
+                <div class="tool-header-flex">
+                    <span class="tool-icon-small" style="font-size:28px">🔄</span>
+                    <h3 class="tool-name-med">Convertisseur d'unités</h3>
+                </div>
+                <p class="tool-desc-med">Conversion de poids, température, volumes, dosages, vitesses, pressions, énergies.</p>
+            </a>
+
+            <a href="Utilitaires/convertisseur-images/" class="tool-card-med" data-cat="util" data-search="convertisseur images jpeg png webp compression zip">
+                <div class="tool-header-flex">
+                    <span class="tool-icon-small" style="font-size:28px">🖼️</span>
+                    <h3 class="tool-name-med">Convertisseur d'Images</h3>
+                </div>
+                <p class="tool-desc-med">Conversion JPEG/PNG ⇄ WebP avec compression et export ZIP.</p>
+            </a>
+
+            <a href="Utilitaires/convertisseur-gps/" class="tool-card-med" data-cat="util" data-search="gps coordonnées dms plus codes convertisseur">
+                <div class="tool-header-flex">
+                    <span class="tool-icon-small" style="font-size:28px">📍</span>
+                    <h3 class="tool-name-med">Convertisseur GPS</h3>
+                </div>
+                <p class="tool-desc-med">Conversion coordonnées DMS, décimal, Plus Codes Google.</p>
+            </a>
+
+<!-- ✅ PREMIUM - NOUVEAU -->
+<a href="Utilitaires/fusion-avi/" class="tool-card-med" data-cat="util" data-search="fusion avi vidéo concaténation ffmpeg commande" data-premium="true">
+    <div class="premium-ribbon">★</div>
+    <div class="tool-header-flex">
+        <span class="tool-icon-small" style="font-size:28px">🎬</span>
+        <h3 class="tool-name-med">Fusion vidéos AVI / MP4</h3>
+    </div>
+    <p class="tool-desc-med">Générateur de commande FFmpeg pour concaténer des séquences AVI / MP4.</p>
+</a>
+            
+        </div>
+    </section>
+
+    <!-- ========== SECTION 2: GESTION DE DOCUMENTS ========== -->
+    <section class="category-section">
+        <h2 class="category-title">📄 GESTION DE DOCUMENTS</h2>
+        <div class="tools-grid">
+
+            <!-- ✅ PREMIUM -->
+            <a href="Utilitaires/ocr-photos/" class="tool-card-med" data-cat="gestion" data-search="ocr photos texte extraction reconnaissance" data-premium="true">
+                <div class="premium-ribbon">★</div>
+                <div class="tool-header-flex">
+                    <span class="tool-icon-small" style="font-size:28px">📷</span>
+                    <h3 class="tool-name-med">OCR Photos</h3>
+                </div>
+                <p class="tool-desc-med">Extraction de texte depuis images ou captures d'écran.</p>
+            </a>
+
+            <!-- ✅ PREMIUM -->
+            <a href="Utilitaires/pdf-ocr/" class="tool-card-med" data-cat="gestion" data-search="pdf ocr numérisation document scan reconnaissance texte" data-premium="true">
+                <div class="premium-ribbon">★</div>
+                <div class="tool-header-flex">
+                    <span class="tool-icon-small" style="font-size:28px">📄</span>
+                    <h3 class="tool-name-med">PDF OCR</h3>
+                </div>
+                <p class="tool-desc-med">Numérisation et reconnaissance de PDF scannés en texte éditable.</p>
+            </a>
+
+            <!-- ✅ PREMIUM -->
+            <a href="Utilitaires/pdf-manager/" class="tool-card-med" data-cat="gestion" data-search="pdf manager fusion découpage édition" data-premium="true">
+                <div class="premium-ribbon">★</div>
+                <div class="tool-header-flex">
+                    <span class="tool-icon-small" style="font-size:28px">📑</span>
+                    <h3 class="tool-name-med">PDF Manager</h3>
+                </div>
+                <p class="tool-desc-med">Fusion, découpage, compression et édition de documents PDF.</p>
+            </a>
+
+            <!-- Gratuit -->
+            <a href="Utilitaires/edition-excel/" class="tool-card-med" data-cat="gestion" data-search="excel xls édition tableur modification">
+                <div class="tool-header-flex">
+                    <span class="tool-icon-small" style="font-size:28px">📊</span>
+                    <h3 class="tool-name-med">Édition Excel</h3>
+                </div>
+                <p class="tool-desc-med">Modification de tableurs en ligne avec filtres, tri, export.</p>
+            </a>
+
+            <!-- ✅ PREMIUM -->
+            <a href="Utilitaires/creation-ebook/" class="tool-card-med" data-cat="gestion" data-search="ebook word chapitres assemblage document rédaction" data-premium="true">
+                <div class="premium-ribbon">★</div>
+                <div class="tool-header-flex">
+                    <span class="tool-icon-small" style="font-size:28px">📚</span>
+                    <h3 class="tool-name-med">Création Ebook</h3>
+                </div>
+                <p class="tool-desc-med">Assemblage de fichiers Word en document structuré avec export DOCX.</p>
+            </a>
+
+            <!-- ✅ PREMIUM -->
+            <a href="Utilitaires/generateur-tableaux/" class="tool-card-med" data-cat="gestion" data-search="tableau html générateur structure code édition" data-premium="true">
+                <div class="premium-ribbon">★</div>
+                <div class="tool-header-flex">
+                    <span class="tool-icon-small" style="font-size:28px">📋</span>
+                    <h3 class="tool-name-med">Tableaux HTML</h3>
+                </div>
+                <p class="tool-desc-med">Générateur de structures HTML tabulaires avec édition en direct.</p>
+            </a>
+
+        </div>
+    </section>
+
+    <!-- ========== SECTION 3: UTILITAIRES DIVERS ========== -->
+    <section class="category-section">
+        <h2 class="category-title">🛠️ UTILITAIRES DIVERS</h2>
+        <div class="tools-grid">
+
+            <!-- ✅ PREMIUM -->
+            <a href="Utilitaires/qr-code/" class="tool-card-med" data-cat="util" data-search="qr code générateur lien texte contact" data-premium="true">
+                <div class="premium-ribbon">★</div>
+                <div class="tool-header-flex">
+                    <span class="tool-icon-small" style="font-size:28px">🏷️</span>
+                    <h3 class="tool-name-med">Générateur QR Code</h3>
+                </div>
+                <p class="tool-desc-med">Création de QR codes personnalisés pour liens, textes, contacts.</p>
+            </a>
+
+            <!-- ✅ PREMIUM -->
+            <a href="Utilitaires/comparateur-texte/" class="tool-card-med" data-cat="util" data-search="comparateur texte différence analyse comparaison" data-premium="true">
+                <div class="premium-ribbon">★</div>
+                <div class="tool-header-flex">
+                    <span class="tool-icon-small" style="font-size:28px">📝</span>
+                    <h3 class="tool-name-med">Comparateur de texte</h3>
+                </div>
+                <p class="tool-desc-med">Détection de différences entre deux documents texte avec vue fusionnée.</p>
+            </a>
+
+            <!-- ✅ PREMIUM -->
+            <a href="Utilitaires/analyseur-texte/" class="tool-card-med" data-cat="util" data-search="analyseur texte statistiques mots caractères phrases docx pdf" data-premium="true">
+                <div class="premium-ribbon">★</div>
+                <div class="tool-header-flex">
+                    <span class="tool-icon-small" style="font-size:28px">📈</span>
+                    <h3 class="tool-name-med">Analyseur Texte</h3>
+                </div>
+                <p class="tool-desc-med">Statistiques avancées de fichiers TXT, DOCX et PDF.</p>
+            </a>
+
+            <!-- ✅ PREMIUM - NOUVEAU -->
+            <a href="Utilitaires/recherche-copernic/" class="tool-card-med" data-cat="util" data-search="recherche copernic fichiers indexation texte pdf docx" data-premium="true">
+                <div class="premium-ribbon">★</div>
+                <div class="tool-header-flex">
+                    <span class="tool-icon-small" style="font-size:28px">🔍</span>
+                    <h3 class="tool-name-med">Recherche Copernic</h3>
+                </div>
+                <p class="tool-desc-med">Recherche plein texte locale dans PDF, DOCX et TXT.</p>
+            </a>
+
+            <!-- Gratuit -->
+            <a href="https://www.dr-karazaitri-ma.net/repertoire-telephonique/" class="tool-card-med" data-cat="util" data-search="répertoire téléphone contacts professionnels annuaire">
+                <div class="tool-header-flex">
+                    <span class="tool-icon-small" style="font-size:28px">📞</span>
+                    <h3 class="tool-name-med">Répertoire</h3>
+                </div>
+                <p class="tool-desc-med">Contacts professionnels sécurisés.</p>
+            </a>
+
+        </div>
+    </section>
+
+    <!-- ========== SECTION 4: MÉDICAL ========== -->
+    <section class="category-section">
+        <h2 class="category-title">🏥 MÉDICAL</h2>
+        <div class="tools-grid">
+
+            <a href="https://www.dr-karazaitri-ma.net/suivi-de-la-tension-arterielle/" class="tool-card-med" data-cat="medical" data-search="tension hta suivi auto-mesure tensionnelle">
+                <div class="tool-header-flex">
+                    <span class="tool-icon-small" style="font-size:28px">❤️</span>
+                    <h3 class="tool-name-med">Suivi Tensionnel</h3>
+                </div>
+                <p class="tool-desc-med">Journal d'auto-mesure tensionnelle.</p>
+            </a>
+
+        </div>
+    </section>
+
+    <!-- ========== SECTION 5: LOISIRS ========== -->
+    <section class="category-section">
+        <h2 class="category-title">🎮 LOISIRS</h2>
+        <div class="tools-grid">
+
+            <a href="https://www.dr-karazaitri-ma.net/jeu-de-memoire/" class="tool-card-med" data-cat="loisir" data-search="jeu mémoire cognitif entraînement cerveau">
+                <div class="tool-header-flex">
+                    <span class="tool-icon-small" style="font-size:28px">🧠</span>
+                    <h3 class="tool-name-med">Jeu de Mémoire</h3>
+                </div>
+                <p class="tool-desc-med">Entraînement cognitif et mémoire.</p>
+            </a>
+
+            <a href="https://www.dr-karazaitri-ma.net/mastermind-classique/" class="tool-card-med" data-cat="loisir" data-search="mastermind jeu couleurs déduction logique">
+                <div class="tool-header-flex">
+                    <span class="tool-icon-small" style="font-size:28px">🎲</span>
+                    <h3 class="tool-name-med">Mastermind</h3>
+                </div>
+                <p class="tool-desc-med">Déduction logique et stratégie.</p>
+            </a>
+
+        </div>
+    </section>
+
+    <div class="portal-disclaimer">
+        ⚠️ <strong>Usage bureautique</strong> : Ces utilitaires sont fournis à titre informatif. Aucun fichier n'est envoyé sur un serveur. Les outils médicaux spécialisés restent sur <em>dr-karazaitri-ma.net</em>.
     </div>
 
-  </div>
+</div><!-- /#med-hub-full -->
 
-  <!-- Alerte méthode incompatible -->
-  <div id="method-warn" class="alert warn" style="display:none; margin-top:14px;">
-    <span class="alert-icon">&#9888;&#65039;</span>
-    <div id="method-warn-text"></div>
-  </div>
-</div>
+<!-- ========== SCRIPTS ========== -->
 
-<!-- Étape 3 : Génération -->
-<div class="card">
-  <h2>3 — Générer la commande</h2>
-
-  <div class="alert warn" style="margin-bottom:14px;">
-    <span class="alert-icon">&#9888;&#65039;</span>
-    <div>
-      <strong>Pré-requis :</strong> FFmpeg doit être installé sur votre PC.
-      Téléchargement gratuit : <strong>ffmpeg.org</strong> — ajoutez-le au PATH système pour l’utiliser depuis n’importe quel dossier.
-    </div>
-  </div>
-
-  <div class="actions-row">
-    <button class="btn-primary" id="btn-generate" disabled>
-      &#9881; Générer les commandes FFmpeg
-    </button>
-    <button class="btn-secondary" id="btn-reset">
-      &#128465; Réinitialiser
-    </button>
-  </div>
-</div>
-
-<!-- Résultat -->
-<div id="result-section" class="section-sep">
-  <div class="card">
-    <div class="cmd-header">
-      <h2>Commandes générées</h2>
-      <span id="result-badge" class="badge-ok">&#10003; Prêtes à coller</span>
-    </div>
-
-    <!-- Bandeau contexte format -->
-    <div id="result-format-ctx" class="alert info" style="margin-bottom:14px; display:none;">
-      <span class="alert-icon">&#8505;&#65039;</span>
-      <span id="result-format-ctx-text"></span>
-    </div>
-
-    <!-- ÉTAPE A : Créer concat.txt -->
-    <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--accent);margin-bottom:10px;">
-      &#9312; Créer le fichier concat.txt (dans CMD)
-    </p>
-    <p style="font-size:12.5px;color:var(--muted);margin-bottom:8px;line-height:1.5;">
-      Copiez cette commande et collez-la dans le CMD <strong>depuis le dossier de vos vidéos</strong>.
-      Elle crée automatiquement le fichier <code>concat.txt</code> avec vos fichiers dans le bon ordre.
-    </p>
-    <div class="cmd-block amber" id="cmd-concat-create"></div>
-    <div style="margin-top:10px;" class="actions-row">
-      <button class="btn-primary" id="btn-copy-concat-cmd">&#128203; Copier (création concat.txt)</button>
-    </div>
-
-    <!-- ÉTAPE B : Lancer FFmpeg -->
-    <div class="cmd-section">
-      <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--accent);margin-bottom:10px;">
-        &#9313; Lancer la fusion FFmpeg
-      </p>
-      <p style="font-size:12.5px;color:var(--muted);margin-bottom:8px;line-height:1.5;">
-        Copiez cette commande et collez-la dans le CMD (même dossier).
-      </p>
-      <div class="cmd-block" id="cmd-display"></div>
-      <div style="margin-top:10px;" class="actions-row">
-        <button class="btn-primary" id="btn-copy-ffmpeg">&#128203; Copier (commande FFmpeg)</button>
-      </div>
-    </div>
-
-    <!-- ÉTAPE C : Aperçu concat.txt -->
-    <div class="cmd-section">
-      <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--accent);margin-bottom:10px;">
-        &#9314; Contenu attendu du concat.txt (aperçu)
-      </p>
-      <div class="cmd-block blue" id="concat-list-display"></div>
-      <div style="margin-top:10px;" class="actions-row">
-        <button class="btn-secondary" id="btn-copy-list">&#128196; Copier le contenu (solution de secours)</button>
-      </div>
-      <p class="hint" style="margin-top:8px;">
-        Ce bloc montre ce que le fichier <code>concat.txt</code> doit contenir.
-        Utilisez le bouton ci-dessus uniquement si la commande CMD automatique échoue.
-      </p>
-    </div>
-
-    <p id="copy-feedback" style="font-size:12px;color:var(--success);margin-top:10px;display:none;">&#10003; Copié dans le presse-papiers</p>
-  </div>
-
-  <!-- Guide -->
-  <div class="card">
-    <h2>4 — Guide complet Windows (A à Z)</h2>
-
-    <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--accent);margin-bottom:10px;">&#9312; Installer FFmpeg — une seule fois</p>
-
-    <div class="alert warn" style="margin-bottom:14px;">
-      <span class="alert-icon">&#9888;&#65039;</span>
-      <div>Si <code>ffmpeg -version</code> fonctionne déjà dans votre CMD, passez directement à la phase ②.</div>
-    </div>
-
-    <div class="guide-step">
-      <span class="gs-num">1</span>
-      <div class="gs-body">
-        <p class="gs-title">Télécharger FFmpeg</p>
-        <p>Allez sur <strong>https://www.gyan.dev/ffmpeg/builds/</strong> et téléchargez le fichier <code>ffmpeg-release-essentials.zip</code> (environ 103&nbsp;Mo).</p>
-      </div>
-    </div>
-
-    <div class="guide-step">
-      <span class="gs-num">2</span>
-      <div class="gs-body">
-        <p class="gs-title">Installer dans C:\ffmpeg</p>
-        <p>Décompressez l’archive. Renommez le dossier en <code>ffmpeg</code> et déplacez-le à la racine de C.</p>
-        <p>Le chemin final doit être : <code>C:\ffmpeg\bin\ffmpeg.exe</code></p>
-      </div>
-    </div>
-
-    <div class="guide-step">
-      <span class="gs-num">3</span>
-      <div class="gs-body">
-        <p class="gs-title">Ajouter C:\ffmpeg\bin au PATH Windows</p>
-        <p>Appuyez sur <code>Win + R</code>, tapez <code>SystemPropertiesAdvanced</code> et appuyez sur Entrée.</p>
-        <p>Cliquez sur <strong>«&nbsp;Variables d’environnement…&nbsp;»</strong> → dans la section <strong>Variables système</strong>, double-cliquez sur <strong>Path</strong> → <strong>Nouveau</strong> → collez <code>C:\ffmpeg\bin</code> → OK (3 fois).</p>
-      </div>
-    </div>
-
-    <div class="guide-step" style="margin-bottom:0;">
-      <span class="gs-num">4</span>
-      <div class="gs-body">
-        <p class="gs-title">Vérifier l’installation</p>
-        <p>Ouvrez un nouveau CMD : <code>Win + R</code> → <code>cmd</code> → tapez <code>ffmpeg -version</code>. Vous devez voir le numéro de version.</p>
-      </div>
-    </div>
-
-    <div style="height:1px;background:var(--border);margin:20px 0;"></div>
-
-    <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--accent);margin-bottom:10px;">&#9313; Fusionner les vidéos — à chaque utilisation</p>
-
-    <div class="guide-step">
-      <span class="gs-num">1</span>
-      <div class="gs-body">
-        <p class="gs-title">Préparer les fichiers</p>
-        <p>Placez vos séquences dans un même dossier. <strong>Ne mélangez pas AVI et MP4</strong> si vous souhaitez utiliser le mode «copy» (sans réencodage). Si mélange inévitable, utilisez le mode réencodage MP4 (H.264).</p>
-      </div>
-    </div>
-
-    <div class="guide-step">
-      <span class="gs-num">2</span>
-      <div class="gs-body">
-        <p class="gs-title">Générer les commandes dans cet outil</p>
-        <p>Glissez-déposez vos fichiers. Le format est détecté automatiquement. Cliquez sur <strong>«&nbsp;Générer les commandes FFmpeg&nbsp;»</strong>.</p>
-      </div>
-    </div>
-
-    <div class="guide-step">
-      <span class="gs-num">3</span>
-      <div class="gs-body">
-        <p class="gs-title">Naviguer vers le dossier vidéos dans CMD</p>
-        <p>Dans l’Explorateur Windows, ouvrez votre dossier vidéos, cliquez dans la barre d’adresse, tapez <code>cmd</code> et appuyez sur Entrée.</p>
-      </div>
-    </div>
-
-    <div class="guide-step">
-      <span class="gs-num">4</span>
-      <div class="gs-body">
-        <p class="gs-title">Créer le concat.txt (commande ①)</p>
-        <p class="gs-warn">&#9888; Commande générée automatiquement avec vos vrais noms de fichiers.</p>
-        <p>Copiez et collez dans le CMD. Vérifiez avec <code>type concat.txt</code>.</p>
-      </div>
-    </div>
-
-    <div class="guide-step">
-      <span class="gs-num">5</span>
-      <div class="gs-body">
-        <p class="gs-title">Lancer la fusion (commande ②)</p>
-        <p>Copiez la commande FFmpeg et collez-la dans le CMD. La fusion sans réencodage est quasi-instantanée.</p>
-      </div>
-    </div>
-
-    <div class="guide-step" style="margin-bottom:0;">
-      <span class="gs-num">6</span>
-      <div class="gs-body">
-        <p class="gs-title">Vérifier le résultat</p>
-        <p>Le fichier fusionné apparaît dans votre dossier. Ouvrez-le avec VLC pour vérifier.</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Note technique -->
-  <div class="card">
-    <h2>Note technique</h2>
-    <div class="alert info">
-      <span class="alert-icon">&#8505;&#65039;</span>
-      <div>
-        <p style="margin-bottom:6px;"><strong>Sans réencodage (copy) :</strong> quasi-instantané, zéro perte de qualité. Nécessite des séquences du même format, même codec, même résolution et même fréquence d’images.</p>
-        <p style="margin-bottom:6px;"><strong>Réencodage MP4 (H.264 + AAC) :</strong> format universel, compatible tous lecteurs. Recommandé pour les mélanges ou si le «copy» génère des artefacts.</p>
-        <p style="margin-bottom:6px;"><strong>Réencodage AVI (MPEG-4 + MP3) :</strong> préserver le conteneur AVI en cas de contrainte spécifique (logiciel legacy, exportation particulière).</p>
-        <p style="margin-bottom:6px;"><strong>Mélange AVI + MP4 :</strong> FFmpeg ne peut pas concaténer des conteneurs différents en mode copy. Le réencodage MP4 est la solution universelle.</p>
-        <p style="margin-bottom:0;"><strong>Erreur «&nbsp;unknown keyword file&nbsp;» :</strong> le concat.txt a été créé avec Notepad (BOM). Toujours utiliser la méthode CMD avec <code>echo</code> générée par cet outil.</p>
-      </div>
-    </div>
-  </div>
-</div>
-
+<!-- Recherche -->
 <script>
-(function () {
-  'use strict';
+(function() {
+    var input    = document.getElementById('tool-search');
+    var clearBtn = document.getElementById('clear-search');
+    var cards    = document.querySelectorAll('.tool-card-med');
 
-  /* ── État ── */
-  var files = [];
-  var dragSrcIndex = null;
+    function filterAll() {
+        var query = input.value.toLowerCase().trim();
+        clearBtn.style.display = query.length > 0 ? 'block' : 'none';
+        cards.forEach(function(card) {
+            var searchData = card.getAttribute('data-search').toLowerCase();
+            card.classList.toggle('hidden', !searchData.includes(query));
+        });
+    }
 
-  /* ── Éléments DOM ── */
-  var dropZone        = document.getElementById('drop-zone');
-  var fileInput       = document.getElementById('file-input');
-  var fileList        = document.getElementById('file-list');
-  var listActions     = document.getElementById('list-actions');
-  var listCount       = document.getElementById('list-count');
-  var spacesAlert     = document.getElementById('spaces-alert');
-  var mixedAlert      = document.getElementById('mixed-alert');
-  var methodWarn      = document.getElementById('method-warn');
-  var methodWarnText  = document.getElementById('method-warn-text');
-  var btnGenerate     = document.getElementById('btn-generate');
-  var btnReset        = document.getElementById('btn-reset');
-  var btnSortAlpha    = document.getElementById('btn-sort-alpha');
-  var btnSortRev      = document.getElementById('btn-sort-rev');
-  var btnCopyConcatCmd= document.getElementById('btn-copy-concat-cmd');
-  var btnCopyFfmpeg   = document.getElementById('btn-copy-ffmpeg');
-  var btnCopyList     = document.getElementById('btn-copy-list');
-  var resultSec       = document.getElementById('result-section');
-  var cmdDisplay      = document.getElementById('cmd-display');
-  var cmdConcatCreate = document.getElementById('cmd-concat-create');
-  var concatDisp      = document.getElementById('concat-list-display');
-  var copyFeedback    = document.getElementById('copy-feedback');
-  var outputName      = document.getElementById('output-name');
-  var outputDir       = document.getElementById('output-dir');
-  var methodSel       = document.getElementById('method');
-  var resultBadge     = document.getElementById('result-badge');
-  var resultFmtCtx    = document.getElementById('result-format-ctx');
-  var resultFmtCtxTxt = document.getElementById('result-format-ctx-text');
-  var dupAlert        = document.getElementById('dup-alert');
-  var dupAlertText    = document.getElementById('dup-alert-text');
-  var previewSection  = document.getElementById('preview-section');
-  var previewList     = document.getElementById('preview-list');
-  var previewTotalSize= document.getElementById('preview-total-size');
-
-  /* ── Utilitaires format ── */
-  function getExt(filename) {
-    return filename.split('.').pop().toLowerCase();
-  }
-  function countFormats() {
-    var avi = 0, mp4 = 0;
-    files.forEach(function (f) {
-      if (getExt(f.name) === 'avi') avi++;
-      else mp4++;
+    input.addEventListener('input', filterAll);
+    clearBtn.addEventListener('click', function() {
+        input.value = '';
+        filterAll();
+        input.focus();
     });
-    return { avi: avi, mp4: mp4 };
-  }
-  function isMixed() {
-    var c = countFormats();
-    return c.avi > 0 && c.mp4 > 0;
-  }
-  function dominantExt() {
-    var c = countFormats();
-    if (c.avi === 0) return 'mp4';
-    if (c.mp4 === 0) return 'avi';
-    return c.mp4 >= c.avi ? 'mp4' : 'avi'; // en cas de mélange, MP4 prioritaire
-  }
-
-  /* ── Drop zone ── */
-  dropZone.addEventListener('click', function () { fileInput.click(); });
-  dropZone.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') fileInput.click(); });
-  dropZone.addEventListener('dragover', function (e) { e.preventDefault(); dropZone.classList.add('drag-over'); });
-  dropZone.addEventListener('dragleave', function () { dropZone.classList.remove('drag-over'); });
-  dropZone.addEventListener('drop', function (e) {
-    e.preventDefault();
-    dropZone.classList.remove('drag-over');
-    addFiles(e.dataTransfer.files);
-  });
-  fileInput.addEventListener('change', function () { addFiles(fileInput.files); fileInput.value = ''; });
-
-  /* ── Ajout + tri alphabétique ── */
-  function addFiles(fileObjs) {
-    var newEntries = [];
-    for (var i = 0; i < fileObjs.length; i++) {
-      var f = fileObjs[i];
-      var ext = getExt(f.name);
-      if (ext !== 'avi' && ext !== 'mp4') continue;
-      var exists = false;
-      for (var j = 0; j < files.length; j++) {
-        if (files[j].name === f.name) { exists = true; break; }
-      }
-      if (!exists) newEntries.push({ name: f.name, size: f.size, ext: ext });
-    }
-    if (newEntries.length === 0) return;
-    files = files.concat(newEntries);
-    sortFiles('alpha');
-    updateOutputName();
-    renderList();
-    updateBtn();
-    updateMethodWarning();
-  }
-
-  /* ── Détection doublons (même nom + même taille) ── */
-  function getDuplicates() {
-    var seen = {};
-    var dups = {};
-    files.forEach(function (f) {
-      var key = f.name + '|' + f.size;
-      if (seen[key]) {
-        dups[key] = true;
-      }
-      seen[key] = true;
-    });
-    return dups; // objet { "nom|taille": true, ... }
-  }
-
-  /* ── Mise à jour automatique nom de sortie ── */
-  function updateOutputName() {
-    if (files.length === 0) return;
-    var ext = dominantExt();
-    var current = outputName.value.trim();
-    // Remplacer uniquement l'extension, pas le nom
-    if (current.match(/\.(avi|mp4)$/i)) {
-      outputName.value = current.replace(/\.(avi|mp4)$/i, '.' + ext);
-    } else {
-      outputName.value = 'fusion_finale.' + ext;
-    }
-  }
-
-  /* ── Avertissement méthode ── */
-  function updateMethodWarning() {
-    if (files.length === 0) {
-      methodWarn.style.display = 'none';
-      mixedAlert.style.display = 'none';
-      return;
-    }
-    var mixed = isMixed();
-    var method = methodSel.value;
-    mixedAlert.style.display = mixed ? 'flex' : 'none';
-
-    if (mixed && method === 'copy') {
-      methodWarnText.innerHTML = '<strong>Incompatibilité détectée :</strong> le mode «copy» ne peut pas mélanger AVI et MP4. La commande générée utilisera automatiquement le <strong>réencodage MP4 (H.264 + AAC)</strong>.';
-      methodWarn.style.display = 'flex';
-    } else if (!mixed && method !== 'copy') {
-      var c = countFormats();
-      var fmt = c.avi > 0 ? 'AVI' : 'MP4';
-      methodWarnText.innerHTML = 'Vous avez sélectionné le réencodage alors que tous vos fichiers sont en <strong>' + fmt + '</strong>. Le mode «copy» serait plus rapide et sans perte de qualité.';
-      methodWarn.style.display = 'flex';
-    } else {
-      methodWarn.style.display = 'none';
-    }
-  }
-
-  methodSel.addEventListener('change', updateMethodWarning);
-
-  /* ── Tri ── */
-  function sortFiles(dir) {
-    files.sort(function (a, b) {
-      var na = a.name.toLowerCase();
-      var nb = b.name.toLowerCase();
-      if (dir === 'alpha') return na < nb ? -1 : na > nb ? 1 : 0;
-      return na > nb ? -1 : na < nb ? 1 : 0;
-    });
-  }
-  btnSortAlpha.addEventListener('click', function () { sortFiles('alpha'); renderList(); });
-  btnSortRev.addEventListener('click',   function () { sortFiles('rev');   renderList(); });
-
-  function hasSpaceFiles() {
-    return files.some(function (f) { return f.name.indexOf(' ') !== -1; });
-  }
-
-  /* ── Rendu liste ── */
-  function renderList() {
-    fileList.innerHTML = '';
-
-    spacesAlert.style.display = (files.length > 0 && hasSpaceFiles()) ? 'flex' : 'none';
-    listActions.style.display = files.length > 0 ? 'flex' : 'none';
-    if (files.length > 0) {
-      listCount.textContent = files.length + (files.length > 1 ? ' fichiers' : ' fichier');
-    }
-
-    var dups = getDuplicates();
-
-    // Alerte doublons globale
-    var dupKeys = Object.keys(dups);
-    if (dupKeys.length > 0) {
-      var dupNames = [];
-      files.forEach(function (f) {
-        var key = f.name + '|' + f.size;
-        if (dups[key] && dupNames.indexOf(f.name) === -1) dupNames.push(f.name);
-      });
-      dupAlertText.innerHTML = '<strong>Doublon(s) détecté(s) :</strong> ' +
-        dupNames.map(function (n) { return '<code>' + escHtml(n) + '</code>'; }).join(', ') +
-        ' — même nom <em>et</em> même taille. Vérifiez et retirez les copies avant de générer.';
-      dupAlert.style.display = 'flex';
-    } else {
-      dupAlert.style.display = 'none';
-    }
-
-    files.forEach(function (f, idx) {
-      var hasSpace = f.name.indexOf(' ') !== -1;
-      var ext = getExt(f.name);
-      var key = f.name + '|' + f.size;
-      var isDup = !!dups[key];
-      var item = document.createElement('div');
-      item.className = 'file-item is-' + ext +
-        (hasSpace ? ' has-space' : '') +
-        (isDup    ? ' is-dup'    : '');
-      item.draggable = true;
-      item.dataset.index = idx;
-
-      item.innerHTML =
-        '<span class="drag-handle" title="Réorganiser">&#9776;</span>' +
-        '<span class="file-num">' + (idx + 1) + '</span>' +
-        '<span class="fmt-badge fmt-' + ext + '">' + ext.toUpperCase() + '</span>' +
-        '<span class="file-name" title="' + escHtml(f.name) + '">' + escHtml(f.name) + '</span>' +
-        (hasSpace ? '<span class="space-badge">ESPACE</span>' : '') +
-        (isDup    ? '<span class="dup-badge">DOUBLON</span>'  : '') +
-        '<span class="file-size">' + fmtSize(f.size) + '</span>' +
-        '<button class="btn-remove" data-idx="' + idx + '" title="Retirer">&#215;</button>';
-
-      /* Drag & drop */
-      item.addEventListener('dragstart', function (e) {
-        dragSrcIndex = +this.dataset.index;
-        this.classList.add('dragging');
-        e.dataTransfer.effectAllowed = 'move';
-      });
-      item.addEventListener('dragend', function () {
-        this.classList.remove('dragging');
-        document.querySelectorAll('.file-item').forEach(function (el) { el.classList.remove('drag-target'); });
-      });
-      item.addEventListener('dragover', function (e) {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = 'move';
-        document.querySelectorAll('.file-item').forEach(function (el) { el.classList.remove('drag-target'); });
-        this.classList.add('drag-target');
-      });
-      item.addEventListener('drop', function (e) {
-        e.preventDefault();
-        var targetIndex = +this.dataset.index;
-        if (dragSrcIndex === null || dragSrcIndex === targetIndex) return;
-        var moved = files.splice(dragSrcIndex, 1)[0];
-        files.splice(targetIndex, 0, moved);
-        dragSrcIndex = null;
-        renderList();
-        updateMethodWarning();
-      });
-
-      /* Supprimer */
-      item.querySelector('.btn-remove').addEventListener('click', function () {
-        files.splice(+this.dataset.idx, 1);
-        updateOutputName();
-        renderList();
-        updateBtn();
-        updateMethodWarning();
-        resultSec.style.display = 'none';
-      });
-
-      fileList.appendChild(item);
-    });
-
-    renderPreview(dups);
-  }
-
-  /* ── Prévisualisation ordre de fusion ── */
-  function renderPreview(dups) {
-    previewList.innerHTML = '';
-    if (files.length < 2) {
-      previewSection.style.display = 'none';
-      return;
-    }
-    previewSection.style.display = 'block';
-
-    var totalBytes = 0;
-    files.forEach(function (f) { totalBytes += (f.size || 0); });
-    previewTotalSize.textContent = totalBytes > 0
-      ? 'Poids estimé : ' + fmtSize(totalBytes)
-      : '';
-
-    files.forEach(function (f, idx) {
-      var ext   = getExt(f.name);
-      var key   = f.name + '|' + f.size;
-      var isDup = !!(dups && dups[key]);
-      var row   = document.createElement('div');
-      row.className = 'preview-row' + (isDup ? ' pr-dup' : '');
-
-      var arrowHtml = idx < files.length - 1
-        ? '<span class="pr-arrow">&#8595;</span>'
-        : '<span class="pr-arrow" style="color:var(--success);font-weight:700;">&#9654;</span>';
-
-      row.innerHTML =
-        '<span class="pr-idx">' + (idx + 1) + '</span>' +
-        '<span class="pr-fmt ' + ext + '">' + ext.toUpperCase() + '</span>' +
-        '<span class="pr-name" title="' + escHtml(f.name) + '">' + escHtml(f.name) + '</span>' +
-        (isDup ? '<span class="pr-dup-flag">DOUBLON</span>' : '') +
-        '<span class="pr-size">' + fmtSize(f.size) + '</span>' +
-        arrowHtml;
-
-      previewList.appendChild(row);
-    });
-  }
-
-  function updateBtn() {
-    btnGenerate.disabled = files.length < 2;
-  }
-
-  /* ── Génération ── */
-  btnGenerate.addEventListener('click', function () {
-    if (files.length < 2) return;
-
-    var mixed   = isMixed();
-    var method  = methodSel.value;
-
-    // Si mélange + copy : forcer réencodage MP4
-    if (mixed && method === 'copy') method = 'reencode-mp4';
-
-    var outName = sanitizeFilename(outputName.value.trim() || ('fusion_finale.' + dominantExt()));
-    // Sécurité extension selon méthode
-    if (method === 'reencode-avi') {
-      outName = outName.replace(/\.(mp4|avi)$/i, '') + '.avi';
-    } else {
-      outName = outName.replace(/\.(mp4|avi)$/i, '') + '.mp4';
-      // Sauf si copy et tous AVI
-      if (method === 'copy' && !mixed && countFormats().avi > 0) {
-        outName = outName.replace(/\.mp4$/i, '.avi');
-      }
-    }
-
-    var dirRaw = outputDir.value.trim();
-    var sep    = (dirRaw && dirRaw.indexOf('\\') !== -1) ? '\\' : '/';
-    var outPath = dirRaw
-      ? (dirRaw.replace(/[\/\\]$/, '') + sep + outName)
-      : outName;
-
-    /* Commande concat.txt */
-    var echoParts = files.map(function (f) {
-      var safeName = f.name.replace(/'/g, "''");
-      return "echo file '" + safeName + "'";
-    });
-    var concatCreateCmd = echoParts.length === 1
-      ? echoParts[0] + ' > concat.txt'
-      : '(' + echoParts.join(' & ') + ') > concat.txt';
-    cmdConcatCreate.textContent = concatCreateCmd;
-
-    /* Commande FFmpeg */
-    var ffmpegCmd;
-    if (method === 'copy') {
-      ffmpegCmd = 'ffmpeg -f concat -safe 0 -i concat.txt -c copy "' + outPath + '"';
-    } else if (method === 'reencode-mp4') {
-      ffmpegCmd = 'ffmpeg -f concat -safe 0 -i concat.txt -vcodec libx264 -crf 23 -preset medium -acodec aac -b:a 192k "' + outPath + '"';
-    } else {
-      // reencode-avi
-      ffmpegCmd = 'ffmpeg -f concat -safe 0 -i concat.txt -vcodec mpeg4 -acodec mp3 "' + outPath + '"';
-    }
-    cmdDisplay.textContent = ffmpegCmd;
-
-    /* Contenu concat.txt */
-    var concatContent = files.map(function (f) {
-      return "file '" + f.name.replace(/'/g, "\\'") + "'";
-    }).join('\n');
-    concatDisp.textContent = concatContent;
-
-    /* Badge + contexte format */
-    var c = countFormats();
-    if (mixed) {
-      resultBadge.className = 'badge-mixed';
-      resultBadge.textContent = '⚠ Formats mélangés — réencodage MP4 appliqué';
-      resultFmtCtxTxt.innerHTML = 'Formats détectés : <strong>' + c.avi + ' AVI</strong> + <strong>' + c.mp4 + ' MP4</strong>. Les fichiers hétérogènes sont fusionnés en MP4 via réencodage H.264/AAC.';
-      resultFmtCtx.style.display = 'flex';
-    } else if (hasSpaceFiles()) {
-      resultBadge.className = 'badge-warn';
-      resultBadge.textContent = '⚠ Noms avec espaces — lisez la note';
-      resultFmtCtx.style.display = 'none';
-    } else {
-      var fmt = c.avi > 0 ? 'AVI' : 'MP4';
-      resultBadge.className = 'badge-ok';
-      resultBadge.textContent = '✓ ' + files.length + ' fichiers ' + fmt + ' — prêtes à coller';
-      resultFmtCtx.style.display = 'none';
-    }
-
-    resultSec.style.display = 'block';
-    copyFeedback.style.display = 'none';
-    resultSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  });
-
-  /* ── Copier ── */
-  btnCopyConcatCmd.addEventListener('click', function () { copyText(cmdConcatCreate.textContent); });
-  btnCopyFfmpeg.addEventListener('click',    function () { copyText(cmdDisplay.textContent); });
-  btnCopyList.addEventListener('click',      function () { copyText(concatDisp.textContent); });
-
-  function copyText(txt) {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(txt).then(showFeedback);
-    } else {
-      var ta = document.createElement('textarea');
-      ta.value = txt;
-      ta.style.position = 'fixed';
-      ta.style.opacity  = '0';
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand('copy');
-      document.body.removeChild(ta);
-      showFeedback();
-    }
-  }
-  function showFeedback() {
-    copyFeedback.style.display = 'block';
-    setTimeout(function () { copyFeedback.style.display = 'none'; }, 2500);
-  }
-
-  /* ── Reset ── */
-  btnReset.addEventListener('click', function () {
-    files = [];
-    dragSrcIndex = null;
-    renderList();
-    updateBtn();
-    resultSec.style.display   = 'none';
-    spacesAlert.style.display  = 'none';
-    mixedAlert.style.display   = 'none';
-    methodWarn.style.display   = 'none';
-    dupAlert.style.display     = 'none';
-    previewSection.style.display = 'none';
-    outputName.value = 'fusion_finale.mp4';
-    outputDir.value  = '';
-    methodSel.value  = 'copy';
-  });
-
-  /* ── Utils ── */
-  function fmtSize(bytes) {
-    if (!bytes) return '';
-    var mb = bytes / (1024 * 1024);
-    return mb >= 1 ? mb.toFixed(1) + ' Mo' : (bytes / 1024).toFixed(0) + ' Ko';
-  }
-  function escHtml(s) {
-    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
-  function sanitizeFilename(s) {
-    return s.replace(/[<>:"|?*]/g, '_');
-  }
-
 })();
 </script>
 
-<!-- TRACKING UMAMI (RGPD compliant, no cookies) -->
-<script defer src="https://cloud.umami.is/script.js" data-website-id="b182aba6-225e-47ac-b6be-892e033a6013"></script>
+<!-- Vérification premium -->
+<script>
+(function() {
+    var WP_ENDPOINT = 'https://www.dr-karazaitri-ma.net/wp-json/kz/v1/verify-token';
+
+    // Récupérer le token depuis l'URL si présent
+    var urlParams    = new URLSearchParams(window.location.search);
+    var tokenFromUrl = urlParams.get('token');
+    if (tokenFromUrl) {
+        localStorage.setItem('kz_premium_token', tokenFromUrl);
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    var token = localStorage.getItem('kz_premium_token');
+
+    if (!token) {
+        setPremiumState(false);
+        return;
+    }
+
+    fetch(WP_ENDPOINT + '?token=' + encodeURIComponent(token))
+        .then(function(r) { return r.json(); })
+        .then(function(data) { setPremiumState(data.valid === true); })
+        .catch(function() { setPremiumState(false); });
+
+    function setPremiumState(isPremium) {
+
+        // Cartes premium : cliquables si premium, grisées et bloquées sinon
+        document.querySelectorAll('[data-premium="true"]').forEach(function(card) {
+            if (!isPremium) {
+                card.classList.add('kz-locked');
+                card.setAttribute('title', 'Accès réservé aux membres premium');
+                // Intercepter le clic pour rediriger vers la page de connexion
+                card.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    window.location.href = 'https://www.dr-karazaitri-ma.net/connexion-membres/';
+                });
+            }
+        });
+
+        // Bandeau non-membre
+        var banner = document.getElementById('kz-guest-banner');
+        if (banner) banner.style.display = isPremium ? 'none' : 'block';
+    }
+})();
+</script>
+
 </body>
 </html>
