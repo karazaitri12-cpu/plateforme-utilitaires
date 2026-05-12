@@ -242,6 +242,119 @@ header p.sub {
 }
 .btn-remove:hover { color: var(--danger); }
 
+/* ── Badge doublon ── */
+.dup-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 10px;
+  background: var(--danger-bg);
+  color: var(--danger);
+  border: 1px solid #fca5a5;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.file-item.is-dup {
+  border-color: #fca5a5;
+  background: #fff5f5;
+}
+
+/* ── Prévisualisation ordre de fusion ── */
+#preview-section {
+  display: none;
+  margin-top: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+#preview-section .preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 14px;
+  background: var(--accent-lt);
+  border-bottom: 1px solid #c7d9f5;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--accent);
+  gap: 8px;
+}
+#preview-section .preview-header span.total-size {
+  font-size: 11.5px;
+  font-weight: 400;
+  color: var(--muted);
+  text-transform: none;
+  letter-spacing: 0;
+  margin-left: auto;
+}
+#preview-list {
+  display: flex;
+  flex-direction: column;
+}
+.preview-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 14px;
+  font-size: 12.5px;
+  border-bottom: 1px solid var(--border);
+}
+.preview-row:last-child { border-bottom: none; }
+.preview-row.pr-dup { background: #fff5f5; }
+.pr-idx {
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--accent);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.pr-arrow {
+  font-size: 11px;
+  color: #c0c8d4;
+  flex-shrink: 0;
+}
+.pr-name {
+  flex: 1;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pr-fmt {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+.pr-fmt.avi { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
+.pr-fmt.mp4 { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+.pr-size {
+  font-size: 11px;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+.pr-dup-flag {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 8px;
+  background: var(--danger-bg);
+  color: var(--danger);
+  border: 1px solid #fca5a5;
+  flex-shrink: 0;
+}
+
 /* ── Résumé formats ── */
 #format-summary {
   display: none;
@@ -543,6 +656,21 @@ body { -ms-overflow-style: none; overflow-y: auto; }
   </div>
 
   <div id="file-list"></div>
+
+  <!-- Alerte doublons -->
+  <div id="dup-alert" class="alert error" style="display:none;">
+    <span class="alert-icon">&#9888;&#65039;</span>
+    <div id="dup-alert-text"></div>
+  </div>
+
+  <!-- Prévisualisation ordre de fusion -->
+  <div id="preview-section">
+    <div class="preview-header">
+      <span>&#128065;&#65039; Ordre de fusion &#8212; vérification avant génération</span>
+      <span class="total-size" id="preview-total-size"></span>
+    </div>
+    <div id="preview-list"></div>
+  </div>
 </div>
 
 <!-- Étape 2 : Options -->
@@ -813,6 +941,11 @@ body { -ms-overflow-style: none; overflow-y: auto; }
   var resultBadge     = document.getElementById('result-badge');
   var resultFmtCtx    = document.getElementById('result-format-ctx');
   var resultFmtCtxTxt = document.getElementById('result-format-ctx-text');
+  var dupAlert        = document.getElementById('dup-alert');
+  var dupAlertText    = document.getElementById('dup-alert-text');
+  var previewSection  = document.getElementById('preview-section');
+  var previewList     = document.getElementById('preview-list');
+  var previewTotalSize= document.getElementById('preview-total-size');
 
   /* ── Utilitaires format ── */
   function getExt(filename) {
@@ -869,6 +1002,20 @@ body { -ms-overflow-style: none; overflow-y: auto; }
     renderList();
     updateBtn();
     updateMethodWarning();
+  }
+
+  /* ── Détection doublons (même nom + même taille) ── */
+  function getDuplicates() {
+    var seen = {};
+    var dups = {};
+    files.forEach(function (f) {
+      var key = f.name + '|' + f.size;
+      if (seen[key]) {
+        dups[key] = true;
+      }
+      seen[key] = true;
+    });
+    return dups; // objet { "nom|taille": true, ... }
   }
 
   /* ── Mise à jour automatique nom de sortie ── */
@@ -936,22 +1083,45 @@ body { -ms-overflow-style: none; overflow-y: auto; }
       listCount.textContent = files.length + (files.length > 1 ? ' fichiers' : ' fichier');
     }
 
+    var dups = getDuplicates();
+
+    // Alerte doublons globale
+    var dupKeys = Object.keys(dups);
+    if (dupKeys.length > 0) {
+      var dupNames = [];
+      files.forEach(function (f) {
+        var key = f.name + '|' + f.size;
+        if (dups[key] && dupNames.indexOf(f.name) === -1) dupNames.push(f.name);
+      });
+      dupAlertText.innerHTML = '<strong>Doublon(s) détecté(s) :</strong> ' +
+        dupNames.map(function (n) { return '<code>' + escHtml(n) + '</code>'; }).join(', ') +
+        ' — même nom <em>et</em> même taille. Vérifiez et retirez les copies avant de générer.';
+      dupAlert.style.display = 'flex';
+    } else {
+      dupAlert.style.display = 'none';
+    }
+
     files.forEach(function (f, idx) {
       var hasSpace = f.name.indexOf(' ') !== -1;
       var ext = getExt(f.name);
+      var key = f.name + '|' + f.size;
+      var isDup = !!dups[key];
       var item = document.createElement('div');
-      item.className = 'file-item is-' + ext + (hasSpace ? ' has-space' : '');
+      item.className = 'file-item is-' + ext +
+        (hasSpace ? ' has-space' : '') +
+        (isDup    ? ' is-dup'    : '');
       item.draggable = true;
       item.dataset.index = idx;
 
       item.innerHTML =
-        '<span class="drag-handle" title="Réorganiser">☰</span>' +
+        '<span class="drag-handle" title="Réorganiser">&#9776;</span>' +
         '<span class="file-num">' + (idx + 1) + '</span>' +
         '<span class="fmt-badge fmt-' + ext + '">' + ext.toUpperCase() + '</span>' +
         '<span class="file-name" title="' + escHtml(f.name) + '">' + escHtml(f.name) + '</span>' +
         (hasSpace ? '<span class="space-badge">ESPACE</span>' : '') +
+        (isDup    ? '<span class="dup-badge">DOUBLON</span>'  : '') +
         '<span class="file-size">' + fmtSize(f.size) + '</span>' +
-        '<button class="btn-remove" data-idx="' + idx + '" title="Retirer">×</button>';
+        '<button class="btn-remove" data-idx="' + idx + '" title="Retirer">&#215;</button>';
 
       /* Drag & drop */
       item.addEventListener('dragstart', function (e) {
@@ -991,6 +1161,46 @@ body { -ms-overflow-style: none; overflow-y: auto; }
       });
 
       fileList.appendChild(item);
+    });
+
+    renderPreview(dups);
+  }
+
+  /* ── Prévisualisation ordre de fusion ── */
+  function renderPreview(dups) {
+    previewList.innerHTML = '';
+    if (files.length < 2) {
+      previewSection.style.display = 'none';
+      return;
+    }
+    previewSection.style.display = 'block';
+
+    var totalBytes = 0;
+    files.forEach(function (f) { totalBytes += (f.size || 0); });
+    previewTotalSize.textContent = totalBytes > 0
+      ? 'Poids estimé : ' + fmtSize(totalBytes)
+      : '';
+
+    files.forEach(function (f, idx) {
+      var ext   = getExt(f.name);
+      var key   = f.name + '|' + f.size;
+      var isDup = !!(dups && dups[key]);
+      var row   = document.createElement('div');
+      row.className = 'preview-row' + (isDup ? ' pr-dup' : '');
+
+      var arrowHtml = idx < files.length - 1
+        ? '<span class="pr-arrow">&#8595;</span>'
+        : '<span class="pr-arrow" style="color:var(--success);font-weight:700;">&#9654;</span>';
+
+      row.innerHTML =
+        '<span class="pr-idx">' + (idx + 1) + '</span>' +
+        '<span class="pr-fmt ' + ext + '">' + ext.toUpperCase() + '</span>' +
+        '<span class="pr-name" title="' + escHtml(f.name) + '">' + escHtml(f.name) + '</span>' +
+        (isDup ? '<span class="pr-dup-flag">DOUBLON</span>' : '') +
+        '<span class="pr-size">' + fmtSize(f.size) + '</span>' +
+        arrowHtml;
+
+      previewList.appendChild(row);
     });
   }
 
@@ -1108,10 +1318,12 @@ body { -ms-overflow-style: none; overflow-y: auto; }
     dragSrcIndex = null;
     renderList();
     updateBtn();
-    resultSec.style.display  = 'none';
-    spacesAlert.style.display = 'none';
-    mixedAlert.style.display  = 'none';
-    methodWarn.style.display  = 'none';
+    resultSec.style.display   = 'none';
+    spacesAlert.style.display  = 'none';
+    mixedAlert.style.display   = 'none';
+    methodWarn.style.display   = 'none';
+    dupAlert.style.display     = 'none';
+    previewSection.style.display = 'none';
     outputName.value = 'fusion_finale.mp4';
     outputDir.value  = '';
     methodSel.value  = 'copy';
