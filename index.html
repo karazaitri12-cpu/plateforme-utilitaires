@@ -1,516 +1,358 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plateforme Utilitaires | Dr KARA-ZAITRI M.A</title>
-    <meta name="description" content="Utilitaires techniques et bureautiques pour professionnels de santé.">
-    <style>
-        /* --- BASE & DESIGN SYSTEM INSTITUTIONNEL --- */
-        #med-hub-full {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif !important;
-            color: #4a6977 !important;
-            background-color: #ffffff !important;
-            width: 100% !important;
-            margin: 0 auto !important;
-        }
-
-        /* EN-TÊTE PRINCIPAL */
-        #med-hub-full .main-header {
-            background: #fff !important;
-            border-bottom: 3px solid #1a3a5c !important;
-            padding: 25px 20px !important;
-            text-align: center !important;
-        }
-        #med-hub-full .main-header h1 {
-            font-size: 20px !important;
-            color: #1a3a5c !important;
-            margin: 0 !important;
-            text-transform: uppercase !important;
-            letter-spacing: 0.5px !important;
-            font-weight: 700 !important;
-        }
-        #med-hub-full .main-header .subtitle {
-            font-size: 13px !important;
-            color: #607d8b !important;
-            margin: 5px 0 0 0 !important;
-        }
-        #med-hub-full .main-header .subtitle a {
-            color: #1a3a5c !important;
-            text-decoration: none !important;
-            border-bottom: 1px dotted #1a3a5c !important;
-        }
-
-        /* BARRE DE RECHERCHE */
-        #med-hub-full .search-section {
-            background: #f4f7f9 !important;
-            padding: 20px !important;
-            border-bottom: 1px solid #cfd8dc !important;
-        }
-        #med-hub-full .search-wrapper {
-            position: relative !important;
-            max-width: 500px !important;
-            margin: 0 auto !important;
-        }
-        #med-hub-full #tool-search {
-            width: 100% !important;
-            height: 44px !important;
-            padding: 0 45px !important;
-            border: 1px solid #cfd8dc !important;
-            border-radius: 8px !important;
-            outline: none !important;
-            font-size: 16px !important;
-        }
-        #med-hub-full #tool-search:focus { border-color: #1a3a5c !important; }
-        #med-hub-full .search-icon { position: absolute !important; left: 15px; top: 13px; font-size: 18px; color: #90a4ae; }
-        #med-hub-full #clear-search { position: absolute !important; right: 12px; top: 5px; font-size: 28px; color: #cfd8dc; cursor: pointer; display: none; }
-
-        /* SECTIONS PAR CATÉGORIE */
-        .category-section {
-            padding: 25px 20px !important;
-            border-bottom: 1px solid #f0f0f0 !important;
-        }
-        .category-section:last-child { border-bottom: none !important; }
-        
-        .category-title {
-            font-size: 16px !important;
-            font-weight: 700 !important;
-            color: #546e7a !important;
-            margin: 0 0 20px 0 !important;
-            padding-bottom: 8px !important;
-            border-bottom: 2px solid #cfd8dc !important;
-            display: flex !important;
-            align-items: center !important;
-            gap: 8px !important;
-            text-transform: uppercase !important;
-            letter-spacing: 0.5px !important;
-        }
-
-        /* GRILLE */
-        #med-hub-full .tools-grid {
-            display: grid !important;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
-            gap: 15px !important;
-        }
-
-        .tool-card-med {
-            display: flex !important;
-            flex-direction: column !important;
-            text-decoration: none !important;
-            background: #ffffff !important;
-            border: 1px solid #e0e6ed !important;
-            padding: 20px !important;
-            position: relative !important;
-            border-radius: 10px !important;
-            transition: all 0.3s ease !important;
-        }
-
-        .tool-card-med:hover { 
-            border-color: #1a3a5c !important; 
-            box-shadow: 0 6px 15px rgba(0,0,0,0.08) !important; 
-            transform: translateY(-3px) !important; 
-        }
-
-        .tool-card-med.hidden { display: none !important; }
-
-        /* ✅ CARTES PREMIUM VERROUILLÉES pour les non-membres */
-        .tool-card-med[data-premium="true"].kz-locked {
-            opacity: 0.6 !important;
-            cursor: not-allowed !important;
-            pointer-events: none !important;
-            filter: grayscale(30%) !important;
-        }
-
-        .tool-header-flex { display: flex !important; align-items: center !important; margin-bottom: 10px !important; }
-        .tool-icon-small { height: 35px !important; width: 35px !important; object-fit: contain !important; margin-right: 15px !important; flex-shrink: 0 !important; }
-        .tool-name-med { font-size: 16px !important; font-weight: 700 !important; color: #1a3a5c !important; margin: 0 !important; line-height: 1.2 !important; }
-        .tool-desc-med { font-size: 13.5px !important; color: #546e7a !important; font-weight: 400; margin: 0 !important; line-height: 1.4 !important; }
-
-        /* BADGES */
-        .premium-ribbon {
-            position: absolute !important;
-            top: 8px !important;
-            right: 10px !important;
-            color: #C9A961 !important;
-            font-size: 20px !important;
-        }
-        .badge-coming {
-            position: absolute !important;
-            top: 12px !important;
-            right: 12px !important;
-            background: #ff9800 !important;
-            color: #fff !important;
-            padding: 3px 10px !important;
-            border-radius: 12px !important;
-            font-size: 11px !important;
-            font-weight: 700 !important;
-        }
-
-        /* BANDEAU NON-MEMBRE */
-        #kz-guest-banner {
-            display: none;
-            background: #c62828;
-            color: #fff;
-            text-align: center;
-            padding: 12px 20px;
-            font-size: 13px;
-            font-weight: 600;
-        }
-       #kz-guest-banner a {
-    color: #ffffff;
-    text-decoration: underline;
-    font-weight: 800;
-    margin-left: 8px;
-    background: rgba(0,0,0,0.25);
-    padding: 2px 8px;
-    border-radius: 4px;
-}
-        .portal-disclaimer { 
-            margin: 0 20px 40px 20px !important; 
-            padding: 15px !important; 
-            background: #fbfbfb !important; 
-            border: 1px dashed #cfd8dc !important; 
-            border-radius: 8px !important;
-            font-size: 11px !important; 
-            color: #78909c !important; 
-            text-align: center !important;
-        }
-
-        @media (max-width: 600px) {
-            #med-hub-full .main-header { padding: 20px 15px !important; }
-            #med-hub-full .tools-grid { grid-template-columns: 1fr !important; }
-        }
-    </style>
-</head>
-<body>
-
-<div id="med-hub-full">
-
-    <!-- BANDEAU VISIBLE UNIQUEMENT AUX NON-MEMBRES -->
-    <div id="kz-guest-banner">
-        ★ Certains outils sont réservés aux membres premium.
-        <a href="https://www.dr-karazaitri-ma.net/compte-dadherent/paiement-dadhesion/">Activer mon accès</a>
-        &nbsp;|&nbsp;
-        <a href="https://www.dr-karazaitri-ma.net/connexion-membres/">Se connecter</a>
-    </div>
-
-    <!-- EN-TÊTE -->
-    <header class="main-header">
-        <h1>Plateforme Utilitaires Techniques</h1>
-        <p class="subtitle">Outils bureautiques et productivité | Site FemCare Hub sur <a href="https://www.dr-karazaitri-ma.net">www.dr-karazaitri-ma.net</a></p>
-    </header>
-
-    <!-- RECHERCHE -->
-    <div class="search-section">
-        <div class="search-wrapper">
-            <span class="search-icon">&#128269;</span>
-            <input type="text" id="tool-search" placeholder="Rechercher un utilitaire...">
-            <span id="clear-search">&times;</span>
-        </div>
-    </div>
-
-    <!-- ========== SECTION 1: CALCUL & CONVERSION ========== -->
-    <section class="category-section">
-        <h2 class="category-title">📊 CALCUL & CONVERSION</h2>
-        <div class="tools-grid">
-
-            <a href="Utilitaires/calculatrice/" class="tool-card-med" data-cat="util" data-search="calculatrice mémoire trigonométrie scientifique pourcentage">
-                <div class="tool-header-flex">
-                    <span class="tool-icon-small" style="font-size:28px">🧮</span>
-                    <h3 class="tool-name-med">Calculatrice Clinique</h3>
-                </div>
-                <p class="tool-desc-med">Opérations avancées, mémoire, fonctions scientifiques, pourcentages contextuels.</p>
-            </a>
-
-            <a href="Utilitaires/convertisseur/" class="tool-card-med" data-cat="util" data-search="convertisseur unités température poids volume vitesse pression énergie">
-                <div class="tool-header-flex">
-                    <span class="tool-icon-small" style="font-size:28px">🔄</span>
-                    <h3 class="tool-name-med">Convertisseur d'unités</h3>
-                </div>
-                <p class="tool-desc-med">Conversion de poids, température, volumes, dosages, vitesses, pressions, énergies.</p>
-            </a>
-
-            <a href="Utilitaires/convertisseur-images/" class="tool-card-med" data-cat="util" data-search="convertisseur images jpeg png webp compression zip">
-                <div class="tool-header-flex">
-                    <span class="tool-icon-small" style="font-size:28px">🖼️</span>
-                    <h3 class="tool-name-med">Convertisseur d'Images</h3>
-                </div>
-                <p class="tool-desc-med">Conversion JPEG/PNG ⇄ WebP avec compression et export ZIP.</p>
-            </a>
-
-            <a href="Utilitaires/convertisseur-gps/" class="tool-card-med" data-cat="util" data-search="gps coordonnées dms plus codes convertisseur">
-                <div class="tool-header-flex">
-                    <span class="tool-icon-small" style="font-size:28px">📍</span>
-                    <h3 class="tool-name-med">Convertisseur GPS</h3>
-                </div>
-                <p class="tool-desc-med">Conversion coordonnées DMS, décimal, Plus Codes Google.</p>
-            </a>
-
-<!-- ✅ PREMIUM - NOUVEAU -->
-<a href="Utilitaires/fusion-avi/" class="tool-card-med" data-cat="util" data-search="fusion avi vidéo concaténation ffmpeg commande" data-premium="true">
-    <div class="premium-ribbon">★</div>
-    <div class="tool-header-flex">
-        <span class="tool-icon-small" style="font-size:28px">🎬</span>
-        <h3 class="tool-name-med">Fusion vidéos AVI / MP4</h3>
-    </div>
-    <p class="tool-desc-med">Générateur de commande FFmpeg pour concaténer des séquences AVI / MP4.</p>
-</a>
-            
-        </div>
-    </section>
-
-    <!-- ========== SECTION 2: GESTION DE DOCUMENTS ========== -->
-    <section class="category-section">
-        <h2 class="category-title">📄 GESTION DE DOCUMENTS</h2>
-        <div class="tools-grid">
-
-            <!-- ✅ PREMIUM -->
-            <a href="Utilitaires/ocr-photos/" class="tool-card-med" data-cat="gestion" data-search="ocr photos texte extraction reconnaissance" data-premium="true">
-                <div class="premium-ribbon">★</div>
-                <div class="tool-header-flex">
-                    <span class="tool-icon-small" style="font-size:28px">📷</span>
-                    <h3 class="tool-name-med">OCR Photos</h3>
-                </div>
-                <p class="tool-desc-med">Extraction de texte depuis images ou captures d'écran.</p>
-            </a>
-
-            <!-- ✅ PREMIUM -->
-            <a href="Utilitaires/pdf-ocr/" class="tool-card-med" data-cat="gestion" data-search="pdf ocr numérisation document scan reconnaissance texte" data-premium="true">
-                <div class="premium-ribbon">★</div>
-                <div class="tool-header-flex">
-                    <span class="tool-icon-small" style="font-size:28px">📄</span>
-                    <h3 class="tool-name-med">PDF OCR</h3>
-                </div>
-                <p class="tool-desc-med">Numérisation et reconnaissance de PDF scannés en texte éditable.</p>
-            </a>
-
-            <!-- ✅ PREMIUM -->
-            <a href="Utilitaires/pdf-manager/" class="tool-card-med" data-cat="gestion" data-search="pdf manager fusion découpage édition" data-premium="true">
-                <div class="premium-ribbon">★</div>
-                <div class="tool-header-flex">
-                    <span class="tool-icon-small" style="font-size:28px">📑</span>
-                    <h3 class="tool-name-med">PDF Manager</h3>
-                </div>
-                <p class="tool-desc-med">Fusion, découpage, compression et édition de documents PDF.</p>
-            </a>
-
-            <!-- Gratuit -->
-            <a href="Utilitaires/edition-excel/" class="tool-card-med" data-cat="gestion" data-search="excel xls édition tableur modification">
-                <div class="tool-header-flex">
-                    <span class="tool-icon-small" style="font-size:28px">📊</span>
-                    <h3 class="tool-name-med">Édition Excel</h3>
-                </div>
-                <p class="tool-desc-med">Modification de tableurs en ligne avec filtres, tri, export.</p>
-            </a>
-
-            <!-- ✅ PREMIUM -->
-            <a href="Utilitaires/creation-ebook/" class="tool-card-med" data-cat="gestion" data-search="ebook word chapitres assemblage document rédaction" data-premium="true">
-                <div class="premium-ribbon">★</div>
-                <div class="tool-header-flex">
-                    <span class="tool-icon-small" style="font-size:28px">📚</span>
-                    <h3 class="tool-name-med">Création Ebook</h3>
-                </div>
-                <p class="tool-desc-med">Assemblage de fichiers Word en document structuré avec export DOCX.</p>
-            </a>
-
-            <!-- ✅ PREMIUM -->
-            <a href="Utilitaires/generateur-tableaux/" class="tool-card-med" data-cat="gestion" data-search="tableau html générateur structure code édition" data-premium="true">
-                <div class="premium-ribbon">★</div>
-                <div class="tool-header-flex">
-                    <span class="tool-icon-small" style="font-size:28px">📋</span>
-                    <h3 class="tool-name-med">Tableaux HTML</h3>
-                </div>
-                <p class="tool-desc-med">Générateur de structures HTML tabulaires avec édition en direct.</p>
-            </a>
-
-        </div>
-    </section>
-
-    <!-- ========== SECTION 3: UTILITAIRES DIVERS ========== -->
-    <section class="category-section">
-        <h2 class="category-title">🛠️ UTILITAIRES DIVERS</h2>
-        <div class="tools-grid">
-
-            <!-- ✅ PREMIUM -->
-            <a href="Utilitaires/qr-code/" class="tool-card-med" data-cat="util" data-search="qr code générateur lien texte contact" data-premium="true">
-                <div class="premium-ribbon">★</div>
-                <div class="tool-header-flex">
-                    <span class="tool-icon-small" style="font-size:28px">🏷️</span>
-                    <h3 class="tool-name-med">Générateur QR Code</h3>
-                </div>
-                <p class="tool-desc-med">Création de QR codes personnalisés pour liens, textes, contacts.</p>
-            </a>
-
-            <!-- ✅ PREMIUM -->
-            <a href="Utilitaires/comparateur-texte/" class="tool-card-med" data-cat="util" data-search="comparateur texte différence analyse comparaison" data-premium="true">
-                <div class="premium-ribbon">★</div>
-                <div class="tool-header-flex">
-                    <span class="tool-icon-small" style="font-size:28px">📝</span>
-                    <h3 class="tool-name-med">Comparateur de texte</h3>
-                </div>
-                <p class="tool-desc-med">Détection de différences entre deux documents texte avec vue fusionnée.</p>
-            </a>
-
-            <!-- ✅ PREMIUM -->
-            <a href="Utilitaires/analyseur-texte/" class="tool-card-med" data-cat="util" data-search="analyseur texte statistiques mots caractères phrases docx pdf" data-premium="true">
-                <div class="premium-ribbon">★</div>
-                <div class="tool-header-flex">
-                    <span class="tool-icon-small" style="font-size:28px">📈</span>
-                    <h3 class="tool-name-med">Analyseur Texte</h3>
-                </div>
-                <p class="tool-desc-med">Statistiques avancées de fichiers TXT, DOCX et PDF.</p>
-            </a>
-
-            <!-- ✅ PREMIUM - NOUVEAU -->
-            <a href="Utilitaires/recherche-copernic/" class="tool-card-med" data-cat="util" data-search="recherche copernic fichiers indexation texte pdf docx" data-premium="true">
-                <div class="premium-ribbon">★</div>
-                <div class="tool-header-flex">
-                    <span class="tool-icon-small" style="font-size:28px">🔍</span>
-                    <h3 class="tool-name-med">Recherche Copernic</h3>
-                </div>
-                <p class="tool-desc-med">Recherche plein texte locale dans PDF, DOCX et TXT.</p>
-            </a>
-
-            <!-- Gratuit -->
-            <a href="https://www.dr-karazaitri-ma.net/repertoire-telephonique/" class="tool-card-med" data-cat="util" data-search="répertoire téléphone contacts professionnels annuaire">
-                <div class="tool-header-flex">
-                    <span class="tool-icon-small" style="font-size:28px">📞</span>
-                    <h3 class="tool-name-med">Répertoire</h3>
-                </div>
-                <p class="tool-desc-med">Contacts professionnels sécurisés.</p>
-            </a>
-
-            <!-- ✅ PREMIUM - NOUVEAU -->
-<a href="Utilitaires/chronometre/" class="tool-card-med" data-cat="util" data-search="chronomètre compte à rebours temps minuterie consultation" data-premium="true">
-        <div class="tool-header-flex">
-        <span class="tool-icon-small" style="font-size:28px">⏱️</span>
-        <h3 class="tool-name-med">Chronomètre</h3>
-    </div>
-    <p class="tool-desc-med">Chronométrage et compte à rebours pour consultations médicales.</p>
-</a>
-
-        </div>
-    </section>
-
-    <!-- ========== SECTION 4: MÉDICAL ========== -->
-    <section class="category-section">
-        <h2 class="category-title">🏥 MÉDICAL</h2>
-        <div class="tools-grid">
-
-            <a href="https://www.dr-karazaitri-ma.net/suivi-de-la-tension-arterielle/" class="tool-card-med" data-cat="medical" data-search="tension hta suivi auto-mesure tensionnelle">
-                <div class="tool-header-flex">
-                    <span class="tool-icon-small" style="font-size:28px">❤️</span>
-                    <h3 class="tool-name-med">Suivi Tensionnel</h3>
-                </div>
-                <p class="tool-desc-med">Journal d'auto-mesure tensionnelle.</p>
-            </a>
-
-        </div>
-    </section>
-
-    <!-- ========== SECTION 5: LOISIRS ========== -->
-    <section class="category-section">
-        <h2 class="category-title">🎮 LOISIRS</h2>
-        <div class="tools-grid">
-
-            <a href="https://www.dr-karazaitri-ma.net/jeu-de-memoire/" class="tool-card-med" data-cat="loisir" data-search="jeu mémoire cognitif entraînement cerveau">
-                <div class="tool-header-flex">
-                    <span class="tool-icon-small" style="font-size:28px">🧠</span>
-                    <h3 class="tool-name-med">Jeu de Mémoire</h3>
-                </div>
-                <p class="tool-desc-med">Entraînement cognitif et mémoire.</p>
-            </a>
-
-      <a href="Utilitaires/mastermind/" class="tool-card-med" data-cat="loisir" data-search="mastermind jeu couleurs déduction logique code secret" data-premium="true">
-        <div class="tool-header-flex">
-        <span class="tool-icon-small" style="font-size:28px">🎲</span>
-        <h3 class="tool-name-med">Mastermind</h3>
-    </div>
-    <p class="tool-desc-med">Jeu de déduction logique : devinez le code secret en 10 essais.</p>
-</a>
-
-        </div>
-    </section>
-
-    <div class="portal-disclaimer">
-        ⚠️ <strong>Usage bureautique</strong> : Ces utilitaires sont fournis à titre informatif. Aucun fichier n'est envoyé sur un serveur. Les outils médicaux spécialisés restent sur <em>dr-karazaitri-ma.net</em>.
-    </div>
-
-</div><!-- /#med-hub-full -->
-
-<!-- ========== SCRIPTS ========== -->
-
-<!-- Recherche -->
+autre utilitaire (jeu) : Mastermind classique, dont voici le code :
+<!-- Mastermind Classique pour Elementor -->
+<div class="mm-game-container">
+  <h1>Mastermind Classique</h1>
+  <div class="mm-attempts" id="mm-attempts">Essais: 0 / 10</div>
+  <div id="mm-gameBoard"></div>
+  <div class="mm-color-picker" id="mm-colorPicker"></div>
+  <div class="mm-secret-code-container">
+    <div>Code secret :</div>
+    <div class="mm-secret-code-row" id="mm-secretCodeRow"></div>
+  </div>
+  <div id="mm-gameEndMessage"></div>
+  <div class="mm-button-container">
+    <button id="mm-newGameBtn">Nouvelle partie</button>
+    <button id="mm-rulesBtn">Règles du jeu</button>
+  </div>
+  <!-- Bouton Recommencer déplacé ici -->
+  <button id="mm-restartGameBtn" style="display:none; margin: 20px auto 0; display: block;">Recommencer</button>
+</div>
+<style>
+  .mm-game-container {
+    font-family: Arial, sans-serif;
+    background: rgba(139,69,19,0.8);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.2);
+    max-width: 400px;
+    width: 100%;
+    margin: 40px auto;
+    position: relative;
+  }
+  .mm-game-container h1 {
+    text-align: center;
+    color: #f0e68c;
+    font-size: 1.5em;
+    margin-bottom: 15px;
+  }
+  #mm-gameBoard {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .mm-board {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .mm-guess-row, .mm-secret-code-row {
+    display: flex;
+    gap: 5px;
+  }
+  .mm-feedback-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2px;
+    margin-left: 10px;
+  }
+  .mm-hole {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #8b4513;
+    border: 2px solid #deb887;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
+    cursor: pointer;
+  }
+  .mm-feedback-hole {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: #8b4513;
+    border: 1px solid #deb887;
+    box-shadow: inset 0 0 3px rgba(0,0,0,0.5);
+  }
+  .mm-color-picker {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 15px;
+  }
+  .mm-color {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid #deb887;
+    box-shadow: 0 0 3px rgba(0,0,0,0.5);
+  }
+  .mm-attempts {
+    color: #f0e68c;
+    font-size: 0.9em;
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: rgba(139,69,19,0.8);
+    padding: 3px 6px;
+    border-radius: 3px;
+  }
+  .mm-secret-code-container {
+    margin-top: 15px;
+    text-align: center;
+    display: none;
+  }
+  .mm-secret-code-row {
+    justify-content: center;
+    margin-top: 5px;
+  }
+  .mm-secret-hole {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: #8b4513;
+    border: 2px solid #deb887;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
+    transition: background-color 0.5s ease;
+  }
+  #mm-newGameBtn, #mm-restartGameBtn, #mm-rulesBtn {
+    margin-top: 15px;
+    padding: 10px 20px;
+    background: #f0e68c;
+    color: #8b4513;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background 0.3s;
+    display: inline-block;
+  }
+  #mm-newGameBtn:hover, #mm-restartGameBtn:hover, #mm-rulesBtn:hover {
+    background: #deb887;
+  }
+  .mm-button-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+  }
+  #mm-gameEndMessage {
+    text-align: center;
+    color: #f0e68c;
+    font-size: 1.2em;
+    margin-top: 15px;
+    display: none;
+  }
+  #mm-restartGameBtn {
+    margin: 20px auto 0;
+    display: none;
+    width: 60%;
+    text-align: center;
+  }
+  @media (max-width: 500px) {
+    .mm-game-container { max-width: 98vw; }
+    #mm-restartGameBtn { width: 90%; }
+  }
+</style>
 <script>
-(function() {
-    var input    = document.getElementById('tool-search');
-    var clearBtn = document.getElementById('clear-search');
-    var cards    = document.querySelectorAll('.tool-card-med');
+(function(){
+  const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+  const codeLength = 4;
+  const maxAttempts = 10;
+  let secretCode = [];
+  let currentGuess = [];
+  let attempts = 0;
+  let currentRow = 0;
+  let gameEnded = false;
+  // Sélecteurs avec préfixe pour éviter les conflits
+  const gameBoard = document.getElementById('mm-gameBoard');
+  const colorPicker = document.getElementById('mm-colorPicker');
+  const attemptsDisplay = document.getElementById('mm-attempts');
+  const secretCodeContainer = document.querySelector('.mm-secret-code-container');
+  const secretCodeRow = document.getElementById('mm-secretCodeRow');
+  const newGameBtn = document.getElementById('mm-newGameBtn');
+  const restartGameBtn = document.getElementById('mm-restartGameBtn');
+  const gameEndMessage = document.getElementById('mm-gameEndMessage');
+  const rulesBtn = document.getElementById('mm-rulesBtn');
 
-    function filterAll() {
-        var query = input.value.toLowerCase().trim();
-        clearBtn.style.display = query.length > 0 ? 'block' : 'none';
-        cards.forEach(function(card) {
-            var searchData = card.getAttribute('data-search').toLowerCase();
-            card.classList.toggle('hidden', !searchData.includes(query));
-        });
+  function initGame() {
+    secretCode = Array.from({length: codeLength}, () => colors[Math.floor(Math.random() * colors.length)]);
+    renderBoard();
+    renderColorPicker();
+    updateAttempts();
+    gameEnded = false;
+    gameEndMessage.style.display = 'none';
+    restartGameBtn.style.display = 'none';
+    secretCodeContainer.style.display = 'none';
+    currentGuess = [];
+    attempts = 0;
+    currentRow = 0;
+  }
+
+  function renderBoard() {
+    gameBoard.innerHTML = '';
+    for (let i = maxAttempts - 1; i >= 0; i--) {
+      const row = document.createElement('div');
+      row.className = 'mm-board';
+
+      const guessRow = document.createElement('div');
+      guessRow.className = 'mm-guess-row';
+
+      for (let j = 0; j < codeLength; j++) {
+        const hole = document.createElement('div');
+        hole.className = 'mm-hole';
+        hole.dataset.row = i;
+        hole.dataset.col = j;
+        hole.addEventListener('dblclick', () => removeColorFromHole(hole));
+        guessRow.appendChild(hole);
+      }
+      row.appendChild(guessRow);
+
+      const feedbackRow = document.createElement('div');
+      feedbackRow.className = 'mm-feedback-row';
+
+      for (let j = 0; j < codeLength; j++) {
+        const feedbackHole = document.createElement('div');
+        feedbackHole.className = 'mm-feedback-hole';
+        feedbackRow.appendChild(feedbackHole);
+      }
+      row.appendChild(feedbackRow);
+      gameBoard.appendChild(row);
     }
+  }
 
-    input.addEventListener('input', filterAll);
-    clearBtn.addEventListener('click', function() {
-        input.value = '';
-        filterAll();
-        input.focus();
+  function renderColorPicker() {
+    colorPicker.innerHTML = '';
+    colors.forEach(color => {
+      const colorElement = document.createElement('div');
+      colorElement.className = 'mm-color';
+      colorElement.style.backgroundColor = color;
+      colorElement.addEventListener('click', () => selectColor(color));
+      colorPicker.appendChild(colorElement);
     });
+  }
+
+  function selectColor(color) {
+    if (gameEnded) return;
+    if (currentGuess.length < codeLength) {
+      currentGuess.push(color);
+      const holes = document.querySelectorAll(`.mm-hole[data-row="${currentRow}"]`);
+      holes[currentGuess.length - 1].style.backgroundColor = color;
+
+      if (currentGuess.length === codeLength) {
+        checkGuess();
+      }
+    }
+  }
+
+  function removeColorFromHole(hole) {
+    if (gameEnded || parseInt(hole.dataset.row) !== currentRow) return;
+    const index = parseInt(hole.dataset.col);
+    if (index < currentGuess.length) {
+      currentGuess.splice(index, 1);
+      hole.style.backgroundColor = '#8b4513';
+      // Reset colors for the remaining holes
+      const holes = document.querySelectorAll(`.mm-hole[data-row="${currentRow}"]`);
+      for (let i = index + 1; i < holes.length; i++) {
+        holes[i].style.backgroundColor = '#8b4513';
+      }
+      // Reapply colors for the updated guess
+      for (let i = 0; i < currentGuess.length; i++) {
+        holes[i].style.backgroundColor = currentGuess[i];
+      }
+    }
+  }
+
+  function checkGuess() {
+    attempts++;
+    updateAttempts();
+    const result = evaluateGuess();
+    displayFeedback(result);
+
+    if (result.correctPositions === codeLength) {
+      endGame(`Félicitations! Vous avez gagné en ${attempts} essais!`);
+    } else if (attempts >= maxAttempts) {
+      endGame(`Désolé, vous avez épuisé vos ${maxAttempts} essais.`);
+    } else {
+      currentGuess = [];
+      currentRow++;
+    }
+  }
+
+  function evaluateGuess() {
+    let correctPositions = 0;
+    let correctColors = 0;
+    const codeCopy = [...secretCode];
+    const guessCopy = [...currentGuess];
+
+    for (let i = 0; i < codeLength; i++) {
+      if (guessCopy[i] === codeCopy[i]) {
+        correctPositions++;
+        codeCopy[i] = null;
+        guessCopy[i] = null;
+      }
+    }
+    for (let i = 0; i < codeLength; i++) {
+      if (guessCopy[i] !== null) {
+        const index = codeCopy.indexOf(guessCopy[i]);
+        if (index !== -1) {
+          correctColors++;
+          codeCopy[index] = null;
+        }
+      }
+    }
+    return { correctPositions, correctColors };
+  }
+
+  function displayFeedback({ correctPositions, correctColors }) {
+    const feedbackHoles = document.querySelectorAll(`.mm-board:nth-child(${maxAttempts - currentRow}) .mm-feedback-hole`);
+    let index = 0;
+    for (let i = 0; i < correctPositions; i++) {
+      feedbackHoles[index].style.backgroundColor = '#000000'; // Noir
+      index++;
+    }
+    for (let i = 0; i < correctColors; i++) {
+      feedbackHoles[index].style.backgroundColor = '#ffffff'; // Blanc
+      index++;
+    }
+  }
+
+  function revealSecretCode() {
+    secretCodeContainer.style.display = 'block';
+    secretCodeRow.innerHTML = '';
+    for (let i = 0; i < codeLength; i++) {
+      const secretHole = document.createElement('div');
+      secretHole.className = 'mm-secret-hole';
+      secretHole.style.backgroundColor = secretCode[i];
+      secretCodeRow.appendChild(secretHole);
+    }
+  }
+
+  function updateAttempts() {
+    attemptsDisplay.textContent = `Essais: ${attempts} / ${maxAttempts}`;
+  }
+
+  function endGame(message) {
+    gameEnded = true;
+    gameEndMessage.textContent = message;
+    gameEndMessage.style.display = 'block';
+    restartGameBtn.style.display = 'block';
+    revealSecretCode();
+  }
+
+  function showRules() {
+    alert("Règles du Mastermind:\n\n" +
+          "1. Le but du jeu est de deviner le code secret composé de 4 couleurs.\n" +
+          "2. Vous avez 10 essais pour trouver le code.\n" +
+          "3. Après chaque essai, vous recevez des indices :\n" +
+          "   - Un pion noir signifie une couleur correcte à la bonne position.\n" +
+          "   - Un pion blanc signifie une couleur correcte mais mal placée.\n" +
+          "4. Utilisez ces indices pour déduire le code secret.\n" +
+          "5. Gagnez en trouvant le code exact avant d'épuiser vos essais !\n" +
+          "6. Vous pouvez annuler une couleur en double-cliquant sur elle dans la rangée actuelle.");
+  }
+
+  newGameBtn.addEventListener('click', initGame);
+  restartGameBtn.addEventListener('click', initGame);
+  rulesBtn.addEventListener('click', showRules);
+
+  initGame();
 })();
 </script>
-
-<!-- Vérification premium -->
-<script>
-(function() {
-    var WP_ENDPOINT = 'https://www.dr-karazaitri-ma.net/wp-json/kz/v1/verify-token';
-
-    // Récupérer le token depuis l'URL si présent
-    var urlParams    = new URLSearchParams(window.location.search);
-    var tokenFromUrl = urlParams.get('token');
-    if (tokenFromUrl) {
-        localStorage.setItem('kz_premium_token', tokenFromUrl);
-        window.history.replaceState({}, document.title, window.location.pathname);
-    }
-
-    var token = localStorage.getItem('kz_premium_token');
-
-    if (!token) {
-        setPremiumState(false);
-        return;
-    }
-
-    fetch(WP_ENDPOINT + '?token=' + encodeURIComponent(token))
-        .then(function(r) { return r.json(); })
-        .then(function(data) { setPremiumState(data.valid === true); })
-        .catch(function() { setPremiumState(false); });
-
-    function setPremiumState(isPremium) {
-
-        // Cartes premium : cliquables si premium, grisées et bloquées sinon
-        document.querySelectorAll('[data-premium="true"]').forEach(function(card) {
-            if (!isPremium) {
-                card.classList.add('kz-locked');
-                card.setAttribute('title', 'Accès réservé aux membres premium');
-                // Intercepter le clic pour rediriger vers la page de connexion
-                card.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    window.location.href = 'https://www.dr-karazaitri-ma.net/connexion-membres/';
-                });
-            }
-        });
-
-        // Bandeau non-membre
-        var banner = document.getElementById('kz-guest-banner');
-        if (banner) banner.style.display = isPremium ? 'none' : 'block';
-    }
-})();
-</script>
-
-</body>
-</html>
