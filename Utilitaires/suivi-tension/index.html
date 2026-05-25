@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Carnet de Tension Artérielle — Suivi Personnel</title>
+<style>
+/* ============================================================
+   BLINDAGE ELEMENTOR — Reset ciblé
+   ============================================================ */
+#kz-tension-app,
+#kz-tension-app * {
+  box-sizing: border-box;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+}
+#kz-tension-app h1,
+#kz-tension-app h2,
+#kz-tension-app h3,
+#kz-tension-app h4 {
+  color: inherit !important;
+  font-weight: 600;
+  margin: 0 0 0.5em 0;
+  padding: 0;
+  line-height: 1.3;
+}
+
+/* ============================================================
+   VARIABLES
+   ============================================================ */
+:root {
+  --primary:    #1a3a5c;
+  --primary-lt: #2a5485;
+  --accent:     #2196f3;
+  --surface:    #ffffff;
+  --bg:         #f5f7fa;
+  --border:     #dde3ea;
+  --text:       #1e2a35;
+  --text-muted: #607d8b;
+  --radius:     6px;
+  --shadow:     0 1px 4px rgba(0,0,0,.08), 0 3px 12px rgba(0,0,0,.06);
+
+  --ok:         #4caf50;
+  --ok-bg:      #e8f5e9;
+  --warn1:      #f9a825;
+  --warn1-bg:   #fff8e1;
+  --warn2:      #ef6c00;
+  --warn2-bg:   #fff3e0;
+  --danger:     #c62828;
+  --danger-bg:  #ffebee;
+}
+
+/* ============================================================
+   CONTENEUR PRINCIPAL
+   ============================================================ */
+#kz-tension-app {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 24px 16px 40px;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* EN-TÊTE */
+.kz-header {
+  background: var(--primary);
+  color: #fff;
+  border-radius: var(--radius);
+  padding: 20px 24px 18px;
+  margin-bottom: 20px;
+}
+.kz-header-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 6px;
+}
+.kz-header-icon {
+  width: 42px;
+  height: 42px;
+  background: rgba(255,255,255,.15);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+.kz-header h1 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fff !important;
+  margin: 0 !important;
+}
+.kz-header-sub {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,.7);
+  margin-top: 4px;
+}
+
+/* CARTES STATISTIQUES */
+.kz-stats-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.kz-stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  box-shadow: var(--shadow);
+}
+.kz-stat-card .stat-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+.kz-stat-values {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+.kz-stat-badge {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+.kz-stat-sep { color: var(--text-muted); font-size: 0.85rem; }
+.kz-stat-unit { font-size: 0.72rem; color: var(--text-muted); }
+.kz-stat-empty { font-size: 0.8rem; color: var(--text-muted); font-style: italic; }
+
+/* PANEL SAISIE */
+.kz-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+}
+.kz-panel-title {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+}
+.kz-form-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.kz-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.kz-form-group label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: .03em;
+}
+.kz-form-group input {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  font-size: 0.9rem;
+  color: var(--text);
+  background: var(--bg);
+  outline: none;
+  transition: border-color .2s;
+  width: 100%;
+}
+.kz-form-group input:focus { border-color: var(--accent); }
+
+.kz-btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.kz-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: var(--radius);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: opacity .2s, transform .1s;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.kz-btn:active { transform: scale(.97); }
+.kz-btn-primary {
+  background: var(--primary);
+  color: #fff;
+}
+.kz-btn-secondary {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+.kz-btn-outline {
+  background: transparent;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+}
+.kz-btn-danger-soft {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+/* TABLEAU */
+.kz-table-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.kz-table-wrap table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.kz-table-wrap thead th {
+  background: var(--primary);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  padding: 11px 12px;
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+}
+.kz-table-wrap thead th:first-child { cursor: default; width: 40px; }
+.kz-table-wrap thead th.sort-asc::after  { content: ' \25B2'; font-size: .65em; }
+.kz-table-wrap thead th.sort-desc::after { content: ' \25BC'; font-size: .65em; }
+.kz-table-wrap tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background .15s;
+}
+.kz-table-wrap tbody tr:last-child { border-bottom: none; }
+.kz-table-wrap tbody tr:hover { background: var(--bg); }
+.kz-table-wrap tbody td {
+  padding: 9px 12px;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+.kz-table-wrap tbody td:nth-child(4),
+.kz-table-wrap tbody td:nth-child(5) {
+  font-weight: 700;
+  font-size: 0.92rem;
+}
+.kz-table-empty {
+  text-align: center;
+  padding: 32px;
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 0.85rem;
+}
+
+/* BADGE TENSION */
+.kz-badge {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 0.88rem;
+}
+.kz-badge-ok     { background: var(--ok-bg);    color: #1b5e20; }
+.kz-badge-warn1  { background: var(--warn1-bg);  color: #e65100; }
+.kz-badge-warn2  { background: var(--warn2-bg);  color: #bf360c; }
+.kz-badge-danger { background: var(--danger-bg); color: var(--danger); }
+
+/* CATÉGORIE */
+.kz-class-tag {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 3px;
+  letter-spacing: .02em;
+}
+
+/* BOUTON SUPPRESSION */
+.kz-del-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 1rem;
+  padding: 2px 6px;
+  border-radius: 3px;
+  transition: background .15s, color .15s;
+  line-height: 1;
+}
+.kz-del-btn:hover { background: var(--danger-bg); color: var(--danger); }
+
+/* GRAPHIQUE */
+.kz-chart-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 18px 20px;
+  margin-bottom: 16px;
+}
+.kz-chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.kz-chart-canvas-wrap {
+  position: relative;
+  height: 260px;
+}
+
+/* LÉGENDE */
+.kz-legend {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.kz-legend-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  font-size: 0.78rem;
+}
+.kz-legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.kz-legend-item strong { display: block; font-size: 0.8rem; margin-bottom: 2px; }
+
+/* MENTION LÉGALE */
+.kz-legal {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+  margin-top: 4px;
+  line-height: 1.6;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 600px) {
+  .kz-form-row { grid-template-columns: 1fr 1fr; }
+  .kz-stats-row { grid-template-columns: 1fr; }
+  .kz-legend { grid-template-columns: 1fr; }
+  .kz-header h1 { font-size: 1rem; }
+}
+
+
+/* ============================================================
+   MASQUE ASCENSEUR (style App native)
+   ============================================================ */
+html { scrollbar-width: none; }
+body { -ms-overflow-style: none; overflow-y: auto; }
+::-webkit-scrollbar { display: none; }
+</style>
+</head>
+<body>
+
+
+<div id="kz-tension-app">
+
+  <!-- EN-TÊTE -->
+  <div class="kz-header">
+    <div class="kz-header-top">
+      <div class="kz-header-icon">&#10084;</div>
+      <div>
+        <h1>Carnet de Tension Art&eacute;rielle</h1>
+        <div class="kz-header-sub">Suivi personnel des mesures domiciliaires &mdash; Classification ESH/ESC 2023</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATISTIQUES -->
+  <div class="kz-stats-row">
+    <div class="kz-stat-card" id="statToday">
+      <div class="stat-label">&#128197; Moyenne du jour</div>
+      <div id="statTodayContent"><span class="kz-stat-empty">Aucune mesure aujourd&apos;hui</span></div>
+    </div>
+    <div class="kz-stat-card" id="statGlobal">
+      <div class="stat-label">&#9654; Moyenne globale</div>
+      <div id="statGlobalContent"><span class="kz-stat-empty">Aucune mesure enregistr&eacute;e</span></div>
+    </div>
+  </div>
+
+  <!-- SAISIE -->
+  <div class="kz-panel">
+    <div class="kz-panel-title">Nouvelle mesure</div>
+    <div class="kz-form-row">
+      <div class="kz-form-group">
+        <label for="kz-date">Date</label>
+        <input type="date" id="kz-date">
+      </div>
+      <div class="kz-form-group">
+        <label for="kz-time">Heure</label>
+        <input type="time" id="kz-time">
+      </div>
+      <div class="kz-form-group">
+        <label for="kz-sys">Systolique (mmHg)</label>
+        <input type="number" id="kz-sys" min="60" max="300" placeholder="ex. 120">
+      </div>
+      <div class="kz-form-group">
+        <label for="kz-dia">Diastolique (mmHg)</label>
+        <input type="number" id="kz-dia" min="30" max="200" placeholder="ex. 80">
+      </div>
+    </div>
+    <div class="kz-btn-row">
+      <button class="kz-btn kz-btn-primary" id="btnAdd">&#43; Ajouter la mesure</button>
+      <button class="kz-btn kz-btn-secondary" id="btnNow">&#9201; Date &amp; heure actuelles</button>
+      <button class="kz-btn kz-btn-outline"  id="btnToggleChart">&#128202; Graphique</button>
+      <button class="kz-btn kz-btn-secondary" id="btnExport">&#128203; Copier / Exporter</button>
+      <button class="kz-btn kz-btn-secondary" id="btnImport">&#128196; Importer</button>
+    </div>
+  </div>
+
+  <!-- GRAPHIQUE (masqué par défaut) -->
+  <div class="kz-chart-panel" id="chartPanel" style="display:none;">
+    <div class="kz-chart-header">
+      <div class="kz-panel-title" style="margin:0;">&#201;volution de la tension art&eacute;rielle</div>
+    </div>
+    <div class="kz-chart-canvas-wrap">
+      <canvas id="kzTensionChart"></canvas>
+    </div>
+  </div>
+
+  <!-- TABLEAU -->
+  <div class="kz-table-wrap">
+    <table id="kzTable">
+      <thead>
+        <tr>
+          <th></th>
+          <th data-col="date">Date</th>
+          <th data-col="time">Heure</th>
+          <th data-col="sys">Systolique</th>
+          <th data-col="dia">Diastolique</th>
+          <th>Classification</th>
+        </tr>
+      </thead>
+      <tbody id="kzTbody">
+        <tr><td colspan="6" class="kz-table-empty">Aucune mesure enregistr&eacute;e. Ajoutez votre premi&egrave;re mesure ci-dessus.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- LÉGENDE -->
+  <div class="kz-legend">
+    <div class="kz-legend-item">
+      <div class="kz-legend-dot" style="background:#c8e6c9;"></div>
+      <div><strong>Normale</strong>Syst. &lt; 140 mmHg <em>et</em> Diast. &lt; 90 mmHg</div>
+    </div>
+    <div class="kz-legend-item">
+      <div class="kz-legend-dot" style="background:#fff9c4;"></div>
+      <div><strong>HTA de stade 1 (l&eacute;g&egrave;re)</strong>Syst. 140&ndash;159 mmHg <em>ou</em> Diast. 90&ndash;99 mmHg</div>
+    </div>
+    <div class="kz-legend-item">
+      <div class="kz-legend-dot" style="background:#ffe0b2;"></div>
+      <div><strong>HTA de stade 2 (mod&eacute;r&eacute;e)</strong>Syst. 160&ndash;179 mmHg <em>ou</em> Diast. 100&ndash;109 mmHg</div>
+    </div>
+    <div class="kz-legend-item">
+      <div class="kz-legend-dot" style="background:#ffcdd2;"></div>
+      <div><strong>HTA de stade 3 (s&eacute;v&egrave;re)</strong>Syst. &ge; 180 mmHg <em>ou</em> Diast. &ge; 110 mmHg</div>
+    </div>
+  </div>
+
+  <!-- MENTION LÉGALE -->
+  <div class="kz-legal">
+    <strong>Avertissement m&eacute;dical &mdash;</strong> Cet outil est destin&eacute; au suivi personnel des mesures domiciliaires de la pression art&eacute;rielle.
+    Il ne constitue pas un acte diagnostique et ne remplace pas la consultation m&eacute;dicale. La classification appliqu&eacute;e est celle des recommandations
+    ESH/ESC 2023. En cas d&apos;HTA stade 3 ou de symptômes (c&eacute;phal&eacute;es intenses, troubles visuels, douleur thoracique), consultez un m&eacute;decin en urgence.
+    Les donn&eacute;es sont stock&eacute;es localement sur votre appareil (localStorage) et ne sont transmises &agrave; aucun serveur.
+  </div>
+
+</div><!-- /kz-tension-app -->
+
+<!-- Chart.js — seule dépendance externe justifiée -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+
+<script>
+/* ============================================================
+   APPLICATION — données & état
+   ============================================================ */
+var measurements = [];
+var sortState = { col: 'date', dir: 'desc' };
+var tensionChart = null;
+var chartVisible = false;
+
+/* ---- Utilitaires de date ---- */
+function toDisplayDate(yyyymmdd) {
+  var p = yyyymmdd.split('-');
+  return p[2] + '-' + p[1] + '-' + p[0];
+}
+function toISODate(ddmmyyyy) {
+  var p = ddmmyyyy.split('-');
+  return p[2] + '-' + p[1] + '-' + p[0];
+}
+
+/* ---- Classification HTA ---- */
+function classify(sys, dia) {
+  sys = parseInt(sys); dia = parseInt(dia);
+  if (sys >= 180 || dia >= 110) return { label: 'HTA stade 3',   cls: 'kz-badge-danger', bg: 'rgba(198,40,40,.08)'  };
+  if (sys >= 160 || dia >= 100) return { label: 'HTA stade 2',   cls: 'kz-badge-warn2',  bg: 'rgba(239,108,0,.08)' };
+  if (sys >= 140 || dia >= 90)  return { label: 'HTA stade 1',   cls: 'kz-badge-warn1',  bg: 'rgba(249,168,37,.08)' };
+  return                               { label: 'Normale',        cls: 'kz-badge-ok',     bg: 'rgba(76,175,80,.06)'  };
+}
+
+/* ---- LocalStorage ---- */
+function save() { localStorage.setItem('kz_ta_data', JSON.stringify(measurements)); }
+function load() {
+  var raw = localStorage.getItem('kz_ta_data');
+  if (!raw) return;
+  measurements = JSON.parse(raw);
+  /* migration : si date au format ISO, convertir */
+  measurements = measurements.map(function(m) {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(m.date)) m.date = toDisplayDate(m.date);
+    return m;
+  });
+}
+
+/* ---- Tri ---- */
+function sortMeasurements(col) {
+  if (sortState.col === col) sortState.dir = sortState.dir === 'asc' ? 'desc' : 'asc';
+  else { sortState.col = col; sortState.dir = 'asc'; }
+
+  measurements.sort(function(a, b) {
+    var va, vb;
+    if (col === 'date' || col === 'time') {
+      va = new Date(toISODate(a.date) + 'T' + a.time);
+      vb = new Date(toISODate(b.date) + 'T' + b.time);
+    } else {
+      va = parseInt(a[col]); vb = parseInt(b[col]);
+    }
+    if (va < vb) return sortState.dir === 'asc' ? -1 : 1;
+    if (va > vb) return sortState.dir === 'asc' ?  1 : -1;
+    return 0;
+  });
+}
+
+/* ---- Rendu tableau ---- */
+function renderTable() {
+  var tbody = document.getElementById('kzTbody');
+  tbody.innerHTML = '';
+
+  if (measurements.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" class="kz-table-empty">Aucune mesure enregistr\u00e9e. Ajoutez votre premi\u00e8re mesure ci-dessus.</td></tr>';
+    return;
+  }
+
+  measurements.forEach(function(m, i) {
+    var cat = classify(m.sys, m.dia);
+    var tr = document.createElement('tr');
+    tr.style.background = cat.bg;
+
+    /* Bouton suppression */
+    var tdDel = document.createElement('td');
+    var btn = document.createElement('button');
+    btn.className = 'kz-del-btn';
+    btn.title = 'Supprimer cette mesure';
+    btn.innerHTML = '\u2715';
+    btn.onclick = (function(idx) { return function() { deleteMeasure(idx); }; })(i);
+    tdDel.appendChild(btn);
+
+    /* Cellules données */
+    var tdDate = document.createElement('td'); tdDate.textContent = m.date;
+    var tdTime = document.createElement('td'); tdTime.textContent = m.time;
+    var tdSys  = document.createElement('td');
+    var tdDia  = document.createElement('td');
+    var tdCat  = document.createElement('td');
+
+    var spanSys = document.createElement('span');
+    spanSys.className = 'kz-badge ' + cat.cls;
+    spanSys.textContent = m.sys + ' mmHg';
+    tdSys.appendChild(spanSys);
+
+    var spanDia = document.createElement('span');
+    spanDia.className = 'kz-badge ' + cat.cls;
+    spanDia.textContent = m.dia + ' mmHg';
+    tdDia.appendChild(spanDia);
+
+    var spanCat = document.createElement('span');
+    spanCat.className = 'kz-class-tag kz-badge ' + cat.cls;
+    spanCat.textContent = cat.label;
+    tdCat.appendChild(spanCat);
+
+    tr.appendChild(tdDel);
+    tr.appendChild(tdDate);
+    tr.appendChild(tdTime);
+    tr.appendChild(tdSys);
+    tr.appendChild(tdDia);
+    tr.appendChild(tdCat);
+    tbody.appendChild(tr);
+  });
+
+  /* Indicateurs de tri */
+  document.querySelectorAll('#kzTable thead th[data-col]').forEach(function(th) {
+    th.classList.remove('sort-asc', 'sort-desc');
+    if (th.dataset.col === sortState.col) {
+      th.classList.add('sort-' + sortState.dir);
+    }
+  });
+}
+
+/* ---- Rendu statistiques ---- */
+function renderStats() {
+  var today = toDisplayDate(new Date().toISOString().split('T')[0]);
+  var todayM = measurements.filter(function(m) { return m.date === today; });
+
+  renderStatBlock('statTodayContent', todayM,     'Aujourd\u0027hui');
+  renderStatBlock('statGlobalContent', measurements, 'Global');
+}
+function renderStatBlock(elId, data, label) {
+  var el = document.getElementById(elId);
+  if (!data.length) {
+    el.innerHTML = '<span class="kz-stat-empty">Aucune mesure</span>';
+    return;
+  }
+  var avgSys = Math.round(data.reduce(function(s, m) { return s + parseInt(m.sys); }, 0) / data.length);
+  var avgDia = Math.round(data.reduce(function(s, m) { return s + parseInt(m.dia); }, 0) / data.length);
+  var cat = classify(avgSys, avgDia);
+  el.innerHTML =
+    '<div class="kz-stat-values">' +
+    '<span class="kz-stat-badge ' + cat.cls + '">' + avgSys + '</span>' +
+    '<span class="kz-stat-sep">/</span>' +
+    '<span class="kz-stat-badge ' + cat.cls + '">' + avgDia + '</span>' +
+    '<span class="kz-stat-unit">mmHg &mdash; ' + cat.label + '</span>' +
+    '</div>' +
+    '<div style="font-size:.72rem;color:var(--text-muted);margin-top:4px;">' + data.length + ' mesure' + (data.length > 1 ? 's' : '') + '</div>';
+}
+
+/* ---- Graphique ---- */
+function buildChart() {
+  if (!measurements.length) return;
+
+  /* Regrouper par date, calculer moyennes */
+  var byDate = {};
+  measurements.forEach(function(m) {
+    if (!byDate[m.date]) byDate[m.date] = { sys:[], dia:[] };
+    byDate[m.date].sys.push(parseInt(m.sys));
+    byDate[m.date].dia.push(parseInt(m.dia));
+  });
+  var dates = Object.keys(byDate).sort(function(a, b) {
+    return new Date(toISODate(a)) - new Date(toISODate(b));
+  });
+  var sysData = dates.map(function(d) {
+    var arr = byDate[d].sys;
+    return Math.round(arr.reduce(function(s,v){return s+v;},0)/arr.length);
+  });
+  var diaData = dates.map(function(d) {
+    var arr = byDate[d].dia;
+    return Math.round(arr.reduce(function(s,v){return s+v;},0)/arr.length);
+  });
+
+  if (tensionChart) tensionChart.destroy();
+
+  var ctx = document.getElementById('kzTensionChart').getContext('2d');
+
+  /* Plugin fond coloré — défini inline pour éviter doublons */
+  var bgPlugin = {
+    id: 'kzBg',
+    beforeDraw: function(chart) {
+      var c = chart.ctx, ca = chart.chartArea, y = chart.scales.y;
+      c.save();
+      c.globalCompositeOperation = 'destination-over';
+      var zones = [
+        { min:180, max:220, color:'rgba(198,40,40,.08)'   },
+        { min:160, max:180, color:'rgba(239,108,0,.08)'   },
+        { min:140, max:160, color:'rgba(249,168,37,.08)'  },
+        { min:40,  max:140, color:'rgba(76,175,80,.06)'   }
+      ];
+      zones.forEach(function(z) {
+        var top = y.getPixelForValue(z.max);
+        var bot = y.getPixelForValue(z.min);
+        c.fillStyle = z.color;
+        c.fillRect(ca.left, top, ca.right - ca.left, bot - top);
+      });
+      c.restore();
+    }
+  };
+
+  tensionChart = new Chart(ctx, {
+    type: 'line',
+    plugins: [bgPlugin],
+    data: {
+      labels: dates,
+      datasets: [
+        {
+          label: 'Systolique',
+          data: sysData,
+          borderColor: '#c62828',
+          backgroundColor: 'rgba(198,40,40,.12)',
+          tension: 0.3,
+          pointRadius: 5,
+          pointHoverRadius: 7,
+          fill: false
+        },
+        {
+          label: 'Diastolique',
+          data: diaData,
+          borderColor: '#1565c0',
+          backgroundColor: 'rgba(21,101,192,.12)',
+          tension: 0.3,
+          pointRadius: 5,
+          pointHoverRadius: 7,
+          fill: false
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: { ticks: { font: { size: 11 } } },
+        y: {
+          min: 40, max: 220,
+          title: { display: true, text: 'mmHg', font: { size: 11 } },
+          ticks: { font: { size: 11 } }
+        }
+      },
+      plugins: {
+        legend: { labels: { font: { size: 12 } } },
+        title: {
+          display: true,
+          text: 'Moyennes journali\u00e8res (mmHg)',
+          font: { size: 12, weight: '600' },
+          color: '#1e2a35'
+        },
+        tooltip: {
+          callbacks: {
+            afterBody: function(items) {
+              var sys = parseInt(items[0] ? items[0].raw : 0);
+              var dia = parseInt(items[1] ? items[1].raw : 0);
+              if (!sys || !dia) return '';
+              return '\u2192 ' + classify(sys, dia).label;
+            }
+          }
+        }
+      }
+    }
+  });
+}
+function updateChart() {
+  if (chartVisible) buildChart();
+}
+
+/* ---- Actions ---- */
+function addMeasure() {
+  var dateRaw = document.getElementById('kz-date').value;
+  var time    = document.getElementById('kz-time').value;
+  var sys     = document.getElementById('kz-sys').value;
+  var dia     = document.getElementById('kz-dia').value;
+
+  if (!dateRaw || !time || !sys || !dia) {
+    alert('Veuillez remplir tous les champs avant d\u2019ajouter une mesure.');
+    return;
+  }
+  var sysN = parseInt(sys), diaN = parseInt(dia);
+  if (isNaN(sysN) || sysN < 60 || sysN > 300) { alert('Valeur systolique invalide (60\u2013300 mmHg).'); return; }
+  if (isNaN(diaN) || diaN < 30 || diaN > 200) { alert('Valeur diastolique invalide (30\u2013200 mmHg).'); return; }
+
+  measurements.push({ date: toDisplayDate(dateRaw), time: time, sys: sys, dia: dia });
+  save();
+  sortMeasurements(sortState.col);
+  renderTable();
+  renderStats();
+  updateChart();
+
+  document.getElementById('kz-date').value = '';
+  document.getElementById('kz-time').value = '';
+  document.getElementById('kz-sys').value  = '';
+  document.getElementById('kz-dia').value  = '';
+}
+
+function setNow() {
+  var now = new Date();
+  var pad = function(n){return String(n).padStart(2,'0');};
+  document.getElementById('kz-date').value = now.getFullYear() + '-' + pad(now.getMonth()+1) + '-' + pad(now.getDate());
+  document.getElementById('kz-time').value = pad(now.getHours()) + ':' + pad(now.getMinutes());
+}
+
+function deleteMeasure(i) {
+  if (!confirm('Supprimer cette mesure ?')) return;
+  measurements.splice(i, 1);
+  save();
+  renderTable();
+  renderStats();
+  updateChart();
+}
+
+function exportData() {
+  var lines = ['Carnet de Tension Art\u00e9rielle\n'];
+  measurements.forEach(function(m) {
+    lines.push('Date: ' + m.date + ', Heure: ' + m.time + ', Systolique: ' + m.sys + ', Diastolique: ' + m.dia);
+  });
+  navigator.clipboard.writeText(lines.join('\n')).then(function() {
+    alert('Donn\u00e9es copi\u00e9es dans le presse-papier.');
+  }).catch(function() {
+    alert('Impossible d\u2019acc\u00e9der au presse-papier. V\u00e9rifiez les permissions du navigateur.');
+  });
+}
+
+function importData() {
+  alert('Copiez le contenu export\u00e9 pr\u00e9c\u00e9demment, puis cliquez OK pour importer.');
+  navigator.clipboard.readText().then(function(text) {
+    var lines = text.split('\n');
+    var imported = [];
+    lines.forEach(function(line) {
+      var mDate = line.match(/Date:\s*([^\s,]+)/);
+      var mTime = line.match(/Heure:\s*([^\s,]+)/);
+      var mSys  = line.match(/Systolique:\s*(\d+)/);
+      var mDia  = line.match(/Diastolique:\s*(\d+)/);
+      if (mDate && mTime && mSys && mDia) {
+        var date = mDate[1];
+        /* migration format ISO */
+        if (/^\d{4}-\d{2}-\d{2}$/.test(date)) date = toDisplayDate(date);
+        imported.push({ date: date, time: mTime[1], sys: mSys[1], dia: mDia[1] });
+      }
+    });
+    if (!imported.length) { alert('Aucune mesure valide d\u00e9tect\u00e9e dans le texte copi\u00e9.'); return; }
+    measurements = imported;
+    save();
+    renderTable();
+    renderStats();
+    updateChart();
+    alert(imported.length + ' mesure(s) import\u00e9e(s) avec succ\u00e8s.');
+  }).catch(function() {
+    alert('Impossible de lire le presse-papier. V\u00e9rifiez les permissions du navigateur.');
+  });
+}
+
+function toggleChart() {
+  var panel = document.getElementById('chartPanel');
+  chartVisible = !chartVisible;
+  panel.style.display = chartVisible ? 'block' : 'none';
+  if (chartVisible) buildChart();
+}
+
+/* ---- Tri via en-têtes ---- */
+function bindHeaderSort() {
+  document.querySelectorAll('#kzTable thead th[data-col]').forEach(function(th) {
+    th.addEventListener('click', function() {
+      sortMeasurements(th.dataset.col);
+      renderTable();
+    });
+  });
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+function initApp() {
+  load();
+  sortMeasurements('date'); /* tri initial : date desc */
+  renderTable();
+  renderStats();
+  bindHeaderSort();
+
+  document.getElementById('btnAdd').addEventListener('click', addMeasure);
+  document.getElementById('btnNow').addEventListener('click', setNow);
+  document.getElementById('btnToggleChart').addEventListener('click', toggleChart);
+  document.getElementById('btnExport').addEventListener('click', exportData);
+  document.getElementById('btnImport').addEventListener('click', importData);
+}
+
+/* ============================================================
+   LANCEMENT
+   ============================================================ */
+initApp();
+</script>
+
+<!-- TRACKING UMAMI (RGPD compliant, no cookies) -->
+<script defer src="https://cloud.umami.is/script.js" data-website-id="b182aba6-225e-47ac-b6be-892e033a6013"></script>
+
+</body>
+</html>
