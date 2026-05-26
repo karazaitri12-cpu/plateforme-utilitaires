@@ -455,6 +455,7 @@ body { -ms-overflow-style: none; overflow-y: auto; }
       <button class="kz-btn kz-btn-secondary" id="btnExportCSV">&#8681; Export CSV</button>
       <button class="kz-btn kz-btn-secondary" id="btnExportPrint">&#128438; Imprimer</button>
       <button class="kz-btn kz-btn-secondary" id="btnImport">&#8679; Importer</button>
+      <button class="kz-btn" id="btnClear" style="background:var(--danger-bg);color:var(--danger);border:1px solid #ef9a9a;">&#128465; Effacer tout</button>
     </div>
   </div>
 
@@ -682,15 +683,45 @@ function renderSFHTA() {
    PERSISTENCE
    ============================================================ */
 function save() { localStorage.setItem('kz_ta_data', JSON.stringify(measurements)); }
+
+function isValidMeasure(m) {
+  if (!m || typeof m !== 'object') return false;
+  var sysN = parseInt(m.sys), diaN = parseInt(m.dia);
+  if (isNaN(sysN) || sysN < 60  || sysN > 300) return false;
+  if (isNaN(diaN) || diaN < 30  || diaN > 200) return false;
+  if (sysN <= diaN) return false;
+  if (!/^\d{2}-\d{2}-\d{4}$/.test(m.date) && !/^\d{4}-\d{2}-\d{2}$/.test(m.date)) return false;
+  if (!/^\d{2}:\d{2}$/.test(m.time)) return false;
+  return true;
+}
+
 function load() {
   var raw = localStorage.getItem('kz_ta_data');
   if (!raw) return;
-  measurements = JSON.parse(raw);
-  measurements = measurements.map(function(m) {
-    if (/^\d{4}-\d{2}-\d{2}$/.test(m.date)) m.date = toDisplayDate(m.date);
-    if (!m.ctx) m.ctx = '';
-    return m;
-  });
+  try {
+    var parsed = JSON.parse(raw);
+    var valid = parsed.filter(isValidMeasure);
+    var rejected = parsed.length - valid.length;
+    measurements = valid.map(function(m) {
+      if (/^\d{4}-\d{2}-\d{2}$/.test(m.date)) m.date = toDisplayDate(m.date);
+      if (!m.ctx) m.ctx = '';
+      return m;
+    });
+    if (rejected > 0) {
+      console.warn('[Carnet TA] ' + rejected + ' enregistrement(s) corrompu(s) ignore(s) au chargement.');
+      save();
+    }
+  } catch(e) {
+    console.error('[Carnet TA] localStorage illisible, reinitialisation.', e);
+    localStorage.removeItem('kz_ta_data');
+  }
+}
+
+function clearAllData() {
+  if (!confirm('Effacer TOUTES les mesures ? Cette action est irreversible.')) return;
+  measurements = [];
+  localStorage.removeItem('kz_ta_data');
+  renderTable(); renderStats(); renderSFHTA(); checkAlert(); updateChart();
 }
 
 /* ============================================================
@@ -1140,7 +1171,8 @@ function importData() {
       if (parts.length >= 4) {
         var date = parts[0].trim();
         if (/^\d{4}-\d{2}-\d{2}$/.test(date)) date = toDisplayDate(date);
-        imported.push({ date:date, time:parts[1].trim(), sys:parts[2].trim(), dia:parts[3].trim(), ctx:parts[5]?parts[5].trim():'' });
+        var candidate = { date:date, time:parts[1].trim(), sys:parts[2].trim(), dia:parts[3].trim(), ctx:parts[5]?parts[5].trim():'' };
+        if (isValidMeasure(candidate)) imported.push(candidate);
         return;
       }
       // Format texte ancien
@@ -1214,6 +1246,7 @@ function initApp() {
   document.getElementById('btnExportCSV').addEventListener('click', exportCSV);
   document.getElementById('btnExportPrint').addEventListener('click', printView);
   document.getElementById('btnImport').addEventListener('click', importData);
+  document.getElementById('btnClear').addEventListener('click', clearAllData);
 }
 
 initApp();
