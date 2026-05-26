@@ -281,7 +281,7 @@
 .kz-badge-danger { background: var(--danger-bg); color: var(--danger); }
 .kz-badge-pp     { background: #e3f2fd; color: #0d47a1; font-size: 0.78rem; }
 
-/* SUPPRESSION INLINE */
+/* SUPPRESSION */
 .kz-del-btn {
   background: none; border: none; cursor: pointer;
   color: var(--text-muted); font-size: 1rem;
@@ -289,22 +289,6 @@
   transition: background .15s, color .15s; line-height: 1;
 }
 .kz-del-btn:hover { background: var(--danger-bg); color: var(--danger); }
-.kz-del-confirm {
-  display: none; position: absolute;
-  right: 8px; top: 50%; transform: translateY(-50%);
-  background: #fff; border: 1px solid var(--danger);
-  border-radius: 6px; padding: 6px 10px;
-  font-size: 0.75rem; z-index: 10;
-  box-shadow: 0 2px 8px rgba(0,0,0,.15);
-  white-space: nowrap; align-items: center; gap: 8px;
-}
-.kz-del-confirm.show { display: flex; }
-.kz-del-confirm button {
-  border: none; border-radius: 4px; padding: 3px 10px;
-  font-size: 0.75rem; font-weight: 600; cursor: pointer;
-}
-.kz-btn-confirm-yes { background: var(--danger); color: #fff; }
-.kz-btn-confirm-no  { background: var(--bg); color: var(--text); border: 1px solid var(--border) !important; }
 
 /* GRAPHIQUE */
 .kz-chart-panel {
@@ -452,9 +436,9 @@ body { -ms-overflow-style: none; overflow-y: auto; }
       <button class="kz-btn kz-btn-primary" id="btnAdd">&#43; Ajouter</button>
       <button class="kz-btn kz-btn-secondary" id="btnNow">&#9201; Maintenant</button>
       <button class="kz-btn kz-btn-outline"  id="btnToggleChart">&#128202; Graphique</button>
-      <button class="kz-btn kz-btn-secondary" id="btnExportCSV">&#8681; Export CSV</button>
+      <button class="kz-btn kz-btn-secondary" id="btnExportKeep">&#128203; Sauvegarder dans Keep</button>
       <button class="kz-btn kz-btn-secondary" id="btnExportPrint">&#128438; Imprimer</button>
-      <button class="kz-btn kz-btn-secondary" id="btnImport">&#8679; Importer</button>
+      <label class="kz-btn kz-btn-secondary" style="cursor:pointer;">&#8679; Importer CSV <input type="file" id="fileImport" accept=".csv,.txt" style="display:none;"></label>
       <button class="kz-btn" id="btnClear" style="background:var(--danger-bg);color:var(--danger);border:1px solid #ef9a9a;">&#128465; Effacer tout</button>
     </div>
   </div>
@@ -568,7 +552,7 @@ var tensionChart   = null;
 var chartVisible   = false;
 var chartPeriod    = 0;   // 0 = tout, 7, 30
 var tablePeriod    = 0;
-var pendingDelete  = null; // index en attente de confirmation
+
 
 /* ============================================================
    UTILITAIRES
@@ -783,32 +767,17 @@ function renderTable() {
 
     var tr = document.createElement('tr');
     tr.style.background = cat.bg;
-    tr.style.position   = 'relative';
 
     // Bouton suppr
     var tdDel = document.createElement('td');
     var btnDel = document.createElement('button');
     btnDel.className = 'kz-del-btn';
-    btnDel.title = 'Supprimer';
+    btnDel.title = 'Supprimer cette mesure';
     btnDel.innerHTML = '\u2715';
-    btnDel.onclick = (function(idx, row) {
-      return function(e) {
-        e.stopPropagation();
-        showDeleteConfirm(idx, row);
-      };
-    })(realIdx, tr);
+    btnDel.onclick = (function(idx) {
+      return function() { confirmDelete(idx); };
+    })(realIdx);
     tdDel.appendChild(btnDel);
-
-    // Confirmation inline
-    var confirm = document.createElement('div');
-    confirm.className = 'kz-del-confirm';
-    confirm.id = 'confirm-' + realIdx;
-    confirm.innerHTML =
-      '<span>Supprimer cette mesure\u00a0?</span>' +
-      '<button class="kz-btn-confirm-yes" onclick="confirmDelete(' + realIdx + ')">Oui</button>' +
-      '<button class="kz-btn-confirm-no" onclick="cancelDelete(' + realIdx + ')">Non</button>';
-    tdDel.style.position = 'relative';
-    tdDel.appendChild(confirm);
 
     // Cellules
     function td(html) {
@@ -840,16 +809,10 @@ function updateHeaderSort() {
 }
 
 /* ============================================================
-   SUPPRESSION INLINE
+   SUPPRESSION
    ============================================================ */
-function showDeleteConfirm(idx, row) {
-  // Ferme tout autre confirm ouvert
-  document.querySelectorAll('.kz-del-confirm.show').forEach(function(el) { el.classList.remove('show'); });
-  var el = document.getElementById('confirm-' + idx);
-  if (el) el.classList.add('show');
-  pendingDelete = idx;
-}
 function confirmDelete(idx) {
+  if (!confirm('Supprimer cette mesure ?')) return;
   measurements.splice(idx, 1);
   save();
   renderTable();
@@ -857,21 +820,7 @@ function confirmDelete(idx) {
   renderSFHTA();
   checkAlert();
   updateChart();
-  pendingDelete = null;
 }
-function cancelDelete(idx) {
-  var el = document.getElementById('confirm-' + idx);
-  if (el) el.classList.remove('show');
-  pendingDelete = null;
-}
-
-/* Ferme confirm si clic ailleurs */
-document.addEventListener('click', function(e) {
-  if (pendingDelete !== null && !e.target.closest('.kz-del-confirm') && !e.target.closest('.kz-del-btn')) {
-    document.querySelectorAll('.kz-del-confirm.show').forEach(function(el) { el.classList.remove('show'); });
-    pendingDelete = null;
-  }
-});
 
 /* ============================================================
    STATISTIQUES
@@ -1093,23 +1042,46 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 /* ============================================================
-   EXPORT CSV
+   EXPORT GOOGLE KEEP
    ============================================================ */
-function exportCSV() {
+function exportKeep() {
   if (!measurements.length) { alert('Aucune mesure \u00e0 exporter.'); return; }
-  var lines = ['Date,Heure,Systolique,Diastolique,PP,Contexte,Classification'];
+
+  var today  = todayDisplay();
+  var todayM = measurements.filter(function(m){ return m.date === today; });
+
+  var lines = ['=== Carnet de Tension Arterielle ===', ''];
+
+  /* En-tete CSV pour reimport */
+  lines.push('Date,Heure,Systolique,Diastolique,PP,Contexte,Classification');
   measurements.forEach(function(m) {
     var pp  = parseInt(m.sys) - parseInt(m.dia);
     var cat = classify(m.sys, m.dia);
     lines.push([m.date, m.time, m.sys, m.dia, pp, m.ctx||'', cat.label].join(','));
   });
-  var blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
-  var url  = URL.createObjectURL(blob);
-  var a    = document.createElement('a');
-  a.href   = url;
-  a.download = 'tension-' + todayDisplay() + '.csv';
-  a.click();
-  URL.revokeObjectURL(url);
+
+  lines.push('');
+
+  /* Moyenne du jour */
+  if (todayM.length) {
+    var avgS = Math.round(todayM.reduce(function(s,m){return s+parseInt(m.sys);},0)/todayM.length);
+    var avgD = Math.round(todayM.reduce(function(s,m){return s+parseInt(m.dia);},0)/todayM.length);
+    lines.push('Moyenne du jour (' + today + ') : ' + avgS + '/' + avgD + ' mmHg — ' + classify(avgS,avgD).label);
+  }
+
+  /* Moyenne globale */
+  var avgSG = Math.round(measurements.reduce(function(s,m){return s+parseInt(m.sys);},0)/measurements.length);
+  var avgDG = Math.round(measurements.reduce(function(s,m){return s+parseInt(m.dia);},0)/measurements.length);
+  lines.push('Moyenne globale : ' + avgSG + '/' + avgDG + ' mmHg — ' + classify(avgSG,avgDG).label);
+  lines.push('');
+  lines.push('Exporte le ' + new Date().toLocaleDateString('fr-FR') + ' — ' + measurements.length + ' mesure(s)');
+
+  navigator.clipboard.writeText(lines.join('\n')).then(function() {
+    alert('Donnees copiees dans le presse-papier.\nGoogle Keep va s\u2019ouvrir.\nCollez (Ctrl+V) dans une nouvelle note.');
+    window.open('https://keep.google.com', '_blank');
+  }).catch(function() {
+    alert('Impossible d\u2019acceder au presse-papier. Verifiez les permissions du navigateur.');
+  });
 }
 
 /* ============================================================
@@ -1157,43 +1129,63 @@ function printView() {
 }
 
 /* ============================================================
-   IMPORT (format CSV ou texte)
+   IMPORT via fichier CSV (ou note Keep copiee)
    ============================================================ */
-function importData() {
-  alert('Copiez le contenu CSV export\u00e9 pr\u00e9c\u00e9demment, puis cliquez OK.');
-  navigator.clipboard.readText().then(function(text) {
-    var lines   = text.split('\n');
-    var imported = [];
-    lines.forEach(function(line) {
-      if (line.startsWith('Date,') || !line.trim()) return; // skip header/empty
-      // Format CSV
-      var parts = line.split(',');
-      if (parts.length >= 4) {
-        var date = parts[0].trim();
-        if (/^\d{4}-\d{2}-\d{2}$/.test(date)) date = toDisplayDate(date);
-        var candidate = { date:date, time:parts[1].trim(), sys:parts[2].trim(), dia:parts[3].trim(), ctx:parts[5]?parts[5].trim():'' };
-        if (isValidMeasure(candidate)) imported.push(candidate);
+function parseAndImport(text) {
+  var lines    = text.split('\n');
+  var imported = [];
+  lines.forEach(function(line) {
+    line = line.trim();
+    if (!line) return;
+    /* Ignorer lignes non-donnees */
+    if (line.startsWith('===') || line.startsWith('Moyenne') || line.startsWith('Exporte')) return;
+    /* Ignorer l en-tete CSV */
+    if (/^Date[,;]/i.test(line)) return;
+
+    /* Format CSV : date,heure,sys,dia[,pp,ctx,cat] */
+    var sep = line.indexOf(';') !== -1 ? ';' : ',';
+    var parts = line.split(sep);
+    if (parts.length >= 4) {
+      var date = parts[0].trim();
+      if (/^\d{4}-\d{2}-\d{2}$/.test(date)) date = toDisplayDate(date);
+      var candidate = {
+        date: date,
+        time: parts[1].trim(),
+        sys:  parts[2].trim(),
+        dia:  parts[3].trim(),
+        ctx:  parts[5] ? parts[5].trim() : ''
+      };
+      if (isValidMeasure(candidate)) imported.push(candidate);
+    }
+  });
+  return imported;
+}
+
+function bindFileImport() {
+  var input = document.getElementById('fileImport');
+  input.addEventListener('change', function() {
+    var file = input.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var imported = parseAndImport(e.target.result);
+      if (!imported.length) {
+        alert('Aucune mesure valide detectee dans ce fichier.\nVerifiez que c\u2019est bien un export de cet outil.');
+        input.value = '';
         return;
       }
-      // Format texte ancien
-      var mDate = line.match(/Date:\s*([^\s,]+)/);
-      var mTime = line.match(/Heure:\s*([^\s,]+)/);
-      var mSys  = line.match(/Systolique:\s*(\d+)/);
-      var mDia  = line.match(/Diastolique:\s*(\d+)/);
-      if (mDate && mTime && mSys && mDia) {
-        var d = mDate[1];
-        if (/^\d{4}-\d{2}-\d{2}$/.test(d)) d = toDisplayDate(d);
-        imported.push({ date:d, time:mTime[1], sys:mSys[1], dia:mDia[1], ctx:'' });
+      if (!confirm(imported.length + ' mesure(s) trouvee(s).\nRemplacer toutes les donnees actuelles ?')) {
+        input.value = '';
+        return;
       }
-    });
-    if (!imported.length) { alert('Aucune mesure valide d\u00e9tect\u00e9e.'); return; }
-    measurements = imported;
-    save();
-    sortMeasurements('date');
-    renderTable(); renderStats(); renderSFHTA(); checkAlert(); updateChart();
-    alert(imported.length + ' mesure(s) import\u00e9e(s).');
-  }).catch(function() {
-    alert('Impossible de lire le presse-papier. V\u00e9rifiez les permissions du navigateur.');
+      measurements = imported;
+      save();
+      sortMeasurements('date');
+      renderTable(); renderStats(); renderSFHTA(); checkAlert(); updateChart();
+      alert(imported.length + ' mesure(s) importee(s) avec succes.');
+      input.value = '';
+    };
+    reader.readAsText(file, 'UTF-8');
   });
 }
 
@@ -1243,10 +1235,10 @@ function initApp() {
   document.getElementById('btnAdd').addEventListener('click', addMeasure);
   document.getElementById('btnNow').addEventListener('click', setNow);
   document.getElementById('btnToggleChart').addEventListener('click', toggleChart);
-  document.getElementById('btnExportCSV').addEventListener('click', exportCSV);
+  document.getElementById('btnExportKeep').addEventListener('click', exportKeep);
   document.getElementById('btnExportPrint').addEventListener('click', printView);
-  document.getElementById('btnImport').addEventListener('click', importData);
   document.getElementById('btnClear').addEventListener('click', clearAllData);
+  bindFileImport();
 }
 
 initApp();
