@@ -12,7 +12,6 @@
     padding: 0;
     font-family: Arial, Helvetica, sans-serif;
 }
-
 #outil-compression {
     font-size: 14px;
     color: #2c2c2c;
@@ -20,11 +19,7 @@
     min-height: 100vh;
     padding: 28px 16px 40px;
 }
-
-#outil-compression .oc-inner {
-    max-width: 900px;
-    margin: 0 auto;
-}
+#outil-compression .oc-inner { max-width: 900px; margin: 0 auto; }
 
 /* En-tête */
 #outil-compression .oc-header {
@@ -34,17 +29,8 @@
     border-radius: 4px 4px 0 0;
     border-bottom: 3px solid #0e2340;
 }
-
-#outil-compression .oc-header h1 {
-    font-size: 17px;
-    font-weight: 700;
-}
-
-#outil-compression .oc-header p {
-    font-size: 12px;
-    color: #9dbcd4;
-    margin-top: 4px;
-}
+#outil-compression .oc-header h1 { font-size: 17px; font-weight: 700; }
+#outil-compression .oc-header p  { font-size: 12px; color: #9dbcd4; margin-top: 4px; }
 
 /* Carte */
 #outil-compression .oc-card {
@@ -67,259 +53,92 @@
     transition: border-color 0.2s, background 0.2s;
     margin-bottom: 20px;
 }
-
 #outil-compression .oc-dropzone:hover,
-#outil-compression .oc-dropzone.drag-over {
-    border-color: #1A3A5C;
-    background: #edf3f9;
-}
+#outil-compression .oc-dropzone.drag-over { border-color: #1A3A5C; background: #edf3f9; }
+#outil-compression .oc-dropzone-icon { font-size: 32px; display: block; margin-bottom: 10px; }
+#outil-compression .oc-dropzone p   { color: #5a7a96; font-size: 14px; line-height: 1.7; }
+#outil-compression .oc-dropzone-link { color: #1A3A5C; font-weight: 700; text-decoration: underline; cursor: pointer; }
+#outil-compression .oc-dropzone small { display: block; margin-top: 5px; font-size: 11px; color: #9ab5c8; }
 
-#outil-compression .oc-dropzone-icon {
-    font-size: 32px;
-    display: block;
-    margin-bottom: 10px;
-}
-
-#outil-compression .oc-dropzone p {
-    color: #5a7a96;
-    font-size: 14px;
-    line-height: 1.7;
-}
-
-#outil-compression .oc-dropzone-link {
-    color: #1A3A5C;
-    font-weight: 700;
-    text-decoration: underline;
-    cursor: pointer;
-}
-
-#outil-compression .oc-dropzone small {
-    display: block;
-    margin-top: 5px;
-    font-size: 11px;
-    color: #9ab5c8;
-}
-
-/* Section label */
+/* Label section */
 #outil-compression .oc-label {
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.6px;
-    color: #1A3A5C;
-    display: block;
-    margin-bottom: 9px;
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.6px; color: #1A3A5C; display: block; margin-bottom: 9px;
 }
 
 /* Slider */
-#outil-compression .oc-slider-row {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin-bottom: 5px;
-}
-
-#outil-compression input[type="range"] {
-    flex: 1;
-    height: 4px;
-    accent-color: #1A3A5C;
-    cursor: pointer;
-}
-
-#outil-compression .oc-quality-val {
-    font-size: 20px;
-    font-weight: 700;
-    color: #1A3A5C;
-    min-width: 48px;
-    text-align: right;
-}
-
-#outil-compression .oc-slider-hints {
-    display: flex;
-    justify-content: space-between;
-    font-size: 10px;
-    color: #9ab5c8;
-    margin-bottom: 22px;
-}
+#outil-compression .oc-slider-row { display: flex; align-items: center; gap: 14px; margin-bottom: 5px; }
+#outil-compression input[type="range"] { flex: 1; height: 4px; accent-color: #1A3A5C; cursor: pointer; }
+#outil-compression .oc-quality-val { font-size: 20px; font-weight: 700; color: #1A3A5C; min-width: 48px; text-align: right; }
+#outil-compression .oc-slider-hints { display: flex; justify-content: space-between; font-size: 10px; color: #9ab5c8; margin-bottom: 22px; }
 
 /* Stats globales */
-#outil-compression .oc-summary {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    margin-bottom: 22px;
-}
-
-#outil-compression .oc-stat {
-    background: #f4f7fa;
-    border: 1px solid #dde5ec;
-    border-radius: 4px;
-    padding: 13px 10px;
-    text-align: center;
-}
-
-#outil-compression .oc-stat .val {
-    font-size: 18px;
-    font-weight: 700;
-    color: #1A3A5C;
-    display: block;
-}
-
+#outil-compression .oc-summary { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 22px; }
+#outil-compression .oc-stat { background: #f4f7fa; border: 1px solid #dde5ec; border-radius: 4px; padding: 13px 10px; text-align: center; }
+#outil-compression .oc-stat .val { font-size: 18px; font-weight: 700; color: #1A3A5C; display: block; }
 #outil-compression .oc-stat.gain .val { color: #166534; }
-
-#outil-compression .oc-stat .lbl {
-    font-size: 11px;
-    color: #7a99b0;
-    display: block;
-    margin-top: 3px;
-}
+#outil-compression .oc-stat .lbl { font-size: 11px; color: #7a99b0; display: block; margin-top: 3px; }
 
 /* Séparateur */
-#outil-compression .oc-sep {
-    height: 1px;
-    background: #edf0f3;
-    margin-bottom: 18px;
-}
+#outil-compression .oc-sep { height: 1px; background: #edf0f3; margin-bottom: 18px; }
 
 /* Tableau */
-#outil-compression .oc-table-wrap {
-    overflow-x: auto;
-    margin-bottom: 18px;
-}
-
-#outil-compression table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-}
-
+#outil-compression .oc-table-wrap { overflow-x: auto; margin-bottom: 18px; }
+#outil-compression table { width: 100%; border-collapse: collapse; font-size: 13px; }
 #outil-compression thead th {
-    background: #f0f5fb;
-    border-bottom: 2px solid #dde5ec;
-    padding: 9px 12px;
-    text-align: left;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-    color: #1A3A5C;
-    white-space: nowrap;
+    background: #f0f5fb; border-bottom: 2px solid #dde5ec;
+    padding: 9px 12px; text-align: left; font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.4px; color: #1A3A5C; white-space: nowrap;
 }
-
-#outil-compression tbody tr {
-    border-bottom: 1px solid #edf0f3;
-    transition: background 0.15s;
-}
-
+#outil-compression tbody tr { border-bottom: 1px solid #edf0f3; transition: background 0.15s; }
 #outil-compression tbody tr:hover { background: #fafcfe; }
-
-#outil-compression tbody td {
-    padding: 9px 12px;
-    vertical-align: middle;
-}
-
-#outil-compression .oc-td-name {
-    max-width: 220px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    color: #2c2c2c;
-    font-weight: 600;
-}
-
+#outil-compression tbody td { padding: 9px 12px; vertical-align: middle; }
+#outil-compression .oc-td-name { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
 #outil-compression .oc-td-size { color: #5a7a96; white-space: nowrap; }
-
-#outil-compression .oc-td-gain {
-    font-weight: 700;
-    color: #166534;
-    white-space: nowrap;
-}
-
+#outil-compression .oc-td-gain { font-weight: 700; color: #166534; white-space: nowrap; }
 #outil-compression .oc-td-gain.neg { color: #C8102E; }
 
-#outil-compression .oc-td-status {
-    white-space: nowrap;
-}
+/* Badges */
+#outil-compression .oc-badge { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 11px; font-weight: 700; }
+#outil-compression .oc-badge-wait { background: #f0f5fb; color: #7a99b0; }
+#outil-compression .oc-badge-proc { background: #fff3cd; color: #856404; }
+#outil-compression .oc-badge-ok   { background: #d1e7dd; color: #0a3622; }
+#outil-compression .oc-badge-err  { background: #f8d7da; color: #842029; }
 
-/* Badge statut */
-#outil-compression .oc-badge {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 3px;
-    font-size: 11px;
-    font-weight: 700;
-}
-
-#outil-compression .oc-badge-wait  { background: #f0f5fb; color: #7a99b0; }
-#outil-compression .oc-badge-proc  { background: #fff3cd; color: #856404; }
-#outil-compression .oc-badge-ok    { background: #d1e7dd; color: #0a3622; }
-#outil-compression .oc-badge-err   { background: #f8d7da; color: #842029; }
-
-/* Bouton dl par ligne */
+/* Bouton ligne */
 #outil-compression .oc-btn-dl-row {
-    padding: 4px 10px;
-    background: #1A3A5C;
-    color: #fff;
-    font-size: 11px;
-    font-weight: 700;
-    font-family: Arial, Helvetica, sans-serif;
-    border: none;
-    border-radius: 3px;
-    cursor: pointer;
-    white-space: nowrap;
+    padding: 4px 10px; background: #1A3A5C; color: #fff;
+    font-size: 11px; font-weight: 700; font-family: Arial, Helvetica, sans-serif;
+    border: none; border-radius: 3px; cursor: pointer; white-space: nowrap;
     transition: background 0.2s;
 }
-
-#outil-compression .oc-btn-dl-row:hover   { background: #0e2340; }
+#outil-compression .oc-btn-dl-row:hover    { background: #0e2340; }
 #outil-compression .oc-btn-dl-row:disabled { background: #c0cdd8; cursor: not-allowed; }
 
 /* Boutons principaux */
-#outil-compression .oc-actions {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    align-items: center;
-}
-
+#outil-compression .oc-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
 #outil-compression .oc-btn {
-    padding: 11px 20px;
-    border-radius: 3px;
-    font-size: 13px;
-    font-weight: 700;
-    font-family: Arial, Helvetica, sans-serif;
-    border: none;
-    cursor: pointer;
-    transition: opacity 0.2s;
+    padding: 11px 20px; border-radius: 3px; font-size: 13px; font-weight: 700;
+    font-family: Arial, Helvetica, sans-serif; border: none; cursor: pointer; transition: opacity 0.2s;
 }
-
-#outil-compression .oc-btn:hover { opacity: 0.85; }
+#outil-compression .oc-btn:hover    { opacity: 0.85; }
 #outil-compression .oc-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+#outil-compression .oc-btn-green  { background: #166534; color: #fff; }
+#outil-compression .oc-btn-navy   { background: #1A3A5C; color: #fff; }
+#outil-compression .oc-btn-outline { background: #fff; color: #1A3A5C; border: 1px solid #1A3A5C; }
+#outil-compression .oc-btn-green::before  { content: "\2193\A0"; }
+#outil-compression .oc-btn-navy::before   { content: "\1F4E6\A0"; }
+#outil-compression .oc-btn-outline::before { content: "\2715\A0"; }
 
-#outil-compression .oc-btn-primary  { background: #166534; color: #fff; }
-#outil-compression .oc-btn-secondary { background: #fff; color: #1A3A5C; border: 1px solid #1A3A5C; }
-
-#outil-compression .oc-btn-primary::before  { content: "\2193\A0\A0"; }
-#outil-compression .oc-btn-secondary::before { content: "\2715\A0\A0"; }
-
-#outil-compression .oc-progress-txt {
-    font-size: 12px;
-    color: #7a99b0;
-    margin-left: 6px;
-}
+#outil-compression .oc-progress-txt { font-size: 12px; color: #7a99b0; margin-left: 4px; }
 
 /* Notice */
 #outil-compression .oc-notice {
-    font-size: 11px;
-    color: #9ab5c8;
-    border-top: 1px solid #edf0f3;
-    padding-top: 14px;
-    margin-top: 20px;
-    line-height: 1.7;
+    font-size: 11px; color: #9ab5c8; border-top: 1px solid #edf0f3;
+    padding-top: 14px; margin-top: 20px; line-height: 1.7;
 }
-
 #outil-compression .oc-notice::before { content: "\26A0\A0"; }
 
-/* Contrôles (masqués par défaut) */
 #outil-compression #oc-controls { display: none; }
 
 /* Masque l'ascenseur */
@@ -327,7 +146,6 @@ html { scrollbar-width: none; }
 body { -ms-overflow-style: none; overflow-y: auto; }
 ::-webkit-scrollbar { display: none; }
 
-/* Responsive */
 @media (max-width: 580px) {
     #outil-compression .oc-summary { grid-template-columns: 1fr 1fr; }
 }
@@ -345,7 +163,6 @@ body { -ms-overflow-style: none; overflow-y: auto; }
 
     <div class="oc-card">
 
-        <!-- Zone de dépôt (toujours visible) -->
         <div class="oc-dropzone" id="oc-dropzone">
             <span class="oc-dropzone-icon">&#128247;</span>
             <p>Glissez vos images ici<br>ou <span class="oc-dropzone-link" id="oc-browse">cliquez pour s&eacute;lectionner</span></p>
@@ -354,10 +171,8 @@ body { -ms-overflow-style: none; overflow-y: auto; }
         <input type="file" id="oc-file-input" accept="image/jpeg,image/png" multiple style="display:none">
         <canvas id="oc-canvas" style="display:none"></canvas>
 
-        <!-- Contrôles (affichés après chargement) -->
         <div id="oc-controls">
 
-            <!-- Slider qualité -->
             <span class="oc-label">Qualit&eacute; de compression (appliqu&eacute;e &agrave; tous)</span>
             <div class="oc-slider-row">
                 <input type="range" id="oc-slider" min="50" max="95" value="85">
@@ -368,29 +183,15 @@ body { -ms-overflow-style: none; overflow-y: auto; }
                 <span>95% &mdash; Quasi-original</span>
             </div>
 
-            <!-- Récap global -->
             <div class="oc-summary">
-                <div class="oc-stat">
-                    <span class="val" id="oc-s-count">0</span>
-                    <span class="lbl">Fichiers</span>
-                </div>
-                <div class="oc-stat">
-                    <span class="val" id="oc-s-orig">—</span>
-                    <span class="lbl">Taille totale originale</span>
-                </div>
-                <div class="oc-stat">
-                    <span class="val" id="oc-s-comp">—</span>
-                    <span class="lbl">Taille totale compress&eacute;e</span>
-                </div>
-                <div class="oc-stat gain">
-                    <span class="val" id="oc-s-gain">—</span>
-                    <span class="lbl">Gain total</span>
-                </div>
+                <div class="oc-stat"><span class="val" id="oc-s-count">0</span><span class="lbl">Fichiers</span></div>
+                <div class="oc-stat"><span class="val" id="oc-s-orig">—</span><span class="lbl">Taille totale originale</span></div>
+                <div class="oc-stat"><span class="val" id="oc-s-comp">—</span><span class="lbl">Taille totale compress&eacute;e</span></div>
+                <div class="oc-stat gain"><span class="val" id="oc-s-gain">—</span><span class="lbl">Gain total</span></div>
             </div>
 
             <div class="oc-sep"></div>
 
-            <!-- Tableau des fichiers -->
             <div class="oc-table-wrap">
                 <table>
                     <thead>
@@ -408,21 +209,21 @@ body { -ms-overflow-style: none; overflow-y: auto; }
                 </table>
             </div>
 
-            <!-- Actions -->
             <div class="oc-actions">
-                <button class="oc-btn oc-btn-primary" id="oc-dl-all" disabled>T&eacute;l&eacute;charger tout</button>
-                <button class="oc-btn oc-btn-secondary" id="oc-reset">R&eacute;initialiser</button>
+                <button class="oc-btn oc-btn-green"   id="oc-dl-all"  disabled>T&eacute;l&eacute;charger tout</button>
+                <button class="oc-btn oc-btn-navy"    id="oc-dl-zip"  disabled style="display:none">T&eacute;l&eacute;charger en ZIP</button>
+                <button class="oc-btn oc-btn-outline" id="oc-reset">R&eacute;initialiser</button>
                 <span class="oc-progress-txt" id="oc-progress-txt"></span>
             </div>
 
-        </div><!-- /oc-controls -->
+        </div>
 
         <p class="oc-notice">
             Traitement enti&egrave;rement local (navigateur). Aucune image n&rsquo;est envoy&eacute;e vers un serveur.
             La qualit&eacute; &agrave; 85&nbsp;% est visuellement identique &agrave; l&rsquo;original pour la quasi-totalit&eacute; des usages.
         </p>
 
-    </div><!-- /oc-card -->
+    </div>
 
 </div>
 </div>
@@ -430,7 +231,7 @@ body { -ms-overflow-style: none; overflow-y: auto; }
 <script>
 (function () {
 
-    /* ---- Éléments DOM ---- */
+    /* ── DOM ── */
     var dropzone  = document.getElementById('oc-dropzone');
     var fileInput = document.getElementById('oc-file-input');
     var browse    = document.getElementById('oc-browse');
@@ -441,62 +242,184 @@ body { -ms-overflow-style: none; overflow-y: auto; }
     var qVal      = document.getElementById('oc-quality-val');
     var tbody     = document.getElementById('oc-tbody');
     var dlAllBtn  = document.getElementById('oc-dl-all');
+    var dlZipBtn  = document.getElementById('oc-dl-zip');
     var resetBtn  = document.getElementById('oc-reset');
     var progTxt   = document.getElementById('oc-progress-txt');
 
-    /* ---- État ---- */
-    var files = [];       // { file, origSize, compDataURL, compSize, row }
+    /* ── État ── */
+    var files = [];
     var processing = false;
 
-    /* ---- Drag & drop ---- */
+    /* ── CRC-32 (pour ZIP) ── */
+    var CRC_TABLE = (function () {
+        var t = new Uint32Array(256);
+        for (var i = 0; i < 256; i++) {
+            var c = i;
+            for (var j = 0; j < 8; j++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+            t[i] = c;
+        }
+        return t;
+    })();
+
+    function crc32(data) {
+        var c = 0xFFFFFFFF;
+        for (var i = 0; i < data.length; i++) c = CRC_TABLE[(c ^ data[i]) & 0xFF] ^ (c >>> 8);
+        return (c ^ 0xFFFFFFFF) >>> 0;
+    }
+
+    /* ── dataURL → Uint8Array ── */
+    function dataURLtoBytes(dataURL) {
+        var b64 = dataURL.split(',')[1];
+        var bin = atob(b64);
+        var out = new Uint8Array(bin.length);
+        for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+        return out;
+    }
+
+    /* ── Générateur ZIP pur JS (méthode STORE) ── */
+    function buildZip(entries) {
+        /* entries = [{name: string, data: Uint8Array}] */
+        var parts      = [];
+        var centralDir = [];
+        var offset     = 0;
+
+        function u16(v) { var b = new Uint8Array(2); new DataView(b.buffer).setUint16(0, v, true); return b; }
+        function u32(v) { var b = new Uint8Array(4); new DataView(b.buffer).setUint32(0, v, true); return b; }
+        function str2bytes(s) {
+            var b = new Uint8Array(s.length);
+            for (var i = 0; i < s.length; i++) b[i] = s.charCodeAt(i) & 0xff;
+            return b;
+        }
+
+        entries.forEach(function (e) {
+            var name  = str2bytes(e.name);
+            var data  = e.data;
+            var crc   = crc32(data);
+            var size  = data.length;
+            var zero2 = new Uint8Array(2);
+            var zero4 = new Uint8Array(4);
+
+            /* Local file header */
+            var lfh = concat([
+                new Uint8Array([0x50,0x4B,0x03,0x04]), // signature
+                u16(20), u16(0), u16(0),               // version, flags, method (STORE)
+                zero2, zero2,                           // mod time, mod date
+                u32(crc), u32(size), u32(size),        // crc, comp size, uncomp size
+                u16(name.length), zero2,               // name len, extra len
+                name
+            ]);
+            parts.push(lfh, data);
+
+            /* Central directory entry */
+            var cde = concat([
+                new Uint8Array([0x50,0x4B,0x01,0x02]), // signature
+                u16(20), u16(20), u16(0), u16(0),      // versions, flags, method
+                zero2, zero2,                           // mod time, mod date
+                u32(crc), u32(size), u32(size),        // crc, sizes
+                u16(name.length), zero2, zero2,        // name, extra, comment len
+                zero2, zero2, zero4,                   // disk, int/ext attrs
+                u32(offset),                           // local header offset
+                name
+            ]);
+            centralDir.push(cde);
+            offset += lfh.length + size;
+        });
+
+        var cdOffset = offset;
+        var cdSize   = centralDir.reduce(function (s, e) { return s + e.length; }, 0);
+        var n        = entries.length;
+
+        /* End of central directory */
+        var eocd = concat([
+            new Uint8Array([0x50,0x4B,0x05,0x06]), // signature
+            u16(0), u16(0),                         // disk numbers
+            u16(n), u16(n),                         // entry counts
+            u32(cdSize), u32(cdOffset),             // cd size & offset
+            u16(0)                                  // comment len
+        ]);
+
+        var all = parts.concat(centralDir).concat([eocd]);
+        return new Blob(all, { type: 'application/zip' });
+    }
+
+    function concat(arrays) {
+        var len = arrays.reduce(function (s, a) { return s + a.length; }, 0);
+        var out = new Uint8Array(len);
+        var pos = 0;
+        arrays.forEach(function (a) { out.set(a, pos); pos += a.length; });
+        return out;
+    }
+
+    /* ── Drag & drop ── */
     dropzone.addEventListener('dragover', function (e) { e.preventDefault(); dropzone.classList.add('drag-over'); });
     dropzone.addEventListener('dragleave', function () { dropzone.classList.remove('drag-over'); });
     dropzone.addEventListener('drop', function (e) {
-        e.preventDefault();
-        dropzone.classList.remove('drag-over');
+        e.preventDefault(); dropzone.classList.remove('drag-over');
         addFiles(e.dataTransfer.files);
     });
     dropzone.addEventListener('click', function () { fileInput.click(); });
     browse.addEventListener('click', function (e) { e.stopPropagation(); fileInput.click(); });
     fileInput.addEventListener('change', function () { addFiles(fileInput.files); fileInput.value = ''; });
 
-    /* ---- Slider ---- */
-    slider.addEventListener('change', function () {
-        qVal.textContent = slider.value + '%';
-        recompressAll();
-    });
-    slider.addEventListener('input', function () {
-        qVal.textContent = slider.value + '%';
-    });
+    /* ── Slider ── */
+    slider.addEventListener('input',  function () { qVal.textContent = slider.value + '%'; });
+    slider.addEventListener('change', function () { qVal.textContent = slider.value + '%'; recompressAll(); });
 
-    /* ---- Télécharger tout ---- */
+    /* ── Télécharger tout (fichiers séparés) ── */
     dlAllBtn.addEventListener('click', function () {
-        var ready = files.filter(function (f) { return f.compDataURL; });
-        ready.forEach(function (f, i) {
-            setTimeout(function () { triggerDownload(f); }, i * 350);
-        });
+        files.filter(function (f) { return f.compDataURL; })
+             .forEach(function (f, i) { setTimeout(function () { triggerDownload(f); }, i * 350); });
     });
 
-    /* ---- Reset ---- */
+    /* ── Télécharger en ZIP ── */
+    dlZipBtn.addEventListener('click', function () {
+        dlZipBtn.disabled = true;
+        progTxt.textContent = 'Création du ZIP...';
+        setTimeout(function () {
+            var entries = files
+                .filter(function (f) { return f.compDataURL; })
+                .map(function (f) {
+                    return {
+                        name: f.file.name.replace(/\.[^/.]+$/, '') + '_compresse.jpg',
+                        data: dataURLtoBytes(f.compDataURL)
+                    };
+                });
+            var blob = buildZip(entries);
+            var url  = URL.createObjectURL(blob);
+            var a    = document.createElement('a');
+            a.href     = url;
+            a.download = 'photos_compressees.zip';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+            dlZipBtn.disabled = false;
+            progTxt.textContent = 'ZIP prêt !';
+        }, 50);
+    });
+
+    /* ── Reset ── */
     resetBtn.addEventListener('click', function () {
         files = [];
         tbody.innerHTML = '';
         controls.style.display = 'none';
         dlAllBtn.disabled = true;
+        dlZipBtn.disabled = true;
+        dlZipBtn.style.display = 'none';
         progTxt.textContent = '';
         updateSummary();
     });
 
-    /* ---- Ajout de fichiers ---- */
+    /* ── Ajout de fichiers ── */
     function addFiles(fileList) {
         var added = 0;
         for (var i = 0; i < fileList.length; i++) {
             var f = fileList[i];
             if (!f.type.match(/image\/(jpeg|png)/)) continue;
-            var idx = files.length;
-            var entry = { file: f, origSize: f.size, compDataURL: null, compSize: 0 };
+            var idx   = files.length;
+            var entry = { file: f, origSize: f.size, compDataURL: null, compSize: 0, _processing: false };
             files.push(entry);
-            entry.row = createRow(idx, f.name, f.size);
+            createRow(idx, f.name, f.size);
             added++;
         }
         if (added > 0) {
@@ -506,7 +429,7 @@ body { -ms-overflow-style: none; overflow-y: auto; }
         }
     }
 
-    /* ---- Création d'une ligne ---- */
+    /* ── Création d'une ligne ── */
     function createRow(idx, name, origSize) {
         var tr = document.createElement('tr');
         tr.innerHTML =
@@ -515,22 +438,19 @@ body { -ms-overflow-style: none; overflow-y: auto; }
             '<td class="oc-td-size">' + fmt(origSize) + '</td>' +
             '<td class="oc-td-size" id="oc-comp-' + idx + '">—</td>' +
             '<td class="oc-td-gain" id="oc-gain-' + idx + '">—</td>' +
-            '<td class="oc-td-status"><span class="oc-badge oc-badge-wait" id="oc-badge-' + idx + '">En attente</span></td>' +
+            '<td><span class="oc-badge oc-badge-wait" id="oc-badge-' + idx + '">En attente</span></td>' +
             '<td><button class="oc-btn-dl-row" id="oc-dl-' + idx + '" disabled>Télécharger</button></td>';
         tbody.appendChild(tr);
-
         document.getElementById('oc-dl-' + idx).addEventListener('click', (function (i) {
             return function () { triggerDownload(files[i]); };
         })(idx));
-
-        return tr;
     }
 
-    /* ---- Traitement séquentiel ---- */
+    /* ── Traitement séquentiel ── */
     function processQueue() {
         if (processing) return;
         var pending = files.filter(function (f) { return !f.compDataURL && !f._processing; });
-        if (pending.length === 0) return;
+        if (!pending.length) return;
         processing = true;
         processNext(0);
     }
@@ -560,17 +480,12 @@ body { -ms-overflow-style: none; overflow-y: auto; }
 
                 var gain    = entry.origSize - compSize;
                 var gainPct = Math.round((gain / entry.origSize) * 100);
-
-                var compEl = document.getElementById('oc-comp-' + idx);
-                var gainEl = document.getElementById('oc-gain-' + idx);
-                var dlEl   = document.getElementById('oc-dl-' + idx);
-
+                var compEl  = document.getElementById('oc-comp-' + idx);
+                var gainEl  = document.getElementById('oc-gain-' + idx);
+                var dlEl    = document.getElementById('oc-dl-' + idx);
                 if (compEl) compEl.textContent = fmt(compSize);
-                if (gainEl) {
-                    gainEl.textContent = (gainPct >= 0 ? '-' : '+') + Math.abs(gainPct) + '%';
-                    if (gainPct < 0) gainEl.classList.add('neg');
-                }
-                if (dlEl) dlEl.disabled = false;
+                if (gainEl) { gainEl.textContent = (gainPct >= 0 ? '-' : '+') + Math.abs(gainPct) + '%'; if (gainPct < 0) gainEl.classList.add('neg'); }
+                if (dlEl)   dlEl.disabled = false;
 
                 setBadge(idx, 'ok', 'OK');
                 updateSummary();
@@ -583,58 +498,72 @@ body { -ms-overflow-style: none; overflow-y: auto; }
         reader.readAsDataURL(entry.file);
     }
 
-    /* ---- Recompresser tous (changement slider) ---- */
+    /* ── Recompresser tout ── */
     function recompressAll() {
         files.forEach(function (f) { f.compDataURL = null; f._processing = false; });
+        files.forEach(function (f, i) {
+            var el = document.getElementById('oc-comp-' + i);
+            var ge = document.getElementById('oc-gain-' + i);
+            var dl = document.getElementById('oc-dl-' + i);
+            if (el) el.textContent = '—';
+            if (ge) { ge.textContent = '—'; ge.classList.remove('neg'); }
+            if (dl) dl.disabled = true;
+            setBadge(i, 'wait', 'En attente');
+        });
+        dlAllBtn.disabled = true;
+        dlZipBtn.disabled = true;
         processQueue();
     }
 
-    /* ---- Mise à jour récap global ---- */
+    /* ── Récap global ── */
     function updateSummary() {
-        var total = files.length;
+        var total     = files.length;
         var origTotal = files.reduce(function (s, f) { return s + f.origSize; }, 0);
-        var compTotal = files.filter(function (f) { return f.compDataURL; })
-                             .reduce(function (s, f) { return s + f.compSize; }, 0);
-        var done  = files.filter(function (f) { return f.compDataURL; }).length;
-        var gain  = origTotal - compTotal;
-        var gainPct = origTotal > 0 ? Math.round((gain / origTotal) * 100) : 0;
+        var done      = files.filter(function (f) { return f.compDataURL; });
+        var compTotal = done.reduce(function (s, f) { return s + f.compSize; }, 0);
+        var gainPct   = origTotal > 0 ? Math.round(((origTotal - compTotal) / origTotal) * 100) : 0;
 
         document.getElementById('oc-s-count').textContent = total;
         document.getElementById('oc-s-orig').textContent  = fmt(origTotal);
-        document.getElementById('oc-s-comp').textContent  = done > 0 ? fmt(compTotal) : '—';
-        document.getElementById('oc-s-gain').textContent  = done > 0 ? '-' + gainPct + '%' : '—';
+        document.getElementById('oc-s-comp').textContent  = done.length > 0 ? fmt(compTotal) : '—';
+        document.getElementById('oc-s-gain').textContent  = done.length > 0 ? '-' + gainPct + '%' : '—';
 
-        dlAllBtn.disabled = (done === 0);
-        if (done === total && total > 0) {
-            progTxt.textContent = done + ' photo' + (done > 1 ? 's' : '') + ' traitée' + (done > 1 ? 's' : '') + '.';
+        var allDone = done.length === total && total > 0;
+        dlAllBtn.disabled = done.length === 0;
+
+        /* Bouton ZIP : visible seulement si > 1 fichier */
+        if (total > 1) {
+            dlZipBtn.style.display = '';
+            dlZipBtn.disabled = done.length === 0;
+        } else {
+            dlZipBtn.style.display = 'none';
+        }
+
+        if (allDone) {
+            progTxt.textContent = done.length + ' photo' + (done.length > 1 ? 's' : '') + ' traitée' + (done.length > 1 ? 's' : '') + '.';
         }
     }
 
-    /* ---- Téléchargement ---- */
+    /* ── Téléchargement individuel ── */
     function triggerDownload(entry) {
         if (!entry || !entry.compDataURL) return;
         var a    = document.createElement('a');
-        var base = entry.file.name.replace(/\.[^/.]+$/, '');
         a.href     = entry.compDataURL;
-        a.download = base + '_compresse.jpg';
+        a.download = entry.file.name.replace(/\.[^/.]+$/, '') + '_compresse.jpg';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
     }
 
-    /* ---- Helpers ---- */
+    /* ── Helpers ── */
     function setBadge(idx, type, label) {
         var el = document.getElementById('oc-badge-' + idx);
-        if (!el) return;
-        el.className = 'oc-badge oc-badge-' + type;
-        el.textContent = label;
+        if (el) { el.className = 'oc-badge oc-badge-' + type; el.textContent = label; }
     }
-
     function fmt(b) {
         if (!b) return '—';
         return b > 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.round(b / 1024) + ' KB';
     }
-
     function esc(s) {
         return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
