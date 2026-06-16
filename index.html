@@ -71,7 +71,7 @@
             border-bottom: 1px solid #f0f0f0 !important;
         }
         .category-section:last-child { border-bottom: none !important; }
-        
+
         .category-title {
             font-size: 16px !important;
             font-weight: 700 !important;
@@ -105,20 +105,56 @@
             transition: all 0.3s ease !important;
         }
 
-        .tool-card-med:hover { 
-            border-color: #1a3a5c !important; 
-            box-shadow: 0 6px 15px rgba(0,0,0,0.08) !important; 
-            transform: translateY(-3px) !important; 
+        .tool-card-med:hover {
+            border-color: #1a3a5c !important;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.08) !important;
+            transform: translateY(-3px) !important;
         }
 
         .tool-card-med.hidden { display: none !important; }
 
-        /* ✅ CARTES PREMIUM VERROUILLÉES pour les non-membres */
-        .tool-card-med[data-premium="true"].kz-locked {
-            opacity: 0.6 !important;
-            cursor: not-allowed !important;
+        /* ---- CARTES PREMIUM VERROUILLÉES (style plateforme médicale) ---- */
+        .tool-card-med.premium-locked {
+            border: 2px solid #C9A84C !important;
+            background: #fafaf7 !important;
+            opacity: 1 !important;
+            cursor: pointer !important;
+            filter: grayscale(0.35) !important;
+            pointer-events: auto !important;
+        }
+        .tool-card-med.premium-locked:hover {
+            transform: translateY(-3px) !important;
+            box-shadow: 0 4px 16px rgba(201,168,76,0.35) !important;
+        }
+        .tool-card-med.premium-locked .tool-name-med { color: #6b7280 !important; }
+        .tool-card-med.premium-locked .tool-desc-med { color: #9ca3af !important; }
+
+        /* Badge "★ Premium" (pilule dorée en haut à droite) */
+        .premium-badge-pill {
+            position: absolute !important;
+            top: 10px !important;
+            right: 10px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 3px !important;
+            background: linear-gradient(135deg, #C9A84C, #e8c96a) !important;
+            color: #fff !important;
+            font-size: 10px !important;
+            font-weight: 700 !important;
+            padding: 2px 7px !important;
+            border-radius: 10px !important;
+            z-index: 2 !important;
             pointer-events: none !important;
-            filter: grayscale(30%) !important;
+        }
+
+        /* Cadenas en bas à droite */
+        .premium-lock-icon {
+            position: absolute !important;
+            bottom: 10px !important;
+            right: 10px !important;
+            font-size: 14px !important;
+            color: #C9A84C !important;
+            pointer-events: none !important;
         }
 
         .tool-header-flex { display: flex !important; align-items: center !important; margin-bottom: 10px !important; }
@@ -127,13 +163,6 @@
         .tool-desc-med { font-size: 13.5px !important; color: #546e7a !important; font-weight: 400; margin: 0 !important; line-height: 1.4 !important; }
 
         /* BADGES */
-        .premium-ribbon {
-            position: absolute !important;
-            top: 8px !important;
-            right: 10px !important;
-            color: #C9A961 !important;
-            font-size: 20px !important;
-        }
         .badge-coming {
             position: absolute !important;
             top: 12px !important;
@@ -156,23 +185,23 @@
             font-size: 13px;
             font-weight: 600;
         }
-       #kz-guest-banner a {
-    color: #ffffff;
-    text-decoration: underline;
-    font-weight: 800;
-    margin-left: 8px;
-    background: rgba(0,0,0,0.25);
-    padding: 2px 8px;
-    border-radius: 4px;
-}
-        .portal-disclaimer { 
-            margin: 0 20px 40px 20px !important; 
-            padding: 15px !important; 
-            background: #fbfbfb !important; 
-            border: 1px dashed #cfd8dc !important; 
+        #kz-guest-banner a {
+            color: #ffffff;
+            text-decoration: underline;
+            font-weight: 800;
+            margin-left: 8px;
+            background: rgba(0,0,0,0.25);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+        .portal-disclaimer {
+            margin: 0 20px 40px 20px !important;
+            padding: 15px !important;
+            background: #fbfbfb !important;
+            border: 1px dashed #cfd8dc !important;
             border-radius: 8px !important;
-            font-size: 11px !important; 
-            color: #78909c !important; 
+            font-size: 11px !important;
+            color: #78909c !important;
             text-align: center !important;
         }
 
@@ -238,16 +267,14 @@
                 <p class="tool-desc-med">Conversion JPEG/PNG ⇄ WebP avec compression et export ZIP.</p>
             </a>
 
-            <!-- ✅ PREMIUM - NOUVEAU -->
             <a href="Utilitaires/compression-images/" class="tool-card-med" data-cat="gestion" data-search="compression images jpg png optimisation taille lot" data-premium="true">
-                <div class="premium-ribbon">★</div>
                 <div class="tool-header-flex">
                    <span class="tool-icon-small" style="font-size:28px">🗜️</span>
                    <h3 class="tool-name-med">Compresseur d'Images</h3>
                 </div>
                 <p class="tool-desc-med">Compression par lot de fichiers JPG/PNG avec réglage qualité.</p>
             </a>
-                        
+
             <a href="Utilitaires/convertisseur-gps/" class="tool-card-med" data-cat="util" data-search="gps coordonnées dms plus codes convertisseur">
                 <div class="tool-header-flex">
                     <span class="tool-icon-small" style="font-size:28px">📍</span>
@@ -256,16 +283,14 @@
                 <p class="tool-desc-med">Conversion coordonnées DMS, décimal, Plus Codes Google.</p>
             </a>
 
-<!-- ✅ PREMIUM - NOUVEAU -->
-<a href="Utilitaires/fusion-avi/" class="tool-card-med" data-cat="util" data-search="fusion avi vidéo concaténation ffmpeg commande" data-premium="true">
-    <div class="premium-ribbon">★</div>
-    <div class="tool-header-flex">
-        <span class="tool-icon-small" style="font-size:28px">🎬</span>
-        <h3 class="tool-name-med">Fusion vidéos AVI / MP4</h3>
-    </div>
-    <p class="tool-desc-med">Générateur de commande FFmpeg pour concaténer des séquences AVI / MP4.</p>
-</a>
-            
+            <a href="Utilitaires/fusion-avi/" class="tool-card-med" data-cat="util" data-search="fusion avi vidéo concaténation ffmpeg commande" data-premium="true">
+                <div class="tool-header-flex">
+                    <span class="tool-icon-small" style="font-size:28px">🎬</span>
+                    <h3 class="tool-name-med">Fusion vidéos AVI / MP4</h3>
+                </div>
+                <p class="tool-desc-med">Générateur de commande FFmpeg pour concaténer des séquences AVI / MP4.</p>
+            </a>
+
         </div>
     </section>
 
@@ -274,9 +299,7 @@
         <h2 class="category-title">📄 GESTION DE DOCUMENTS</h2>
         <div class="tools-grid">
 
-            <!-- ✅ PREMIUM -->
             <a href="Utilitaires/ocr-photos/" class="tool-card-med" data-cat="gestion" data-search="ocr photos texte extraction reconnaissance" data-premium="true">
-                <div class="premium-ribbon">★</div>
                 <div class="tool-header-flex">
                     <span class="tool-icon-small" style="font-size:28px">📷</span>
                     <h3 class="tool-name-med">OCR Photos</h3>
@@ -284,9 +307,7 @@
                 <p class="tool-desc-med">Extraction de texte depuis images ou captures d'écran.</p>
             </a>
 
-            <!-- ✅ PREMIUM -->
             <a href="Utilitaires/pdf-ocr/" class="tool-card-med" data-cat="gestion" data-search="pdf ocr numérisation document scan reconnaissance texte" data-premium="true">
-                <div class="premium-ribbon">★</div>
                 <div class="tool-header-flex">
                     <span class="tool-icon-small" style="font-size:28px">📄</span>
                     <h3 class="tool-name-med">PDF OCR</h3>
@@ -294,9 +315,7 @@
                 <p class="tool-desc-med">Numérisation et reconnaissance de PDF scannés en texte éditable.</p>
             </a>
 
-            <!-- ✅ PREMIUM -->
             <a href="Utilitaires/pdf-manager/" class="tool-card-med" data-cat="gestion" data-search="pdf manager fusion découpage édition" data-premium="true">
-                <div class="premium-ribbon">★</div>
                 <div class="tool-header-flex">
                     <span class="tool-icon-small" style="font-size:28px">📑</span>
                     <h3 class="tool-name-med">PDF Manager</h3>
@@ -304,7 +323,6 @@
                 <p class="tool-desc-med">Fusion, découpage, compression et édition de documents PDF.</p>
             </a>
 
-            <!-- Gratuit -->
             <a href="Utilitaires/edition-excel/" class="tool-card-med" data-cat="gestion" data-search="excel xls édition tableur modification">
                 <div class="tool-header-flex">
                     <span class="tool-icon-small" style="font-size:28px">📊</span>
@@ -313,9 +331,7 @@
                 <p class="tool-desc-med">Modification de tableurs en ligne avec filtres, tri, export.</p>
             </a>
 
-            <!-- ✅ PREMIUM -->
             <a href="Utilitaires/creation-ebook/" class="tool-card-med" data-cat="gestion" data-search="ebook word chapitres assemblage document rédaction" data-premium="true">
-                <div class="premium-ribbon">★</div>
                 <div class="tool-header-flex">
                     <span class="tool-icon-small" style="font-size:28px">📚</span>
                     <h3 class="tool-name-med">Création Ebook</h3>
@@ -323,9 +339,7 @@
                 <p class="tool-desc-med">Assemblage de fichiers Word en document structuré avec export DOCX.</p>
             </a>
 
-            <!-- ✅ PREMIUM -->
             <a href="Utilitaires/generateur-tableaux/" class="tool-card-med" data-cat="gestion" data-search="tableau html générateur structure code édition" data-premium="true">
-                <div class="premium-ribbon">★</div>
                 <div class="tool-header-flex">
                     <span class="tool-icon-small" style="font-size:28px">📋</span>
                     <h3 class="tool-name-med">Tableaux HTML</h3>
@@ -341,9 +355,7 @@
         <h2 class="category-title">🛠️ UTILITAIRES DIVERS</h2>
         <div class="tools-grid">
 
-            <!-- ✅ PREMIUM -->
             <a href="Utilitaires/qr-code/" class="tool-card-med" data-cat="util" data-search="qr code générateur lien texte contact" data-premium="true">
-                <div class="premium-ribbon">★</div>
                 <div class="tool-header-flex">
                     <span class="tool-icon-small" style="font-size:28px">🏷️</span>
                     <h3 class="tool-name-med">Générateur QR Code</h3>
@@ -351,9 +363,7 @@
                 <p class="tool-desc-med">Création de QR codes personnalisés pour liens, textes, contacts.</p>
             </a>
 
-            <!-- ✅ PREMIUM -->
             <a href="Utilitaires/comparateur-texte/" class="tool-card-med" data-cat="util" data-search="comparateur texte différence analyse comparaison" data-premium="true">
-                <div class="premium-ribbon">★</div>
                 <div class="tool-header-flex">
                     <span class="tool-icon-small" style="font-size:28px">📝</span>
                     <h3 class="tool-name-med">Comparateur de texte</h3>
@@ -361,9 +371,7 @@
                 <p class="tool-desc-med">Détection de différences entre deux documents texte avec vue fusionnée.</p>
             </a>
 
-            <!-- ✅ PREMIUM -->
             <a href="Utilitaires/analyseur-texte/" class="tool-card-med" data-cat="util" data-search="analyseur texte statistiques mots caractères phrases docx pdf" data-premium="true">
-                <div class="premium-ribbon">★</div>
                 <div class="tool-header-flex">
                     <span class="tool-icon-small" style="font-size:28px">📈</span>
                     <h3 class="tool-name-med">Analyseur Texte</h3>
@@ -371,9 +379,7 @@
                 <p class="tool-desc-med">Statistiques avancées de fichiers TXT, DOCX et PDF.</p>
             </a>
 
-            <!-- ✅ PREMIUM - NOUVEAU -->
             <a href="Utilitaires/recherche-copernic/" class="tool-card-med" data-cat="util" data-search="recherche copernic fichiers indexation texte pdf docx" data-premium="true">
-                <div class="premium-ribbon">★</div>
                 <div class="tool-header-flex">
                     <span class="tool-icon-small" style="font-size:28px">🔍</span>
                     <h3 class="tool-name-med">Recherche Copernic</h3>
@@ -381,7 +387,6 @@
                 <p class="tool-desc-med">Recherche plein texte locale dans PDF, DOCX et TXT.</p>
             </a>
 
-            <!-- Gratuit -->
             <a href="https://www.dr-karazaitri-ma.net/repertoire-telephonique/" class="tool-card-med" data-cat="util" data-search="répertoire téléphone contacts professionnels annuaire">
                 <div class="tool-header-flex">
                     <span class="tool-icon-small" style="font-size:28px">📞</span>
@@ -390,14 +395,13 @@
                 <p class="tool-desc-med">Contacts professionnels sécurisés.</p>
             </a>
 
-            <!-- NOUVEAU -->
-<a href="Utilitaires/chronometre/" class="tool-card-med" data-cat="util" data-search="chronomètre compte à rebours temps minuterie consultation">
-        <div class="tool-header-flex">
-        <span class="tool-icon-small" style="font-size:28px">⏱️</span>
-        <h3 class="tool-name-med">Chronomètre</h3>
-    </div>
-    <p class="tool-desc-med">Chronométrage et compte à rebours pour consultations médicales.</p>
-</a>
+            <a href="Utilitaires/chronometre/" class="tool-card-med" data-cat="util" data-search="chronomètre compte à rebours temps minuterie consultation">
+                <div class="tool-header-flex">
+                    <span class="tool-icon-small" style="font-size:28px">⏱️</span>
+                    <h3 class="tool-name-med">Chronomètre</h3>
+                </div>
+                <p class="tool-desc-med">Chronométrage et compte à rebours pour consultations médicales.</p>
+            </a>
 
         </div>
     </section>
@@ -407,15 +411,13 @@
         <h2 class="category-title">🏥 MÉDICAL</h2>
         <div class="tools-grid">
 
-           <!-- ✅ PREMIUM - NOUVEAU -->
-<a href="Utilitaires/suivi-tension/" class="tool-card-med" data-cat="medical" data-search="tension artérielle hta suivi mesures graphique" data-premium="true">
-    <div class="premium-ribbon">★</div>
-    <div class="tool-header-flex">
-        <span class="tool-icon-small" style="font-size:28px">❤️</span>
-        <h3 class="tool-name-med">Suivi Tension</h3>
-    </div>
-    <p class="tool-desc-med">Journal d'auto-mesure tensionnelle avec graphique et export.</p>
-</a>
+            <a href="Utilitaires/suivi-tension/" class="tool-card-med" data-cat="medical" data-search="tension artérielle hta suivi mesures graphique" data-premium="true">
+                <div class="tool-header-flex">
+                    <span class="tool-icon-small" style="font-size:28px">❤️</span>
+                    <h3 class="tool-name-med">Suivi Tension</h3>
+                </div>
+                <p class="tool-desc-med">Journal d'auto-mesure tensionnelle avec graphique et export.</p>
+            </a>
 
         </div>
     </section>
@@ -433,17 +435,16 @@
                 <p class="tool-desc-med">Entraînement cognitif et mémoire.</p>
             </a>
 
-            <!-- Mastermind Classique -->
-<a href="https://karazaitri12-cpu.github.io/plateforme-utilitaires/Utilitaires/mastermind/" 
-   class="tool-card-med" 
-   data-cat="loisir" 
-   data-search="mastermind jeu couleurs déduction logique code secret">
-       <div class="tool-header-flex">
-        <span class="tool-icon-small" style="font-size:28px">🎲</span>
-        <h3 class="tool-name-med">Mastermind</h3>
-    </div>
-    <p class="tool-desc-med">Jeu de déduction logique : devinez le code secret en 10 essais.</p>
-</a>
+            <a href="https://karazaitri12-cpu.github.io/plateforme-utilitaires/Utilitaires/mastermind/"
+               class="tool-card-med"
+               data-cat="loisir"
+               data-search="mastermind jeu couleurs déduction logique code secret">
+                <div class="tool-header-flex">
+                    <span class="tool-icon-small" style="font-size:28px">🎲</span>
+                    <h3 class="tool-name-med">Mastermind</h3>
+                </div>
+                <p class="tool-desc-med">Jeu de déduction logique : devinez le code secret en 10 essais.</p>
+            </a>
 
         </div>
     </section>
@@ -486,7 +487,6 @@
 (function() {
     var WP_ENDPOINT = 'https://www.dr-karazaitri-ma.net/wp-json/kz/v1/verify-token';
 
-    // Récupérer le token depuis l'URL si présent
     var urlParams    = new URLSearchParams(window.location.search);
     var tokenFromUrl = urlParams.get('token');
     if (tokenFromUrl) {
@@ -507,25 +507,121 @@
         .catch(function() { setPremiumState(false); });
 
     function setPremiumState(isPremium) {
-
-        // Cartes premium : cliquables si premium, grisées et bloquées sinon
         document.querySelectorAll('[data-premium="true"]').forEach(function(card) {
             if (!isPremium) {
-                card.classList.add('kz-locked');
+                // Style carte premium verrouillée
+                card.classList.add('premium-locked');
                 card.setAttribute('title', 'Accès réservé aux membres premium');
-                // Intercepter le clic pour rediriger vers la page de connexion
+
+                // Badge "★ Premium" (pilule dorée)
+                var badge = document.createElement('span');
+                badge.className = 'premium-badge-pill';
+                badge.textContent = '★ Premium';
+                card.appendChild(badge);
+
+                // Cadenas en bas à droite
+                var lock = document.createElement('span');
+                lock.className = 'premium-lock-icon';
+                lock.textContent = '🔒';
+                card.appendChild(lock);
+
+                // Popup modal au clic (au lieu de redirection directe)
                 card.addEventListener('click', function(e) {
                     e.preventDefault();
-                    window.location.href = 'https://www.dr-karazaitri-ma.net/connexion-membres/';
+                    var toolName = card.querySelector('.tool-name-med')
+                        ? card.querySelector('.tool-name-med').textContent
+                        : 'Cet outil';
+                    openPremiumModal(toolName, 'https://www.dr-karazaitri-ma.net/connexion-membres/');
                 });
             }
         });
 
-        // Bandeau non-membre
         var banner = document.getElementById('kz-guest-banner');
         if (banner) banner.style.display = isPremium ? 'none' : 'block';
     }
 })();
+</script>
+
+<!-- Modal premium (identique à la plateforme d'outils médicaux) -->
+<script>
+function openPremiumModal(toolName, connexionUrl) {
+    function sp(el, prop, val) { el.style.setProperty(prop, val, 'important'); }
+
+    var hr   = document.documentElement.getBoundingClientRect();
+    var vh   = window.innerHeight;
+    var vw   = window.innerWidth;
+    var topC = vh / 2 - hr.top;
+    var lefC = vw / 2 - hr.left;
+
+    var overlay = document.createElement('div');
+    sp(overlay,'position','absolute');
+    sp(overlay,'top',  (-hr.top)  + 'px');
+    sp(overlay,'left', (-hr.left) + 'px');
+    sp(overlay,'width',  vw + 'px');
+    sp(overlay,'height', vh + 'px');
+    sp(overlay,'background','rgba(15,23,42,0.6)');
+    sp(overlay,'z-index','2147483646');
+    sp(overlay,'margin','0'); sp(overlay,'padding','0');
+
+    var card = document.createElement('div');
+    sp(card,'position','absolute');
+    sp(card,'top',  topC + 'px');
+    sp(card,'left', lefC + 'px');
+    sp(card,'transform','translate(-50%,-50%)');
+    sp(card,'z-index','2147483647');
+    sp(card,'background','#ffffff'); sp(card,'border-radius','16px');
+    sp(card,'padding','24px 20px'); sp(card,'max-width','420px'); sp(card,'width','88%');
+    sp(card,'max-height','80vh'); sp(card,'overflow-y','auto');
+    sp(card,'box-shadow','0 16px 48px rgba(0,0,0,0.3)');
+    sp(card,'text-align','center'); sp(card,'box-sizing','border-box');
+    sp(card,'font-family','Segoe UI,Arial,sans-serif');
+
+    var inner = document.createElement('div');
+    inner.innerHTML =
+        '<div style="font-size:34px;margin-bottom:6px;line-height:1;">&#128274;</div>' +
+        '<div style="display:inline-block;background:#fff8e0;border:1px solid #e0c060;border-radius:20px;padding:3px 12px;font-size:11px;font-weight:700;color:#7a5a00;margin-bottom:10px;font-family:sans-serif;">&#9733; Contenu Premium</div>' +
+        '<div style="font-size:1rem;color:#1e2a35;margin:0 0 4px;font-weight:700;font-family:sans-serif;">Outil r&#233;serv&#233; aux membres</div>' +
+        '<div style="font-size:0.92rem;color:#C9A84C;font-weight:600;margin:0 0 10px;font-family:sans-serif;">' + toolName + '</div>' +
+        '<div style="font-size:0.85rem;color:#4b5563;margin:0 0 18px;line-height:1.5;font-family:sans-serif;">Cet outil est accessible aux membres premium de FemCare Hub.<br>Souhaitez-vous acc&#233;der &#224; la page de connexion / abonnement&nbsp;?</div>';
+    card.appendChild(inner);
+
+    var actions = document.createElement('div');
+    sp(actions,'display','flex'); sp(actions,'gap','10px'); sp(actions,'margin-top','4px');
+
+    var btnNo = document.createElement('a');
+    btnNo.textContent = 'Non, pas maintenant';
+    sp(btnNo,'flex','1'); sp(btnNo,'display','block');
+    sp(btnNo,'background','#f3f4f6'); sp(btnNo,'color','#374151');
+    sp(btnNo,'border','1px solid #d1d5db'); sp(btnNo,'border-radius','8px');
+    sp(btnNo,'padding','11px 6px'); sp(btnNo,'font-size','0.85rem');
+    sp(btnNo,'font-weight','600'); sp(btnNo,'cursor','pointer');
+    sp(btnNo,'text-decoration','none'); sp(btnNo,'text-align','center');
+    sp(btnNo,'font-family','sans-serif'); sp(btnNo,'box-sizing','border-box');
+
+    var btnYes = document.createElement('a');
+    btnYes.textContent = 'Oui, me connecter';
+    sp(btnYes,'flex','1'); sp(btnYes,'display','block');
+    sp(btnYes,'background','#1A3A5C'); sp(btnYes,'color','#ffffff');
+    sp(btnYes,'border','none'); sp(btnYes,'border-radius','8px');
+    sp(btnYes,'padding','11px 6px'); sp(btnYes,'font-size','0.85rem');
+    sp(btnYes,'font-weight','600'); sp(btnYes,'cursor','pointer');
+    sp(btnYes,'text-decoration','none'); sp(btnYes,'text-align','center');
+    sp(btnYes,'font-family','sans-serif'); sp(btnYes,'box-sizing','border-box');
+
+    actions.appendChild(btnNo); actions.appendChild(btnYes);
+    card.appendChild(actions);
+    document.body.appendChild(overlay);
+    document.body.appendChild(card);
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    function close() {
+        if (document.body.contains(overlay)) document.body.removeChild(overlay);
+        if (document.body.contains(card))    document.body.removeChild(card);
+    }
+    overlay.addEventListener('click', close);
+    btnNo.addEventListener('click', close);
+    btnYes.addEventListener('click', function(e) { e.preventDefault(); window.top.location.href = connexionUrl; });
+}
 </script>
 
 </body>
