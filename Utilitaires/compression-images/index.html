@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Compression d'images — Lot</title>
+<style>
+/* === BLINDAGE ELEMENTOR === */
+#outil-compression, #outil-compression * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+#outil-compression {
+    font-size: 14px;
+    color: #2c2c2c;
+    background: #f4f7fa;
+    min-height: 100vh;
+    padding: 28px 16px 40px;
+}
+
+#outil-compression .oc-inner {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+/* En-tête */
+#outil-compression .oc-header {
+    background: #1A3A5C;
+    color: #fff;
+    padding: 18px 24px;
+    border-radius: 4px 4px 0 0;
+    border-bottom: 3px solid #0e2340;
+}
+
+#outil-compression .oc-header h1 {
+    font-size: 17px;
+    font-weight: 700;
+}
+
+#outil-compression .oc-header p {
+    font-size: 12px;
+    color: #9dbcd4;
+    margin-top: 4px;
+}
+
+/* Carte */
+#outil-compression .oc-card {
+    background: #fff;
+    border: 1px solid #dde5ec;
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    padding: 24px;
+    margin-bottom: 16px;
+}
+
+/* Zone de dépôt */
+#outil-compression .oc-dropzone {
+    border: 2px dashed #b5c8d8;
+    border-radius: 4px;
+    background: #f9fbfd;
+    padding: 36px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    margin-bottom: 20px;
+}
+
+#outil-compression .oc-dropzone:hover,
+#outil-compression .oc-dropzone.drag-over {
+    border-color: #1A3A5C;
+    background: #edf3f9;
+}
+
+#outil-compression .oc-dropzone-icon {
+    font-size: 32px;
+    display: block;
+    margin-bottom: 10px;
+}
+
+#outil-compression .oc-dropzone p {
+    color: #5a7a96;
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+#outil-compression .oc-dropzone-link {
+    color: #1A3A5C;
+    font-weight: 700;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+#outil-compression .oc-dropzone small {
+    display: block;
+    margin-top: 5px;
+    font-size: 11px;
+    color: #9ab5c8;
+}
+
+/* Section label */
+#outil-compression .oc-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #1A3A5C;
+    display: block;
+    margin-bottom: 9px;
+}
+
+/* Slider */
+#outil-compression .oc-slider-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 5px;
+}
+
+#outil-compression input[type="range"] {
+    flex: 1;
+    height: 4px;
+    accent-color: #1A3A5C;
+    cursor: pointer;
+}
+
+#outil-compression .oc-quality-val {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1A3A5C;
+    min-width: 48px;
+    text-align: right;
+}
+
+#outil-compression .oc-slider-hints {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: #9ab5c8;
+    margin-bottom: 22px;
+}
+
+/* Stats globales */
+#outil-compression .oc-summary {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 22px;
+}
+
+#outil-compression .oc-stat {
+    background: #f4f7fa;
+    border: 1px solid #dde5ec;
+    border-radius: 4px;
+    padding: 13px 10px;
+    text-align: center;
+}
+
+#outil-compression .oc-stat .val {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1A3A5C;
+    display: block;
+}
+
+#outil-compression .oc-stat.gain .val { color: #166534; }
+
+#outil-compression .oc-stat .lbl {
+    font-size: 11px;
+    color: #7a99b0;
+    display: block;
+    margin-top: 3px;
+}
+
+/* Séparateur */
+#outil-compression .oc-sep {
+    height: 1px;
+    background: #edf0f3;
+    margin-bottom: 18px;
+}
+
+/* Tableau */
+#outil-compression .oc-table-wrap {
+    overflow-x: auto;
+    margin-bottom: 18px;
+}
+
+#outil-compression table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+#outil-compression thead th {
+    background: #f0f5fb;
+    border-bottom: 2px solid #dde5ec;
+    padding: 9px 12px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: #1A3A5C;
+    white-space: nowrap;
+}
+
+#outil-compression tbody tr {
+    border-bottom: 1px solid #edf0f3;
+    transition: background 0.15s;
+}
+
+#outil-compression tbody tr:hover { background: #fafcfe; }
+
+#outil-compression tbody td {
+    padding: 9px 12px;
+    vertical-align: middle;
+}
+
+#outil-compression .oc-td-name {
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #2c2c2c;
+    font-weight: 600;
+}
+
+#outil-compression .oc-td-size { color: #5a7a96; white-space: nowrap; }
+
+#outil-compression .oc-td-gain {
+    font-weight: 700;
+    color: #166534;
+    white-space: nowrap;
+}
+
+#outil-compression .oc-td-gain.neg { color: #C8102E; }
+
+#outil-compression .oc-td-status {
+    white-space: nowrap;
+}
+
+/* Badge statut */
+#outil-compression .oc-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+#outil-compression .oc-badge-wait  { background: #f0f5fb; color: #7a99b0; }
+#outil-compression .oc-badge-proc  { background: #fff3cd; color: #856404; }
+#outil-compression .oc-badge-ok    { background: #d1e7dd; color: #0a3622; }
+#outil-compression .oc-badge-err   { background: #f8d7da; color: #842029; }
+
+/* Bouton dl par ligne */
+#outil-compression .oc-btn-dl-row {
+    padding: 4px 10px;
+    background: #1A3A5C;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: Arial, Helvetica, sans-serif;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s;
+}
+
+#outil-compression .oc-btn-dl-row:hover   { background: #0e2340; }
+#outil-compression .oc-btn-dl-row:disabled { background: #c0cdd8; cursor: not-allowed; }
+
+/* Boutons principaux */
+#outil-compression .oc-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+#outil-compression .oc-btn {
+    padding: 11px 20px;
+    border-radius: 3px;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: Arial, Helvetica, sans-serif;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+#outil-compression .oc-btn:hover { opacity: 0.85; }
+#outil-compression .oc-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+#outil-compression .oc-btn-primary  { background: #166534; color: #fff; }
+#outil-compression .oc-btn-secondary { background: #fff; color: #1A3A5C; border: 1px solid #1A3A5C; }
+
+#outil-compression .oc-btn-primary::before  { content: "\2193\A0\A0"; }
+#outil-compression .oc-btn-secondary::before { content: "\2715\A0\A0"; }
+
+#outil-compression .oc-progress-txt {
+    font-size: 12px;
+    color: #7a99b0;
+    margin-left: 6px;
+}
+
+/* Notice */
+#outil-compression .oc-notice {
+    font-size: 11px;
+    color: #9ab5c8;
+    border-top: 1px solid #edf0f3;
+    padding-top: 14px;
+    margin-top: 20px;
+    line-height: 1.7;
+}
+
+#outil-compression .oc-notice::before { content: "\26A0\A0"; }
+
+/* Contrôles (masqués par défaut) */
+#outil-compression #oc-controls { display: none; }
+
+/* Masque l'ascenseur */
+html { scrollbar-width: none; }
+body { -ms-overflow-style: none; overflow-y: auto; }
+::-webkit-scrollbar { display: none; }
+
+/* Responsive */
+@media (max-width: 580px) {
+    #outil-compression .oc-summary { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div id="outil-compression">
+<div class="oc-inner">
+
+    <div class="oc-header">
+        <h1>Compression d&rsquo;images &mdash; Traitement par lot</h1>
+        <p>S&eacute;lectionnez plusieurs photos &agrave; la fois &mdash; traitement 100&nbsp;% local, aucun envoi de donn&eacute;es</p>
+    </div>
+
+    <div class="oc-card">
+
+        <!-- Zone de dépôt (toujours visible) -->
+        <div class="oc-dropzone" id="oc-dropzone">
+            <span class="oc-dropzone-icon">&#128247;</span>
+            <p>Glissez vos images ici<br>ou <span class="oc-dropzone-link" id="oc-browse">cliquez pour s&eacute;lectionner</span></p>
+            <small>JPG &bull; PNG &bull; S&eacute;lection multiple autoris&eacute;e</small>
+        </div>
+        <input type="file" id="oc-file-input" accept="image/jpeg,image/png" multiple style="display:none">
+        <canvas id="oc-canvas" style="display:none"></canvas>
+
+        <!-- Contrôles (affichés après chargement) -->
+        <div id="oc-controls">
+
+            <!-- Slider qualité -->
+            <span class="oc-label">Qualit&eacute; de compression (appliqu&eacute;e &agrave; tous)</span>
+            <div class="oc-slider-row">
+                <input type="range" id="oc-slider" min="50" max="95" value="85">
+                <span class="oc-quality-val" id="oc-quality-val">85%</span>
+            </div>
+            <div class="oc-slider-hints">
+                <span>50% &mdash; Compression maximale</span>
+                <span>95% &mdash; Quasi-original</span>
+            </div>
+
+            <!-- Récap global -->
+            <div class="oc-summary">
+                <div class="oc-stat">
+                    <span class="val" id="oc-s-count">0</span>
+                    <span class="lbl">Fichiers</span>
+                </div>
+                <div class="oc-stat">
+                    <span class="val" id="oc-s-orig">—</span>
+                    <span class="lbl">Taille totale originale</span>
+                </div>
+                <div class="oc-stat">
+                    <span class="val" id="oc-s-comp">—</span>
+                    <span class="lbl">Taille totale compress&eacute;e</span>
+                </div>
+                <div class="oc-stat gain">
+                    <span class="val" id="oc-s-gain">—</span>
+                    <span class="lbl">Gain total</span>
+                </div>
+            </div>
+
+            <div class="oc-sep"></div>
+
+            <!-- Tableau des fichiers -->
+            <div class="oc-table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Fichier</th>
+                            <th>Original</th>
+                            <th>Compress&eacute;</th>
+                            <th>Gain</th>
+                            <th>Statut</th>
+                            <th>T&eacute;l&eacute;charger</th>
+                        </tr>
+                    </thead>
+                    <tbody id="oc-tbody"></tbody>
+                </table>
+            </div>
+
+            <!-- Actions -->
+            <div class="oc-actions">
+                <button class="oc-btn oc-btn-primary" id="oc-dl-all" disabled>T&eacute;l&eacute;charger tout</button>
+                <button class="oc-btn oc-btn-secondary" id="oc-reset">R&eacute;initialiser</button>
+                <span class="oc-progress-txt" id="oc-progress-txt"></span>
+            </div>
+
+        </div><!-- /oc-controls -->
+
+        <p class="oc-notice">
+            Traitement enti&egrave;rement local (navigateur). Aucune image n&rsquo;est envoy&eacute;e vers un serveur.
+            La qualit&eacute; &agrave; 85&nbsp;% est visuellement identique &agrave; l&rsquo;original pour la quasi-totalit&eacute; des usages.
+        </p>
+
+    </div><!-- /oc-card -->
+
+</div>
+</div>
+
+<script>
+(function () {
+
+    /* ---- Éléments DOM ---- */
+    var dropzone  = document.getElementById('oc-dropzone');
+    var fileInput = document.getElementById('oc-file-input');
+    var browse    = document.getElementById('oc-browse');
+    var canvas    = document.getElementById('oc-canvas');
+    var ctx       = canvas.getContext('2d');
+    var controls  = document.getElementById('oc-controls');
+    var slider    = document.getElementById('oc-slider');
+    var qVal      = document.getElementById('oc-quality-val');
+    var tbody     = document.getElementById('oc-tbody');
+    var dlAllBtn  = document.getElementById('oc-dl-all');
+    var resetBtn  = document.getElementById('oc-reset');
+    var progTxt   = document.getElementById('oc-progress-txt');
+
+    /* ---- État ---- */
+    var files = [];       // { file, origSize, compDataURL, compSize, row }
+    var processing = false;
+
+    /* ---- Drag & drop ---- */
+    dropzone.addEventListener('dragover', function (e) { e.preventDefault(); dropzone.classList.add('drag-over'); });
+    dropzone.addEventListener('dragleave', function () { dropzone.classList.remove('drag-over'); });
+    dropzone.addEventListener('drop', function (e) {
+        e.preventDefault();
+        dropzone.classList.remove('drag-over');
+        addFiles(e.dataTransfer.files);
+    });
+    dropzone.addEventListener('click', function () { fileInput.click(); });
+    browse.addEventListener('click', function (e) { e.stopPropagation(); fileInput.click(); });
+    fileInput.addEventListener('change', function () { addFiles(fileInput.files); fileInput.value = ''; });
+
+    /* ---- Slider ---- */
+    slider.addEventListener('change', function () {
+        qVal.textContent = slider.value + '%';
+        recompressAll();
+    });
+    slider.addEventListener('input', function () {
+        qVal.textContent = slider.value + '%';
+    });
+
+    /* ---- Télécharger tout ---- */
+    dlAllBtn.addEventListener('click', function () {
+        var ready = files.filter(function (f) { return f.compDataURL; });
+        ready.forEach(function (f, i) {
+            setTimeout(function () { triggerDownload(f); }, i * 350);
+        });
+    });
+
+    /* ---- Reset ---- */
+    resetBtn.addEventListener('click', function () {
+        files = [];
+        tbody.innerHTML = '';
+        controls.style.display = 'none';
+        dlAllBtn.disabled = true;
+        progTxt.textContent = '';
+        updateSummary();
+    });
+
+    /* ---- Ajout de fichiers ---- */
+    function addFiles(fileList) {
+        var added = 0;
+        for (var i = 0; i < fileList.length; i++) {
+            var f = fileList[i];
+            if (!f.type.match(/image\/(jpeg|png)/)) continue;
+            var idx = files.length;
+            var entry = { file: f, origSize: f.size, compDataURL: null, compSize: 0 };
+            files.push(entry);
+            entry.row = createRow(idx, f.name, f.size);
+            added++;
+        }
+        if (added > 0) {
+            controls.style.display = 'block';
+            updateSummary();
+            processQueue();
+        }
+    }
+
+    /* ---- Création d'une ligne ---- */
+    function createRow(idx, name, origSize) {
+        var tr = document.createElement('tr');
+        tr.innerHTML =
+            '<td style="color:#9ab5c8;font-size:12px">' + (idx + 1) + '</td>' +
+            '<td class="oc-td-name" title="' + esc(name) + '">' + esc(name) + '</td>' +
+            '<td class="oc-td-size">' + fmt(origSize) + '</td>' +
+            '<td class="oc-td-size" id="oc-comp-' + idx + '">—</td>' +
+            '<td class="oc-td-gain" id="oc-gain-' + idx + '">—</td>' +
+            '<td class="oc-td-status"><span class="oc-badge oc-badge-wait" id="oc-badge-' + idx + '">En attente</span></td>' +
+            '<td><button class="oc-btn-dl-row" id="oc-dl-' + idx + '" disabled>Télécharger</button></td>';
+        tbody.appendChild(tr);
+
+        document.getElementById('oc-dl-' + idx).addEventListener('click', (function (i) {
+            return function () { triggerDownload(files[i]); };
+        })(idx));
+
+        return tr;
+    }
+
+    /* ---- Traitement séquentiel ---- */
+    function processQueue() {
+        if (processing) return;
+        var pending = files.filter(function (f) { return !f.compDataURL && !f._processing; });
+        if (pending.length === 0) return;
+        processing = true;
+        processNext(0);
+    }
+
+    function processNext(idx) {
+        if (idx >= files.length) { processing = false; return; }
+        var entry = files[idx];
+        if (entry.compDataURL || entry._processing) { processNext(idx + 1); return; }
+        entry._processing = true;
+        setBadge(idx, 'proc', 'Traitement...');
+        progTxt.textContent = 'Traitement ' + (idx + 1) + ' / ' + files.length + '...';
+
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            var img = new Image();
+            img.onload = function () {
+                var q = parseInt(slider.value) / 100;
+                canvas.width  = img.naturalWidth;
+                canvas.height = img.naturalHeight;
+                ctx.drawImage(img, 0, 0);
+                var dataURL  = canvas.toDataURL('image/jpeg', q);
+                var b64      = dataURL.split(',')[1];
+                var compSize = Math.round(b64.length * 0.75);
+
+                entry.compDataURL = dataURL;
+                entry.compSize    = compSize;
+
+                var gain    = entry.origSize - compSize;
+                var gainPct = Math.round((gain / entry.origSize) * 100);
+
+                var compEl = document.getElementById('oc-comp-' + idx);
+                var gainEl = document.getElementById('oc-gain-' + idx);
+                var dlEl   = document.getElementById('oc-dl-' + idx);
+
+                if (compEl) compEl.textContent = fmt(compSize);
+                if (gainEl) {
+                    gainEl.textContent = (gainPct >= 0 ? '-' : '+') + Math.abs(gainPct) + '%';
+                    if (gainPct < 0) gainEl.classList.add('neg');
+                }
+                if (dlEl) dlEl.disabled = false;
+
+                setBadge(idx, 'ok', 'OK');
+                updateSummary();
+                processNext(idx + 1);
+            };
+            img.onerror = function () { setBadge(idx, 'err', 'Erreur'); processNext(idx + 1); };
+            img.src = e.target.result;
+        };
+        reader.onerror = function () { setBadge(idx, 'err', 'Erreur'); processNext(idx + 1); };
+        reader.readAsDataURL(entry.file);
+    }
+
+    /* ---- Recompresser tous (changement slider) ---- */
+    function recompressAll() {
+        files.forEach(function (f) { f.compDataURL = null; f._processing = false; });
+        processQueue();
+    }
+
+    /* ---- Mise à jour récap global ---- */
+    function updateSummary() {
+        var total = files.length;
+        var origTotal = files.reduce(function (s, f) { return s + f.origSize; }, 0);
+        var compTotal = files.filter(function (f) { return f.compDataURL; })
+                             .reduce(function (s, f) { return s + f.compSize; }, 0);
+        var done  = files.filter(function (f) { return f.compDataURL; }).length;
+        var gain  = origTotal - compTotal;
+        var gainPct = origTotal > 0 ? Math.round((gain / origTotal) * 100) : 0;
+
+        document.getElementById('oc-s-count').textContent = total;
+        document.getElementById('oc-s-orig').textContent  = fmt(origTotal);
+        document.getElementById('oc-s-comp').textContent  = done > 0 ? fmt(compTotal) : '—';
+        document.getElementById('oc-s-gain').textContent  = done > 0 ? '-' + gainPct + '%' : '—';
+
+        dlAllBtn.disabled = (done === 0);
+        if (done === total && total > 0) {
+            progTxt.textContent = done + ' photo' + (done > 1 ? 's' : '') + ' traitée' + (done > 1 ? 's' : '') + '.';
+        }
+    }
+
+    /* ---- Téléchargement ---- */
+    function triggerDownload(entry) {
+        if (!entry || !entry.compDataURL) return;
+        var a    = document.createElement('a');
+        var base = entry.file.name.replace(/\.[^/.]+$/, '');
+        a.href     = entry.compDataURL;
+        a.download = base + '_compresse.jpg';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+
+    /* ---- Helpers ---- */
+    function setBadge(idx, type, label) {
+        var el = document.getElementById('oc-badge-' + idx);
+        if (!el) return;
+        el.className = 'oc-badge oc-badge-' + type;
+        el.textContent = label;
+    }
+
+    function fmt(b) {
+        if (!b) return '—';
+        return b > 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.round(b / 1024) + ' KB';
+    }
+
+    function esc(s) {
+        return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+})();
+</script>
+
+<!-- TRACKING UMAMI (RGPD compliant, no cookies) -->
+<script defer src="https://cloud.umami.is/script.js" data-website-id="b182aba6-225e-47ac-b6be-892e033a6013"></script>
+
+</body>
+</html>
