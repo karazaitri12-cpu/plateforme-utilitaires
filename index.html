@@ -10,7 +10,7 @@
         #med-hub-full {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif !important;
             color: #4a6977 !important;
-            background-color: #ffffff !important;
+            background-color: #f7fafc !important;
             width: 100% !important;
             margin: 0 auto !important;
         }
@@ -43,25 +43,31 @@
 
         /* BARRE DE RECHERCHE */
         #med-hub-full .search-section {
-            background: #f4f7f9 !important;
-            padding: 20px !important;
-            border-bottom: 1px solid #cfd8dc !important;
+            background: transparent !important;
+            padding: 20px 20px 10px 20px !important;
+            border-bottom: none !important;
         }
         #med-hub-full .search-wrapper {
             position: relative !important;
-            max-width: 500px !important;
+            max-width: 560px !important;
             margin: 0 auto !important;
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 8px !important;
+            padding: 4px 8px !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important;
         }
         #med-hub-full #tool-search {
             width: 100% !important;
             height: 44px !important;
             padding: 0 45px !important;
-            border: 1px solid #cfd8dc !important;
+            border: none !important;
             border-radius: 8px !important;
             outline: none !important;
-            font-size: 16px !important;
+            font-size: 15px !important;
+            background: transparent !important;
         }
-        #med-hub-full #tool-search:focus { border-color: #1a3a5c !important; }
+        #med-hub-full #tool-search:focus { outline: none !important; }
         #med-hub-full .search-icon { position: absolute !important; left: 15px; top: 13px; font-size: 18px; color: #90a4ae; }
         #med-hub-full #clear-search { position: absolute !important; right: 12px; top: 5px; font-size: 28px; color: #cfd8dc; cursor: pointer; display: none; }
 
@@ -455,50 +461,87 @@
 })();
 </script>
 
-<!-- Vérification premium -->
+<!-- Vérification premium (tokens unifiés + déverrouillage cross-onglet) -->
 <script>
 (function() {
     var WP_ENDPOINT = 'https://www.dr-karazaitri-ma.net/wp-json/kz/v1/verify-token';
+    // Les deux plateformes partagent le même compte : on écoute les deux clés
+    var TOKEN_KEYS  = ['kz_premium_token', 'kz_platform_token'];
 
+    // Token transmis par URL → sauvegardé sous les deux clés
     var urlParams    = new URLSearchParams(window.location.search);
     var tokenFromUrl = urlParams.get('token');
     if (tokenFromUrl) {
-        localStorage.setItem('kz_premium_token', tokenFromUrl);
+        TOKEN_KEYS.forEach(function(k) { localStorage.setItem(k, tokenFromUrl); });
         window.history.replaceState({}, document.title, window.location.pathname);
     }
 
-    var token = localStorage.getItem('kz_premium_token');
-
-    if (!token) {
-        setPremiumState(false);
-        return;
+    function getToken() {
+        for (var i = 0; i < TOKEN_KEYS.length; i++) {
+            var t = localStorage.getItem(TOKEN_KEYS[i]);
+            if (t) return t;
+        }
+        return null;
     }
 
-    fetch(WP_ENDPOINT + '?token=' + encodeURIComponent(token))
-        .then(function(r) { return r.json(); })
-        .then(function(data) { setPremiumState(data.valid === true); })
-        .catch(function() { setPremiumState(false); });
+    var currentState = null; // null = pas encore vérifié
+
+    function verifyAndApply() {
+        var token = getToken();
+        if (!token) { applyState(false); return; }
+        fetch(WP_ENDPOINT + '?token=' + encodeURIComponent(token))
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                var valid = data.valid === true;
+                if (valid) {
+                    // Synchroniser les deux clés pour l'autre plateforme
+                    TOKEN_KEYS.forEach(function(k) { localStorage.setItem(k, token); });
+                }
+                applyState(valid);
+            })
+            .catch(function() { applyState(false); });
+    }
+
+    function applyState(isPremium) {
+        if (currentState === isPremium) return; // évite double traitement
+        currentState = isPremium;
+        setPremiumState(isPremium);
+    }
+
+    // Déverrouillage cross-onglet : si l'utilisateur se connecte sur la plateforme médicale,
+    // cette plateforme se déverrouille automatiquement (et vice-versa)
+    window.addEventListener('storage', function(e) {
+        if (TOKEN_KEYS.indexOf(e.key) !== -1 && currentState === false && e.newValue) {
+            fetch(WP_ENDPOINT + '?token=' + encodeURIComponent(e.newValue))
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.valid === true) {
+                        TOKEN_KEYS.forEach(function(k) { localStorage.setItem(k, e.newValue); });
+                        location.reload(); // rechargement propre : tous les outils déverrouillés
+                    }
+                })
+                .catch(function() {});
+        }
+    });
+
+    verifyAndApply();
 
     function setPremiumState(isPremium) {
         document.querySelectorAll('[data-premium="true"]').forEach(function(card) {
             if (!isPremium) {
-                // Style carte premium verrouillée
                 card.classList.add('premium-locked');
                 card.setAttribute('title', 'Accès réservé aux membres premium');
 
-                // Badge "★ Premium" (pilule dorée)
                 var badge = document.createElement('span');
                 badge.className = 'premium-badge-pill';
                 badge.textContent = '★ Premium';
                 card.appendChild(badge);
 
-                // Cadenas en bas à droite
                 var lock = document.createElement('span');
                 lock.className = 'premium-lock-icon';
                 lock.textContent = '🔒';
                 card.appendChild(lock);
 
-                // Popup modal au clic (au lieu de redirection directe)
                 card.addEventListener('click', function(e) {
                     e.preventDefault();
                     var toolName = card.querySelector('.tool-name-med')
@@ -508,7 +551,6 @@
                 });
             }
         });
-
     }
 })();
 </script>
