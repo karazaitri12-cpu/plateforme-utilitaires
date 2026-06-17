@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Compression d'images — Lot</title>
+<!-- Ajout de la bibliothèque pour manipuler les données EXIF (Date de prise de vue) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/piexifjs/1.0.6/piexif.min.js"></script>
 <style>
 /* === BLINDAGE ELEMENTOR === */
 #outil-compression, #outil-compression * {
@@ -85,7 +87,7 @@
 /* Tableau */
 #outil-compression .oc-table-wrap { overflow-x: auto; margin-bottom: 18px; }
 #outil-compression table { width: 100%; border-collapse: collapse; font-size: 13px; }
-#outil-compression type th {
+#outil-compression thead th {
     background: #f0f5fb; border-bottom: 2px solid #dde5ec;
     padding: 9px 12px; text-align: left; font-size: 11px; font-weight: 700;
     text-transform: uppercase; letter-spacing: 0.4px; color: #1A3A5C; white-space: nowrap;
@@ -224,8 +226,7 @@ body { -ms-overflow-style: none; overflow-y: auto; }
         </div>
 
         <p class="oc-notice">
-            Traitement enti&egrave;rement local (navigateur). Aucune image n&rsquo;est envoy&eacute;e vers un serveur.
-            La qualit&eacute; &agrave; 85&nbsp;% est visuellement identique &agrave; l&rsquo;original pour la quasi-totalit&eacute; des usages.
+            Traitement enti&egrave;rement local (navigateur). Les métadonnées (GPS, appareil photo) sont effacées pour protéger votre vie privée, mais <strong>la date de prise de vue originale est préservée</strong> pour conserver le tri chronologique dans vos galeries.
         </p>
 
     </div>
@@ -380,11 +381,10 @@ body { -ms-overflow-style: none; overflow-y: auto; }
             var entries = files
                 .filter(function (f) { return f.compDataURL; })
                 .map(function (f) {
-                    // Extraction de l'extension originale (par défaut jpg)
                     var origMatch = f.file.name.match(/\.[0-9a-z]+$/i);
                     var ext = f.isOriginal && origMatch ? origMatch[0] : '.jpg';
                     return {
-                        name: f.file.name.replace(/\.[^/.]+$/, '') + '_opt' + ext,
+                        name: f.file.name.replace(/\.[^/.]+$/, '') + '_optim' + ext,
                         data: dataURLtoBytes(f.compDataURL)
                     };
                 });
@@ -450,7 +450,7 @@ body { -ms-overflow-style: none; overflow-y: auto; }
         })(idx));
     }
 
-    /* ── Traitement séquentiel avec GARDE-FOU ── */
+    /* ── Traitement séquentiel avec GARDE-FOU & PRESERVATION EXIF (Date) ── */
     function processQueue() {
         if (processing) return;
         var pending = files.filter(function (f) { return !f.compDataURL && !f._processing; });
@@ -469,48 +469,112 @@ body { -ms-overflow-style: none; overflow-y: auto; }
 
         var reader = new FileReader();
         reader.onload = function (e) {
+            var origDataUrl = e.target.result;
+            var isJpeg = entry.file.type === "image/jpeg";
+            var keepExifStr = null;
+
+            // 1. EXTRACTION DE LA DATE DE PRISE DE VUE (JPEGs uniquement)
+            if (isJpeg && typeof piexif !== 'undefined') {
+                try {
+                    var origExif = piexif.load(origDataUrl);
+                    // On prépare un dictionnaire EXIF vierge (on efface GPS, Modèle appareil, etc.)
+                    var newExif = {"0th":{}, "Exif":{}, "GPS":{}, "Interop":{}, "1st":{}, "thumbnail":null};
+                    var hasDate = false;
+
+                    // On ne copie QUE les tags de date
+                    if (origExif["0th"] && origExif["0th"][piexif.ImageIFD.DateTime]) {
+                        newExif["0th"][piexif.ImageIFD.DateTime] = origExif["0th"][piexif.ImageIFD.DateTime];
+                        hasDate = true;
+                    }
+                    if (origExif["Exif"] && origExif["Exif"][piexif.ExifIFD.DateTimeOriginal]) {
+                        newExif["Exif"][piexif.ExifIFD.DateTimeOriginal] = origExif["Exif"][piexif.ExifIFD.DateTimeOriginal];
+                        hasDate = true;
+                    }
+                    if (origExif["Exif"] && origExif["Exif"][piexif.ExifIFD.DateTimeDigitized]) {
+                        newExif["Exif"][piexif.ExifIFD.DateTimeDigitized] = origExif["Exif"][piexif.ExifIFD.DateTimeDigitized];
+                        hasDate = true;
+                    }
+
+                    // S'il y avait une date, on prépare le petit bloc EXIF "propre" à réinjecter
+                    if (hasDate) {
+                        keepExifStr = piexif.dump(newExif);
+                    }
+                } catch (err) {
+                    console.warn("L'image ne contient pas d'EXIF lisible ou est corrompue.");
+                }
+            }
+
             var img = new Image();
             img.onload = function () {
+                // 2. COMPRESSION PAR LE CANVAS (détruit toutes les métadonnées naturellement)
                 var q = parseInt(slider.value) / 100;
                 canvas.width  = img.naturalWidth;
                 canvas.height = img.naturalHeight;
                 ctx.drawImage(img, 0, 0);
                 
-                var dataURL  = canvas.toDataURL('image/jpeg', q);
-                var b64      = dataURL.split(',')[1];
+                var canvasDataUrl = isJpeg ? canvas.toDataURL('image/jpeg', q) : canvas.toDataURL(entry.file.type, q);
+                
+                // 3. REINJECTION DE LA DATE (si elle existait)
+                if (isJpeg && keepExifStr) {
+                    try {
+                        canvasDataUrl = piexif.insert(keepExifStr, canvasDataUrl);
+                    } catch (err) { 
+                        console.warn("Impossible de réinjecter la date."); 
+                    }
+                }
+
+                var b64 = canvasDataUrl.split(',')[1];
                 var compSize = Math.round(b64.length * 0.75);
 
-                // ==========================================
-                // LE GARDE FOU : Ne jamais rendre l'image plus lourde
-                // ==========================================
+                // 4. GARDE-FOU (Si le canvas l'a rendue plus lourde)
                 var isKeptOriginal = false;
+                var finalDataUrl = canvasDataUrl;
+                var finalSize = compSize;
+
                 if (compSize >= entry.origSize) {
-                    entry.compDataURL = e.target.result; // On garde le DataURL original
-                    entry.compSize    = entry.origSize;
-                    entry.isOriginal  = true;
-                    isKeptOriginal    = true;
-                } else {
-                    entry.compDataURL = dataURL;
-                    entry.compSize    = compSize;
-                    entry.isOriginal  = false;
+                    isKeptOriginal = true;
+                    // Même si on la garde, on la nettoie pour supprimer GPS, etc. en gardant la date !
+                    if (isJpeg && typeof piexif !== 'undefined') {
+                        try {
+                            var cleanOriginal = piexif.remove(origDataUrl);
+                            if (keepExifStr) {
+                                finalDataUrl = piexif.insert(keepExifStr, cleanOriginal);
+                            } else {
+                                finalDataUrl = cleanOriginal;
+                            }
+                            var finalB64 = finalDataUrl.split(',')[1];
+                            finalSize = Math.round(finalB64.length * 0.75);
+                        } catch (err) {
+                            finalDataUrl = origDataUrl;
+                            finalSize = entry.origSize;
+                        }
+                    } else {
+                        finalDataUrl = origDataUrl;
+                        finalSize = entry.origSize;
+                    }
                 }
+
+                entry.compDataURL = finalDataUrl;
+                entry.compSize    = finalSize;
+                entry.isOriginal  = isKeptOriginal;
 
                 var gain    = entry.origSize - entry.compSize;
                 var gainPct = Math.round((gain / entry.origSize) * 100);
+                
                 var compEl  = document.getElementById('oc-comp-' + idx);
                 var gainEl  = document.getElementById('oc-gain-' + idx);
                 var dlEl    = document.getElementById('oc-dl-' + idx);
                 
                 if (compEl) compEl.textContent = fmt(entry.compSize);
                 if (gainEl) { 
-                    if (isKeptOriginal) {
-                        // Affichage propre pour les fichiers conservés intacts
+                    if (isKeptOriginal && gainPct <= 0) {
                         gainEl.textContent = 'Déjà opt.';
                         gainEl.style.color = '#7a99b0';
                         gainEl.classList.remove('neg');
                     } else {
-                        gainEl.textContent = '-' + gainPct + '%'; 
-                        gainEl.style.color = ''; // reset au CSS
+                        gainEl.textContent = (gainPct > 0 ? '-' : '') + gainPct + '%'; 
+                        if (gainPct === 0) gainEl.textContent = '0%';
+                        gainEl.style.color = ''; 
                         gainEl.classList.remove('neg');
                     }
                 }
@@ -521,7 +585,7 @@ body { -ms-overflow-style: none; overflow-y: auto; }
                 processNext(idx + 1);
             };
             img.onerror = function () { setBadge(idx, 'err', 'Erreur'); processNext(idx + 1); };
-            img.src = e.target.result;
+            img.src = origDataUrl;
         };
         reader.onerror = function () { setBadge(idx, 'err', 'Erreur'); processNext(idx + 1); };
         reader.readAsDataURL(entry.file);
@@ -582,7 +646,7 @@ body { -ms-overflow-style: none; overflow-y: auto; }
         
         var a    = document.createElement('a');
         a.href     = entry.compDataURL;
-        a.download = entry.file.name.replace(/\.[^/.]+$/, '') + '_opt' + ext;
+        a.download = entry.file.name.replace(/\.[^/.]+$/, '') + '_optim' + ext;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
