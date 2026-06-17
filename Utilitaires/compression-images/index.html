@@ -85,7 +85,7 @@
 /* Tableau */
 #outil-compression .oc-table-wrap { overflow-x: auto; margin-bottom: 18px; }
 #outil-compression table { width: 100%; border-collapse: collapse; font-size: 13px; }
-#outil-compression thead th {
+#outil-compression type th {
     background: #f0f5fb; border-bottom: 2px solid #dde5ec;
     padding: 9px 12px; text-align: left; font-size: 11px; font-weight: 700;
     text-transform: uppercase; letter-spacing: 0.4px; color: #1A3A5C; white-space: nowrap;
@@ -153,7 +153,7 @@ body { -ms-overflow-style: none; overflow-y: auto; }
 </head>
 <body>
 
- <!-- ✅ BANDEAU NAVIGATION (AJOUTEZ-LE ICI) -->
+  <!-- ✅ BANDEAU NAVIGATION -->
   <div style="position:sticky;top:0;z-index:9999;background:#fff;border-bottom:1px solid #cfd8dc;padding:10px 20px;font-family:Arial,Helvetica,sans-serif;box-shadow:0 2px 4px rgba(0,0,0,0.05)">
     <a href="https://karazaitri12-cpu.github.io/plateforme-utilitaires/" style="text-decoration:none;color:#1a3a5c;font-weight:600;font-size:14px;display:inline-flex;align-items:center;gap:6px" onmouseover="this.style.color='#345a7a'" onmouseout="this.style.color='#1a3a5c'">← Retour aux Utilitaires</a>
   </div>
@@ -283,7 +283,6 @@ body { -ms-overflow-style: none; overflow-y: auto; }
 
     /* ── Générateur ZIP pur JS (méthode STORE) ── */
     function buildZip(entries) {
-        /* entries = [{name: string, data: Uint8Array}] */
         var parts      = [];
         var centralDir = [];
         var offset     = 0;
@@ -304,26 +303,24 @@ body { -ms-overflow-style: none; overflow-y: auto; }
             var zero2 = new Uint8Array(2);
             var zero4 = new Uint8Array(4);
 
-            /* Local file header */
             var lfh = concat([
-                new Uint8Array([0x50,0x4B,0x03,0x04]), // signature
-                u16(20), u16(0), u16(0),               // version, flags, method (STORE)
-                zero2, zero2,                           // mod time, mod date
-                u32(crc), u32(size), u32(size),        // crc, comp size, uncomp size
-                u16(name.length), zero2,               // name len, extra len
+                new Uint8Array([0x50,0x4B,0x03,0x04]),
+                u16(20), u16(0), u16(0),
+                zero2, zero2,
+                u32(crc), u32(size), u32(size),
+                u16(name.length), zero2,
                 name
             ]);
             parts.push(lfh, data);
 
-            /* Central directory entry */
             var cde = concat([
-                new Uint8Array([0x50,0x4B,0x01,0x02]), // signature
-                u16(20), u16(20), u16(0), u16(0),      // versions, flags, method
-                zero2, zero2,                           // mod time, mod date
-                u32(crc), u32(size), u32(size),        // crc, sizes
-                u16(name.length), zero2, zero2,        // name, extra, comment len
-                zero2, zero2, zero4,                   // disk, int/ext attrs
-                u32(offset),                           // local header offset
+                new Uint8Array([0x50,0x4B,0x01,0x02]),
+                u16(20), u16(20), u16(0), u16(0),
+                zero2, zero2,
+                u32(crc), u32(size), u32(size),
+                u16(name.length), zero2, zero2,
+                zero2, zero2, zero4,
+                u32(offset),
                 name
             ]);
             centralDir.push(cde);
@@ -334,13 +331,12 @@ body { -ms-overflow-style: none; overflow-y: auto; }
         var cdSize   = centralDir.reduce(function (s, e) { return s + e.length; }, 0);
         var n        = entries.length;
 
-        /* End of central directory */
         var eocd = concat([
-            new Uint8Array([0x50,0x4B,0x05,0x06]), // signature
-            u16(0), u16(0),                         // disk numbers
-            u16(n), u16(n),                         // entry counts
-            u32(cdSize), u32(cdOffset),             // cd size & offset
-            u16(0)                                  // comment len
+            new Uint8Array([0x50,0x4B,0x05,0x06]),
+            u16(0), u16(0),
+            u16(n), u16(n),
+            u32(cdSize), u32(cdOffset),
+            u16(0)
         ]);
 
         var all = parts.concat(centralDir).concat([eocd]);
@@ -384,8 +380,11 @@ body { -ms-overflow-style: none; overflow-y: auto; }
             var entries = files
                 .filter(function (f) { return f.compDataURL; })
                 .map(function (f) {
+                    // Extraction de l'extension originale (par défaut jpg)
+                    var origMatch = f.file.name.match(/\.[0-9a-z]+$/i);
+                    var ext = f.isOriginal && origMatch ? origMatch[0] : '.jpg';
                     return {
-                        name: f.file.name.replace(/\.[^/.]+$/, '') + '_compresse.jpg',
+                        name: f.file.name.replace(/\.[^/.]+$/, '') + '_opt' + ext,
                         data: dataURLtoBytes(f.compDataURL)
                     };
                 });
@@ -422,7 +421,7 @@ body { -ms-overflow-style: none; overflow-y: auto; }
             var f = fileList[i];
             if (!f.type.match(/image\/(jpeg|png)/)) continue;
             var idx   = files.length;
-            var entry = { file: f, origSize: f.size, compDataURL: null, compSize: 0, _processing: false };
+            var entry = { file: f, origSize: f.size, compDataURL: null, compSize: 0, isOriginal: false, _processing: false };
             files.push(entry);
             createRow(idx, f.name, f.size);
             added++;
@@ -451,7 +450,7 @@ body { -ms-overflow-style: none; overflow-y: auto; }
         })(idx));
     }
 
-    /* ── Traitement séquentiel ── */
+    /* ── Traitement séquentiel avec GARDE-FOU ── */
     function processQueue() {
         if (processing) return;
         var pending = files.filter(function (f) { return !f.compDataURL && !f._processing; });
@@ -476,21 +475,46 @@ body { -ms-overflow-style: none; overflow-y: auto; }
                 canvas.width  = img.naturalWidth;
                 canvas.height = img.naturalHeight;
                 ctx.drawImage(img, 0, 0);
+                
                 var dataURL  = canvas.toDataURL('image/jpeg', q);
                 var b64      = dataURL.split(',')[1];
                 var compSize = Math.round(b64.length * 0.75);
 
-                entry.compDataURL = dataURL;
-                entry.compSize    = compSize;
+                // ==========================================
+                // LE GARDE FOU : Ne jamais rendre l'image plus lourde
+                // ==========================================
+                var isKeptOriginal = false;
+                if (compSize >= entry.origSize) {
+                    entry.compDataURL = e.target.result; // On garde le DataURL original
+                    entry.compSize    = entry.origSize;
+                    entry.isOriginal  = true;
+                    isKeptOriginal    = true;
+                } else {
+                    entry.compDataURL = dataURL;
+                    entry.compSize    = compSize;
+                    entry.isOriginal  = false;
+                }
 
-                var gain    = entry.origSize - compSize;
+                var gain    = entry.origSize - entry.compSize;
                 var gainPct = Math.round((gain / entry.origSize) * 100);
                 var compEl  = document.getElementById('oc-comp-' + idx);
                 var gainEl  = document.getElementById('oc-gain-' + idx);
                 var dlEl    = document.getElementById('oc-dl-' + idx);
-                if (compEl) compEl.textContent = fmt(compSize);
-                if (gainEl) { gainEl.textContent = (gainPct >= 0 ? '-' : '+') + Math.abs(gainPct) + '%'; if (gainPct < 0) gainEl.classList.add('neg'); }
-                if (dlEl)   dlEl.disabled = false;
+                
+                if (compEl) compEl.textContent = fmt(entry.compSize);
+                if (gainEl) { 
+                    if (isKeptOriginal) {
+                        // Affichage propre pour les fichiers conservés intacts
+                        gainEl.textContent = 'Déjà opt.';
+                        gainEl.style.color = '#7a99b0';
+                        gainEl.classList.remove('neg');
+                    } else {
+                        gainEl.textContent = '-' + gainPct + '%'; 
+                        gainEl.style.color = ''; // reset au CSS
+                        gainEl.classList.remove('neg');
+                    }
+                }
+                if (dlEl) dlEl.disabled = false;
 
                 setBadge(idx, 'ok', 'OK');
                 updateSummary();
@@ -505,13 +529,13 @@ body { -ms-overflow-style: none; overflow-y: auto; }
 
     /* ── Recompresser tout ── */
     function recompressAll() {
-        files.forEach(function (f) { f.compDataURL = null; f._processing = false; });
+        files.forEach(function (f) { f.compDataURL = null; f._processing = false; f.isOriginal = false; });
         files.forEach(function (f, i) {
             var el = document.getElementById('oc-comp-' + i);
             var ge = document.getElementById('oc-gain-' + i);
             var dl = document.getElementById('oc-dl-' + i);
             if (el) el.textContent = '—';
-            if (ge) { ge.textContent = '—'; ge.classList.remove('neg'); }
+            if (ge) { ge.textContent = '—'; ge.classList.remove('neg'); ge.style.color = ''; }
             if (dl) dl.disabled = true;
             setBadge(i, 'wait', 'En attente');
         });
@@ -531,7 +555,7 @@ body { -ms-overflow-style: none; overflow-y: auto; }
         document.getElementById('oc-s-count').textContent = total;
         document.getElementById('oc-s-orig').textContent  = fmt(origTotal);
         document.getElementById('oc-s-comp').textContent  = done.length > 0 ? fmt(compTotal) : '—';
-        document.getElementById('oc-s-gain').textContent  = done.length > 0 ? '-' + gainPct + '%' : '—';
+        document.getElementById('oc-s-gain').textContent  = done.length > 0 && gainPct > 0 ? '-' + gainPct + '%' : (gainPct === 0 ? '0%' : '—');
 
         var allDone = done.length === total && total > 0;
         dlAllBtn.disabled = done.length === 0;
@@ -552,9 +576,13 @@ body { -ms-overflow-style: none; overflow-y: auto; }
     /* ── Téléchargement individuel ── */
     function triggerDownload(entry) {
         if (!entry || !entry.compDataURL) return;
+        
+        var origMatch = entry.file.name.match(/\.[0-9a-z]+$/i);
+        var ext = entry.isOriginal && origMatch ? origMatch[0] : '.jpg';
+        
         var a    = document.createElement('a');
         a.href     = entry.compDataURL;
-        a.download = entry.file.name.replace(/\.[^/.]+$/, '') + '_compresse.jpg';
+        a.download = entry.file.name.replace(/\.[^/.]+$/, '') + '_opt' + ext;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
