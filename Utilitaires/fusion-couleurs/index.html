@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fusion de Couleurs | Dr KARA-ZAITRI</title>
+    <title>Laboratoire de Fusion de Couleurs</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -12,9 +12,8 @@
             --border-color: #333;
             --text-color: #f3f3f3;
             --text-muted: #888;
-            --primary: #1a3a5c;
-            --primary-light: #345a7a;
-            --premium: #C9A961;
+            --primary-accent: #3b82f6;
+            --circle-size: 180px;
         }
 
         body {
@@ -26,42 +25,16 @@
             background-color: var(--bg-color);
             font-family: 'Inter', sans-serif;
             color: var(--text-color);
-            padding: 0 20px 20px;
+            padding: 20px;
             box-sizing: border-box;
+            overflow-x: hidden;
         }
 
         * { box-sizing: border-box; }
 
-        /* ✅ BANDEAU DE NAVIGATION */
-        .nav-bar {
-            position: sticky;
-            top: 0;
-            z-index: 9999;
-            background: #fff;
-            border-bottom: 1px solid #cfd8dc;
-            padding: 10px 20px;
-            width: 100%;
-            max-width: 900px;
-            margin: 0 auto;
-            border-radius: 0 0 8px 8px;
-            font-family: 'Inter', sans-serif;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .nav-bar a {
-            text-decoration: none;
-            color: var(--primary);
-            font-weight: 600;
-            font-size: 14px;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            transition: color 0.2s;
-        }
-        .nav-bar a:hover { color: var(--primary-light); }
-
         h1 {
-            font-size: clamp(1.5rem, 4vw, 2.2rem);
-            margin: 15px 0 5px 0;
+            font-size: clamp(1.5rem, 3.5vw, 2.2rem);
+            margin: 0 0 5px 0;
             text-align: center;
             font-weight: 800;
             background: linear-gradient(90deg, #ff3333, #33ff33, #3333ff);
@@ -76,17 +49,66 @@
             text-align: center;
         }
 
-        /* Zone de dessin (Canvas) */
+        /* --- BARRE D'OUTILS --- */
+        .toolbar {
+            width: 100%;
+            max-width: 800px;
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .tool-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tool-group label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        select, button, input[type="range"] {
+            background: #2a2a2a;
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        select:hover, button:hover { background: #333; }
+        button:active { transform: scale(0.95); }
+        
+        .btn-icon { padding: 8px; font-size: 1.1rem; }
+        .btn-primary { background: var(--primary-accent); border-color: var(--primary-accent); font-weight: 600; }
+        .btn-primary:hover { background: #2563eb; }
+
+        /* --- ZONE DE DESSIN --- */
         .workspace {
             position: relative;
             width: 100%;
             max-width: 800px;
             height: 50vh;
-            min-height: 300px;
+            min-height: 350px;
             max-height: 500px;
             border-radius: 12px;
             border: 1px solid var(--border-color);
-            background-color: #0a0a0a;
+            background-color: #000;
             background-image: 
                 linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
@@ -94,50 +116,63 @@
             overflow: hidden;
             touch-action: none;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: background-color 0.3s;
+        }
+
+        /* Mode Multiplicatif (Peinture) */
+        .workspace.mode-multiply {
+            background-color: #fff;
+            background-image: 
+                linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
         }
 
         .circle {
             position: absolute;
-            width: clamp(120px, 30vw, 220px);
-            height: clamp(120px, 30vw, 220px);
+            width: var(--circle-size);
+            height: var(--circle-size);
             border-radius: 50%;
-            mix-blend-mode: screen;
+            mix-blend-mode: screen; /* Par défaut (Lumière) */
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            color: rgba(255, 255, 255, 0.9);
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+            color: #fff;
             cursor: grab;
             user-select: none;
-            transition: transform 0.1s;
+            transition: transform 0.1s, width 0.2s, height 0.2s;
+        }
+
+        .workspace.mode-multiply .circle {
+            mix-blend-mode: multiply; /* Mode Peinture */
+            color: #000;
         }
 
         .circle:active { cursor: grabbing; }
 
         .circle .color-number {
-            font-size: clamp(2rem, 5vw, 3rem);
+            font-size: calc(var(--circle-size) * 0.25);
             font-weight: 800;
             line-height: 1;
         }
 
         .circle .hex-code {
-            font-size: clamp(0.7rem, 2vw, 1rem);
+            font-size: calc(var(--circle-size) * 0.1);
             font-weight: 600;
             margin-top: 5px;
-            background: rgba(0,0,0,0.3);
+            background: rgba(128,128,128,0.3); /* Gris neutre pour rester lisible sur noir et blanc */
             padding: 2px 8px;
             border-radius: 20px;
             backdrop-filter: blur(4px);
         }
 
-        /* Tableau de bord */
+        /* --- TABLEAU DE BORD --- */
         .dashboard {
             width: 100%;
             max-width: 800px;
             margin-top: 20px;
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr 1.5fr;
             gap: 15px;
         }
 
@@ -146,17 +181,8 @@
             border: 1px solid var(--border-color);
             border-radius: 12px;
             padding: 20px;
-            position: relative;
-        }
-
-        /* BADGE PREMIUM */
-        .premium-badge {
-            position: absolute;
-            top: 12px;
-            right: 16px;
-            color: var(--premium);
-            font-size: 24px;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
         }
 
         .panel h2 {
@@ -167,155 +193,110 @@
             letter-spacing: 1px;
         }
 
-        /* Sélecteurs de couleurs */
-        .color-inputs {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
+        /* Entrées couleurs */
+        .color-inputs { display: flex; flex-direction: column; gap: 12px; }
         .input-group {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: rgba(255,255,255,0.03);
-            padding: 8px 15px;
-            border-radius: 8px;
+            display: flex; align-items: center; justify-content: space-between;
+            background: rgba(255,255,255,0.03); padding: 8px 15px; border-radius: 8px;
         }
-
-        .input-group label {
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
+        .input-group label { font-weight: 600; display: flex; align-items: center; gap: 10px; }
         input[type="color"] {
-            -webkit-appearance: none;
-            border: none;
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            cursor: pointer;
-            padding: 0;
-            background: none;
+            -webkit-appearance: none; border: none; width: 35px; height: 35px;
+            border-radius: 50%; cursor: pointer; padding: 0; background: none;
         }
         input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
         input[type="color"]::-webkit-color-swatch { border: 2px solid var(--border-color); border-radius: 50%; }
 
         /* Résultats de fusion */
         .fusion-results {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+            flex-grow: 1;
         }
-
         .result-item {
-            background: rgba(255,255,255,0.03);
-            padding: 10px;
-            border-radius: 8px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            text-align: center;
+            background: rgba(255,255,255,0.03); padding: 10px; border-radius: 8px;
+            display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center;
         }
-
-        .result-label {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            font-weight: 600;
-        }
-
+        .result-label { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; }
         .result-hex {
-            font-family: monospace;
-            font-size: 1.1rem;
-            font-weight: 800;
-            cursor: pointer;
-            padding: 4px 8px;
-            border-radius: 4px;
-            transition: background 0.2s;
+            font-family: monospace; font-size: 1rem; font-weight: 800;
+            cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: background 0.2s;
         }
-
         .result-hex:hover { background: rgba(255,255,255,0.1); }
+        .color-preview { width: 100%; height: 25px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.1); }
 
-        .color-preview {
-            width: 100%;
-            height: 25px;
-            border-radius: 4px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
+        .export-btn-container { margin-top: 15px; }
+        .export-btn { width: 100%; justify-content: center; padding: 12px; }
 
-        /* FOOTER */
-        .footer {
-            width: 100%;
-            max-width: 800px;
-            text-align: center;
-            padding: 16px 20px;
-            font-size: 11px;
-            color: var(--text-muted);
-            margin-top: 24px;
-            border-top: 1px solid var(--border-color);
-        }
-        .disclaimer {
-            background: #fff3cd;
-            color: #856404;
-            padding: 10px;
-            border-radius: 6px;
-            border: 1px solid #ffeeba;
-            margin-top: 12px;
-            font-size: 10px;
-            line-height: 1.4;
-        }
-
-        /* Responsive */
-        @media (max-width: 650px) {
+        @media (max-width: 768px) {
             .dashboard { grid-template-columns: 1fr; }
-            .fusion-results { grid-template-columns: 1fr 1fr; }
-            .nav-bar { padding: 10px 16px; }
+            .toolbar { justify-content: center; }
         }
     </style>
 </head>
 <body>
 
-    <!-- ✅ BANDEAU DE NAVIGATION -->
-    <nav class="nav-bar">
-        <a href="https://karazaitri12-cpu.github.io/plateforme-utilitaires/">← Retour aux Utilitaires</a>
-    </nav>
+    <h1>Fusion de Couleurs PRO</h1>
+    <div class="subtitle">Espace pour générer un schéma : testez vos mélanges !</div>
 
-    <h1>Fusion de Couleurs</h1>
-    <div class="subtitle">Glissez les cercles pour visualiser le mélange additif (Lumière)</div>
+    <!-- BARRE D'OUTILS -->
+    <div class="toolbar">
+        <div class="tool-group">
+            <label>Mode</label>
+            <select id="blendMode">
+                <option value="screen">Lumière (Additif)</option>
+                <option value="multiply">Peinture (Soustractif)</option>
+            </select>
+        </div>
+        <div class="tool-group">
+            <label>Format</label>
+            <select id="colorFormat">
+                <option value="hex">HEX</option>
+                <option value="rgb">RGB</option>
+                <option value="hsl">HSL</option>
+            </select>
+        </div>
+        <div class="tool-group">
+            <label title="Taille des cercles">Taille</label>
+            <input type="range" id="sizeSlider" min="100" max="300" value="180" style="width:80px;">
+        </div>
+        <div class="tool-group">
+            <button class="btn-icon" id="btn-venn" title="Diagramme de Venn parfait">🎯</button>
+            <button class="btn-icon" id="btn-random" title="Couleurs Aléatoires (Espace)">🎲</button>
+        </div>
+    </div>
 
+    <!-- ZONE DE DESSIN -->
     <div class="workspace" id="workspace">
-        <div class="circle" id="circle1" style="left: 10%; top: 15%;">
+        <div class="circle" id="circle1">
             <span class="color-number">1</span>
             <span class="hex-code">#FF3333</span>
         </div>
-        <div class="circle" id="circle2" style="left: 50%; top: 15%;">
+        <div class="circle" id="circle2">
             <span class="color-number">2</span>
             <span class="hex-code">#33FF33</span>
         </div>
-        <div class="circle" id="circle3" style="left: 30%; top: 50%;">
+        <div class="circle" id="circle3">
             <span class="color-number">3</span>
             <span class="hex-code">#3333FF</span>
         </div>
     </div>
 
+    <!-- TABLEAU DE BORD -->
     <div class="dashboard">
         <div class="panel">
             <h2>Couleurs de base</h2>
             <div class="color-inputs">
                 <div class="input-group">
-                    <label>Cercle 1 <span id="label-hex-1" style="font-family: monospace; font-size: 0.9em; color:#888;">#FF3333</span></label>
-                    <input type="color" id="color1" value="#ff3333">
+                    <label>Cercle 1 <span id="label-val-1" style="font-family: monospace; font-size: 0.9em; color:#888;"></span></label>
+                    <input type="color" id="color1">
                 </div>
                 <div class="input-group">
-                    <label>Cercle 2 <span id="label-hex-2" style="font-family: monospace; font-size: 0.9em; color:#888;">#33FF33</span></label>
-                    <input type="color" id="color2" value="#33ff33">
+                    <label>Cercle 2 <span id="label-val-2" style="font-family: monospace; font-size: 0.9em; color:#888;"></span></label>
+                    <input type="color" id="color2">
                 </div>
                 <div class="input-group">
-                    <label>Cercle 3 <span id="label-hex-3" style="font-family: monospace; font-size: 0.9em; color:#888;">#3333FF</span></label>
-                    <input type="color" id="color3" value="#3333ff">
+                    <label>Cercle 3 <span id="label-val-3" style="font-family: monospace; font-size: 0.9em; color:#888;"></span></label>
+                    <input type="color" id="color3">
                 </div>
             </div>
         </div>
@@ -326,50 +307,180 @@
                 <div class="result-item">
                     <div class="result-label">1 + 2</div>
                     <div class="color-preview" id="prev-12"></div>
-                    <div class="result-hex" id="hex-12" onclick="copyToClipboard(this)">#...</div>
+                    <div class="result-hex" id="val-12" onclick="copyToClipboard(this)"></div>
                 </div>
                 <div class="result-item">
                     <div class="result-label">1 + 3</div>
                     <div class="color-preview" id="prev-13"></div>
-                    <div class="result-hex" id="hex-13" onclick="copyToClipboard(this)">#...</div>
+                    <div class="result-hex" id="val-13" onclick="copyToClipboard(this)"></div>
                 </div>
                 <div class="result-item">
                     <div class="result-label">2 + 3</div>
                     <div class="color-preview" id="prev-23"></div>
-                    <div class="result-hex" id="hex-23" onclick="copyToClipboard(this)">#...</div>
+                    <div class="result-hex" id="val-23" onclick="copyToClipboard(this)"></div>
                 </div>
                 <div class="result-item">
                     <div class="result-label">1 + 2 + 3</div>
                     <div class="color-preview" id="prev-123"></div>
-                    <div class="result-hex" id="hex-123" onclick="copyToClipboard(this)">#...</div>
+                    <div class="result-hex" id="val-123" onclick="copyToClipboard(this)"></div>
                 </div>
             </div>
-            <div style="text-align: center; margin-top: 10px; font-size: 0.8rem; color: #666;">
-                Cliquez sur un code pour le copier
+            <div class="export-btn-container">
+                <button class="btn-primary export-btn" onclick="exportCSS(this)">📋 Exporter la palette CSS</button>
             </div>
         </div>
     </div>
 
-    <!-- FOOTER -->
-    <footer class="footer">
-        <span>Dr KARA-ZAITRI M.A © 2026</span>
-        <div class="disclaimer">
-            ⚠️ <strong>Usage bureautique</strong> : Fusion de couleurs locale dans votre navigateur. Aucune donnée n'est envoyée sur un serveur.
-        </div>
-    </footer>
-
 <script>
-    // --- Logique du Glisser-Déposer (Drag & Drop) ---
+    /* =========================================
+       1. VARIABLES ET ÉLÉMENTS DOM
+    ========================================= */
     const workspace = document.getElementById('workspace');
     const circles = document.querySelectorAll('.circle');
+    const pickers = [document.getElementById('color1'), document.getElementById('color2'), document.getElementById('color3')];
     
+    const ui = {
+        mode: document.getElementById('blendMode'),
+        format: document.getElementById('colorFormat'),
+        size: document.getElementById('sizeSlider'),
+        btnVenn: document.getElementById('btn-venn'),
+        btnRandom: document.getElementById('btn-random')
+    };
+
+    // Objet pour stocker l'état des fusions actuelles (pour l'export CSS)
+    let currentBlends = {};
+
+    /* =========================================
+       2. OUTILS DE CONVERSION DE COULEURS
+    ========================================= */
+    function hexToRgb(hex) {
+        return [
+            parseInt(hex.substring(1, 3), 16),
+            parseInt(hex.substring(3, 5), 16),
+            parseInt(hex.substring(5, 7), 16)
+        ];
+    }
+
+    function rgbToHex(r, g, b) {
+        return "#" + (1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1).toUpperCase();
+    }
+
+    function rgbToHsl(r, g, b) {
+        r /= 255; g /= 255; b /= 255;
+        const max = Math.max(r, g, b), min = Math.min(r, g, b);
+        let h, s, l = (max + min) / 2;
+        if (max === min) h = s = 0; // achromatic
+        else {
+            const d = max - min;
+            s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+            switch (max) {
+                case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                case g: h = (b - r) / d + 2; break;
+                case b: h = (r - g) / d + 4; break;
+            }
+            h /= 6;
+        }
+        return `hsl(${Math.round(h * 360)}, ${Math.round(s * 100)}%, ${Math.round(l * 100)}%)`;
+    }
+
+    function formatColor(hex, format) {
+        if (format === 'hex') return hex.toUpperCase();
+        const [r, g, b] = hexToRgb(hex);
+        if (format === 'rgb') return `rgb(${r}, ${g}, ${b})`;
+        if (format === 'hsl') return rgbToHsl(r, g, b);
+    }
+
+    /* =========================================
+       3. ALGORITHMES DE FUSION
+    ========================================= */
+    function blendColors(...hexColors) {
+        const mode = ui.mode.value;
+        let r, g, b;
+
+        if (mode === 'screen') {
+            // Addition Lumière : 1 - (1-A)*(1-B)
+            r = 1; g = 1; b = 1;
+            hexColors.forEach(hex => {
+                const [r1, g1, b1] = hexToRgb(hex);
+                r *= (1 - r1 / 255);
+                g *= (1 - g1 / 255);
+                b *= (1 - b1 / 255);
+            });
+            r = Math.round((1 - r) * 255);
+            g = Math.round((1 - g) * 255);
+            b = Math.round((1 - b) * 255);
+        } else {
+            // Soustraction Peinture : A * B
+            r = 255; g = 255; b = 255;
+            hexColors.forEach(hex => {
+                const [r1, g1, b1] = hexToRgb(hex);
+                r = (r * r1) / 255;
+                g = (g * g1) / 255;
+                b = (b * b1) / 255;
+            });
+            r = Math.round(r); g = Math.round(g); b = Math.round(b);
+        }
+        return rgbToHex(r, g, b);
+    }
+
+    /* =========================================
+       4. MISE À JOUR DE L'INTERFACE
+    ========================================= */
+    function updateUI() {
+        const format = ui.format.value;
+        const colors = pickers.map(p => p.value);
+
+        // Met à jour les cercles et labels
+        circles.forEach((circle, i) => {
+            circle.style.backgroundColor = colors[i];
+            circle.style.boxShadow = `0 0 40px ${colors[i]}80`;
+            circle.querySelector('.hex-code').textContent = formatColor(colors[i], format);
+            document.getElementById(`label-val-${i+1}`).textContent = formatColor(colors[i], format);
+        });
+
+        // Met à jour la zone de travail (Mode Screen ou Multiply)
+        if(ui.mode.value === 'multiply') workspace.classList.add('mode-multiply');
+        else workspace.classList.remove('mode-multiply');
+
+        // Calcule les fusions
+        currentBlends = {
+            f12: blendColors(colors[0], colors[1]),
+            f13: blendColors(colors[0], colors[2]),
+            f23: blendColors(colors[1], colors[2]),
+            f123: blendColors(colors[0], colors[1], colors[2])
+        };
+
+        // Affiche les résultats
+        const updates = [
+            { id: '12', hex: currentBlends.f12 },
+            { id: '13', hex: currentBlends.f13 },
+            { id: '23', hex: currentBlends.f23 },
+            { id: '123', hex: currentBlends.f123 }
+        ];
+
+        updates.forEach(u => {
+            document.getElementById(`prev-${u.id}`).style.backgroundColor = u.hex;
+            document.getElementById(`val-${u.id}`).textContent = formatColor(u.hex, format);
+        });
+
+        // Met à jour l'URL (Partageable)
+        const url = new URL(window.location);
+        url.searchParams.set('c1', colors[0].replace('#',''));
+        url.searchParams.set('c2', colors[1].replace('#',''));
+        url.searchParams.set('c3', colors[2].replace('#',''));
+        url.searchParams.set('mode', ui.mode.value);
+        window.history.replaceState({}, '', url);
+    }
+
+    /* =========================================
+       5. DRAG & DROP FLUIDE ET CONTRAINT
+    ========================================= */
     let isDragging = false;
     let currentCircle = null;
     let offsetX, offsetY;
 
     function startDrag(e) {
         if (e.type === 'touchstart' && e.touches.length > 1) return;
-        
         isDragging = true;
         currentCircle = e.target.closest('.circle');
         
@@ -379,7 +490,6 @@
 
         const event = e.type === 'mousedown' ? e : e.touches[0];
         const rect = currentCircle.getBoundingClientRect();
-        
         offsetX = event.clientX - rect.left;
         offsetY = event.clientY - rect.top;
     }
@@ -393,6 +503,7 @@
         let newX = event.clientX - workspaceRect.left - offsetX;
         let newY = event.clientY - workspaceRect.top - offsetY;
 
+        // Limites strictes au bord du conteneur
         newX = Math.max(0, Math.min(newX, workspaceRect.width - currentCircle.offsetWidth));
         newY = Math.max(0, Math.min(newY, workspaceRect.height - currentCircle.offsetHeight));
 
@@ -419,84 +530,143 @@
     document.addEventListener('mouseup', stopDrag);
     document.addEventListener('touchend', stopDrag);
 
-
-    // --- Logique des Couleurs ---
-    const pickers = [
-        document.getElementById('color1'),
-        document.getElementById('color2'),
-        document.getElementById('color3')
-    ];
-
-    function blendScreenColors(...hexColors) {
-        let r = 1, g = 1, b = 1;
+    /* =========================================
+       6. DIAGRAMME DE VENN (Alignement Parfait)
+    ========================================= */
+    function resetPositions() {
+        const W = workspace.offsetWidth;
+        const H = workspace.offsetHeight;
+        const R = circles[0].offsetWidth / 2;
         
-        hexColors.forEach(hex => {
-            r *= (1 - parseInt(hex.substring(1, 3), 16) / 255);
-            g *= (1 - parseInt(hex.substring(3, 5), 16) / 255);
-            b *= (1 - parseInt(hex.substring(5, 7), 16) / 255);
-        });
+        // Distance du centre pour créer un beau chevauchement
+        const D = R * 0.6; 
+        const centerX = W / 2;
+        const centerY = H / 2;
 
-        r = Math.round((1 - r) * 255);
-        g = Math.round((1 - g) * 255);
-        b = Math.round((1 - b) * 255);
+        // Position 1 : Haut
+        circles[0].style.left = `${centerX - R}px`;
+        circles[0].style.top = `${centerY - D - R}px`;
 
-        return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+        // Position 2 : Bas Droite
+        circles[1].style.left = `${centerX + (D * Math.cos(Math.PI/6)) - R}px`;
+        circles[1].style.top = `${centerY + (D * Math.sin(Math.PI/6)) - R}px`;
+
+        // Position 3 : Bas Gauche
+        circles[2].style.left = `${centerX - (D * Math.cos(Math.PI/6)) - R}px`;
+        circles[2].style.top = `${centerY + (D * Math.sin(Math.PI/6)) - R}px`;
+        
+        keepCirclesInBounds();
     }
 
-    function updateColors() {
-        const colors = pickers.map(p => p.value.toUpperCase());
-
-        circles.forEach((circle, i) => {
-            circle.style.backgroundColor = colors[i];
-            circle.style.boxShadow = `0 0 40px ${colors[i]}80`;
-            circle.querySelector('.hex-code').textContent = colors[i];
-            document.getElementById(`label-hex-${i+1}`).textContent = colors[i];
+    function keepCirclesInBounds() {
+        const workspaceRect = workspace.getBoundingClientRect();
+        circles.forEach(circle => {
+            let x = parseFloat(circle.style.left);
+            let y = parseFloat(circle.style.top);
+            if(x < 0) circle.style.left = '0px';
+            if(y < 0) circle.style.top = '0px';
+            if(x + circle.offsetWidth > workspaceRect.width) circle.style.left = `${workspaceRect.width - circle.offsetWidth}px`;
+            if(y + circle.offsetHeight > workspaceRect.height) circle.style.top = `${workspaceRect.height - circle.offsetHeight}px`;
         });
+    }
 
-        const f12 = blendScreenColors(colors[0], colors[1]);
-        const f13 = blendScreenColors(colors[0], colors[2]);
-        const f23 = blendScreenColors(colors[1], colors[2]);
-        const f123 = blendScreenColors(colors[0], colors[1], colors[2]);
+    /* =========================================
+       7. FONCTIONNALITÉS EXTRA (Random, CSS, Copie)
+    ========================================= */
+    function randomHex() {
+        return "#" + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0').toUpperCase();
+    }
 
-        const updates = [
-            { id: '12', color: f12 },
-            { id: '13', color: f13 },
-            { id: '23', color: f23 },
-            { id: '123', color: f123 }
-        ];
-
-        updates.forEach(u => {
-            document.getElementById(`prev-${u.id}`).style.backgroundColor = u.color;
-            document.getElementById(`hex-${u.id}`).textContent = u.color;
-        });
+    function randomizeColors() {
+        pickers[0].value = randomHex();
+        pickers[1].value = randomHex();
+        pickers[2].value = randomHex();
+        updateUI();
     }
 
     window.copyToClipboard = function(element) {
         const text = element.textContent;
         if(text === "Copié !") return;
-        
         navigator.clipboard.writeText(text).then(() => {
             element.textContent = "Copié !";
-            element.style.color = "#33ff33";
+            element.style.color = "#3b82f6";
             setTimeout(() => {
                 element.textContent = text;
                 element.style.color = "";
-            }, 1200);
+            }, 1000);
         });
     }
 
-    pickers.forEach(picker => picker.addEventListener('input', updateColors));
-    updateColors();
-
-    window.addEventListener('resize', () => {
-        const workspaceRect = workspace.getBoundingClientRect();
-        circles.forEach(circle => {
-            const circleRect = circle.getBoundingClientRect();
-            if(circleRect.right > workspaceRect.right) circle.style.left = `${workspaceRect.width - circleRect.width}px`;
-            if(circleRect.bottom > workspaceRect.bottom) circle.style.top = `${workspaceRect.height - circleRect.height}px`;
+    window.exportCSS = function(btn) {
+        const format = ui.format.value;
+        const css = `:root {\n`
+            + `  --color-1: ${formatColor(pickers[0].value, format)};\n`
+            + `  --color-2: ${formatColor(pickers[1].value, format)};\n`
+            + `  --color-3: ${formatColor(pickers[2].value, format)};\n`
+            + `  --blend-1-2: ${formatColor(currentBlends.f12, format)};\n`
+            + `  --blend-1-3: ${formatColor(currentBlends.f13, format)};\n`
+            + `  --blend-2-3: ${formatColor(currentBlends.f23, format)};\n`
+            + `  --blend-all: ${formatColor(currentBlends.f123, format)};\n`
+            + `}`;
+        
+        navigator.clipboard.writeText(css).then(() => {
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "✅ CSS Copié !";
+            btn.style.background = "#166534";
+            btn.style.borderColor = "#166534";
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.style.background = "";
+                btn.style.borderColor = "";
+            }, 2000);
         });
-    });
-</script>
+    }
 
+    /* =========================================
+       8. INITIALISATION & ÉCOUTEURS
+    ========================================= */
+    // Initialisation depuis l'URL (si lien partagé)
+    const urlParams = new URLSearchParams(window.location.search);
+    if(urlParams.has('c1')) pickers[0].value = '#' + urlParams.get('c1');
+    else pickers[0].value = '#FF3333';
+    if(urlParams.has('c2')) pickers[1].value = '#' + urlParams.get('c2');
+    else pickers[1].value = '#33FF33';
+    if(urlParams.has('c3')) pickers[2].value = '#' + urlParams.get('c3');
+    else pickers[2].value = '#3333FF';
+    if(urlParams.has('mode')) ui.mode.value = urlParams.get('mode');
+
+    // Écouteurs d'événements
+    pickers.forEach(picker => picker.addEventListener('input', updateUI));
+    ui.mode.addEventListener('change', updateUI);
+    ui.format.addEventListener('change', updateUI);
+    ui.btnRandom.addEventListener('click', randomizeColors);
+    
+    ui.btnVenn.addEventListener('click', () => {
+        resetPositions();
+        // Petite animation
+        circles.forEach(c => { c.style.transition = 'all 0.5s cubic-bezier(0.25, 1, 0.5, 1)'; });
+        setTimeout(() => { circles.forEach(c => c.style.transition = 'transform 0.1s, width 0.2s, height 0.2s'); }, 500);
+    });
+
+    ui.size.addEventListener('input', (e) => {
+        document.documentElement.style.setProperty('--circle-size', `${e.target.value}px`);
+        keepCirclesInBounds();
+    });
+
+    // Touche Espace pour l'aléatoire
+    document.addEventListener('keydown', (e) => {
+        if(e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT' && e.target.tagName !== 'BUTTON') {
+            e.preventDefault();
+            randomizeColors();
+        }
+    });
+
+    window.addEventListener('resize', keepCirclesInBounds);
+
+    // Lancement
+    updateUI();
+    setTimeout(resetPositions, 100); // Placer en diagramme de Venn au démarrage
+
+</script>
 </body>
 </html>
