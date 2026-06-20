@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
+<title>Convertisseur Numérique | Dr KARA-ZAITRI</title>
+<meta name="description" content="Outil pédagogique de conversion entre nombres, lettres et chiffres romains.">
+
+<style>
+/* ==========================================
+   DESIGN INSTITUTIONNEL COMPLET
+   ========================================== */
+:root {
+  --primary: #1a3a5c;
+  --primary-light: #345a7a;
+  --primary-dark: #0d2538;
+  --text: #37474f;
+  --text-light: #607d8b;
+  --border: #cfd8dc;
+  --bg-page: #f4f7f9;
+  --bg-card: #ffffff;
+  --bg-input: #f8f9fa;
+  --success: #2e7d32;
+  --warning: #ed6c02;
+  --error: #c62828;
+  --gold: #C9A961;
+  --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font-ui);
+  background: var(--bg-page);
+  color: var(--text);
+  line-height: 1.5;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ✅ BANDEAU DE NAVIGATION */
+.nav-bar {
+  position: sticky;
+  top: 0;
+  z-index: 9999;
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  padding: 12px 20px;
+  width: 100%;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+.nav-bar a {
+  text-decoration: none;
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: color 0.2s;
+}
+.nav-bar a:hover { color: var(--primary-light); }
+
+/* CONTENEUR PRINCIPAL */
+.container {
+  flex: 1;
+  max-width: 640px;
+  margin: 24px auto;
+  padding: 0 16px 40px;
+  width: 100%;
+}
+
+/* CARTE PRINCIPALE */
+.main-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-top: 4px solid var(--primary);
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+/* EN-TÊTE CARTE */
+.card-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 6px;
+}
+.card-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--primary);
+  margin: 0 0 6px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--primary);
+}
+.card-subtitle {
+  font-size: 13px;
+  color: var(--text-light);
+  margin: 10px 0 20px;
+}
+
+/* CHAMPS DE SAISIE */
+.field-row {
+  display: grid;
+  grid-template-columns: 2fr 1.2fr;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+@media (max-width: 480px) { .field-row { grid-template-columns: 1fr; } }
+
+.field-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.field-input, .field-select {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-input);
+  color: var(--text);
+  font-size: 15px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.field-input:focus, .field-select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(26,58,92,0.1);
+}
+
+/* BOUTONS */
+.btn {
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 12px 16px;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+}
+.btn-primary {
+  width: 100%;
+  background: var(--primary);
+  color: #fff;
+  margin-bottom: 18px;
+}
+.btn-primary:hover { background: var(--primary-light); }
+.btn-secondary {
+  flex: 1;
+  background: var(--bg-card);
+  border: 1px solid var(--primary);
+  color: var(--primary);
+}
+.btn-secondary:hover { background: var(--bg-input); }
+.btn-secondary.copied {
+  border-color: var(--success);
+  color: var(--success);
+}
+
+/* RÉSULTAT */
+.result-box {
+  background: var(--bg-input);
+  border-left: 4px solid var(--primary);
+  border-radius: 4px;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+}
+.result-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-light);
+  margin-bottom: 4px;
+}
+.result-value {
+  display: block;
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--primary);
+}
+.result-value.error { color: var(--error); }
+.result-value.success { color: var(--success); }
+
+/* PÉDAGOGIE */
+.pedagogy-box {
+  background: #fbf8f0;
+  border-left: 4px solid var(--gold);
+  border-radius: 4px;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text);
+}
+.pedagogy-box[hidden] { display: none; }
+.pedagogy-label {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8a6d1f;
+}
+.pedagogy-content b { color: var(--primary); }
+
+/* ACTIONS */
+.actions-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 22px;
+  flex-wrap: wrap;
+}
+
+/* HISTORIQUE */
+.history-section {
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+  margin-bottom: 18px;
+}
+.history-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-light);
+  margin: 0 0 10px;
+}
+.history-list {
+  max-height: 170px;
+  overflow-y: auto;
+}
+.history-empty {
+  font-size: 13px;
+  color: var(--text-light);
+  font-style: italic;
+  margin: 0;
+}
+.history-item {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--text);
+}
+.history-item:last-child { border-bottom: none; }
+.history-from { font-weight: 600; }
+.history-arrow::before { content: "→"; color: var(--gold); font-weight: 700; }
+
+/* FOOTER */
+.card-footer {
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+}
+.card-footer p {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-light);
+}
+
+/* FOOTER GLOBAL */
+.footer {
+  text-align: center;
+  padding: 16px 20px;
+  font-size: 11px;
+  color: var(--text-light);
+  margin-top: auto;
+  border-top: 1px solid var(--border);
+}
+.disclaimer {
+  background: #fff3cd;
+  color: #856404;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ffeeba;
+  margin-top: 12px;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+/* MASQUE SCROLLBAR */
+html { scrollbar-width: none; }
+body { -ms-overflow-style: none; overflow-y: auto; }
+::-webkit-scrollbar { display: none; }
+</style>
+</head>
+<body>
+
+  <!-- ✅ BANDEAU DE NAVIGATION -->
+  <nav class="nav-bar">
+    <a href="https://karazaitri12-cpu.github.io/plateforme-utilitaires/">← Retour aux Utilitaires</a>
+  </nav>
+
+  <div class="container">
+    <div class="main-card">
+      <p class="card-eyebrow">Outil pédagogique</p>
+      <h1 class="card-title">Convertisseur numérique</h1>
+      <p class="card-subtitle">Nombres, lettres et chiffres romains</p>
+
+      <div class="field-row">
+        <div>
+          <label for="cvn-input" class="field-label">Valeur à convertir</label>
+          <input id="cvn-input" class="field-input" type="text" placeholder="Ex. 1942 ou MCMXLII" autocomplete="off">
+        </div>
+        <div>
+          <label for="cvn-mode" class="field-label">Sens de conversion</label>
+          <select id="cvn-mode" class="field-select">
+            <option value="auto">Détection automatique</option>
+            <option value="letters">Nombre → Lettres</option>
+            <option value="roman">Nombre → Chiffres romains</option>
+            <option value="romanToNum">Chiffres romains → Nombre</option>
+          </select>
+        </div>
+      </div>
+
+      <button type="button" class="btn btn-primary" id="cvn-convert-btn">Convertir</button>
+
+      <div class="result-box">
+        <span class="result-label">Résultat</span>
+        <span class="result-value" id="cvn-result-value" aria-live="polite">En attente d'une valeur</span>
+      </div>
+
+      <div class="pedagogy-box" id="cvn-pedagogy" hidden>
+        <p class="pedagogy-label">Repère pédagogique</p>
+        <div class="pedagogy-content" id="cvn-pedagogy-content"></div>
+      </div>
+
+      <div class="actions-row">
+        <button type="button" class="btn btn-secondary" id="cvn-copy-btn">Copier le résultat</button>
+        <button type="button" class="btn btn-secondary" id="cvn-clear-btn">Effacer l'historique</button>
+      </div>
+
+      <div class="history-section">
+        <p class="history-title">Historique de la session</p>
+        <div class="history-list" id="cvn-history"></div>
+      </div>
+
+      <div class="card-footer">
+        <p>Outil à visée pédagogique. Pour toute valeur utilisée dans un contexte clinique ou administratif, vérifier la conversion avant utilisation.</p>
+      </div>
+    </div>
+
+    <!-- FOOTER GLOBAL -->
+    <footer class="footer">
+      <span>Dr KARA-ZAITRI M.A © 2026</span>
+      <div class="disclaimer">
+        ⚠️ <strong>Usage pédagogique</strong> : Conversion locale dans votre navigateur. Aucune donnée n'est envoyée sur un serveur.
+      </div>
+    </footer>
+  </div>
+
+  <!-- LOGIQUE JAVASCRIPT (Préservée et adaptée) -->
+  <script>
+  (function(){
+    "use strict";
+    var historyData = [];
+    function $(id){ return document.getElementById(id); }
+
+    function updateHistory(){
+      var box = $("cvn-history");
+      if(historyData.length === 0){
+        box.innerHTML = '<p class="history-empty">Aucune conversion pour le moment.</p>';
+        return;
+      }
+      var html = "";
+      for(var i = historyData.length - 1; i >= 0; i--){
+        var h = historyData[i];
+        html += '<div class="history-item"><span class="history-from">' + h.from + '</span><span class="history-arrow"></span><span>' + h.to + '</span></div>';
+      }
+      box.innerHTML = html;
+    }
+
+    function pushHistory(from, to){
+      historyData.push({ from: from, to: to });
+      if(historyData.length > 15) historyData.shift();
+      updateHistory();
+    }
+
+    function setResult(text, state){
+      var el = $("cvn-result-value");
+      el.textContent = text;
+      el.className = "result-value" + (state ? (" " + state) : "");
+    }
+
+    function setPedagogy(html){
+      var box = $("cvn-pedagogy");
+      var content = $("cvn-pedagogy-content");
+      if(html){ content.innerHTML = html; box.hidden = false; }
+      else { box.hidden = true; content.innerHTML = ""; }
+    }
+
+    /* ===== Romain ===== */
+    function toRoman(num){
+      if(num <= 0 || num > 3999) return null;
+      var map = [[1000,"M"],[900,"CM"],[500,"D"],[400,"CD"],[100,"C"],[90,"XC"],[50,"L"],[40,"XL"],[10,"X"],[9,"IX"],[5,"V"],[4,"IV"],[1,"I"]];
+      var r = "";
+      for(var i = 0; i < map.length; i++){
+        while(num >= map[i][0]){ r += map[i][1]; num -= map[i][0]; }
+      }
+      return r;
+    }
+
+    function romanToNumber(str){
+      var m = {I:1, V:5, X:10, L:50, C:100, D:500, M:1000};
+      var total = 0;
+      str = str.toUpperCase();
+      for(var i = 0; i < str.length; i++){
+        var c = m[str[i]], n = m[str[i+1]];
+        if(n > c) total -= c; else total += c;
+      }
+      return total;
+    }
+
+    function correctRoman(s){
+      s = s.toUpperCase();
+      var fixes = {"IIII":"IV", "VV":"X", "XXXX":"XL", "LL":"C", "CCCC":"CD", "DD":"M", "IC":"XCIX", "IL":"XLIX", "IM":"CMXCIX", "XM":"CML"};
+      for(var k in fixes){ s = s.split(k).join(fixes[k]); }
+      return s;
+    }
+
+    /* ===== Nombres en lettres ===== */
+    function numberToWords(n){
+      if(n === 0) return "zéro";
+      if(n < 0) return "moins " + numberToWords(Math.abs(n));
+      var u = ["","un","deux","trois","quatre","cinq","six","sept","huit","neuf","dix","onze","douze","treize","quatorze","quinze","seize"];
+      var d = ["","","vingt","trente","quarante","cinquante","soixante"];
+      function under100(x){
+        if(x < 17) return u[x];
+        if(x < 20) return "dix-" + u[x-10];
+        if(x < 70){ var t = Math.floor(x/10), r = x%10; return d[t] + (r ? ("-" + (r === 1 ? "et-un" : u[r])) : ""); }
+        if(x < 80) return "soixante-" + under100(x-60);
+        if(x < 100) return "quatre-vingt" + (x === 80 ? "s" : "-" + under100(x-80));
+      }
+      function under1000(x){
+        var h = Math.floor(x/100), r = x%100;
+        var t = "";
+        if(h > 0) t += (h > 1 ? u[h] + " " : "") + "cent" + (r === 0 && h > 1 ? "s" : "");
+        if(r > 0) t += (t ? " " : "") + under100(r);
+        return t;
+      }
+      function conv(x){
+        if(x < 1000) return under1000(x);
+        if(x < 1000000){ var th = Math.floor(x/1000), r = x%1000; return (th === 1 ? "mille" : conv(th) + " mille") + (r ? " " + conv(r) : ""); }
+        if(x < 1000000000){ var mEnt = Math.floor(x/1000000), r2 = x%1000000; return (mEnt === 1 ? "un million" : conv(mEnt) + " millions") + (r2 ? " " + conv(r2) : ""); }
+        return null;
+      }
+      return conv(n);
+    }
+
+    /* ===== Conversion principale ===== */
+    function convert(){
+      var raw = $("cvn-input").value.trim();
+      var mode = $("cvn-mode").value;
+      if(!raw){ setResult("Veuillez saisir une valeur.", "error"); setPedagogy(""); return; }
+      var res = null, pedagogy = "", error = null;
+
+      if(mode === "auto"){
+        if(/^[ivxlcdm]+$/i.test(raw)){
+          var corrected = correctRoman(raw);
+          var num = romanToNumber(corrected);
+          res = String(num);
+          pedagogy = "Entrée : <b>" + raw.toUpperCase() + "</b><br>" + (raw.toUpperCase() !== corrected ? "Forme standard : <b>" + corrected + "</b><br>" : "") + "Valeur décimale : <b>" + num + "</b><br>Les chiffres romains s'additionnent, sauf lorsqu'un chiffre plus petit précède un chiffre plus grand (lecture soustractive, ex. IV = 4).";
+        } else if(/^-?\d+$/.test(raw)){
+          var n = parseInt(raw, 10);
+          var words = numberToWords(n);
+          if(words === null){ error = "Valeur trop grande pour ce convertisseur."; }
+          else { res = words; pedagogy = "Nombre analysé : <b>" + n + "</b><br>Conversion littérale : <b>" + words + "</b><br>Décomposition selon les règles de l'orthographe française (unités, dizaines, centaines)."; }
+        } else { error = "Format non reconnu : saisissez un nombre entier ou des chiffres romains (I, V, X, L, C, D, M)."; }
+      }
+      if(mode === "letters"){
+        if(!/^-?\d+$/.test(raw)){ error = "Saisissez un nombre entier valide."; }
+        else {
+          var n2 = parseInt(raw, 10);
+          var w2 = numberToWords(n2);
+          if(w2 === null){ error = "Valeur trop grande pour ce convertisseur."; }
+          else { res = w2; pedagogy = "Transformation du nombre <b>" + n2 + "</b> en toutes lettres, selon l'orthographe française usuelle."; }
+        }
+      }
+      if(mode === "roman"){
+        if(!/^-?\d+$/.test(raw)){ error = "Saisissez un nombre entier valide."; }
+        else {
+          var n3 = parseInt(raw, 10);
+          var r3 = toRoman(n3);
+          if(r3 === null){ error = "La notation romaine classique est limitée à l'intervalle 1–3999."; }
+          else { res = r3; pedagogy = "Décomposition en milliers (M), centaines (C/D), dizaines (X/L) et unités (I/V), selon la règle additive/soustractive."; }
+        }
+      }
+      if(mode === "romanToNum"){
+        if(!/^[ivxlcdm]+$/i.test(raw)){ error = "Saisissez des chiffres romains valides (I, V, X, L, C, D, M)."; }
+        else {
+          var corrected2 = correctRoman(raw);
+          var num2 = romanToNumber(corrected2);
+          res = String(num2);
+          pedagogy = "Entrée : <b>" + raw.toUpperCase() + "</b><br>" + (raw.toUpperCase() !== corrected2 ? "Forme standard : <b>" + corrected2 + "</b><br>" : "") + "Conversion vers le système décimal.";
+        }
+      }
+      if(error){ setResult(error, "error"); setPedagogy(""); return; }
+      setResult(res, "success");
+      setPedagogy(pedagogy);
+      pushHistory(raw, res);
+    }
+
+    function copyResult(){
+      var val = $("cvn-result-value").textContent;
+      if(!val || val === "En attente d'une valeur") return;
+      var btn = $("cvn-copy-btn");
+      var done = function(){
+        var original = "Copier le résultat";
+        btn.textContent = "Copié";
+        btn.classList.add("copied");
+        setTimeout(function(){ btn.textContent = original; btn.classList.remove("copied"); }, 1500);
+      };
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(val).then(done).catch(function(){});
+      } else {
+        var ta = document.createElement("textarea");
+        ta.value = val;
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand("copy"); done(); } catch(e){}
+        document.body.removeChild(ta);
+      }
+    }
+
+    function clearHistory(){ historyData = []; updateHistory(); }
+
+    document.addEventListener("DOMContentLoaded", function(){
+      updateHistory();
+      $("cvn-convert-btn").addEventListener("click", convert);
+      $("cvn-copy-btn").addEventListener("click", copyResult);
+      $("cvn-clear-btn").addEventListener("click", clearHistory);
+      $("cvn-input").addEventListener("keypress", function(e){ if(e.key === "Enter") convert(); });
+    });
+
+    window.ConvNumTool = { convert: convert, copyResult: copyResult, clearHistory: clearHistory };
+  })();
+  </script>
+</body>
+</html>
