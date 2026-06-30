@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Météo — Prévisions complètes</title>
+<meta name="description" content="Outil météo complet : conditions actuelles, prévisions 7 jours, alertes et géolocalisation.">
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="theme-color" content="#0F2C4D">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Météo">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+
+<style>
+  :root{
+    --bleu-nuit:#0F2C4D;
+    --bleu-marine:#1A3A5C;
+    --bleu-clair:#3E7CB1;
+    --accent:#1A8FE3;
+    --gris-fond:#F4F6F9;
+    --gris-bordure:#DDE3EA;
+    --gris-texte:#52606D;
+    --texte-fonce:#1C2733;
+    --blanc:#FFFFFF;
+    --alerte-fond:#FEF2F2;
+    --alerte-bord:#C8102E;
+    --vigilance-fond:#FFFBEB;
+    --vigilance-bord:#B45309;
+    --ok-fond:#E8F5E9;
+    --ok-bord:#166534;
+    --radius:12px;
+    --ombre:0 2px 10px rgba(15,44,77,.08);
+  }
+
+  html[data-theme="dark"]{
+    --bleu-nuit:#0A1A2E;
+    --bleu-marine:#5B9BD5;
+    --bleu-clair:#3E7CB1;
+    --accent:#4FA8E8;
+    --gris-fond:#10161F;
+    --gris-bordure:#27313F;
+    --gris-texte:#8A97A6;
+    --texte-fonce:#E8ECF1;
+    --blanc:#1A2230;
+    --alerte-fond:#2E1518;
+    --alerte-bord:#E5546A;
+    --vigilance-fond:#2E2410;
+    --vigilance-bord:#E0A23B;
+    --ok-fond:#0F2A18;
+    --ok-bord:#3FAE63;
+    --ombre:0 2px 10px rgba(0,0,0,.35);
+  }
+  html[data-theme="dark"] body{ background:var(--gris-fond); }
+
+  *{box-sizing:border-box;}
+  html{scrollbar-width:none;}
+  body{-ms-overflow-style:none; overflow-y:auto;}
+  ::-webkit-scrollbar{display:none;}
+
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    background:var(--gris-fond);
+    color:var(--texte-fonce);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  #meteoApp{
+    max-width:780px;
+    margin:0 auto;
+    padding:0 0 48px;
+  }
+
+  /* ---------- HEADER ---------- */
+  .app-header{
+    background:linear-gradient(135deg,var(--bleu-nuit),var(--bleu-clair));
+    color:var(--blanc);
+    padding:22px 18px 26px;
+    border-radius:0 0 20px 20px;
+    position:relative;
+  }
+  .app-header h1{
+    margin:0 0 4px;
+    font-size:1.25rem;
+    font-weight:700;
+    letter-spacing:.2px;
+  }
+  .app-header .subtitle{
+    font-size:.82rem;
+    opacity:.85;
+    margin-bottom:16px;
+  }
+
+  .search-row{
+    display:flex;
+    gap:8px;
+    position:relative;
+  }
+  .search-row input{
+    flex:1;
+    border:none;
+    border-radius:10px;
+    padding:12px 14px;
+    font-size:.95rem;
+    background:rgba(255,255,255,.95);
+    color:var(--texte-fonce);
+  }
+  .search-row input:focus{outline:2px solid var(--accent);}
+  .icon-btn{
+    border:none;
+    background:rgba(255,255,255,.18);
+    color:var(--blanc);
+    width:44px;
+    height:44px;
+    border-radius:10px;
+    font-size:1.1rem;
+    cursor:pointer;
+    flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    transition:background .15s;
+  }
+  .icon-btn:hover{background:rgba(255,255,255,.3);}
+  .icon-btn:active{transform:scale(.96);}
+  .icon-btn.active-fav{background:rgba(255,255,255,.4);}
+
+  .header-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+  }
+  .theme-toggle{
+    border:none;
+    background:rgba(255,255,255,.18);
+    color:var(--blanc);
+    width:38px; height:38px;
+    border-radius:10px;
+    font-size:1rem;
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+  }
+  .theme-toggle:hover{background:rgba(255,255,255,.3);}
+
+  .favorites-bar{
+    display:flex;
+    gap:8px;
+    margin-top:12px;
+    overflow-x:auto;
+    padding-bottom:2px;
+  }
+  .favorites-bar::-webkit-scrollbar{display:none;}
+  .fav-tab{
+    flex-shrink:0;
+    background:rgba(255,255,255,.14);
+    color:var(--blanc);
+    border:1px solid rgba(255,255,255,.25);
+    border-radius:20px;
+    padding:6px 13px;
+    font-size:.78rem;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    white-space:nowrap;
+  }
+  .fav-tab.active{
+    background:rgba(255,255,255,.95);
+    color:var(--bleu-marine);
+    font-weight:700;
+  }
+  .fav-tab .fav-remove{
+    opacity:.7;
+    font-size:.85rem;
+    margin-left:2px;
+  }
+  .fav-tab .fav-remove:hover{opacity:1;}
+
+  .suggestions{
+    position:absolute;
+    top:50px;
+    left:0; right:0;
+    background:var(--blanc);
+    border-radius:10px;
+    box-shadow:var(--ombre);
+    overflow:hidden;
+    z-index:30;
+    max-height:260px;
+    overflow-y:auto;
+    display:none;
+  }
+  .suggestions.show{display:block;}
+  .suggestion-item{
+    padding:11px 14px;
+    font-size:.88rem;
+    color:var(--texte-fonce);
+    cursor:pointer;
+    border-bottom:1px solid var(--gris-bordure);
+  }
+  .suggestion-item:last-child{border-bottom:none;}
+  .suggestion-item:hover{background:var(--gris-fond);}
+  .suggestion-item small{display:block;color:var(--gris-texte);font-size:.75rem;margin-top:2px;}
+
+  /* ---------- MAIN CONTENT ---------- */
+  .content{padding:18px;}
+
+  .loading, .error-box{
+    text-align:center;
+    padding:40px 16px;
+    color:var(--gris-texte);
+    font-size:.9rem;
+  }
+  .error-box{
+    background:var(--alerte-fond);
+    border-left:4px solid var(--alerte-bord);
+    border-radius:8px;
+    color:var(--texte-fonce);
+    text-align:left;
+  }
+
+  .hidden{display:none !important;}
+
+  /* ---------- ALERTES ---------- */
+  .alert-card{
+    border-left:4px solid var(--vigilance-bord);
+    background:var(--vigilance-fond);
+    border-radius:8px;
+    padding:12px 14px;
+    margin-bottom:10px;
+    font-size:.86rem;
+    display:flex;
+    gap:10px;
+    align-items:flex-start;
+  }
+  .alert-card.danger{border-left-color:var(--alerte-bord); background:var(--alerte-fond);}
+  .alert-card .alert-ic{font-size:1.2rem;line-height:1;}
+  .alert-card strong{display:block;margin-bottom:2px;}
+
+  /* ---------- CARTE PRINCIPALE ---------- */
+  .current-card{
+    background:var(--blanc);
+    border-radius:var(--radius);
+    box-shadow:var(--ombre);
+    padding:22px 20px;
+    margin-bottom:16px;
+  }
+  .current-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+  }
+  .current-loc{
+    font-size:.95rem;
+    font-weight:600;
+    color:var(--bleu-marine);
+  }
+  .current-date{
+    font-size:.75rem;
+    color:var(--gris-texte);
+    margin-top:2px;
+  }
+  .current-main{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin:14px 0 6px;
+  }
+  .current-icon{font-size:3.2rem; line-height:1;}
+  .current-temp{font-size:2.6rem; font-weight:700; color:var(--texte-fonce);}
+  .current-desc{font-size:.95rem; color:var(--gris-texte); text-transform:capitalize;}
+  .current-feels{font-size:.8rem; color:var(--gris-texte); margin-top:2px;}
+
+  .current-grid{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:10px;
+    margin-top:16px;
+    border-top:1px solid var(--gris-bordure);
+    padding-top:14px;
+  }
+  .current-grid .item{text-align:center;}
+  .current-grid .item .label{font-size:.68rem; color:var(--gris-texte); text-transform:uppercase; letter-spacing:.3px;}
+  .current-grid .item .value{font-size:.92rem; font-weight:600; color:var(--texte-fonce); margin-top:3px;}
+
+  /* ---------- RISQUE THERMIQUE ---------- */
+  .heat-card{
+    border-radius:var(--radius);
+    box-shadow:var(--ombre);
+    padding:16px 18px;
+    margin-bottom:16px;
+    display:flex;
+    align-items:center;
+    gap:14px;
+    border-left:5px solid var(--ok-bord);
+    background:var(--ok-fond);
+  }
+  .heat-card.level-moderate{ border-left-color:var(--vigilance-bord); background:var(--vigilance-fond); }
+  .heat-card.level-high{ border-left-color:#D97706; background:#FFF3E0; }
+  html[data-theme="dark"] .heat-card.level-high{ background:#2E1F0A; }
+  .heat-card.level-severe{ border-left-color:var(--alerte-bord); background:var(--alerte-fond); }
+  .heat-icon{font-size:2.1rem; flex-shrink:0; line-height:1;}
+  .heat-body{flex:1;}
+  .heat-title{font-size:.92rem; font-weight:700; color:var(--texte-fonce); margin-bottom:2px;}
+  .heat-sub{font-size:.78rem; color:var(--gris-texte); line-height:1.45;}
+  .heat-badge{
+    font-size:.68rem;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.4px;
+    padding:3px 9px;
+    border-radius:12px;
+    background:var(--ok-bord);
+    color:#fff;
+    flex-shrink:0;
+  }
+  .heat-card.level-moderate .heat-badge{background:var(--vigilance-bord);}
+  .heat-card.level-high .heat-badge{background:#D97706;}
+  .heat-card.level-severe .heat-badge{background:var(--alerte-bord);}
+
+  /* ---------- SOLEIL / LUNE ---------- */
+  .sun-moon-bar{
+    display:flex;
+    background:var(--blanc);
+    border-radius:var(--radius);
+    box-shadow:var(--ombre);
+    padding:14px 18px;
+    margin-bottom:16px;
+    gap:18px;
+    flex-wrap:wrap;
+  }
+  .sun-moon-item{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:.82rem;
+    color:var(--texte-fonce);
+  }
+  .sun-moon-item .sm-ic{font-size:1.3rem;}
+  .sun-moon-item .sm-label{font-size:.68rem; color:var(--gris-texte); display:block; text-transform:uppercase; letter-spacing:.3px;}
+  .sun-moon-item .sm-value{font-weight:600;}
+  .section-title{
+    font-size:.95rem;
+    font-weight:700;
+    color:var(--bleu-marine);
+    margin:22px 0 10px;
+  }
+  .forecast-list{
+    background:var(--blanc);
+    border-radius:var(--radius);
+    box-shadow:var(--ombre);
+    overflow:hidden;
+  }
+  .forecast-row{
+    display:grid;
+    grid-template-columns:80px 1fr auto 70px;
+    align-items:center;
+    gap:10px;
+    padding:12px 16px;
+    border-bottom:1px solid var(--gris-bordure);
+    font-size:.85rem;
+  }
+  .forecast-row:last-child{border-bottom:none;}
+  .forecast-row{cursor:pointer; transition:background .12s;}
+  .forecast-row:hover{background:var(--gris-fond);}
+  .forecast-row:focus-visible{outline:2px solid var(--accent); outline-offset:-2px;}
+  .forecast-row.selected{
+    background:#EEF4FA;
+    box-shadow:inset 3px 0 0 var(--bleu-marine);
+  }
+  .forecast-day{font-weight:600; color:var(--texte-fonce); text-transform:capitalize;}
+  .forecast-ic{font-size:1.4rem; text-align:center;}
+  .forecast-precip{font-size:.75rem; color:var(--bleu-clair); text-align:right; min-width:36px;}
+  .forecast-precip .mm{display:block; font-size:.68rem; color:var(--gris-texte);}
+  .forecast-temps{display:flex; gap:8px; justify-content:flex-end; font-size:.85rem;}
+  .forecast-temps .max{font-weight:700; color:var(--texte-fonce);}
+  .forecast-temps .min{color:var(--gris-texte);}
+
+  /* ---------- CARTE SATELLITE / RADAR ---------- */
+  .map-card{
+    background:var(--blanc);
+    border-radius:var(--radius);
+    box-shadow:var(--ombre);
+    overflow:hidden;
+  }
+  .map-toolbar{
+    display:flex;
+    gap:8px;
+    padding:10px 12px;
+    border-bottom:1px solid var(--gris-bordure);
+    flex-wrap:wrap;
+    align-items:center;
+  }
+  .map-toggle{
+    border:1px solid var(--gris-bordure);
+    background:var(--gris-fond);
+    color:var(--gris-texte);
+    font-size:.78rem;
+    font-weight:600;
+    padding:7px 12px;
+    border-radius:20px;
+    cursor:pointer;
+    transition:.15s;
+  }
+  .map-toggle.active{
+    background:var(--bleu-marine);
+    border-color:var(--bleu-marine);
+    color:var(--blanc);
+  }
+  .map-time{
+    margin-left:auto;
+    font-size:.72rem;
+    color:var(--gris-texte);
+  }
+  #weatherMap{
+    height:320px;
+    width:100%;
+  }
+  .map-legend{
+    padding:8px 12px;
+    font-size:.68rem;
+    color:var(--gris-texte);
+    border-top:1px solid var(--gris-bordure);
+  }
+  .leaflet-control-attribution{font-size:9px !important;}
+
+  /* ---------- HORAIRE (aujourd'hui) ---------- */
+  .hourly-wrap{position:relative;}
+  .hourly-scroll{
+    display:flex;
+    gap:10px;
+    overflow-x:auto;
+    padding-bottom:4px;
+    scroll-behavior:smooth;
+  }
+  .hourly-scroll::-webkit-scrollbar{display:none;}
+  .hourly-fade{
+    position:absolute;
+    top:0; bottom:4px;
+    width:36px;
+    pointer-events:none;
+  }
+  .hourly-fade.left{left:0; background:linear-gradient(to right, var(--gris-fond), transparent);}
+  .hourly-fade.right{right:0; background:linear-gradient(to left, var(--gris-fond), transparent);}
+  .hourly-nav{
+    position:absolute;
+    top:50%;
+    transform:translateY(-50%);
+    width:30px; height:30px;
+    border-radius:50%;
+    border:1px solid var(--gris-bordure);
+    background:var(--blanc);
+    box-shadow:var(--ombre);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    font-size:.85rem;
+    color:var(--bleu-marine);
+    z-index:5;
+  }
+  .hourly-nav.prev{left:-4px;}
+  .hourly-nav.next{right:-4px;}
+  .hourly-nav:active{transform:translateY(-50%) scale(.92);}
+  @media (max-width:420px){
+    .hourly-nav{display:none;}
+  }
+  .hour-card{
+    background:var(--blanc);
+    border-radius:10px;
+    box-shadow:var(--ombre);
+    padding:12px 10px;
+    min-width:66px;
+    text-align:center;
+    flex-shrink:0;
+  }
+  .hour-card .h-time{font-size:.72rem; color:var(--gris-texte);}
+  .hour-card .h-ic{font-size:1.3rem; margin:6px 0;}
+  .hour-card .h-temp{font-size:.85rem; font-weight:700;}
+  .hour-card .h-rain{font-size:.65rem; color:var(--bleu-clair); margin-top:3px;}
+  .hour-card .h-prob{font-size:.62rem; color:var(--gris-texte); margin-top:1px;}
+
+  /* ---------- FOOTER ---------- */
+  .legal-footer{
+    margin-top:26px;
+    padding:14px 16px;
+    font-size:.7rem;
+    color:var(--gris-texte);
+    text-align:center;
+    border-top:1px solid var(--gris-bordure);
+  }
+  .legal-footer a{color:var(--bleu-clair);}
+
+  .updated-line{
+    text-align:center;
+    font-size:.72rem;
+    color:var(--gris-texte);
+    margin-top:14px;
+  }
+
+  @media (max-width:420px){
+    .current-temp{font-size:2.2rem;}
+    .current-icon{font-size:2.6rem;}
+    .current-grid{grid-template-columns:repeat(3,1fr); row-gap:14px;}
+    .forecast-row{grid-template-columns:64px 1fr auto 60px; padding:11px 12px;}
+  }
+</style>
+</head>
+<body>
+
+<div id="meteoApp">
+
+  <header class="app-header">
+    <div class="header-row">
+      <div>
+        <h1>Météo</h1>
+        <div class="subtitle">Prévisions sur 7 jours · données Open-Meteo</div>
+      </div>
+      <button class="theme-toggle" id="themeToggle" title="Changer de thème">🌙</button>
+    </div>
+    <button class="icon-btn hidden" id="installBtn" style="width:auto; padding:0 14px; margin-top:10px; gap:6px; font-size:.78rem;" title="Installer l'application">📲 Installer l'application</button>
+    <div class="search-row">
+      <input id="cityInput" type="text" placeholder="Rechercher une ville…" autocomplete="off">
+      <button class="icon-btn" id="pinBtn" title="Épingler ce lieu en favori">☆</button>
+      <button class="icon-btn" id="geoBtn" title="Utiliser ma position">📍</button>
+      <div class="suggestions" id="suggestions"></div>
+    </div>
+    <div class="favorites-bar" id="favoritesBar"></div>
+  </header>
+
+  <div class="content">
+
+    <div id="loadingBox" class="loading hidden">Chargement des données météo…</div>
+    <div id="errorBox" class="error-box hidden"></div>
+
+    <div id="alertsZone"></div>
+
+    <div id="resultsZone" class="hidden">
+
+      <div class="current-card">
+        <div class="current-top">
+          <div>
+            <div class="current-loc" id="locName">—</div>
+            <div class="current-date" id="locDate">—</div>
+          </div>
+        </div>
+        <div class="current-main">
+          <div class="current-icon" id="curIcon">—</div>
+          <div>
+            <div class="current-temp"><span id="curTemp">—</span></div>
+            <div class="current-desc" id="curDesc">—</div>
+            <div class="current-feels">Ressenti <span id="curFeels">—</span>°</div>
+          </div>
+        </div>
+        <div class="current-grid">
+          <div class="item"><div class="label">Humidité</div><div class="value" id="curHum">—</div></div>
+          <div class="item"><div class="label">Pluie</div><div class="value" id="curRain">—</div></div>
+          <div class="item"><div class="label">Vent</div><div class="value" id="curWind">—</div></div>
+          <div class="item"><div class="label">Pression</div><div class="value" id="curPres">—</div></div>
+          <div class="item"><div class="label">Indice UV</div><div class="value" id="curUV">—</div></div>
+        </div>
+      </div>
+
+      <div class="heat-card" id="heatCard">
+        <div class="heat-icon" id="heatIcon">🌡️</div>
+        <div class="heat-body">
+          <div class="heat-title" id="heatTitle">Risque thermique</div>
+          <div class="heat-sub" id="heatSub">—</div>
+        </div>
+        <div class="heat-badge" id="heatBadge">—</div>
+      </div>
+
+      <div class="sun-moon-bar">
+        <div class="sun-moon-item">
+          <span class="sm-ic">🌅</span>
+          <span><span class="sm-label">Lever</span><span class="sm-value" id="sunriseVal">—</span></span>
+        </div>
+        <div class="sun-moon-item">
+          <span class="sm-ic">🌇</span>
+          <span><span class="sm-label">Coucher</span><span class="sm-value" id="sunsetVal">—</span></span>
+        </div>
+        <div class="sun-moon-item">
+          <span class="sm-ic" id="moonIcon">🌕</span>
+          <span><span class="sm-label">Lune</span><span class="sm-value" id="moonVal">—</span></span>
+        </div>
+      </div>
+
+      <div class="section-title">Carte satellite et radar</div>
+      <div class="map-card">
+        <div class="map-toolbar">
+          <button class="map-toggle active" id="layerSat" data-layer="satellite">🛰️ Satellite</button>
+          <button class="map-toggle" id="layerRadar" data-layer="radar">🌧️ Radar pluie</button>
+          <button class="map-toggle hidden" id="radarPlayBtn" title="Lire l'animation radar (2h)">▶️</button>
+          <span class="map-time" id="mapTime"></span>
+        </div>
+        <div id="weatherMap"></div>
+        <div class="map-legend">Imagerie satellite infrarouge et radar de précipitations fournis par RainViewer. Fond de carte © OpenStreetMap. Cliquez sur la carte pour charger la météo à cet endroit.</div>
+        <div class="map-legend" id="mapDayNote" style="color:var(--vigilance-bord); display:none;"></div>
+      </div>
+
+      <div class="section-title" id="hourlyTitle">Aujourd'hui, heure par heure</div>
+      <div class="hourly-wrap">
+        <div class="hourly-nav prev" id="hourlyPrev" aria-label="Heures précédentes">‹</div>
+        <div class="hourly-scroll" id="hourlyZone"></div>
+        <div class="hourly-nav next" id="hourlyNext" aria-label="Heures suivantes">›</div>
+        <div class="hourly-fade left"></div>
+        <div class="hourly-fade right"></div>
+      </div>
+
+      <div class="section-title">Prévisions 7 jours</div>
+      <div class="forecast-list" id="forecastZone"></div>
+
+      <div class="updated-line" id="updatedLine"></div>
+    </div>
+
+    <div class="legal-footer">
+      Données fournies par <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a> — prévisions à titre indicatif, sans valeur officielle de vigilance météorologique. Pour les alertes officielles, consultez Météo-France ou votre service météorologique national.
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  var STORAGE_KEY = "meteo_outil_last_location";
+  var els = {};
+  ["cityInput","suggestions","geoBtn","pinBtn","themeToggle","favoritesBar","loadingBox","errorBox","alertsZone","resultsZone",
+   "locName","locDate","curIcon","curTemp","curDesc","curFeels","curHum","curRain","curWind","curPres","curUV",
+   "hourlyZone","forecastZone","updatedLine","mapTime","hourlyTitle",
+   "heatCard","heatIcon","heatTitle","heatSub","heatBadge","sunriseVal","sunsetVal","moonIcon","moonVal","radarPlayBtn","installBtn"].forEach(function(id){ els[id] = document.getElementById(id); });
+
+  var WMO = {
+    0:{label:"Ciel dégagé", icon:"☀️"},
+    1:{label:"Plutôt dégagé", icon:"🌤️"},
+    2:{label:"Partiellement nuageux", icon:"⛅"},
+    3:{label:"Couvert", icon:"☁️"},
+    45:{label:"Brouillard", icon:"🌫️"},
+    48:{label:"Brouillard givrant", icon:"🌫️"},
+    51:{label:"Bruine légère", icon:"🌦️"},
+    53:{label:"Bruine modérée", icon:"🌦️"},
+    55:{label:"Bruine dense", icon:"🌧️"},
+    56:{label:"Bruine verglaçante", icon:"🌧️"},
+    57:{label:"Bruine verglaçante dense", icon:"🌧️"},
+    61:{label:"Pluie légère", icon:"🌧️"},
+    63:{label:"Pluie modérée", icon:"🌧️"},
+    65:{label:"Pluie forte", icon:"🌧️"},
+    66:{label:"Pluie verglaçante", icon:"🌧️"},
+    67:{label:"Pluie verglaçante forte", icon:"🌧️"},
+    71:{label:"Neige légère", icon:"🌨️"},
+    73:{label:"Neige modérée", icon:"🌨️"},
+    75:{label:"Neige forte", icon:"❄️"},
+    77:{label:"Grains de neige", icon:"❄️"},
+    80:{label:"Averses légères", icon:"🌦️"},
+    81:{label:"Averses modérées", icon:"🌧️"},
+    82:{label:"Averses violentes", icon:"⛈️"},
+    85:{label:"Averses de neige légères", icon:"🌨️"},
+    86:{label:"Averses de neige fortes", icon:"❄️"},
+    95:{label:"Orage", icon:"⛈️"},
+    96:{label:"Orage avec grêle légère", icon:"⛈️"},
+    99:{label:"Orage avec grêle forte", icon:"⛈️"}
+  };
+
+  function wmo(code){ return WMO[code] || {label:"Conditions inconnues", icon:"❓"}; }
+
+  var DAYS = ["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"];
+  var DAYS_SHORT = ["dim.","lun.","mar.","mer.","jeu.","ven.","sam."];
+  var MONTHS = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+
+  function fmtFullDate(d){
+    return DAYS[d.getDay()] + " " + d.getDate() + " " + MONTHS[d.getMonth()];
+  }
+
+  function show(el){ el.classList.remove("hidden"); }
+  function hide(el){ el.classList.add("hidden"); }
+
+  function setLoading(on){
+    if(on){ show(els.loadingBox); hide(els.errorBox); hide(els.resultsZone); }
+    else { hide(els.loadingBox); }
+  }
+  function setError(msg){
+    hide(els.loadingBox); hide(els.resultsZone);
+    els.errorBox.textContent = msg;
+    show(els.errorBox);
+  }
+
+  // ---------- THEME SOMBRE ----------
+  var THEME_KEY = "meteo_outil_theme";
+  function applyTheme(theme){
+    if(theme === "dark"){
+      document.documentElement.setAttribute("data-theme", "dark");
+      els.themeToggle.textContent = "☀️";
+    } else {
+      document.documentElement.removeAttribute("data-theme");
+      els.themeToggle.textContent = "🌙";
+    }
+  }
+  function initTheme(){
+    var saved = localStorage.getItem(THEME_KEY);
+    if(saved){ applyTheme(saved); }
+    else {
+      var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+      applyTheme(prefersDark ? "dark" : "light");
+    }
+  }
+  els.themeToggle.addEventListener("click", function(){
+    var isDark = document.documentElement.getAttribute("data-theme") === "dark";
+    var next = isDark ? "light" : "dark";
+    applyTheme(next);
+    localStorage.setItem(THEME_KEY, next);
+  });
+  initTheme();
+
+  // ---------- VILLES FAVORITES (max 3) ----------
+  var FAV_KEY = "meteo_outil_favoris";
+  var MAX_FAVS = 3;
+  var currentLocationCache = null; // {lat, lon, label}
+
+  function getFavorites(){
+    try{ return JSON.parse(localStorage.getItem(FAV_KEY)) || []; }catch(e){ return []; }
+  }
+  function setFavorites(favs){
+    localStorage.setItem(FAV_KEY, JSON.stringify(favs));
+  }
+  function isFavorite(lat, lon){
+    return getFavorites().some(function(f){ return Math.abs(f.lat - lat) < 0.01 && Math.abs(f.lon - lon) < 0.01; });
+  }
+  function renderFavoritesBar(activeLat, activeLon){
+    var favs = getFavorites();
+    els.favoritesBar.innerHTML = "";
+    favs.forEach(function(f){
+      var tab = document.createElement("div");
+      var active = activeLat != null && Math.abs(f.lat - activeLat) < 0.01 && Math.abs(f.lon - activeLon) < 0.01;
+      tab.className = "fav-tab" + (active ? " active" : "");
+      tab.innerHTML = "<span>★ " + esc(f.label.split(",")[0]) + "</span><span class='fav-remove' data-remove='1'>✕</span>";
+      tab.addEventListener("click", function(e){
+        if(e.target.getAttribute("data-remove")){
+          e.stopPropagation();
+          var updated = getFavorites().filter(function(x){ return !(Math.abs(x.lat - f.lat) < 0.01 && Math.abs(x.lon - f.lon) < 0.01); });
+          setFavorites(updated);
+          renderFavoritesBar(activeLat, activeLon);
+          updatePinBtn();
+          return;
+        }
+        loadWeather(f.lat, f.lon, f.label);
+      });
+      els.favoritesBar.appendChild(tab);
+    });
+  }
+  function updatePinBtn(){
+    if(!currentLocationCache) return;
+    var fav = isFavorite(currentLocationCache.lat, currentLocationCache.lon);
+    els.pinBtn.textContent = fav ? "★" : "☆";
+    els.pinBtn.classList.toggle("active-fav", fav);
+  }
+  els.pinBtn.addEventListener("click", function(){
+    if(!currentLocationCache) return;
+    var favs = getFavorites();
+    var already = isFavorite(currentLocationCache.lat, currentLocationCache.lon);
+    if(already){
+      favs = favs.filter(function(f){ return !(Math.abs(f.lat - currentLocationCache.lat) < 0.01 && Math.abs(f.lon - currentLocationCache.lon) < 0.01); });
+    } else {
+      if(favs.length >= MAX_FAVS){
+        setError("Vous avez déjà " + MAX_FAVS + " villes épinglées. Retirez-en une avant d'en ajouter une nouvelle.");
+        setTimeout(function(){ hide(els.errorBox); }, 3500);
+        return;
+      }
+      favs.push({ lat: currentLocationCache.lat, lon: currentLocationCache.lon, label: currentLocationCache.label });
+    }
+    setFavorites(favs);
+    renderFavoritesBar(currentLocationCache.lat, currentLocationCache.lon);
+    updatePinBtn();
+  });
+
+  // ---------- RECHERCHE VILLE (geocoding) ----------
+  var searchTimer = null;
+  els.cityInput.addEventListener("input", function(){
+    var q = els.cityInput.value.trim();
+    clearTimeout(searchTimer);
+    if(q.length < 2){ els.suggestions.classList.remove("show"); return; }
+    searchTimer = setTimeout(function(){ doGeocodeSearch(q); }, 350);
+  });
+
+  document.addEventListener("click", function(e){
+    if(!els.suggestions.contains(e.target) && e.target !== els.cityInput){
+      els.suggestions.classList.remove("show");
+    }
+  });
+
+  function doGeocodeSearch(q){
+    var url = "https://geocoding-api.open-meteo.com/v1/search?name=" + encodeURIComponent(q) + "&count=6&language=fr&format=json";
+    fetch(url).then(function(r){ return r.json(); }).then(function(data){
+      renderSuggestions(data.results || []);
+    }).catch(function(){ els.suggestions.classList.remove("show"); });
+  }
+
+  function renderSuggestions(results){
+    if(!results.length){ els.suggestions.classList.remove("show"); return; }
+    els.suggestions.innerHTML = "";
+    results.forEach(function(r){
+      var div = document.createElement("div");
+      div.className = "suggestion-item";
+      var parts = [r.admin1, r.country].filter(Boolean).join(", ");
+      div.innerHTML = "<span>" + esc(r.name) + "</span><small>" + esc(parts) + "</small>";
+      div.addEventListener("click", function(){
+        els.cityInput.value = r.name;
+        els.suggestions.classList.remove("show");
+        loadWeather(r.latitude, r.longitude, r.name + (r.admin1 ? ", " + r.admin1 : ""));
+      });
+      els.suggestions.appendChild(div);
+    });
+    els.suggestions.classList.add("show");
+  }
+
+  function esc(s){
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];
+    });
+  }
+
+  // ---------- GEOLOCALISATION ----------
+  els.geoBtn.addEventListener("click", function(){
+    if(!navigator.geolocation){
+      setError("La géolocalisation n'est pas disponible sur cet appareil.");
+      return;
+    }
+    setLoading(true);
+    navigator.geolocation.getCurrentPosition(function(pos){
+      loadWeather(pos.coords.latitude, pos.coords.longitude, "Ma position");
+    }, function(){
+      setError("Impossible d'accéder à votre position. Vérifiez les autorisations de localisation, ou recherchez une ville manuellement.");
+    }, { timeout: 10000 });
+  });
+
+  // ---------- CHARGEMENT METEO ----------
+  function loadWeather(lat, lon, label){
+    setLoading(true);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({lat:lat, lon:lon, label:label}));
+    initMap(lat, lon);
+
+    var params = [
+      "latitude=" + lat,
+      "longitude=" + lon,
+      "current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,wind_direction_10m,surface_pressure,uv_index",
+      "hourly=temperature_2m,weather_code,precipitation_probability,precipitation,relative_humidity_2m,wind_speed_10m,surface_pressure,apparent_temperature",
+      "daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,uv_index_max,sunrise,sunset",
+      "timezone=auto",
+      "forecast_days=7"
+    ].join("&");
+
+    var url = "https://api.open-meteo.com/v1/forecast?" + params;
+
+    fetch(url).then(function(r){
+      if(!r.ok) throw new Error("network");
+      return r.json();
+    }).then(function(data){
+      renderAll(data, label, lat, lon);
+      setLoading(false);
+      show(els.resultsZone);
+      if(weatherMap){ setTimeout(function(){ weatherMap.invalidateSize(); }, 50); }
+    }).catch(function(){
+      setError("Impossible de récupérer les données météo pour le moment. Vérifiez votre connexion internet et réessayez.");
+    });
+  }
+
+  var currentDataCache = null;
+  var locationLabelCache = "";
+
+  function renderAll(data, label, lat, lon){
+    var cur = data.current;
+    var daily = data.daily;
+    var hourly = data.hourly;
+
+    currentDataCache = cur;
+    locationLabelCache = label || "Position sélectionnée";
+    currentLocationCache = { lat: lat, lon: lon, label: locationLabelCache };
+
+    els.locName.textContent = locationLabelCache;
+
+    renderDayPanel(0);
+    renderHourly(hourly, daily, 0);
+    renderForecast(daily);
+    renderAlerts(cur, daily);
+    renderFavoritesBar(lat, lon);
+    updatePinBtn();
+
+    els.updatedLine.textContent = "Dernière mise à jour : " + new Date().toLocaleTimeString("fr-FR", {hour:"2-digit", minute:"2-digit"});
+  }
+
+  // ---------- PHASE LUNAIRE (calcul local, sans API) ----------
+  function moonPhase(date){
+    // Algorithme simplifié basé sur le cycle synodique (29.530588853 jours)
+    var synodic = 29.530588853;
+    var knownNewMoon = Date.UTC(2000, 0, 6, 18, 14); // nouvelle lune de référence
+    var diffDays = (date.getTime() - knownNewMoon) / 86400000;
+    var phase = diffDays % synodic;
+    if(phase < 0) phase += synodic;
+    var fraction = phase / synodic;
+
+    if(fraction < 0.03 || fraction > 0.97) return { icon:"🌑", label:"Nouvelle lune" };
+    if(fraction < 0.22) return { icon:"🌒", label:"Premier croissant" };
+    if(fraction < 0.28) return { icon:"🌓", label:"Premier quartier" };
+    if(fraction < 0.47) return { icon:"🌔", label:"Gibbeuse croissante" };
+    if(fraction < 0.53) return { icon:"🌕", label:"Pleine lune" };
+    if(fraction < 0.72) return { icon:"🌖", label:"Gibbeuse décroissante" };
+    if(fraction < 0.78) return { icon:"🌗", label:"Dernier quartier" };
+    return { icon:"🌘", label:"Dernier croissant" };
+  }
+
+  function renderSunMoon(dayIndex){
+    if(!dailyDataCache || !dailyDataCache.sunrise) return;
+    var sunriseStr = dailyDataCache.sunrise[dayIndex];
+    var sunsetStr = dailyDataCache.sunset[dayIndex];
+    if(sunriseStr) els.sunriseVal.textContent = new Date(sunriseStr).toLocaleTimeString("fr-FR", {hour:"2-digit", minute:"2-digit"});
+    if(sunsetStr) els.sunsetVal.textContent = new Date(sunsetStr).toLocaleTimeString("fr-FR", {hour:"2-digit", minute:"2-digit"});
+
+    var refDate = new Date(dailyDataCache.time[dayIndex] + "T12:00:00Z");
+    var m = moonPhase(refDate);
+    els.moonIcon.textContent = m.icon;
+    els.moonVal.textContent = m.label;
+  }
+
+  // ---------- RISQUE THERMIQUE (intérêt clinique : chaleur en grossesse) ----------
+  function renderHeatRisk(apparentTemp, humidity){
+    if(apparentTemp == null){ els.heatCard.classList.add("hidden"); return; }
+    els.heatCard.classList.remove("hidden");
+
+    var level, icon, title, badge, sub;
+    if(apparentTemp < 28){
+      level = "low"; icon = "🌡️"; title = "Risque thermique faible"; badge = "Faible";
+      sub = "Conditions thermiques sans particularité. Hydratation habituelle recommandée.";
+    } else if(apparentTemp < 32){
+      level = "moderate"; icon = "🌤️"; title = "Vigilance chaleur modérée"; badge = "Modéré";
+      sub = "Pensez à vous hydrater régulièrement et à limiter les efforts physiques aux heures les plus chaudes.";
+    } else if(apparentTemp < 38){
+      level = "high"; icon = "🥵"; title = "Risque de chaleur élevé"; badge = "Élevé";
+      sub = "Hydratation renforcée recommandée, exposition au soleil à limiter. Vigilance particulière pour les femmes enceintes, jeunes enfants et personnes âgées.";
+    } else {
+      level = "severe"; icon = "🆘"; title = "Risque de chaleur sévère"; badge = "Sévère";
+      sub = "Forte chaleur : évitez tout effort, restez à l'ombre/au frais et hydratez-vous abondamment. En cas de grossesse, de malaise ou de signes de déshydratation, consultez sans délai.";
+    }
+
+    if(humidity != null && humidity >= 60 && apparentTemp >= 28){
+      sub += " Humidité élevée (" + Math.round(humidity) + " %) : la sensation de chaleur et la difficulté à évacuer la chaleur corporelle sont accentuées.";
+    }
+
+    els.heatCard.className = "heat-card" + (level !== "low" ? " level-" + level : "");
+    els.heatIcon.textContent = icon;
+    els.heatTitle.textContent = title;
+    els.heatSub.textContent = sub;
+    els.heatBadge.textContent = badge;
+  }
+
+  function dayAverages(hourly, dateStr){
+    var idxs = [];
+    for(var i=0; i<hourly.time.length; i++){
+      if(hourly.time[i].indexOf(dateStr) === 0) idxs.push(i);
+    }
+    if(!idxs.length) return null;
+    function avg(arr){
+      var sum = 0, n = 0;
+      idxs.forEach(function(i){ if(arr[i] != null){ sum += arr[i]; n++; } });
+      return n ? sum / n : null;
+    }
+    return {
+      humidity: avg(hourly.relative_humidity_2m),
+      wind: avg(hourly.wind_speed_10m),
+      pressure: avg(hourly.surface_pressure),
+      feels: avg(hourly.apparent_temperature)
+    };
+  }
+
+  function renderDayPanel(dayIndex){
+    if(!dailyDataCache) return;
+    selectedDayIndex = dayIndex;
+    var daily = dailyDataCache;
+    var d = new Date(daily.time[dayIndex] + "T12:00:00");
+    var isToday = (dayIndex === 0);
+
+    els.locDate.textContent = isToday ? fmtFullDate(new Date()) : fmtFullDate(d);
+
+    if(isToday && currentDataCache){
+      var cur = currentDataCache;
+      var w = wmo(cur.weather_code);
+      els.curIcon.textContent = w.icon;
+      els.curTemp.textContent = Math.round(cur.temperature_2m) + "°";
+      els.curDesc.textContent = w.label;
+      els.curFeels.textContent = Math.round(cur.apparent_temperature);
+      els.curHum.textContent = Math.round(cur.relative_humidity_2m) + " %";
+      els.curRain.textContent = (cur.precipitation != null ? cur.precipitation.toFixed(1) : "0.0") + " mm/h";
+      els.curWind.textContent = Math.round(cur.wind_speed_10m) + " km/h";
+      els.curPres.textContent = Math.round(cur.surface_pressure) + " hPa";
+      els.curUV.textContent = (cur.uv_index != null ? cur.uv_index.toFixed(1) : "—");
+      renderHeatRisk(cur.apparent_temperature, cur.relative_humidity_2m);
+    } else {
+      var w2 = wmo(daily.weather_code[dayIndex]);
+      var avgs = hourlyDataCache ? dayAverages(hourlyDataCache, daily.time[dayIndex]) : null;
+      els.curIcon.textContent = w2.icon;
+      els.curTemp.textContent = Math.round(daily.temperature_2m_max[dayIndex]) + "° / " + Math.round(daily.temperature_2m_min[dayIndex]);
+      els.curDesc.textContent = w2.label + " (prévision)";
+      els.curFeels.textContent = avgs && avgs.feels != null ? Math.round(avgs.feels) : Math.round(daily.temperature_2m_max[dayIndex]);
+      els.curHum.textContent = avgs && avgs.humidity != null ? Math.round(avgs.humidity) + " %" : "—";
+      els.curRain.textContent = (daily.precipitation_sum && daily.precipitation_sum[dayIndex] != null) ? daily.precipitation_sum[dayIndex].toFixed(1) + " mm" : "—";
+      els.curWind.textContent = Math.round(daily.wind_speed_10m_max[dayIndex]) + " km/h";
+      els.curPres.textContent = avgs && avgs.pressure != null ? Math.round(avgs.pressure) + " hPa" : "—";
+      els.curUV.textContent = (daily.uv_index_max && daily.uv_index_max[dayIndex] != null) ? daily.uv_index_max[dayIndex].toFixed(1) : "—";
+      var heatTemp = (avgs && avgs.feels != null) ? avgs.feels : daily.temperature_2m_max[dayIndex];
+      renderHeatRisk(heatTemp, avgs ? avgs.humidity : null);
+    }
+
+    renderSunMoon(dayIndex);
+  }
+
+  function renderHourly(hourly, daily, dayIndex){
+    hourlyDataCache = hourly;
+    dailyDataCache = daily;
+    selectedDayIndex = dayIndex;
+
+    els.hourlyZone.innerHTML = "";
+
+    var targetDateStr = daily.time[dayIndex];
+    var now = new Date();
+    var isToday = (dayIndex === 0);
+
+    var indices = [];
+    for(var i=0; i<hourly.time.length; i++){
+      if(hourly.time[i].indexOf(targetDateStr) === 0){
+        indices.push(i);
+      }
+    }
+
+    if(isToday){
+      var startIdx = indices[0];
+      for(var i=0; i<indices.length; i++){
+        var t = new Date(hourly.time[indices[i]]);
+        if(t >= now){ startIdx = indices[i]; break; }
+      }
+      indices = indices.filter(function(idx){ return idx >= startIdx; });
+    }
+
+    var count = 0;
+    for(var i=0; i<indices.length && count<24; i++, count++){
+      var idx = indices[i];
+      var t = new Date(hourly.time[idx]);
+      var w = wmo(hourly.weather_code[idx]);
+      var rainMm = hourly.precipitation ? hourly.precipitation[idx] : null;
+      var rainProb = hourly.precipitation_probability ? hourly.precipitation_probability[idx] : null;
+      var card = document.createElement("div");
+      card.className = "hour-card";
+      var timeLabel = (isToday && count === 0) ? "Maint." : t.getHours() + "h";
+      card.innerHTML =
+        '<div class="h-time">' + timeLabel + '</div>' +
+        '<div class="h-ic">' + w.icon + '</div>' +
+        '<div class="h-temp">' + Math.round(hourly.temperature_2m[idx]) + '°</div>' +
+        (rainProb != null && rainProb > 0 ? '<div class="h-prob">' + rainProb + '%</div>' : '') +
+        (rainMm != null && rainMm > 0 ? '<div class="h-rain">💧' + rainMm.toFixed(1) + 'mm</div>' : '');
+      els.hourlyZone.appendChild(card);
+    }
+
+    if(els.hourlyTitle){
+      var d = new Date(targetDateStr + "T12:00:00");
+      els.hourlyTitle.textContent = isToday ? "Aujourd'hui, heure par heure" : "Heure par heure — " + DAYS[d.getDay()] + " " + d.getDate() + " " + MONTHS[d.getMonth()];
+    }
+  }
+
+  function renderForecast(daily){
+    els.forecastZone.innerHTML = "";
+    for(var i=0; i<daily.time.length; i++){
+      var d = new Date(daily.time[i] + "T12:00:00");
+      var w = wmo(daily.weather_code[i]);
+      var dayLabel = i === 0 ? "Aujourd'hui" : DAYS_SHORT[d.getDay()] + " " + d.getDate();
+      var row = document.createElement("div");
+      row.className = "forecast-row" + (i === selectedDayIndex ? " selected" : "");
+      row.setAttribute("data-day-index", i);
+      row.setAttribute("role", "button");
+      row.setAttribute("tabindex", "0");
+      var precipProb = daily.precipitation_probability_max ? daily.precipitation_probability_max[i] : null;
+      var precipMm = daily.precipitation_sum ? daily.precipitation_sum[i] : null;
+      row.innerHTML =
+        '<div class="forecast-day">' + esc(dayLabel) + '</div>' +
+        '<div class="forecast-ic">' + w.icon + '</div>' +
+        '<div class="forecast-precip">' + (precipProb != null ? precipProb + "%" : "") + (precipMm != null && precipMm > 0 ? '<span class="mm">' + precipMm.toFixed(1) + ' mm</span>' : '') + '</div>' +
+        '<div class="forecast-temps"><span class="max">' + Math.round(daily.temperature_2m_max[i]) + '°</span><span class="min">' + Math.round(daily.temperature_2m_min[i]) + '°</span></div>';
+      (function(idx){
+        row.addEventListener("click", function(){ selectForecastDay(idx); });
+        row.addEventListener("keydown", function(e){ if(e.key === "Enter" || e.key === " "){ e.preventDefault(); selectForecastDay(idx); } });
+      })(i);
+      els.forecastZone.appendChild(row);
+    }
+  }
+
+  function selectForecastDay(idx){
+    if(!hourlyDataCache || !dailyDataCache) return;
+    renderDayPanel(idx);
+    renderHourly(hourlyDataCache, dailyDataCache, idx);
+    renderForecast(dailyDataCache);
+    updateMapForDay(idx);
+    if(els.hourlyZone){
+      els.hourlyZone.scrollIntoView({ behavior:"smooth", block:"nearest" });
+    }
+  }
+
+  function updateMapForDay(idx){
+    if(!weatherMap) return;
+    applyMapLayer(currentLayerType);
+    var note = document.getElementById("mapDayNote");
+    if(idx === 0){
+      if(note){ note.textContent = ""; note.style.display = "none"; }
+    } else {
+      var d = new Date(dailyDataCache.time[idx] + "T12:00:00");
+      if(note){
+        note.style.display = "block";
+        note.textContent = "Le satellite et le radar n'offrent pas de prévision à plusieurs jours : image en temps réel affichée (jour sélectionné : " + DAYS[d.getDay()] + " " + d.getDate() + " " + MONTHS[d.getMonth()] + ").";
+      }
+    }
+  }
+
+  // ---------- ALERTES (seuils) ----------
+  function renderAlerts(cur, daily){
+    els.alertsZone.innerHTML = "";
+    var alerts = [];
+
+    if(cur.temperature_2m >= 35){
+      alerts.push({level:"danger", icon:"🥵", title:"Forte chaleur", text:"Température actuelle de " + Math.round(cur.temperature_2m) + "°C. Hydratez-vous et évitez l'exposition prolongée au soleil."});
+    } else if(cur.temperature_2m <= -8){
+      alerts.push({level:"danger", icon:"🥶", title:"Grand froid", text:"Température actuelle de " + Math.round(cur.temperature_2m) + "°C. Risque d'hypothermie et de gel, limitez les expositions prolongées."});
+    }
+
+    if(cur.wind_speed_10m >= 70){
+      alerts.push({level:"danger", icon:"💨", title:"Vent violent", text:"Rafales de vent jusqu'à " + Math.round(cur.wind_speed_10m) + " km/h. Évitez les déplacements non essentiels."});
+    } else if(cur.wind_speed_10m >= 50){
+      alerts.push({level:"vigilance", icon:"💨", title:"Vent fort", text:"Vent soutenu autour de " + Math.round(cur.wind_speed_10m) + " km/h. Soyez prudent en extérieur."});
+    }
+
+    if(cur.uv_index != null && cur.uv_index >= 8){
+      alerts.push({level:"vigilance", icon:"🔆", title:"Indice UV très élevé", text:"Indice UV de " + cur.uv_index.toFixed(1) + ". Protection solaire fortement recommandée."});
+    }
+
+    var stormToday = (daily.weather_code[0] >= 95);
+    if(stormToday){
+      alerts.push({level:"danger", icon:"⛈️", title:"Risque d'orage aujourd'hui", text:"Des orages sont prévus. Évitez les activités extérieures exposées."});
+    }
+
+    var heavyRainToday = daily.precipitation_sum && daily.precipitation_sum[0] >= 30;
+    if(heavyRainToday){
+      alerts.push({level:"vigilance", icon:"🌧️", title:"Fortes précipitations", text:"Cumul de pluie attendu : " + Math.round(daily.precipitation_sum[0]) + " mm aujourd'hui. Risque de ruissellement."});
+    }
+
+    alerts.forEach(function(a){
+      var div = document.createElement("div");
+      div.className = "alert-card" + (a.level === "danger" ? " danger" : "");
+      div.innerHTML = '<div class="alert-ic">' + a.icon + '</div><div><strong>' + esc(a.title) + '</strong>' + esc(a.text) + '</div>';
+      els.alertsZone.appendChild(div);
+    });
+  }
+
+  // ---------- CARTE SATELLITE / RADAR (Leaflet + RainViewer, sans clé) ----------
+  var weatherMap = null;
+  var baseLayer = null;
+  var overlayLayer = null;
+  var currentLayerType = "satellite";
+  var rainviewerData = null;
+  var mapMarker = null;
+  var hourlyDataCache = null;
+  var dailyDataCache = null;
+  var selectedDayIndex = 0;
+
+  var radarFrames = [];
+  var radarFrameIndex = 0;
+  var radarTimer = null;
+  var radarPlaying = false;
+
+  function initMap(lat, lon){
+    if(typeof L === "undefined") return;
+    if(!weatherMap){
+      weatherMap = L.map("weatherMap", { zoomControl:true, attributionControl:true }).setView([lat, lon], 6);
+      baseLayer = L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+        attribution: '&copy; OpenStreetMap &copy; CARTO',
+        maxZoom: 12
+      }).addTo(weatherMap);
+      mapMarker = L.marker([lat, lon]).addTo(weatherMap);
+      fetchRainviewerLayers();
+
+      weatherMap.on("click", function(e){
+        stopRadarAnimation();
+        loadWeather(e.latlng.lat, e.latlng.lng, "Point sélectionné (" + e.latlng.lat.toFixed(2) + ", " + e.latlng.lng.toFixed(2) + ")");
+      });
+    } else {
+      weatherMap.setView([lat, lon], weatherMap.getZoom());
+      if(mapMarker) mapMarker.setLatLng([lat, lon]);
+    }
+  }
+
+  function fetchRainviewerLayers(){
+    fetch("https://api.rainviewer.com/public/weather-maps.json").then(function(r){ return r.json(); }).then(function(data){
+      rainviewerData = data;
+      applyMapLayer(currentLayerType);
+    }).catch(function(){
+      els.mapTime && (els.mapTime.textContent = "Couche indisponible");
+    });
+  }
+
+  function applyMapLayer(type){
+    if(!weatherMap || !rainviewerData) return;
+    stopRadarAnimation();
+    currentLayerType = type;
+
+    if(overlayLayer){ weatherMap.removeLayer(overlayLayer); overlayLayer = null; }
+
+    if(type === "radar" && rainviewerData.radar && rainviewerData.radar.past && rainviewerData.radar.past.length){
+      radarFrames = rainviewerData.radar.past.slice(-12); // ~2h de frames (10 min d'intervalle)
+      radarFrameIndex = radarFrames.length - 1;
+      els.radarPlayBtn.classList.remove("hidden");
+      showRadarFrame(radarFrameIndex);
+      return;
+    }
+
+    els.radarPlayBtn.classList.add("hidden");
+
+    var host = rainviewerData.host;
+    var frame = null;
+    var timeLabel = "";
+
+    if(type === "satellite" && rainviewerData.satellite && rainviewerData.satellite.infrared && rainviewerData.satellite.infrared.length){
+      var arr = rainviewerData.satellite.infrared;
+      frame = arr[arr.length - 1];
+      timeLabel = "Image satellite : " + new Date(frame.time * 1000).toLocaleTimeString("fr-FR", {hour:"2-digit", minute:"2-digit"});
+    }
+
+    if(frame){
+      overlayLayer = L.tileLayer(host + frame.path + "/256/{z}/{x}/{y}/0/0_0.png", { opacity: 0.75, maxZoom: 12 }).addTo(weatherMap);
+    }
+    if(els.mapTime) els.mapTime.textContent = timeLabel;
+  }
+
+  function showRadarFrame(idx){
+    if(!radarFrames.length || !rainviewerData) return;
+    radarFrameIndex = idx;
+    var frame = radarFrames[idx];
+    if(overlayLayer){ weatherMap.removeLayer(overlayLayer); }
+    overlayLayer = L.tileLayer(rainviewerData.host + frame.path + "/256/{z}/{x}/{y}/3/1_1.png", { opacity: 0.75, maxZoom: 12 }).addTo(weatherMap);
+    if(els.mapTime){
+      els.mapTime.textContent = "Radar : " + new Date(frame.time * 1000).toLocaleTimeString("fr-FR", {hour:"2-digit", minute:"2-digit"}) + " (" + (idx + 1) + "/" + radarFrames.length + ")";
+    }
+  }
+
+  function startRadarAnimation(){
+    if(!radarFrames.length) return;
+    radarPlaying = true;
+    els.radarPlayBtn.textContent = "⏸️";
+    radarTimer = setInterval(function(){
+      radarFrameIndex = (radarFrameIndex + 1) % radarFrames.length;
+      showRadarFrame(radarFrameIndex);
+    }, 600);
+  }
+
+  function stopRadarAnimation(){
+    radarPlaying = false;
+    if(els.radarPlayBtn) els.radarPlayBtn.textContent = "▶️";
+    if(radarTimer){ clearInterval(radarTimer); radarTimer = null; }
+  }
+
+  if(els.radarPlayBtn){
+    els.radarPlayBtn.addEventListener("click", function(){
+      if(radarPlaying){ stopRadarAnimation(); showRadarFrame(radarFrames.length - 1); }
+      else { startRadarAnimation(); }
+    });
+  }
+
+  document.getElementById("layerSat").addEventListener("click", function(){ toggleMapLayer("satellite", this); });
+  document.getElementById("layerRadar").addEventListener("click", function(){ toggleMapLayer("radar", this); });
+
+  var hourlyPrevBtn = document.getElementById("hourlyPrev");
+  var hourlyNextBtn = document.getElementById("hourlyNext");
+  if(hourlyPrevBtn) hourlyPrevBtn.addEventListener("click", function(){
+    els.hourlyZone.scrollBy({ left: -180, behavior: "smooth" });
+  });
+  if(hourlyNextBtn) hourlyNextBtn.addEventListener("click", function(){
+    els.hourlyZone.scrollBy({ left: 180, behavior: "smooth" });
+  });
+
+  function toggleMapLayer(type, btn){
+    document.querySelectorAll(".map-toggle").forEach(function(b){ if(b.id === "layerSat" || b.id === "layerRadar") b.classList.remove("active"); });
+    btn.classList.add("active");
+    applyMapLayer(type);
+  }
+
+  // ---------- INITIALISATION ----------
+  function initApp(){
+    var saved = null;
+    try{ saved = JSON.parse(localStorage.getItem(STORAGE_KEY)); }catch(e){}
+    if(saved && saved.lat && saved.lon){
+      loadWeather(saved.lat, saved.lon, saved.label);
+    } else if(navigator.geolocation){
+      setLoading(true);
+      navigator.geolocation.getCurrentPosition(function(pos){
+        loadWeather(pos.coords.latitude, pos.coords.longitude, "Ma position");
+      }, function(){
+        // par défaut : Paris
+        loadWeather(48.8566, 2.3522, "Paris, France");
+      }, { timeout: 8000 });
+    } else {
+      loadWeather(48.8566, 2.3522, "Paris, France");
+    }
+  }
+
+  initApp();
+})();
+</script>
+
+<!-- TRACKING UMAMI (RGPD compliant, no cookies) -->
+<script defer src="https://cloud.umami.is/script.js" data-website-id="b182aba6-225e-47ac-b6be-892e033a6013"></script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function(){
+      navigator.serviceWorker.register('sw.js').catch(function(){});
+    });
+  }
+</script>
+
+<script>
+  // Installation PWA réelle : ce bouton n'apparaît que si le navigateur juge
+  // le manifest.json et le service worker valides (preuve fonctionnelle).
+  (function(){
+    var installBtn = document.getElementById("installBtn");
+    var deferredPrompt = null;
+
+    window.addEventListener("beforeinstallprompt", function(e){
+      e.preventDefault();
+      deferredPrompt = e;
+      if(installBtn) installBtn.classList.remove("hidden");
+    });
+
+    if(installBtn){
+      installBtn.addEventListener("click", function(){
+        if(!deferredPrompt) return;
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(function(){
+          deferredPrompt = null;
+          installBtn.classList.add("hidden");
+        });
+      });
+    }
+
+    window.addEventListener("appinstalled", function(){
+      if(installBtn) installBtn.classList.add("hidden");
+    });
+  })();
+</script>
+
+</body>
+</html>
