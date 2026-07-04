@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Studio Couleur Pro</title>
     <style>
+     /* =========================================
+       PRO : Masque l'ascenseur (style App native)
+      ========================================= */
+      html { scrollbar-width: none; }
+      body { -ms-overflow-style: none; overflow-y: auto; }
+      ::-webkit-scrollbar { display: none; }
+        
         /* =========================================
            CSS ISOLÉ — tout est scopé sous #studio-couleur-pro
            pour ne jamais affecter le reste de la page (Elementor safe)
@@ -536,5 +543,9 @@
     canvas.addEventListener('touchstart', getColorAtEvent);
     canvas.addEventListener('touchend', saveToHistory);
 </script>
+
+    <!-- TRACKING UMAMI (RGPD compliant, no cookies) -->
+<script defer src="https://cloud.umami.is/script.js" data-website-id="b182aba6-225e-47ac-b6be-892e033a6013"></script>
+    
 </body>
 </html>
