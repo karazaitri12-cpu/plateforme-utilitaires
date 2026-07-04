@@ -438,13 +438,32 @@
     }
 
     // Noms de couleurs pour reconnaître la teinte obtenue / cible
+    // Liste enrichie pour affiner les étiquettes, notamment sur les teintes chaudes/neutres proches (beige, rose pâle, taupe...)
     const NAMED_COLORS = [
-        {n:"Blanc", h:"#FFFFFF"}, {n:"Noir", h:"#000000"}, {n:"Gris", h:"#808080"}, {n:"Gris clair", h:"#D3D3D3"},
-        {n:"Rouge", h:"#FF0000"}, {n:"Bordeaux", h:"#800000"}, {n:"Vert", h:"#00A833"}, {n:"Vert sapin", h:"#095228"},
-        {n:"Bleu", h:"#2960A8"}, {n:"Bleu marine", h:"#000080"}, {n:"Jaune", h:"#FFFF00"}, {n:"Moutarde", h:"#FFDB58"},
-        {n:"Orange", h:"#FF8000"}, {n:"Marron", h:"#7B4B27"}, {n:"Marron clair", h:"#C8A165"}, {n:"Beige", h:"#E8D8B5"},
-        {n:"Kaki", h:"#BFB27C"}, {n:"Rose", h:"#FFC0CB"}, {n:"Rose pâle", h:"#F4D6D6"}, {n:"Violet", h:"#800080"},
-        {n:"Terre de Sienne", h:"#8A5A2B"}, {n:"Ocre", h:"#CC9A3A"}, {n:"Taupe", h:"#8B7D6B"}
+        // Neutres
+        {n:"Blanc", h:"#FFFFFF"}, {n:"Blanc cassé", h:"#FAF3E8"}, {n:"Ivoire", h:"#FFFFF0"}, {n:"Crème", h:"#FFFDD0"},
+        {n:"Gris clair", h:"#D3D3D3"}, {n:"Gris perle", h:"#E5E4E2"}, {n:"Gris", h:"#808080"}, {n:"Gris anthracite", h:"#36454F"},
+        {n:"Noir", h:"#000000"},
+        // Neutres chauds / beiges / bruns
+        {n:"Beige", h:"#E8D8B5"}, {n:"Beige rosé", h:"#E3C9B6"}, {n:"Sable", h:"#C2B280"}, {n:"Lin", h:"#FAF0E6"},
+        {n:"Champagne", h:"#F7E7CE"}, {n:"Kaki", h:"#BFB27C"}, {n:"Taupe", h:"#8B7D6B"}, {n:"Camel", h:"#C19A6B"},
+        {n:"Marron clair", h:"#C8A165"}, {n:"Café au lait", h:"#A47551"}, {n:"Noisette", h:"#9C6B4E"}, {n:"Marron", h:"#7B4B27"},
+        {n:"Terre de Sienne", h:"#8A5A2B"}, {n:"Ocre", h:"#CC9A3A"}, {n:"Marron foncé", h:"#4A2C0F"}, {n:"Chocolat", h:"#3C1E10"},
+        // Roses / rouges
+        {n:"Rose pâle", h:"#F4D6D6"}, {n:"Rose poudré", h:"#E8C5C0"}, {n:"Rose", h:"#FFC0CB"}, {n:"Rose vif", h:"#FF69B4"},
+        {n:"Saumon", h:"#FA8072"}, {n:"Corail", h:"#FF7F50"}, {n:"Rouge", h:"#FF0000"}, {n:"Rouge brique", h:"#B7410E"},
+        {n:"Bordeaux", h:"#800000"}, {n:"Grenat", h:"#7C1D2E"},
+        // Oranges / jaunes
+        {n:"Orange", h:"#FF8000"}, {n:"Orange brûlé", h:"#CC5500"}, {n:"Abricot", h:"#FBCEB1"}, {n:"Jaune", h:"#FFFF00"},
+        {n:"Jaune pâle", h:"#FFF8B0"}, {n:"Moutarde", h:"#FFDB58"}, {n:"Or", h:"#FFD700"},
+        // Verts
+        {n:"Vert", h:"#00A833"}, {n:"Vert clair", h:"#90EE90"}, {n:"Vert menthe", h:"#98FF98"}, {n:"Vert olive", h:"#808000"},
+        {n:"Vert émeraude", h:"#50C878"}, {n:"Vert sapin", h:"#095228"}, {n:"Vert bouteille", h:"#006A4E"},
+        // Bleus
+        {n:"Bleu ciel", h:"#87CEEB"}, {n:"Bleu poudré", h:"#B0E0E6"}, {n:"Bleu", h:"#2960A8"}, {n:"Turquoise", h:"#40E0D0"},
+        {n:"Bleu pétrole", h:"#1B4B5A"}, {n:"Bleu marine", h:"#000080"},
+        // Violets
+        {n:"Lavande", h:"#E6E6FA"}, {n:"Mauve", h:"#E0B0FF"}, {n:"Violet", h:"#800080"}, {n:"Prune", h:"#8E4585"}
     ];
     function closestName(rgb) {
         let best = "Teinte personnalisée", bestD = Infinity;
