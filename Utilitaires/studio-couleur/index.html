@@ -27,6 +27,7 @@
             box-sizing: border-box;
         }
         #studio-couleur-pro .container {
+            position: relative;
             max-width: 1040px; margin: 0 auto;
             background: rgba(255,255,255,0.04);
             backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
@@ -34,6 +35,13 @@
             padding: 32px; border-radius: 24px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.45);
         }
+        #studio-couleur-pro .theme-toggle {
+            position: absolute; top: 18px; right: 18px; width: 42px; height: 42px; border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.06); color: #eef1f8;
+            font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: 0.2s;
+        }
+        #studio-couleur-pro .theme-toggle:hover { background: rgba(255,255,255,0.14); transform: translateY(-2px); }
         #studio-couleur-pro h1 {
             margin: 0 0 4px; font-size: 2.1rem; font-weight: 800; letter-spacing: -0.5px;
             background: linear-gradient(135deg, #ffffff, var(--scp-primary-light));
@@ -157,11 +165,48 @@
             transition: opacity 0.3s ease, transform 0.3s ease;
         }
         #studio-couleur-pro #toast.show { visibility: visible; opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        /* =========================================
+           THÈME CLAIR — activé via la classe .theme-light
+           (bascule utilisateur, choix mémorisé en localStorage)
+           ========================================= */
+        #studio-couleur-pro.theme-light { background: #f4f4f9; color: #333; }
+        #studio-couleur-pro.theme-light .theme-toggle { border-color: #ccc; background: #e9ecef; color: #333; }
+        #studio-couleur-pro.theme-light .container {
+            background: #ffffff; backdrop-filter: none; -webkit-backdrop-filter: none;
+            border: none; box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+        #studio-couleur-pro.theme-light h1 {
+            background: none; -webkit-background-clip: initial; background-clip: initial; color: #222;
+        }
+        #studio-couleur-pro.theme-light .subtitle,
+        #studio-couleur-pro.theme-light .hint,
+        #studio-couleur-pro.theme-light .palette-hex,
+        #studio-couleur-pro.theme-light .palette-item small { color: #666; }
+        #studio-couleur-pro.theme-light .slider-container { background: #e9ecef; border: none; color: #333; }
+        #studio-couleur-pro.theme-light .panel { background: #e9ecef; border: none; }
+        #studio-couleur-pro.theme-light .panel h3,
+        #studio-couleur-pro.theme-light .history-panel h3 { color: #222; }
+        #studio-couleur-pro.theme-light .loupe-container { border: 4px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        #studio-couleur-pro.theme-light .color-box { border: 3px solid #ccc; }
+        #studio-couleur-pro.theme-light .copyable { color: #333; }
+        #studio-couleur-pro.theme-light .copyable:hover { background: #d0d4d8; color: var(--scp-primary); }
+        #studio-couleur-pro.theme-light .copyable strong { color: #333; }
+        #studio-couleur-pro.theme-light .name-value { color: var(--scp-primary); }
+        #studio-couleur-pro.theme-light .palette-color { border: 2px solid #ccc; }
+        #studio-couleur-pro.theme-light .canvas-container { border: 2px dashed #aaa; background: transparent; }
+        #studio-couleur-pro.theme-light .canvas-container::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); }
+        #studio-couleur-pro.theme-light .empty-state { color: #888; }
+        #studio-couleur-pro.theme-light .history-panel { border-top: 2px solid #eee; }
+        #studio-couleur-pro.theme-light .history-swatch { border: 2px solid #ccc; }
+        #studio-couleur-pro.theme-light .clear-btn { background: none; border: 1px solid #ccc; color: #333; }
+        #studio-couleur-pro.theme-light .clear-btn:hover { background: #f0f0f0; }
     </style>
 </head>
 <body>
 <div id="studio-couleur-pro">
 <div class="container">
+    <button class="theme-toggle" id="themeToggle" title="Changer de thème" aria-label="Changer de thème">🌙</button>
     <h1>Studio Couleur Pro 🎨</h1>
     <p class="subtitle">Analysez, extrayez et copiez n'importe quelle couleur en un instant.</p>
 
@@ -248,6 +293,25 @@
     loupeCtx.imageSmoothingEnabled = false;
     const canvasContainer = document.getElementById('canvasContainer');
     const widgetRoot = document.getElementById('studio-couleur-pro');
+    const themeToggle = document.getElementById('themeToggle');
+
+    // Bascule thème sombre / clair, avec mémorisation du choix
+    function applyTheme(theme) {
+        if (theme === 'light') {
+            widgetRoot.classList.add('theme-light');
+            themeToggle.textContent = '☀️';
+        } else {
+            widgetRoot.classList.remove('theme-light');
+            themeToggle.textContent = '🌙';
+        }
+    }
+    applyTheme(localStorage.getItem('scpTheme') || 'dark');
+    themeToggle.addEventListener('click', () => {
+        const next = widgetRoot.classList.contains('theme-light') ? 'dark' : 'light';
+        applyTheme(next);
+        localStorage.setItem('scpTheme', next);
+    });
+
     let img = new Image();
     let imageLoaded = false;
     let currentBrightness = 100;
