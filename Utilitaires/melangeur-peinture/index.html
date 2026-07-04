@@ -5,14 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mélangeur de Peintures</title>
 <style>
-
-   /* =========================================
-   PRO : Masque l'ascenseur (style App native)
-   ========================================= */ 
-     html { scrollbar-width: none; }
-     body { -ms-overflow-style: none; overflow-y: auto; }
-     ::-webkit-scrollbar { display: none; }
-   
     /* =========================================
        CSS ISOLÉ — tout est scopé sous #peintre-melangeur
        pour ne jamais affecter le reste de la page (Elementor safe)
@@ -33,21 +25,32 @@
     }
     #peintre-melangeur *, #peintre-melangeur *::before, #peintre-melangeur *::after { box-sizing: border-box; }
 
+    /* Blindage : neutralise les styles génériques bouton/input du site hôte
+       (thème WordPress / Elementor / autre) qui pourraient s'appliquer par-dessus. */
+    #peintre-melangeur button,
+    #peintre-melangeur input {
+        -webkit-appearance: none; appearance: none;
+        background: none; border: none; font: inherit; color: inherit;
+        margin: 0; cursor: pointer; text-align: inherit; line-height: normal;
+    }
+
     #peintre-melangeur .container {
-        position: relative; max-width: 1040px; margin: 0 auto;
-        background: rgba(255,255,255,0.04);
+        position: relative !important; max-width: 1040px !important; margin: 0 auto !important;
+        background: rgba(255,255,255,0.04) !important;
         backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
-        border: 1px solid rgba(255,255,255,0.09);
-        padding: 32px; border-radius: 24px;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+        border: 1px solid rgba(255,255,255,0.09) !important;
+        padding: 32px !important; border-radius: 24px !important;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.45) !important;
     }
     #peintre-melangeur .theme-toggle {
-        position: absolute; top: 18px; right: 18px; width: 42px; height: 42px; border-radius: 50%;
-        border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.06); color: #eef1f8;
-        font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+        position: absolute !important; top: 18px !important; right: 18px !important;
+        width: 42px !important; height: 42px !important; border-radius: 50% !important;
+        border: 1px solid rgba(255,255,255,0.15) !important; background: rgba(255,255,255,0.06) !important; color: #eef1f8 !important;
+        font-size: 18px !important; cursor: pointer !important; display: flex !important; align-items: center !important; justify-content: center !important;
+        line-height: 1 !important; padding: 0 !important; z-index: 5;
         transition: 0.2s;
     }
-    #peintre-melangeur .theme-toggle:hover { background: rgba(255,255,255,0.14); transform: translateY(-2px); }
+    #peintre-melangeur .theme-toggle:hover { background: rgba(255,255,255,0.14) !important; transform: translateY(-2px); }
 
     #peintre-melangeur h1 {
         margin: 0 0 4px; font-size: 2.1rem; font-weight: 800; letter-spacing: -0.5px;
@@ -86,16 +89,17 @@
         width: 42px; height: 38px; border: none; border-radius: 8px; cursor: pointer; background: none; padding: 0;
     }
     #peintre-melangeur .btn {
-        background: linear-gradient(135deg, var(--pm-primary), var(--pm-primary-light));
-        color: #1a1206; padding: 10px 20px; border: none; border-radius: 10px; cursor: pointer;
-        font-size: 14px; font-weight: 700; box-shadow: 0 6px 18px var(--pm-primary-soft);
-        transition: transform 0.2s ease, box-shadow 0.2s ease; white-space: nowrap;
+        display: inline-block !important;
+        background: linear-gradient(135deg, var(--pm-primary), var(--pm-primary-light)) !important;
+        color: #1a1206 !important; padding: 10px 20px !important; border: none !important; border-radius: 10px !important; cursor: pointer !important;
+        font-size: 14px !important; font-weight: 700 !important; box-shadow: 0 6px 18px var(--pm-primary-soft);
+        transition: transform 0.2s ease, box-shadow 0.2s ease; white-space: nowrap; text-align: center !important;
     }
     #peintre-melangeur .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 24px var(--pm-primary-soft); }
-    #peintre-melangeur .btn.btn-lg { padding: 14px 28px; font-size: 15px; width: 100%; margin-top: 6px; }
+    #peintre-melangeur .btn.btn-lg { padding: 14px 28px !important; font-size: 15px !important; width: 100% !important; margin-top: 6px; }
     #peintre-melangeur .btn.btn-ghost {
-        background: rgba(255,255,255,0.06); color: rgba(238,241,248,0.8); box-shadow: none;
-        border: 1px solid rgba(255,255,255,0.15);
+        background: rgba(255,255,255,0.06) !important; color: rgba(238,241,248,0.8) !important; box-shadow: none !important;
+        border: 1px solid rgba(255,255,255,0.15) !important;
     }
 
     #peintre-melangeur .palette-list { display: flex; flex-wrap: wrap; gap: 10px; }
@@ -184,9 +188,9 @@
     /* =========================================
        THÈME CLAIR
        ========================================= */
-    #peintre-melangeur.theme-light { background: #f4f4f9; color: #333; }
-    #peintre-melangeur.theme-light .theme-toggle { border-color: #ccc; background: #e9ecef; color: #333; }
-    #peintre-melangeur.theme-light .container { background: #ffffff; backdrop-filter: none; -webkit-backdrop-filter: none; border: none; box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+    #peintre-melangeur.theme-light { background: #f4f4f9 !important; color: #333; }
+    #peintre-melangeur.theme-light .theme-toggle { border-color: #ccc !important; background: #e9ecef !important; color: #333 !important; }
+    #peintre-melangeur.theme-light .container { background: #ffffff !important; backdrop-filter: none; -webkit-backdrop-filter: none; border: none !important; box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important; }
     #peintre-melangeur.theme-light h1 { background: none; -webkit-background-clip: initial; background-clip: initial; color: #222; }
     #peintre-melangeur.theme-light .subtitle,
     #peintre-melangeur.theme-light .hint,
@@ -199,7 +203,7 @@
     #peintre-melangeur.theme-light .preset-chip,
     #peintre-melangeur.theme-light .palette-chip,
     #peintre-melangeur.theme-light .quick-btn,
-    #peintre-melangeur.theme-light .btn.btn-ghost { background: #fff; border: 1px solid #ccc; color: #333; }
+    #peintre-melangeur.theme-light .btn.btn-ghost { background: #fff !important; border: 1px solid #ccc !important; color: #333 !important; }
     #peintre-melangeur.theme-light input[type="text"],
     #peintre-melangeur.theme-light input[type="number"] { background: #fff; border: 1px solid #ccc; color: #333; }
     #peintre-melangeur.theme-light .recipe-name { color: #333; }
@@ -207,6 +211,13 @@
     #peintre-melangeur.theme-light .target-name { color: var(--pm-primary); }
     #peintre-melangeur.theme-light .slider-name { color: #333; }
     #peintre-melangeur.theme-light .slider-pct { color: #222; }
+
+    /* =========================================
+       PRO : Masque l'ascenseur (style App native)
+       ========================================= */
+    html { scrollbar-width: none; }
+    body { -ms-overflow-style: none; overflow-y: auto; }
+    ::-webkit-scrollbar { display: none; }
 </style>
 </head>
 <body>
@@ -627,9 +638,7 @@
     updateTargetDisplay();
     renderManualSliders();
 </script>
-
 <!-- TRACKING UMAMI (RGPD compliant, no cookies) -->
 <script defer src="https://cloud.umami.is/script.js" data-website-id="b182aba6-225e-47ac-b6be-892e033a6013"></script>
-   
 </body>
 </html>
