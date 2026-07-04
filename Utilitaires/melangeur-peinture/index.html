@@ -633,24 +633,32 @@
         container.innerHTML = '';
         if (palette.length === 0) return;
         const weights = initialWeights || palette.map(() => 1 / palette.length);
-        palette.forEach((p, i) => {
+        // Affichage trié du plus grand % au plus petit (l'ordre réel de la palette est conservé via data-index)
+        const order = palette.map((p, i) => i).sort((a, b) => weights[b] - weights[a]);
+        order.forEach(i => {
+            const p = palette[i];
             const row = document.createElement('div');
             row.className = 'slider-row';
+            row.dataset.index = i;
             const pct = Math.round(weights[i] * 100);
             row.innerHTML = `
                 <span class="slider-swatch" style="background:${p.hex}"></span>
                 <span class="slider-name">${p.name}</span>
-                <input type="range" min="0" max="100" value="${pct}" data-index="${i}" oninput="onManualSlide()">
-                <span class="slider-pct" id="pct-${i}">${pct}%</span>`;
+                <input type="range" min="0" max="100" value="${pct}" oninput="onManualSlide()">
+                <span class="slider-pct">${pct}%</span>`;
             container.appendChild(row);
         });
     }
     function onManualSlide() {
-        const sliders = Array.from(document.querySelectorAll('#manualSliders input[type="range"]'));
-        const raw = sliders.map(s => parseFloat(s.value));
+        const rows = Array.from(document.querySelectorAll('#manualSliders .slider-row'));
+        const raw = rows.map(r => parseFloat(r.querySelector('input[type="range"]').value));
         const sum = raw.reduce((a,b) => a+b, 0) || 1;
-        const weights = raw.map(v => v / sum);
-        sliders.forEach((s, i) => { document.getElementById('pct-' + i).textContent = Math.round(weights[i]*100) + '%'; });
+        const weights = new Array(palette.length).fill(0);
+        rows.forEach((r, domIdx) => {
+            const pIdx = parseInt(r.dataset.index, 10);
+            weights[pIdx] = raw[domIdx] / sum;
+            r.querySelector('.slider-pct').textContent = Math.round(weights[pIdx] * 100) + '%';
+        });
         const ink = mixInks(palette, weights);
         const predicted = rybToRgb(ink[0], ink[1], ink[2]);
         document.getElementById('predictedSwatchBig').style.backgroundColor = rgbArrToHex(predicted);
