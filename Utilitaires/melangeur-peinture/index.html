@@ -108,6 +108,53 @@
     #peintre-melangeur .info-note .info-ic { flex-shrink: 0; font-size: 14px; line-height: 1.3; }
     #peintre-melangeur.theme-light .info-note { background: rgba(200,161,101,0.14); color: #555; }
 
+    #peintre-melangeur .warning-note {
+        display: flex; gap: 8px; align-items: flex-start;
+        background: rgba(224,162,59,0.12); border-left: 3px solid #e0a23b;
+        border-radius: 8px; padding: 10px 12px; margin-bottom: 16px;
+        font-size: 12.5px; color: rgba(238,241,248,0.85); line-height: 1.45;
+    }
+    #peintre-melangeur.theme-light .warning-note { background: rgba(224,162,59,0.16); color: #6b4a12; }
+
+    /* Sélecteur de mode (Composer / Transformer) */
+    #peintre-melangeur .mode-toggle {
+        display: flex; gap: 6px; margin-bottom: 20px; background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 5px;
+    }
+    #peintre-melangeur .mode-btn {
+        flex: 1; padding: 9px 10px !important; border-radius: 8px !important; font-size: 13px !important; font-weight: 600 !important;
+        background: none !important; color: rgba(238,241,248,0.65) !important; border: none !important; cursor: pointer !important;
+        transition: 0.2s;
+    }
+    #peintre-melangeur .mode-btn.active {
+        background: linear-gradient(135deg, var(--pm-primary), var(--pm-primary-light)) !important;
+        color: #1a1206 !important;
+    }
+    #peintre-melangeur.theme-light .mode-toggle { background: #e9ecef; border: none; }
+    #peintre-melangeur.theme-light .mode-btn { color: #555 !important; }
+    #peintre-melangeur.theme-light .mode-btn.active { color: #1a1206 !important; }
+
+    /* Marqueur "peinture de départ" (mode Transformer) */
+    #peintre-melangeur .base-tag {
+        font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: 999px; cursor: pointer;
+        background: rgba(255,255,255,0.08); color: rgba(238,241,248,0.55); white-space: nowrap;
+    }
+    #peintre-melangeur .palette-chip.is-base { border-color: var(--pm-primary); background: rgba(200,161,101,0.14); }
+    #peintre-melangeur .palette-chip.is-base .base-tag { background: var(--pm-primary); color: #1a1206; }
+    #peintre-melangeur.theme-light .base-tag { background: #eee; color: #777; }
+    #peintre-melangeur.theme-light .palette-chip.is-base { background: rgba(200,161,101,0.2); border-color: var(--pm-primary); }
+
+    #peintre-melangeur .min-base-row { margin-top: 14px; }
+    #peintre-melangeur .min-base-row input[type="range"] { width: 100%; margin-top: 6px; }
+
+    #peintre-melangeur .ratio-list {
+        margin: 4px 0 18px; padding: 12px 14px; background: rgba(255,255,255,0.04);
+        border-radius: 10px; font-size: 13px; color: rgba(238,241,248,0.85);
+    }
+    #peintre-melangeur .ratio-list .ratio-title { font-weight: 700; color: #fff; margin-bottom: 8px; display: block; }
+    #peintre-melangeur.theme-light .ratio-list { background: #f4f4f9; color: #333; }
+    #peintre-melangeur.theme-light .ratio-list .ratio-title { color: #222; }
+
     #peintre-melangeur .preset-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
     #peintre-melangeur .preset-chip {
         display: flex; align-items: center; gap: 6px; padding: 6px 12px 6px 6px; border-radius: 999px;
@@ -271,6 +318,11 @@
     <h1>Mélangeur de Peintures 🖌️</h1>
     <p class="subtitle">Composez votre palette, choisissez une teinte cible, et obtenez les proportions de mélange à réaliser.</p>
 
+    <div class="mode-toggle" id="modeToggle">
+        <button type="button" class="mode-btn active" id="modeComposeBtn" onclick="setMode('compose')">🎨 Composer un mélange</button>
+        <button type="button" class="mode-btn" id="modeTransformBtn" onclick="setMode('transform')">🔄 Transformer une couleur</button>
+    </div>
+
     <div class="dashboard">
         <!-- Panneau Palette -->
         <div class="panel">
@@ -283,7 +335,12 @@
                 <button class="btn" onclick="addCustomPaint()">+ Ajouter</button>
             </div>
             <p class="hint">Cliquez un préréglage ou ajoutez votre propre teinte.</p>
+            <p class="hint" id="baseHint" style="display:none;">Cliquez « Départ ? » sur la peinture que vous possédez déjà pour la définir comme point de départ.</p>
             <div class="palette-list" id="paletteList"></div>
+            <div class="min-base-row" id="minBaseRow" style="display:none;">
+                <label class="hint" for="minBaseSlider" style="margin:0;">Conserver au minimum <b id="minBaseVal">50</b>% de la peinture de départ</label>
+                <input type="range" id="minBaseSlider" min="0" max="90" value="50" step="5" oninput="onMinBaseChange()">
+            </div>
         </div>
 
         <!-- Panneau Cible -->
@@ -297,13 +354,17 @@
                 </div>
             </div>
             <div class="target-quick" id="targetQuick"></div>
-            <button class="btn btn-lg" onclick="runSolve()">🔍 Trouver le mélange</button>
+            <button class="btn btn-lg" id="mainSolveBtn" onclick="runSolve()">🔍 Trouver le mélange</button>
         </div>
     </div>
 
     <!-- Panneau Résultat -->
     <div class="panel" id="resultPanel" style="margin-bottom: 20px; display:none;">
         <h3>✅ Résultat</h3>
+        <div class="warning-note" id="lowMatchWarning" style="display:none;">
+            <span class="info-ic">⚠️</span>
+            <span id="lowMatchText"></span>
+        </div>
         <div class="result-hero">
             <div class="result-swatches">
                 <div class="swatch-col">
@@ -322,6 +383,7 @@
         </div>
         <div class="recipe-bar" id="recipeBar"></div>
         <div class="recipe-list" id="recipeList"></div>
+        <div class="ratio-list" id="ratioList" style="display:none;"></div>
         <div class="qty-row">
             <span class="hint" style="margin:0;">Pour une quantité totale de</span>
             <input type="number" id="totalQty" value="100" min="1" oninput="renderRecipeQuantities()">
@@ -439,6 +501,51 @@
         const ink = mixInks(paints, bestW);
         return { weights: bestW, predicted: rybToRgb(ink[0],ink[1],ink[2]), distance: Math.sqrt(bestDist) };
     }
+    // Variante "mode Transformer" : une peinture de départ (baseIdx) doit rester présente
+    // à au moins minBaseFraction dans le mélange final ; les autres peintures servent d'ajouts.
+    function solveMixFromBase(baseIdx, paints, targetRgb, minBaseFraction) {
+        const n = paints.length;
+        if (n <= 1) {
+            const rgb = rybToRgb(paints[0].ink[0], paints[0].ink[1], paints[0].ink[2]);
+            return { weights: [1], predicted: rgb, distance: Math.sqrt(colorDistSq(rgb, targetRgb)) };
+        }
+        let bestW = null, bestDist = Infinity;
+        for (let s = 0; s < 3000; s++) {
+            const wB = minBaseFraction + Math.random() * (1 - minBaseFraction);
+            let rest = paints.map(() => Math.random());
+            rest[baseIdx] = 0;
+            const restSum = rest.reduce((a,b)=>a+b,0) || 1;
+            const w = rest.map(x => x / restSum * (1 - wB));
+            w[baseIdx] = wB;
+            const ink = mixInks(paints, w);
+            const d = colorDistSq(rybToRgb(ink[0],ink[1],ink[2]), targetRgb);
+            if (d < bestDist) { bestDist = d; bestW = w; }
+        }
+        let step = 0.06;
+        for (let iter = 0; iter < 300; iter++) {
+            let improved = false;
+            for (let i = 0; i < n; i++) {
+                for (let j = 0; j < n; j++) {
+                    if (i === j) continue;
+                    const cand = bestW.slice();
+                    const move = Math.min(step, cand[j]);
+                    if (j === baseIdx && cand[baseIdx] - move < minBaseFraction - 1e-9) continue;
+                    cand[i] = Math.min(1, cand[i] + move);
+                    cand[j] = Math.max(0, cand[j] - move);
+                    const s2 = cand.reduce((a,b)=>a+b,0) || 1;
+                    const wn = cand.map(x => x/s2);
+                    if (wn[baseIdx] < minBaseFraction - 1e-6) continue;
+                    const ink = mixInks(paints, wn);
+                    const d = colorDistSq(rybToRgb(ink[0],ink[1],ink[2]), targetRgb);
+                    if (d < bestDist - 1e-4) { bestDist = d; bestW = wn; improved = true; }
+                }
+            }
+            if (!improved) step *= 0.6;
+            if (step < 0.002) break;
+        }
+        const ink = mixInks(paints, bestW);
+        return { weights: bestW, predicted: rybToRgb(ink[0],ink[1],ink[2]), distance: Math.sqrt(bestDist) };
+    }
     function rgbArrToHex(rgb) {
         return "#" + rgb.map(v => Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0')).join('').toUpperCase();
     }
@@ -517,6 +624,29 @@
         setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 2200);
     }
 
+    // ---- Mode : "compose" (composer un mélange) ou "transform" (partir d'une couleur) ----
+    let mode = 'compose';
+    let baseIndex = null;
+    function setMode(newMode) {
+        mode = newMode;
+        document.getElementById('modeComposeBtn').classList.toggle('active', mode === 'compose');
+        document.getElementById('modeTransformBtn').classList.toggle('active', mode === 'transform');
+        document.getElementById('minBaseRow').style.display = mode === 'transform' ? 'block' : 'none';
+        document.getElementById('baseHint').style.display = mode === 'transform' ? 'block' : 'none';
+        document.getElementById('mainSolveBtn').textContent = mode === 'transform' ? '🔍 Trouver comment y arriver' : '🔍 Trouver le mélange';
+        if (mode === 'transform' && baseIndex === null && palette.length > 0) baseIndex = 0;
+        renderPaletteList();
+        document.getElementById('resultPanel').style.display = 'none';
+        document.getElementById('manualPanel').style.display = 'none';
+    }
+    function setBaseIndex(i) {
+        baseIndex = i;
+        renderPaletteList();
+    }
+    function onMinBaseChange() {
+        document.getElementById('minBaseVal').textContent = document.getElementById('minBaseSlider').value;
+    }
+
     // ---- Palette utilisateur (persistée) ----
     let palette = JSON.parse(localStorage.getItem('pmPalette') || 'null') || [
         { name: "Blanc", hex: rgbArrToHex(rybToRgb(0,0,0)), ink: [0,0,0] },
@@ -559,6 +689,10 @@
     }
     function removePaint(index) {
         palette.splice(index, 1);
+        if (baseIndex !== null) {
+            if (baseIndex === index) baseIndex = palette.length > 0 ? 0 : null;
+            else if (baseIndex > index) baseIndex -= 1;
+        }
         savePalette();
         renderPaletteList();
         renderManualSliders();
@@ -574,8 +708,12 @@
         }
         palette.forEach((p, i) => {
             const chip = document.createElement('div');
-            chip.className = 'palette-chip';
-            chip.innerHTML = `<span class="palette-swatch" style="background:${p.hex}"></span>${p.name}<button class="palette-remove" onclick="removePaint(${i})" title="Retirer">✕</button>`;
+            const isBase = mode === 'transform' && i === baseIndex;
+            chip.className = 'palette-chip' + (isBase ? ' is-base' : '');
+            const baseTag = mode === 'transform'
+                ? `<span class="base-tag" onclick="setBaseIndex(${i})" title="Définir comme peinture de départ">${isBase ? '★ Départ' : 'Départ ?'}</span>`
+                : '';
+            chip.innerHTML = `<span class="palette-swatch" style="background:${p.hex}"></span>${p.name}${baseTag}<button class="palette-remove" onclick="removePaint(${i})" title="Retirer">✕</button>`;
             list.appendChild(chip);
         });
     }
@@ -617,7 +755,17 @@
         }
         const targetHex = document.getElementById('targetColorPicker').value;
         const targetRgb = hexToRgbArr(targetHex);
-        const solved = solveMix(palette, targetRgb);
+        let solved;
+        if (mode === 'transform') {
+            if (baseIndex === null || baseIndex >= palette.length) {
+                showToast("⚠️ Choisissez d'abord votre peinture de départ (bouton « Départ ? »)");
+                return;
+            }
+            const minBaseFraction = parseInt(document.getElementById('minBaseSlider').value, 10) / 100;
+            solved = solveMixFromBase(baseIndex, palette, targetRgb, minBaseFraction);
+        } else {
+            solved = solveMix(palette, targetRgb);
+        }
         lastSolve = solved;
         showResult(targetRgb, solved);
         renderManualSliders(solved.weights);
@@ -631,12 +779,38 @@
         document.getElementById('matchBarFill').style.width = quality.toFixed(0) + '%';
         document.getElementById('matchLabel').textContent = `Correspondance : ${quality.toFixed(0)}% — obtenu ≈ ${closestName(solved.predicted)}`;
         renderRecipe(solved.weights);
+
+        const warning = document.getElementById('lowMatchWarning');
+        if (mode === 'transform' && quality < 60) {
+            warning.style.display = 'flex';
+            document.getElementById('lowMatchText').textContent =
+                "Cette teinte de départ ne permet pas d'atteindre précisément la cible : en mélange soustractif, on ne peut pas \"redonner\" une couleur que le pigment de base absorbe déjà. Le résultat ci-dessous est le meilleur compromis possible — envisagez une autre peinture de départ si la précision compte.";
+        } else {
+            warning.style.display = 'none';
+        }
+
+        const ratioBox = document.getElementById('ratioList');
+        if (mode === 'transform' && baseIndex !== null && baseIndex < palette.length) {
+            const wB = solved.weights[baseIndex];
+            let html = `<span class="ratio-title">Pour 1 part de ${palette[baseIndex].name} (votre peinture de départ), ajoutez :</span>`;
+            let anyAdd = false;
+            palette.forEach((p, i) => {
+                if (i === baseIndex) return;
+                const ratio = wB > 0 ? solved.weights[i] / wB : 0;
+                if (ratio > 0.005) { html += `<div>• ${p.name} : ${ratio.toFixed(2)} part</div>`; anyAdd = true; }
+            });
+            if (!anyAdd) html += `<div>Aucun ajout nécessaire — votre peinture de départ est déjà proche de la cible.</div>`;
+            ratioBox.innerHTML = html;
+            ratioBox.style.display = 'block';
+        } else {
+            ratioBox.style.display = 'none';
+        }
     }
     function renderRecipe(weights) {
         const bar = document.getElementById('recipeBar');
         const list = document.getElementById('recipeList');
         bar.innerHTML = ''; list.innerHTML = '';
-        const items = palette.map((p, i) => ({ p, w: weights[i] })).sort((a,b) => b.w - a.w).filter(it => it.w > 0.005);
+        const items = palette.map((p, i) => ({ p, w: weights[i], i })).sort((a,b) => b.w - a.w).filter(it => it.w > 0.005);
         items.forEach(it => {
             const seg = document.createElement('div');
             seg.className = 'recipe-segment';
@@ -646,7 +820,8 @@
 
             const row = document.createElement('div');
             row.className = 'recipe-row';
-            row.innerHTML = `<span class="recipe-dot" style="background:${it.p.hex}"></span><span class="recipe-name">${it.p.name}</span><span class="recipe-pct">${(it.w*100).toFixed(0)}%</span><span class="recipe-qty" data-w="${it.w}"></span>`;
+            const tag = (mode === 'transform' && it.i === baseIndex) ? ' (départ)' : '';
+            row.innerHTML = `<span class="recipe-dot" style="background:${it.p.hex}"></span><span class="recipe-name">${it.p.name}${tag}</span><span class="recipe-pct">${(it.w*100).toFixed(0)}%</span><span class="recipe-qty" data-w="${it.w}"></span>`;
             list.appendChild(row);
         });
         renderRecipeQuantities();
@@ -673,9 +848,10 @@
             row.className = 'slider-row';
             row.dataset.index = i;
             const pct = Math.round(weights[i] * 100);
+            const tag = (mode === 'transform' && i === baseIndex) ? ' (départ)' : '';
             row.innerHTML = `
                 <span class="slider-swatch" style="background:${p.hex}"></span>
-                <span class="slider-name">${p.name}</span>
+                <span class="slider-name">${p.name}${tag}</span>
                 <input type="range" min="0" max="100" value="${pct}" oninput="onManualSlide()">
                 <span class="slider-pct">${pct}%</span>`;
             container.appendChild(row);
