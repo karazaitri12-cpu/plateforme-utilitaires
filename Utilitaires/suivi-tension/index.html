@@ -49,15 +49,49 @@
   --danger-bg:  #ffebee;
 }
 
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
 /* ============================================================
-   LAYOUT
+   BANDEAU DE NAVIGATION (INSPIRÉ DE MÉTÉO)
+   ============================================================ */
+.nav-bar {
+  position: sticky;
+  top: 0;
+  z-index: 9999;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 20px;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+.nav-bar a {
+  text-decoration: none;
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: opacity 0.2s;
+}
+.nav-bar a:hover { 
+  opacity: 0.7; 
+}
+
+/* ============================================================
+   LAYOUT APP
    ============================================================ */
 #kz-tension-app {
   max-width: 900px;
   margin: 0 auto;
   padding: 24px 16px 48px;
-  background: var(--bg);
-  color: var(--text);
 }
 
 /* EN-TÊTE */
@@ -356,6 +390,12 @@ body { -ms-overflow-style: none; overflow-y: auto; }
 </style>
 </head>
 <body>
+
+<!-- BANDEAU DE NAVIGATION -->
+<nav class="nav-bar">
+  <a href="https://karazaitri12-cpu.github.io/plateforme-utilitaires/">← Retour aux Utilitaires</a>
+</nav>
+
 <div id="kz-tension-app">
 
   <!-- EN-TÊTE -->
@@ -437,7 +477,7 @@ body { -ms-overflow-style: none; overflow-y: auto; }
       <button class="kz-btn kz-btn-secondary" id="btnNow">&#9201; Maintenant</button>
       <button class="kz-btn kz-btn-outline"  id="btnToggleChart">&#128202; Graphique</button>
       
-      <!-- BOUTON EXPORT DRIVE MIS À JOUR -->
+      <!-- BOUTON EXPORT CSV (DRIVE) -->
       <button class="kz-btn kz-btn-secondary" id="btnExportDrive">&#128190; Sauvegarde CSV (Drive)</button>
       
       <button class="kz-btn kz-btn-secondary" id="btnExportPrint">&#128438; Imprimer</button>
@@ -556,7 +596,6 @@ var chartVisible   = false;
 var chartPeriod    = 0;   // 0 = tout, 7, 30
 var tablePeriod    = 0;
 
-
 /* ============================================================
    UTILITAIRES
    ============================================================ */
@@ -613,14 +652,13 @@ function checkAlert() {
 }
 
 /* ============================================================
-   PROTOCOLE SFHTA (3x3) — 3 mesures/session, 2 sessions/j, 3 jours
+   PROTOCOLE SFHTA (3x3)
    ============================================================ */
 function renderSFHTA() {
   var panel  = document.getElementById('sfhtaPanel');
   var status = document.getElementById('sfhtaStatus');
   var prog   = document.getElementById('sfhtaProgress');
 
-  // Regrouper par date
   var byDate = {};
   measurements.forEach(function(m) {
     if (!byDate[m.date]) byDate[m.date] = [];
@@ -628,7 +666,7 @@ function renderSFHTA() {
   });
   var dates = Object.keys(byDate).sort(function(a,b){
     return new Date(toISODate(a)) - new Date(toISODate(b));
-  }).slice(-3); // les 3 derniers jours avec données
+  }).slice(-3);
 
   if (!dates.length) {
     status.textContent = 'Aucune mesure. Objectif : 3 mesures matin + 3 mesures soir pendant 3 jours consécutifs.';
@@ -655,7 +693,6 @@ function renderSFHTA() {
   var pct = Math.round(totalDone / 18 * 100);
   if (totalDone >= 18) {
     status.textContent = '\u2713 Protocole complet (' + totalDone + '/18 mesures). Moyenne valide disponible.';
-    // Afficher la moyenne SFHTA
     var sfhtaM = measurements.slice(0, 18);
     var avgS = Math.round(sfhtaM.reduce(function(s,m){return s+parseInt(m.sys);},0)/sfhtaM.length);
     var avgD = Math.round(sfhtaM.reduce(function(s,m){return s+parseInt(m.dia);},0)/sfhtaM.length);
@@ -688,16 +725,11 @@ function load() {
   try {
     var parsed = JSON.parse(raw);
     var valid = parsed.filter(isValidMeasure);
-    var rejected = parsed.length - valid.length;
     measurements = valid.map(function(m) {
       if (/^\d{4}-\d{2}-\d{2}$/.test(m.date)) m.date = toDisplayDate(m.date);
       if (!m.ctx) m.ctx = '';
       return m;
     });
-    if (rejected > 0) {
-      console.warn('[Carnet TA] ' + rejected + ' enregistrement(s) corrompu(s) ignore(s) au chargement.');
-      save();
-    }
   } catch(e) {
     console.error('[Carnet TA] localStorage illisible, reinitialisation.', e);
     localStorage.removeItem('kz_ta_data');
@@ -712,7 +744,7 @@ function clearAllData() {
 }
 
 /* ============================================================
-   FILTRE PAR PÉRIODE
+   FILTRES ET TRI
    ============================================================ */
 function filterByPeriod(data, days) {
   if (!days) return data;
@@ -723,9 +755,6 @@ function filterByPeriod(data, days) {
   });
 }
 
-/* ============================================================
-   TRI
-   ============================================================ */
 function sortMeasurements(col) {
   if (sortState.col === col) sortState.dir = sortState.dir === 'asc' ? 'desc' : 'asc';
   else { sortState.col = col; sortState.dir = 'asc'; }
@@ -753,7 +782,6 @@ function sortMeasurements(col) {
 function renderTable() {
   var tbody  = document.getElementById('kzTbody');
   tbody.innerHTML = '';
-
   var data = filterByPeriod(measurements, tablePeriod);
 
   if (!data.length) {
@@ -762,7 +790,6 @@ function renderTable() {
     return;
   }
 
-  /* Trouver l'index réel dans measurements[] pour chaque item de data[] */
   data.forEach(function(m) {
     var realIdx = measurements.indexOf(m);
     var cat = classify(m.sys, m.dia);
@@ -771,23 +798,15 @@ function renderTable() {
     var tr = document.createElement('tr');
     tr.style.background = cat.bg;
 
-    // Bouton suppr
     var tdDel = document.createElement('td');
     var btnDel = document.createElement('button');
     btnDel.className = 'kz-del-btn';
     btnDel.title = 'Supprimer cette mesure';
     btnDel.innerHTML = '\u2715';
-    btnDel.onclick = (function(idx) {
-      return function() { confirmDelete(idx); };
-    })(realIdx);
+    btnDel.onclick = function() { confirmDelete(realIdx); };
     tdDel.appendChild(btnDel);
 
-    // Cellules
-    function td(html) {
-      var el = document.createElement('td');
-      el.innerHTML = html;
-      return el;
-    }
+    function td(html) { var el = document.createElement('td'); el.innerHTML = html; return el; }
 
     tr.appendChild(tdDel);
     tr.appendChild(td(m.date));
@@ -797,10 +816,8 @@ function renderTable() {
     tr.appendChild(td('<span class="kz-badge ' + ppClass(pp) + '">' + pp + ' mmHg</span>'));
     tr.appendChild(td(m.ctx ? '<em style="color:var(--text-muted);font-size:.78rem;">' + m.ctx + '</em>' : ''));
     tr.appendChild(td('<span class="kz-badge ' + cat.cls + '">' + cat.label + '</span>'));
-
     tbody.appendChild(tr);
   });
-
   updateHeaderSort();
 }
 
@@ -811,18 +828,10 @@ function updateHeaderSort() {
   });
 }
 
-/* ============================================================
-   SUPPRESSION
-   ============================================================ */
 function confirmDelete(idx) {
   if (!confirm('Supprimer cette mesure ?')) return;
   measurements.splice(idx, 1);
-  save();
-  renderTable();
-  renderStats();
-  renderSFHTA();
-  checkAlert();
-  updateChart();
+  save(); renderTable(); renderStats(); renderSFHTA(); checkAlert(); updateChart();
 }
 
 /* ============================================================
@@ -876,7 +885,6 @@ function buildChart() {
     if (tensionChart) { tensionChart.destroy(); tensionChart = null; }
     return;
   }
-
   var byDate = {};
   source.forEach(function(m) {
     if (!byDate[m.date]) byDate[m.date] = { sys:[], dia:[] };
@@ -895,21 +903,15 @@ function buildChart() {
   var ppData = sysData.map(function(s,i){ return s - diaData[i]; });
 
   if (tensionChart) tensionChart.destroy();
-
   var ctx = document.getElementById('kzTensionChart').getContext('2d');
-
+  
   var bgPlugin = {
     id: 'kzBg',
     beforeDraw: function(chart) {
       var c=chart.ctx, ca=chart.chartArea, y=chart.scales.y;
       c.save();
       c.globalCompositeOperation = 'destination-over';
-      [
-        {min:180,max:230,color:'rgba(198,40,40,.08)'},
-        {min:160,max:180,color:'rgba(239,108,0,.08)'},
-        {min:140,max:160,color:'rgba(249,168,37,.07)'},
-        {min:40, max:140,color:'rgba(76,175,80,.05)'}
-      ].forEach(function(z){
+      [{min:180,max:230,color:'rgba(198,40,40,.08)'}, {min:160,max:180,color:'rgba(239,108,0,.08)'}, {min:140,max:160,color:'rgba(249,168,37,.07)'}, {min:40, max:140,color:'rgba(76,175,80,.05)'}].forEach(function(z){
         var top=y.getPixelForValue(z.max), bot=y.getPixelForValue(z.min);
         c.fillStyle=z.color;
         c.fillRect(ca.left,top,ca.right-ca.left,bot-top);
@@ -924,72 +926,30 @@ function buildChart() {
     data: {
       labels: dates,
       datasets: [
-        {
-          label: 'Systolique',
-          data: sysData,
-          borderColor: '#c62828',
-          backgroundColor: 'rgba(198,40,40,.10)',
-          tension: 0.3, pointRadius: 5, pointHoverRadius: 7, fill: false
-        },
-        {
-          label: 'Diastolique',
-          data: diaData,
-          borderColor: '#1565c0',
-          backgroundColor: 'rgba(21,101,192,.10)',
-          tension: 0.3, pointRadius: 5, pointHoverRadius: 7, fill: false
-        },
-        {
-          label: 'PP (pression diff.)',
-          data: ppData,
-          borderColor: '#0288d1',
-          borderDash: [4,3],
-          tension: 0.3, pointRadius: 3, pointHoverRadius: 5, fill: false,
-          borderWidth: 1.5
-        }
+        { label: 'Systolique', data: sysData, borderColor: '#c62828', backgroundColor: 'rgba(198,40,40,.10)', tension: 0.3, pointRadius: 5, fill: false },
+        { label: 'Diastolique', data: diaData, borderColor: '#1565c0', backgroundColor: 'rgba(21,101,192,.10)', tension: 0.3, pointRadius: 5, fill: false },
+        { label: 'PP', data: ppData, borderColor: '#0288d1', borderDash: [4,3], tension: 0.3, pointRadius: 3, fill: false, borderWidth: 1.5 }
       ]
     },
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
+      responsive: true, maintainAspectRatio: false,
       scales: {
         x: { ticks: { font: { size: 10 } } },
         y: {
           min: 40, max: 230,
           title: { display: true, text: 'mmHg', font: { size: 10 } },
-          ticks: {
-            font: { size: 10 },
-            callback: function(v) {
-              var labels = { 90:'90',140:'140',160:'160',180:'180' };
-              return labels[v] !== undefined ? labels[v] + ' ←' : v;
-            }
-          }
+          ticks: { font: { size: 10 }, callback: function(v) { var labels = { 90:'90',140:'140',160:'160',180:'180' }; return labels[v] !== undefined ? labels[v] + ' ←' : v; } }
         }
       },
       plugins: {
         legend: { labels: { font: { size: 11 }, boxWidth: 14 } },
-        title: {
-          display: true,
-          text: 'Moyennes journali\u00e8res (mmHg)',
-          font: { size: 12, weight: '600' },
-          color: '#1e2a35'
-        },
-        tooltip: {
-          callbacks: {
-            afterBody: function(items) {
-              var sys = parseInt(items[0] ? items[0].raw : 0);
-              var dia = parseInt(items[1] ? items[1].raw : 0);
-              if (!sys || !dia) return '';
-              return '\u2192 ' + classify(sys, dia).label;
-            }
-          }
-        }
+        title: { display: true, text: 'Moyennes journali\u00e8res (mmHg)', font: { size: 12, weight: '600' }, color: '#1e2a35' }
       }
     }
   });
 }
 
 function updateChart() { if (chartVisible) buildChart(); }
-
 function toggleChart() {
   var panel = document.getElementById('chartPanel');
   chartVisible = !chartVisible;
@@ -1007,27 +967,16 @@ function addMeasure() {
   var dia     = document.getElementById('kz-dia').value;
   var ctx     = document.getElementById('kz-ctx').value;
 
-  if (!dateRaw || !time || !sys || !dia) {
-    alert('Veuillez remplir la date, l\u2019heure, la systolique et la diastolique.');
-    return;
-  }
+  if (!dateRaw || !time || !sys || !dia) { alert('Veuillez remplir la date, l\u2019heure, la systolique et la diastolique.'); return; }
   var sysN = parseInt(sys), diaN = parseInt(dia);
   if (isNaN(sysN) || sysN < 60 || sysN > 300) { alert('Systolique invalide (60\u2013300 mmHg).'); return; }
   if (isNaN(diaN) || diaN < 30 || diaN > 200) { alert('Diastolique invalide (30\u2013200 mmHg).'); return; }
   if (sysN <= diaN) { alert('La systolique doit \u00eatre sup\u00e9rieure \u00e0 la diastolique.'); return; }
 
   measurements.push({ date: toDisplayDate(dateRaw), time: time, sys: sys, dia: dia, ctx: ctx });
-  save();
-  sortMeasurements(sortState.col);
-  renderTable();
-  renderStats();
-  renderSFHTA();
-  checkAlert();
-  updateChart();
-
+  save(); sortMeasurements(sortState.col); renderTable(); renderStats(); renderSFHTA(); checkAlert(); updateChart();
   ['kz-date','kz-time','kz-sys','kz-dia'].forEach(function(id){ document.getElementById(id).value=''; });
-  document.getElementById('kz-ctx').value = '';
-  document.getElementById('kz-sys').focus();
+  document.getElementById('kz-ctx').value = ''; document.getElementById('kz-sys').focus();
 }
 
 function setNow() {
@@ -1037,7 +986,6 @@ function setNow() {
   document.getElementById('kz-sys').focus();
 }
 
-// Touche Entrée depuis kz-dia déclenche l'ajout
 document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('kz-dia').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') { e.preventDefault(); addMeasure(); }
@@ -1045,27 +993,21 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 /* ============================================================
-   EXPORT CSV (POUR GOOGLE DRIVE / LOCAL)
+   EXPORT CSV (DRIVE)
    ============================================================ */
 function exportDrive() {
   if (!measurements.length) { alert('Aucune mesure \u00e0 exporter.'); return; }
-
   var lines = [];
-  // En-tête CSV
   lines.push('Date,Heure,Systolique,Diastolique,PP,Contexte,Classification');
-  
   measurements.forEach(function(m) {
     var pp  = parseInt(m.sys) - parseInt(m.dia);
     var cat = classify(m.sys, m.dia);
     lines.push([m.date, m.time, m.sys, m.dia, pp, m.ctx || '', cat.label].join(','));
   });
 
-  // Création du fichier (Blob) avec BOM pour assurer un bon affichage UTF-8
   var csvContent = "\uFEFF" + lines.join('\n');
   var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   var url = URL.createObjectURL(blob);
-
-  // Déclenchement du téléchargement
   var link = document.createElement('a');
   var dateStr = new Date().toISOString().split('T')[0];
   link.setAttribute('href', url);
@@ -1074,8 +1016,7 @@ function exportDrive() {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-
-  alert('Fichier CSV généré !\n\nSur mobile, choisissez "Enregistrer dans Drive" lors du téléchargement.\nSur ordinateur, glissez simplement le fichier téléchargé dans votre dossier Google Drive.');
+  alert('Fichier CSV généré !\n\nSur mobile, choisissez "Enregistrer dans Drive" lors du téléchargement.\nSur ordinateur, glissez le fichier dans votre Google Drive.');
 }
 
 /* ============================================================
@@ -1083,42 +1024,16 @@ function exportDrive() {
    ============================================================ */
 function printView() {
   if (!measurements.length) { alert('Aucune mesure \u00e0 imprimer.'); return; }
-  var avg = function(arr, key) {
-    return Math.round(arr.reduce(function(s,m){ return s+parseInt(m[key]); },0)/arr.length);
-  };
-  var avgSys = avg(measurements,'sys');
-  var avgDia = avg(measurements,'dia');
-  var avgPP  = Math.round(measurements.reduce(function(s,m){ return s+(parseInt(m.sys)-parseInt(m.dia)); },0)/measurements.length);
-  var cat    = classify(avgSys, avgDia);
-
+  var avg = function(arr, key) { return Math.round(arr.reduce(function(s,m){ return s+parseInt(m[key]); },0)/arr.length); };
+  var avgSys = avg(measurements,'sys'), avgDia = avg(measurements,'dia'), avgPP = Math.round(measurements.reduce(function(s,m){ return s+(parseInt(m.sys)-parseInt(m.dia)); },0)/measurements.length);
+  var cat = classify(avgSys, avgDia);
   var rows = measurements.map(function(m) {
-    var pp = parseInt(m.sys)-parseInt(m.dia);
-    var c  = classify(m.sys,m.dia);
+    var pp = parseInt(m.sys)-parseInt(m.dia), c = classify(m.sys,m.dia);
     return '<tr><td>'+m.date+'</td><td>'+m.time+'</td><td>'+m.sys+'</td><td>'+m.dia+'</td><td>'+pp+'</td><td>'+(m.ctx||'')+'</td><td>'+c.label+'</td></tr>';
   }).join('');
-
   var win = window.open('','_blank');
-  win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Carnet TA</title><style>' +
-    'body{font-family:Arial,sans-serif;font-size:11pt;margin:20mm 15mm;color:#111;}' +
-    'h1{font-size:14pt;margin:0 0 4px;}' +
-    '.sub{font-size:9pt;color:#666;margin-bottom:20px;}' +
-    '.sum{background:#f5f5f5;border:1px solid #ccc;padding:10px 14px;margin-bottom:16px;border-radius:4px;font-size:10pt;}' +
-    'table{width:100%;border-collapse:collapse;font-size:9pt;}' +
-    'th{background:#1a3a5c;color:#fff;padding:7px 8px;text-align:left;}' +
-    'td{padding:5px 8px;border-bottom:1px solid #ddd;}' +
-    'tr:nth-child(even) td{background:#fafafa;}' +
-    '.legal{font-size:8pt;color:#888;margin-top:18px;border-top:1px solid #ccc;padding-top:8px;}' +
-    '@media print{body{margin:10mm;}}' +
-    '</style></head><body>' +
-    '<h1>Carnet de Tension Art\u00e9rielle</h1>' +
-    '<div class="sub">Imprim\u00e9 le ' + new Date().toLocaleDateString('fr-FR') + ' \u2014 ' + measurements.length + ' mesure(s)</div>' +
-    '<div class="sum"><strong>Moyenne globale :</strong> ' + avgSys + '/' + avgDia + ' mmHg &nbsp;|&nbsp; PP : ' + avgPP + ' mmHg &nbsp;|&nbsp; <strong>' + cat.label + '</strong></div>' +
-    '<table><thead><tr><th>Date</th><th>Heure</th><th>Sys. (mmHg)</th><th>Dia. (mmHg)</th><th>PP (mmHg)</th><th>Contexte</th><th>Classification</th></tr></thead>' +
-    '<tbody>' + rows + '</tbody></table>' +
-    '<div class="legal">Cet outil est destin\u00e9 au suivi personnel. Il ne remplace pas la consultation m\u00e9dicale. Classification ESH/ESC 2023.</div>' +
-    '</body></html>');
-  win.document.close();
-  win.focus();
+  win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Carnet TA</title><style>body{font-family:Arial,sans-serif;font-size:11pt;margin:20mm 15mm;color:#111;}h1{font-size:14pt;margin:0 0 4px;}.sub{font-size:9pt;color:#666;margin-bottom:20px;}.sum{background:#f5f5f5;border:1px solid #ccc;padding:10px 14px;margin-bottom:16px;border-radius:4px;font-size:10pt;}table{width:100%;border-collapse:collapse;font-size:9pt;}th{background:#1a3a5c;color:#fff;padding:7px 8px;text-align:left;}td{padding:5px 8px;border-bottom:1px solid #ddd;}tr:nth-child(even) td{background:#fafafa;}.legal{font-size:8pt;color:#888;margin-top:18px;border-top:1px solid #ccc;padding-top:8px;}@media print{body{margin:10mm;}}</style></head><body><h1>Carnet de Tension Art\u00e9rielle</h1><div class="sub">Imprim\u00e9 le ' + new Date().toLocaleDateString('fr-FR') + ' \u2014 ' + measurements.length + ' mesure(s)</div><div class="sum"><strong>Moyenne globale :</strong> ' + avgSys + '/' + avgDia + ' mmHg &nbsp;|&nbsp; PP : ' + avgPP + ' mmHg &nbsp;|&nbsp; <strong>' + cat.label + '</strong></div><table><thead><tr><th>Date</th><th>Heure</th><th>Sys. (mmHg)</th><th>Dia. (mmHg)</th><th>PP (mmHg)</th><th>Contexte</th><th>Classification</th></tr></thead><tbody>' + rows + '</tbody></table><div class="legal">Cet outil est destin\u00e9 au suivi personnel. Il ne remplace pas la consultation m\u00e9dicale. Classification ESH/ESC 2023.</div></body></html>');
+  win.document.close(); win.focus();
   setTimeout(function(){ win.print(); }, 400);
 }
 
@@ -1126,29 +1041,16 @@ function printView() {
    IMPORT via fichier CSV
    ============================================================ */
 function parseAndImport(text) {
-  var lines    = text.split('\n');
-  var imported = [];
+  var lines = text.split('\n'), imported = [];
   lines.forEach(function(line) {
     line = line.trim();
-    if (!line) return;
-    /* Ignorer lignes non-donnees */
-    if (line.startsWith('===') || line.startsWith('Moyenne') || line.startsWith('Exporte')) return;
-    /* Ignorer l'en-tete CSV */
-    if (/^Date[,;]/i.test(line)) return;
-
-    /* Format CSV : date,heure,sys,dia[,pp,ctx,cat] */
+    if (!line || line.startsWith('===') || line.startsWith('Moyenne') || line.startsWith('Exporte') || /^Date[,;]/i.test(line)) return;
     var sep = line.indexOf(';') !== -1 ? ';' : ',';
     var parts = line.split(sep);
     if (parts.length >= 4) {
       var date = parts[0].trim();
       if (/^\d{4}-\d{2}-\d{2}$/.test(date)) date = toDisplayDate(date);
-      var candidate = {
-        date: date,
-        time: parts[1].trim(),
-        sys:  parts[2].trim(),
-        dia:  parts[3].trim(),
-        ctx:  parts[5] ? parts[5].trim() : ''
-      };
+      var candidate = { date: date, time: parts[1].trim(), sys: parts[2].trim(), dia: parts[3].trim(), ctx: parts[5] ? parts[5].trim() : '' };
       if (isValidMeasure(candidate)) imported.push(candidate);
     }
   });
@@ -1158,26 +1060,14 @@ function parseAndImport(text) {
 function bindFileImport() {
   var input = document.getElementById('fileImport');
   input.addEventListener('change', function() {
-    var file = input.files[0];
-    if (!file) return;
+    var file = input.files[0]; if (!file) return;
     var reader = new FileReader();
     reader.onload = function(e) {
       var imported = parseAndImport(e.target.result);
-      if (!imported.length) {
-        alert('Aucune mesure valide détectée dans ce fichier.\nVérifiez qu\'il s\'agit bien d\'un export CSV valide.');
-        input.value = '';
-        return;
-      }
-      if (!confirm(imported.length + ' mesure(s) trouvée(s).\nRemplacer toutes les données actuelles ?')) {
-        input.value = '';
-        return;
-      }
-      measurements = imported;
-      save();
-      sortMeasurements('date');
-      renderTable(); renderStats(); renderSFHTA(); checkAlert(); updateChart();
-      alert(imported.length + ' mesure(s) importée(s) avec succès.');
-      input.value = '';
+      if (!imported.length) { alert('Aucune mesure valide detectee.\nVerifiez que le fichier CSV est valide.'); input.value = ''; return; }
+      if (!confirm(imported.length + ' mesure(s) trouvee(s).\nRemplacer toutes les donnees actuelles ?')) { input.value = ''; return; }
+      measurements = imported; save(); sortMeasurements('date'); renderTable(); renderStats(); renderSFHTA(); checkAlert(); updateChart();
+      alert(imported.length + ' mesure(s) importee(s) avec succes.'); input.value = '';
     };
     reader.readAsText(file, 'UTF-8');
   });
@@ -1187,22 +1077,16 @@ function bindFileImport() {
    FILTRES PÉRIODE
    ============================================================ */
 function bindFilters() {
-  // Filtres graphique
   document.querySelectorAll('[data-period]').forEach(function(btn) {
     btn.addEventListener('click', function() {
       document.querySelectorAll('[data-period]').forEach(function(b){ b.classList.remove('active'); });
-      btn.classList.add('active');
-      chartPeriod = parseInt(btn.dataset.period);
-      if (chartVisible) buildChart();
+      btn.classList.add('active'); chartPeriod = parseInt(btn.dataset.period); if (chartVisible) buildChart();
     });
   });
-  // Filtres tableau
   document.querySelectorAll('[data-table-period]').forEach(function(btn) {
     btn.addEventListener('click', function() {
       document.querySelectorAll('[data-table-period]').forEach(function(b){ b.classList.remove('active'); });
-      btn.classList.add('active');
-      tablePeriod = parseInt(btn.dataset.tablePeriod);
-      renderTable();
+      btn.classList.add('active'); tablePeriod = parseInt(btn.dataset.tablePeriod); renderTable();
     });
   });
 }
@@ -1211,35 +1095,21 @@ function bindFilters() {
    INIT
    ============================================================ */
 function initApp() {
-  load();
-  sortMeasurements('date');
-  renderTable();
-  renderStats();
-  renderSFHTA();
-  checkAlert();
-  bindFilters();
-
+  load(); sortMeasurements('date'); renderTable(); renderStats(); renderSFHTA(); checkAlert(); bindFilters();
   document.querySelectorAll('#kzTable thead th[data-col]').forEach(function(th) {
-    th.addEventListener('click', function() {
-      sortMeasurements(th.dataset.col);
-      renderTable();
-    });
+    th.addEventListener('click', function() { sortMeasurements(th.dataset.col); renderTable(); });
   });
-
   document.getElementById('btnAdd').addEventListener('click', addMeasure);
   document.getElementById('btnNow').addEventListener('click', setNow);
   document.getElementById('btnToggleChart').addEventListener('click', toggleChart);
-  document.getElementById('btnExportDrive').addEventListener('click', exportDrive); // MÀJ ÉVÉNEMENT
+  document.getElementById('btnExportDrive').addEventListener('click', exportDrive);
   document.getElementById('btnExportPrint').addEventListener('click', printView);
   document.getElementById('btnClear').addEventListener('click', clearAllData);
   bindFileImport();
 }
-
 initApp();
 </script>
-
 <!-- TRACKING UMAMI (RGPD compliant, no cookies) -->
 <script defer src="https://cloud.umami.is/script.js" data-website-id="b182aba6-225e-47ac-b6be-892e033a6013"></script>
-
 </body>
 </html>
