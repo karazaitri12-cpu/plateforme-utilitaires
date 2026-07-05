@@ -436,7 +436,10 @@ body { -ms-overflow-style: none; overflow-y: auto; }
       <button class="kz-btn kz-btn-primary" id="btnAdd">&#43; Ajouter</button>
       <button class="kz-btn kz-btn-secondary" id="btnNow">&#9201; Maintenant</button>
       <button class="kz-btn kz-btn-outline"  id="btnToggleChart">&#128202; Graphique</button>
-      <button class="kz-btn kz-btn-secondary" id="btnExportKeep">&#128203; Sauvegarde dans Keep</button>
+      
+      <!-- BOUTON EXPORT DRIVE MIS À JOUR -->
+      <button class="kz-btn kz-btn-secondary" id="btnExportDrive">&#128190; Sauvegarde CSV (Drive)</button>
+      
       <button class="kz-btn kz-btn-secondary" id="btnExportPrint">&#128438; Imprimer</button>
       <label class="kz-btn kz-btn-secondary" style="cursor:pointer;">&#8679; Importer CSV <input type="file" id="fileImport" accept=".csv,.txt" style="display:none;"></label>
       <button class="kz-btn" id="btnClear" style="background:var(--danger-bg);color:var(--danger);border:1px solid #ef9a9a;">&#128465; Effacer tout</button>
@@ -1042,46 +1045,37 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 /* ============================================================
-   EXPORT GOOGLE KEEP
+   EXPORT CSV (POUR GOOGLE DRIVE / LOCAL)
    ============================================================ */
-function exportKeep() {
+function exportDrive() {
   if (!measurements.length) { alert('Aucune mesure \u00e0 exporter.'); return; }
 
-  var today  = todayDisplay();
-  var todayM = measurements.filter(function(m){ return m.date === today; });
-
-  var lines = ['=== Carnet de Tension Arterielle ===', ''];
-
-  /* En-tete CSV pour reimport */
+  var lines = [];
+  // En-tête CSV
   lines.push('Date,Heure,Systolique,Diastolique,PP,Contexte,Classification');
+  
   measurements.forEach(function(m) {
     var pp  = parseInt(m.sys) - parseInt(m.dia);
     var cat = classify(m.sys, m.dia);
-    lines.push([m.date, m.time, m.sys, m.dia, pp, m.ctx||'', cat.label].join(','));
+    lines.push([m.date, m.time, m.sys, m.dia, pp, m.ctx || '', cat.label].join(','));
   });
 
-  lines.push('');
+  // Création du fichier (Blob) avec BOM pour assurer un bon affichage UTF-8
+  var csvContent = "\uFEFF" + lines.join('\n');
+  var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  var url = URL.createObjectURL(blob);
 
-  /* Moyenne du jour */
-  if (todayM.length) {
-    var avgS = Math.round(todayM.reduce(function(s,m){return s+parseInt(m.sys);},0)/todayM.length);
-    var avgD = Math.round(todayM.reduce(function(s,m){return s+parseInt(m.dia);},0)/todayM.length);
-    lines.push('Moyenne du jour (' + today + ') : ' + avgS + '/' + avgD + ' mmHg — ' + classify(avgS,avgD).label);
-  }
+  // Déclenchement du téléchargement
+  var link = document.createElement('a');
+  var dateStr = new Date().toISOString().split('T')[0];
+  link.setAttribute('href', url);
+  link.setAttribute('download', 'carnet_tension_' + dateStr + '.csv');
+  link.style.display = 'none';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 
-  /* Moyenne globale */
-  var avgSG = Math.round(measurements.reduce(function(s,m){return s+parseInt(m.sys);},0)/measurements.length);
-  var avgDG = Math.round(measurements.reduce(function(s,m){return s+parseInt(m.dia);},0)/measurements.length);
-  lines.push('Moyenne globale : ' + avgSG + '/' + avgDG + ' mmHg — ' + classify(avgSG,avgDG).label);
-  lines.push('');
-  lines.push('Exporte le ' + new Date().toLocaleDateString('fr-FR') + ' — ' + measurements.length + ' mesure(s)');
-
-  navigator.clipboard.writeText(lines.join('\n')).then(function() {
-    alert('Donnees copiees dans le presse-papier.\nGoogle Keep va s\u2019ouvrir.\nCollez (Ctrl+V) dans une nouvelle note.');
-    window.open('https://keep.google.com', '_blank');
-  }).catch(function() {
-    alert('Impossible d\u2019acceder au presse-papier. Verifiez les permissions du navigateur.');
-  });
+  alert('Fichier CSV généré !\n\nSur mobile, choisissez "Enregistrer dans Drive" lors du téléchargement.\nSur ordinateur, glissez simplement le fichier téléchargé dans votre dossier Google Drive.');
 }
 
 /* ============================================================
@@ -1129,7 +1123,7 @@ function printView() {
 }
 
 /* ============================================================
-   IMPORT via fichier CSV (ou note Keep copiee)
+   IMPORT via fichier CSV
    ============================================================ */
 function parseAndImport(text) {
   var lines    = text.split('\n');
@@ -1139,7 +1133,7 @@ function parseAndImport(text) {
     if (!line) return;
     /* Ignorer lignes non-donnees */
     if (line.startsWith('===') || line.startsWith('Moyenne') || line.startsWith('Exporte')) return;
-    /* Ignorer l en-tete CSV */
+    /* Ignorer l'en-tete CSV */
     if (/^Date[,;]/i.test(line)) return;
 
     /* Format CSV : date,heure,sys,dia[,pp,ctx,cat] */
@@ -1170,11 +1164,11 @@ function bindFileImport() {
     reader.onload = function(e) {
       var imported = parseAndImport(e.target.result);
       if (!imported.length) {
-        alert('Aucune mesure valide detectee dans ce fichier.\nVerifiez que c\u2019est bien un export de cet outil.');
+        alert('Aucune mesure valide détectée dans ce fichier.\nVérifiez qu\'il s\'agit bien d\'un export CSV valide.');
         input.value = '';
         return;
       }
-      if (!confirm(imported.length + ' mesure(s) trouvee(s).\nRemplacer toutes les donnees actuelles ?')) {
+      if (!confirm(imported.length + ' mesure(s) trouvée(s).\nRemplacer toutes les données actuelles ?')) {
         input.value = '';
         return;
       }
@@ -1182,7 +1176,7 @@ function bindFileImport() {
       save();
       sortMeasurements('date');
       renderTable(); renderStats(); renderSFHTA(); checkAlert(); updateChart();
-      alert(imported.length + ' mesure(s) importee(s) avec succes.');
+      alert(imported.length + ' mesure(s) importée(s) avec succès.');
       input.value = '';
     };
     reader.readAsText(file, 'UTF-8');
@@ -1235,7 +1229,7 @@ function initApp() {
   document.getElementById('btnAdd').addEventListener('click', addMeasure);
   document.getElementById('btnNow').addEventListener('click', setNow);
   document.getElementById('btnToggleChart').addEventListener('click', toggleChart);
-  document.getElementById('btnExportKeep').addEventListener('click', exportKeep);
+  document.getElementById('btnExportDrive').addEventListener('click', exportDrive); // MÀJ ÉVÉNEMENT
   document.getElementById('btnExportPrint').addEventListener('click', printView);
   document.getElementById('btnClear').addEventListener('click', clearAllData);
   bindFileImport();
@@ -1249,4 +1243,3 @@ initApp();
 
 </body>
 </html>
-
