@@ -217,7 +217,7 @@ html[data-theme="dark"] #btn-zen-mic { background: var(--accent); color: #0A1A2E
   .controls-top { flex-direction: column-reverse; align-items: flex-start; }
   .mic-wrapper { width: 100%; justify-content: space-between; flex-direction: row-reverse; }
   .app-header { flex-direction: column; align-items: flex-start; }
-  .header-actions { align-self: flex-end; margin-top: -45px; }
+  .header-actions { align-self: flex-end; margin-top: 10px; }
   .text-tools { flex-direction: column; align-items: flex-start; }
 }
 /* =========================================
@@ -548,11 +548,18 @@ document.addEventListener('DOMContentLoaded', function() {
     btnZenMic.disabled = true; btnZenMic.style.opacity = '0.5';
   } else {
   const recognition = new SpeechRecognition();
-  recognition.continuous = true;
+  // CORRECTIF : sur Android/Chrome mobile, continuous=true fait parfois
+  // renvoyer le même segment final plusieurs fois lors des redémarrages
+  // internes du moteur (texte dupliqué x2/x3). En mode non-continu, chaque
+  // segment est capté une seule fois ; le redémarrage automatique (onend)
+  // assure la continuité de la dictée.
+  const isMobileUA = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  recognition.continuous = !isMobileUA;
   recognition.interimResults = true;
   recognition.lang = langSelect.value;
   let manualStop = false;
   let lastRestart = 0, restartCount = 0; // garde-fou anti-boucle (erreurs réseau)
+  let lastFinalChunk = '', lastFinalTime = 0; // garde-fou anti-doublon (résultat final répété)
   langSelect.addEventListener('change', function() { recognition.lang = this.value; if (isRecording) { stopDictation(); setTimeout(startDictation, 300); } });
   function toggleMic() {
     if (isRecording) { manualStop = true; stopDictation(); } else { manualStop = false; startDictation(); }
@@ -582,18 +589,24 @@ document.addEventListener('DOMContentLoaded', function() {
       else interimTranscriptStr += event.results[i][0].transcript;
     }
     if (finalTranscript !== '') {
-      saveHistoryState(); // Sauvegarde pour la fonction Undo
-      let currentVal = transcriptArea.value;
-      let cleanTranscript = applySmartPunctuation(finalTranscript);
-      if (currentVal.length > 0 && !currentVal.match(/[\s\n]$/) && !cleanTranscript.match(/^[.,?!:]/)) {
-        cleanTranscript = ' ' + cleanTranscript;
+      const now = Date.now();
+      const isDuplicate = finalTranscript === lastFinalChunk && (now - lastFinalTime) < 1500;
+      lastFinalChunk = finalTranscript;
+      lastFinalTime = now;
+      if (!isDuplicate) {
+        saveHistoryState(); // Sauvegarde pour la fonction Undo
+        let currentVal = transcriptArea.value;
+        let cleanTranscript = applySmartPunctuation(finalTranscript);
+        if (currentVal.length > 0 && !currentVal.match(/[\s\n]$/) && !cleanTranscript.match(/^[.,?!:]/)) {
+          cleanTranscript = ' ' + cleanTranscript;
+        }
+        if (currentVal.length === 0 || currentVal.match(/[.!?\n]\s*$/)) {
+          cleanTranscript = cleanTranscript.replace(/^\s*([a-zà-ÿ])/, function(m) { return m.toUpperCase(); });
+        }
+        transcriptArea.value = currentVal + cleanTranscript;
+        transcriptArea.scrollTop = transcriptArea.scrollHeight;
+        updateCounter();
       }
-      if (currentVal.length === 0 || currentVal.match(/[.!?\n]\s*$/)) {
-        cleanTranscript = cleanTranscript.replace(/^\s*([a-zà-ÿ])/, function(m) { return m.toUpperCase(); });
-      }
-      transcriptArea.value = currentVal + cleanTranscript;
-      transcriptArea.scrollTop = transcriptArea.scrollHeight;
-      updateCounter();
     }
     interimText.textContent = interimTranscriptStr;
   };
