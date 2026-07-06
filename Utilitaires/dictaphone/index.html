@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dictaphone | Dr KARA-ZAITRI</title>
+<style>
+/* ============================================================
+   VARIABLES ET RESET (Charte institutionnelle)
+   ============================================================ */
+:root {
+  --primary:    #1a3a5c;
+  --primary-lt: #345a7a;
+  --primary-dark: #0d2538;
+  --accent:     #2196f3;
+  --surface:    #ffffff;
+  --bg:         #f4f7f9;
+  --border:     #cfd8dc;
+  --text:       #37474f;
+  --text-muted: #607d8b;
+  --radius:     8px;
+  --shadow:     0 2px 10px rgba(26,58,92,.08);
+  --danger:     #c62828;
+  --ok:         #2e7d32;
+  --premium:    #C9A961;
+  --font-ui:    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+* { box-sizing: border-box; font-family: var(--font-ui); }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* MASQUE ASCENSEUR */
+html { scrollbar-width: none; }
+body { -ms-overflow-style: none; overflow-y: auto; }
+::-webkit-scrollbar { display: none; }
+
+/* ============================================================
+   BANDEAU DE NAVIGATION
+   ============================================================ */
+.nav-bar {
+  position: sticky;
+  top: 0;
+  z-index: 9999;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 20px;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+.nav-bar a {
+  text-decoration: none;
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: opacity 0.2s;
+}
+.nav-bar a:hover { opacity: 0.7; }
+
+/* ============================================================
+   LAYOUT APP
+   ============================================================ */
+#app-container {
+  flex: 1;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 16px 40px;
+  width: 100%;
+}
+
+/* EN-TÊTE */
+.app-header {
+  background: var(--primary);
+  color: #fff;
+  border-radius: var(--radius);
+  padding: 20px 24px 18px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  position: relative;
+}
+.app-header-icon {
+  width: 46px; height: 46px;
+  background: rgba(255,255,255,.15);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; flex-shrink: 0;
+}
+.app-header h1 {
+  font-size: 1.25rem; font-weight: 700;
+  margin: 0 0 4px 0;
+}
+.app-header-sub {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,.75);
+}
+
+/* BADGE PREMIUM */
+.premium-badge {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  color: var(--premium);
+  font-size: 24px;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+/* ERREUR NAVIGATEUR */
+#unsupported-msg {
+  display: none;
+  background: #fff3cd;
+  color: #856404;
+  border-left: 4px solid #ffc107;
+  padding: 14px 18px;
+  border-radius: var(--radius);
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* PANNEAU PRINCIPAL */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+/* CONTRÔLES HAUT */
+.controls-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.lang-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.lang-selector label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.lang-selector select {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.9rem;
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+}
+.lang-selector select:focus { border-color: var(--primary); }
+
+/* BOUTON MICROPHONE */
+.mic-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.mic-status {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.btn-mic {
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  border: none;
+  background: var(--primary);
+  color: #fff;
+  font-size: 1.5rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(26,58,92,.2);
+}
+.btn-mic:hover { transform: scale(1.05); }
+.btn-mic.recording {
+  background: var(--danger);
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(198, 40, 40, 0.7); }
+  70% { box-shadow: 0 0 0 15px rgba(198, 40, 40, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(198, 40, 40, 0); }
+}
+
+/* ZONE DE TEXTE */
+.textarea-wrapper {
+  position: relative;
+  margin-bottom: 16px;
+}
+#transcript-area {
+  width: 100%;
+  height: 250px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 1rem;
+  line-height: 1.6;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s;
+}
+#transcript-area:focus { border-color: var(--primary); background: var(--surface); }
+
+#interim-text {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 0.95rem;
+  pointer-events: none;
+}
+
+/* BOUTONS D'ACTION */
+.btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 18px; border-radius: 6px;
+  font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; border: none;
+  transition: background 0.2s, transform 0.1s;
+}
+.btn:active { transform: scale(.97); }
+.btn-primary   { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-lt); }
+.btn-secondary { background: var(--bg); border: 1px solid var(--border); color: var(--text); }
+.btn-secondary:hover { background: #eef2f6; }
+.btn-danger    { background: #fee2e2; color: var(--danger); border: 1px solid #fecaca; }
+.btn-danger:hover { background: #fecaca; }
+
+/* FOOTER */
+.footer {
+  text-align: center;
+  padding: 16px 20px;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: auto;
+  border-top: 1px solid var(--border);
+}
+.disclaimer {
+  background: #fff3cd;
+  color: #856404;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ffeeba;
+  margin-top: 12px;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+@media (max-width: 600px) {
+  .controls-top { flex-direction: column-reverse; align-items: flex-start; }
+  .mic-wrapper { width: 100%; justify-content: space-between; flex-direction: row-reverse; }
+}
+</style>
+</head>
+<body>
+
+<!-- ✅ BANDEAU DE NAVIGATION -->
+<nav class="nav-bar">
+  <a href="https://karazaitri12-cpu.github.io/plateforme-utilitaires/">← Retour aux Utilitaires</a>
+</nav>
+
+<div id="app-container">
+
+  <!-- EN-TÊTE -->
+  <div class="app-header">
+    <span class="premium-badge">★</span>
+    <div class="app-header-icon">🎙️</div>
+    <div>
+      <h1>Dictaphone & Transcription</h1>
+      <div class="app-header-sub">Retranscription vocale en direct et traitement de texte</div>
+    </div>
+  </div>
+
+  <!-- AVERTISSEMENT COMPATIBILITÉ -->
+  <div id="unsupported-msg">
+    ⚠️ Votre navigateur ne supporte pas la reconnaissance vocale web. Veuillez utiliser <b>Google Chrome</b>, <b>Microsoft Edge</b> ou <b>Safari</b>.
+  </div>
+
+  <!-- PANNEAU PRINCIPAL -->
+  <div class="panel">
+    
+    <div class="controls-top">
+      <div class="lang-selector">
+        <label for="lang-select">Langue de la dictée</label>
+        <select id="lang-select">
+          <option value="fr-FR" selected>Français (France)</option>
+          <option value="ar-DZ">Arabe (Algérie)</option>
+          <option value="ar-SA">Arabe (Classique)</option>
+          <option value="en-US">Anglais (États-Unis)</option>
+        </select>
+      </div>
+
+      <div class="mic-wrapper">
+        <span class="mic-status" id="mic-status">Prêt. Cliquez pour parler.</span>
+        <button class="btn-mic" id="btn-mic" title="Démarrer/Arrêter la dictée">🎤</button>
+      </div>
+    </div>
+
+    <div class="textarea-wrapper">
+      <textarea id="transcript-area" placeholder="Le texte transcrit apparaîtra ici. Vous pouvez utiliser votre clavier pour corriger ou ajouter du texte à tout moment..."></textarea>
+      <div id="interim-text"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btn-copy">📋 Copier le texte</button>
+      <button class="btn btn-secondary" id="btn-download">💾 Sauvegarder (TXT)</button>
+      <button class="btn btn-secondary" id="btn-uppercase">Aa Majuscule / Minuscule</button>
+      <button class="btn btn-danger" style="margin-left:auto;" id="btn-clear">🗑️ Effacer</button>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <span>Dr KARA-ZAITRI M.A © 2026</span>
+    <div class="disclaimer">
+      ⚠️ <strong>Usage médical</strong> : Traitement vocal local via l'API Web Speech de votre navigateur. Aucun enregistrement n'est stocké sur nos serveurs. Vérifiez toujours la transcription des termes médicaux complexes.
+    </div>
+  </footer>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  
+  const btnMic = document.getElementById('btn-mic');
+  const micStatus = document.getElementById('mic-status');
+  const transcriptArea = document.getElementById('transcript-area');
+  const interimText = document.getElementById('interim-text');
+  const langSelect = document.getElementById('lang-select');
+  const unsupportedMsg = document.getElementById('unsupported-msg');
+  
+  const btnCopy = document.getElementById('btn-copy');
+  const btnDownload = document.getElementById('btn-download');
+  const btnClear = document.getElementById('btn-clear');
+  const btnUppercase = document.getElementById('btn-uppercase');
+
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  
+  if (!SpeechRecognition) {
+    unsupportedMsg.style.display = 'block';
+    btnMic.disabled = true;
+    btnMic.style.opacity = '0.5';
+    btnMic.style.cursor = 'not-allowed';
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.lang = langSelect.value;
+
+  let isRecording = false;
+  let manualStop = false;
+
+  langSelect.addEventListener('change', function() {
+    recognition.lang = this.value;
+    if (isRecording) {
+      stopDictation();
+      setTimeout(startDictation, 300);
+    }
+  });
+
+  btnMic.addEventListener('click', function() {
+    if (isRecording) {
+      manualStop = true;
+      stopDictation();
+    } else {
+      manualStop = false;
+      startDictation();
+    }
+  });
+
+  function startDictation() {
+    try {
+      recognition.start();
+    } catch(e) {
+      console.warn("Recognition already started");
+    }
+  }
+
+  function stopDictation() {
+    recognition.stop();
+    updateUIStopped();
+  }
+
+  function updateUIStarted() {
+    isRecording = true;
+    btnMic.classList.add('recording');
+    micStatus.textContent = "Écoute en cours...";
+    micStatus.style.color = "var(--danger)";
+    interimText.textContent = "";
+  }
+
+  function updateUIStopped() {
+    isRecording = false;
+    btnMic.classList.remove('recording');
+    micStatus.textContent = "Prêt. Cliquez pour parler.";
+    micStatus.style.color = "var(--text-muted)";
+    interimText.textContent = "";
+  }
+
+  recognition.onstart = function() { updateUIStarted(); };
+
+  recognition.onresult = function(event) {
+    let finalTranscript = '';
+    let interimTranscriptStr = '';
+
+    for (let i = event.resultIndex; i < event.results.length; ++i) {
+      if (event.results[i].isFinal) {
+        finalTranscript += event.results[i][0].transcript;
+      } else {
+        interimTranscriptStr += event.results[i][0].transcript;
+      }
+    }
+
+    if (finalTranscript !== '') {
+      let currentVal = transcriptArea.value;
+      if (currentVal.length > 0 && !currentVal.endsWith(' ') && !currentVal.endsWith('\n')) {
+        finalTranscript = ' ' + finalTranscript;
+      }
+      if (currentVal.length === 0 || currentVal.endsWith('. ') || currentVal.endsWith('.\n')) {
+        finalTranscript = finalTranscript.charAt(0).trim().toUpperCase() + finalTranscript.slice(1);
+      }
+      transcriptArea.value = currentVal + finalTranscript;
+      transcriptArea.scrollTop = transcriptArea.scrollHeight;
+    }
+    interimText.textContent = interimTranscriptStr;
+  };
+
+  recognition.onerror = function(event) {
+    console.error("Erreur de reconnaissance: " + event.error);
+    if (event.error === 'not-allowed') {
+      alert("L'accès au microphone a été refusé. Veuillez autoriser le microphone dans les paramètres de votre navigateur.");
+      manualStop = true;
+    }
+    updateUIStopped();
+  };
+
+  recognition.onend = function() {
+    if (!manualStop && isRecording) {
+      startDictation();
+    } else {
+      updateUIStopped();
+    }
+  };
+
+  btnCopy.addEventListener('click', function() {
+    if (!transcriptArea.value.trim()) return;
+    transcriptArea.select();
+    navigator.clipboard.writeText(transcriptArea.value).then(function() {
+      let originalText = btnCopy.innerHTML;
+      btnCopy.innerHTML = "✅ Copié !";
+      setTimeout(function() { btnCopy.innerHTML = originalText; }, 2000);
+    }).catch(function(err) {
+      alert("Erreur lors de la copie : " + err);
+    });
+  });
+
+  btnDownload.addEventListener('click', function() {
+    if (!transcriptArea.value.trim()) {
+      alert("Il n'y a pas de texte à sauvegarder.");
+      return;
+    }
+    const blob = new Blob([transcriptArea.value], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    let now = new Date();
+    let dateStr = now.toISOString().split('T')[0] + "_" + now.getHours() + "h" + now.getMinutes();
+    a.href = url;
+    a.download = "Dictee_Medicale_" + dateStr + ".txt";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  btnClear.addEventListener('click', function() {
+    if (transcriptArea.value.trim() === '') return;
+    if (confirm("Êtes-vous sûr de vouloir effacer tout le texte ?")) {
+      transcriptArea.value = '';
+      interimText.textContent = '';
+      transcriptArea.focus();
+    }
+  });
+
+  btnUppercase.addEventListener('click', function() {
+    let val = transcriptArea.value;
+    if(!val) return;
+    val = val.replace(/(^\s*|[.!?]\s+)([a-zàâéèêëîïôùûüç])/g, function(match, p1, p2) {
+      return p1 + p2.toUpperCase();
+    });
+    transcriptArea.value = val;
+  });
+});
+</script>
+
+<!-- TRACKING UMAMI (RGPD compliant, no cookies) -->
+<script defer src="https://cloud.umami.is/script.js" data-website-id="b182aba6-225e-47ac-b6be-892e033a6013"></script>
+
+</body>
+</html>
