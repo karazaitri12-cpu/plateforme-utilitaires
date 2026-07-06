@@ -21,6 +21,7 @@
   --shadow:     0 2px 10px rgba(26,58,92,.08);
   --danger:     #e53935;
   --danger-bg:  #ffebee;
+  --wa-color:   #25D366;
 }
 
 html[data-theme="dark"] {
@@ -35,6 +36,7 @@ html[data-theme="dark"] {
   --shadow:     0 2px 10px rgba(0,0,0,.35);
   --danger:     #e5546a;
   --danger-bg:  #2e1518;
+  --wa-color:   #1DA851;
 }
 
 * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
@@ -58,7 +60,7 @@ html[data-theme="dark"] .nav-bar a { color: var(--accent); }
 /* ============================================================
    LAYOUT APP
    ============================================================ */
-#app-container { max-width: 900px; margin: 0 auto; padding: 24px 16px 48px; }
+#app-container { max-width: 900px; margin: 0 auto; padding: 24px 16px 48px; transition: all 0.3s ease; }
 
 /* EN-TÊTE */
 .app-header {
@@ -73,7 +75,7 @@ html[data-theme="dark"] .nav-bar a { color: var(--accent); }
 .app-header h1 { font-size: 1.25rem; font-weight: 700; margin: 0 0 4px 0; }
 .app-header-sub { font-size: 0.8rem; color: rgba(255,255,255,.75); }
 
-/* BOUTONS D'EN-TÊTE (AIDE + THEME) */
+/* BOUTONS D'EN-TÊTE (AIDE, THEME, ZEN) */
 .header-actions { display: flex; gap: 8px; }
 .icon-btn {
   border: none; background: rgba(255,255,255,.18); color: #fff; width: 38px; height: 38px;
@@ -95,7 +97,7 @@ html[data-theme="dark"] .nav-bar a { color: var(--accent); }
 }
 
 /* CONTRÔLES HAUT */
-.controls-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 16px; }
+.controls-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 16px; }
 .lang-selector { display: flex; flex-direction: column; gap: 6px; }
 .lang-selector label { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
 .lang-selector select {
@@ -122,26 +124,31 @@ html[data-theme="dark"] .btn-mic { background: var(--accent); color: #0A1A2E; }
   100% { box-shadow: 0 0 0 0 rgba(229, 57, 53, 0); }
 }
 
-/* OUTILS TEXTE (Zoom) */
-.text-tools { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 8px; }
-.btn-zoom {
-  background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 4px 10px;
-  border-radius: 4px; font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: 0.2s;
+/* OUTILS TEXTE (Zoom, TTS, Undo) */
+.text-tools { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;}
+.text-tools-left { display: flex; gap: 8px; }
+.text-tools-right { display: flex; gap: 8px; }
+.btn-tool {
+  background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 6px 12px;
+  border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: 0.2s;
+  display: inline-flex; align-items: center; gap: 6px;
 }
-.btn-zoom:hover { background: var(--border); }
+.btn-tool:hover { background: var(--border); }
+.btn-tool:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* ZONE DE TEXTE */
-.textarea-wrapper { position: relative; margin-bottom: 16px; }
+.textarea-wrapper { position: relative; margin-bottom: 16px; display: flex; flex-direction: column; }
 #transcript-area {
-  width: 100%; height: 280px; padding: 16px; border: 1px solid var(--border); border-radius: var(--radius);
+  width: 100%; height: 320px; padding: 16px; padding-bottom: 30px; border: 1px solid var(--border); border-radius: var(--radius);
   background: var(--bg); color: var(--text); font-size: 16px; line-height: 1.6; resize: vertical;
   outline: none; transition: border-color 0.2s, background 0.3s, color 0.3s;
 }
 #transcript-area:focus { border-color: var(--accent); background: var(--surface); }
-#interim-text { position: absolute; bottom: 16px; left: 16px; right: 16px; color: var(--text-muted); font-style: italic; font-size: 0.95em; pointer-events: none; }
+#interim-text { position: absolute; bottom: 35px; left: 16px; right: 16px; color: var(--text-muted); font-style: italic; font-size: 0.95em; pointer-events: none; }
+.text-counter { position: absolute; bottom: 8px; right: 16px; font-size: 0.75rem; color: var(--text-muted); font-weight: 600; pointer-events: none;}
 
-/* BOUTONS D'ACTION */
-.btn-row { display: flex; flex-wrap: wrap; gap: 10px; }
+/* BOUTONS D'ACTION / EXPORT */
+.btn-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;}
 .btn {
   display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 6px;
   font-size: 0.85rem; font-weight: 600; cursor: pointer; border: none; transition: 0.2s;
@@ -155,6 +162,9 @@ html[data-theme="dark"] .btn-primary { background: var(--accent); color: #0A1A2E
 .btn-danger    { background: var(--danger-bg); color: var(--danger); border: 1px solid var(--danger); }
 .btn-danger:hover { background: var(--danger); color: #fff; }
 
+.btn-whatsapp { background: #e8f5e9; color: var(--wa-color); border: 1px solid #c8e6c9; }
+.btn-whatsapp:hover { background: var(--wa-color); color: #fff; }
+
 /* MENTION LÉGALE */
 .legal-footer { margin-top: 10px; font-size: 0.75rem; color: var(--text-muted); line-height: 1.5; text-align: justify; }
 
@@ -162,51 +172,57 @@ html[data-theme="dark"] .btn-primary { background: var(--accent); color: #0A1A2E
    FENÊTRE D'AIDE (MODAL)
    ============================================================ */
 .modal-overlay {
-  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.5); z-index: 10000;
-  display: flex; align-items: center; justify-content: center;
-  opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
-  padding: 20px;
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10000;
+  display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; padding: 20px;
 }
 .modal-overlay.active { opacity: 1; pointer-events: auto; }
 .modal-content {
-  background: var(--surface); color: var(--text);
-  width: 100%; max-width: 600px; max-height: 90vh;
-  border-radius: var(--radius); box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-  display: flex; flex-direction: column;
+  background: var(--surface); color: var(--text); width: 100%; max-width: 650px; max-height: 90vh;
+  border-radius: var(--radius); box-shadow: 0 10px 30px rgba(0,0,0,0.2); display: flex; flex-direction: column;
   transform: translateY(20px); transition: transform 0.3s ease;
 }
 .modal-overlay.active .modal-content { transform: translateY(0); }
-.modal-header {
-  padding: 16px 24px; border-bottom: 1px solid var(--border);
-  display: flex; justify-content: space-between; align-items: center;
-}
+.modal-header { padding: 16px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
 .modal-header h2 { margin: 0; font-size: 1.2rem; color: var(--primary); }
 html[data-theme="dark"] .modal-header h2 { color: var(--accent); }
-.btn-close {
-  background: none; border: none; font-size: 1.5rem; color: var(--text-muted);
-  cursor: pointer; padding: 0; line-height: 1; transition: color 0.2s;
-}
+.btn-close { background: none; border: none; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; padding: 0; line-height: 1; transition: color 0.2s; }
 .btn-close:hover { color: var(--danger); }
-.modal-body {
-  padding: 24px; overflow-y: auto; font-size: 0.95rem; line-height: 1.6;
-}
+.modal-body { padding: 24px; overflow-y: auto; font-size: 0.95rem; line-height: 1.6; }
 .modal-body h3 { margin: 1.5em 0 0.5em 0; font-size: 1.05rem; color: var(--text); border-bottom: 2px solid var(--border); padding-bottom: 4px;}
 .modal-body h3:first-child { margin-top: 0; }
 .modal-body ul { padding-left: 20px; margin: 0 0 1em 0; }
 .modal-body li { margin-bottom: 6px; }
-.help-code {
-  background: var(--bg); border: 1px solid var(--border);
-  padding: 2px 6px; border-radius: 4px; font-family: monospace;
-  color: var(--primary); font-weight: 600; font-size: 0.9em;
-}
+.help-code { background: var(--bg); border: 1px solid var(--border); padding: 2px 6px; border-radius: 4px; font-family: monospace; color: var(--primary); font-weight: 600; font-size: 0.9em; }
 html[data-theme="dark"] .help-code { color: var(--accent); }
+
+/* ============================================================
+   MODE ZEN (Plein Écran)
+   ============================================================ */
+body.zen-active .nav-bar,
+body.zen-active .app-header,
+body.zen-active .controls-top,
+body.zen-active .legal-footer,
+body.zen-active .btn-row { display: none !important; }
+
+body.zen-active #app-container { padding: 0; max-width: 100%; height: 100vh; }
+body.zen-active .panel { margin: 0; border: none; border-radius: 0; height: 100vh; display: flex; flex-direction: column; padding: 16px; box-shadow: none; }
+body.zen-active .textarea-wrapper { flex-grow: 1; }
+body.zen-active #transcript-area { height: 100%; font-size: 1.3rem; border-color: transparent; box-shadow: inset 0 0 10px rgba(0,0,0,0.05); }
+
+#btn-exit-zen {
+  display: none; position: fixed; bottom: 20px; right: 20px; z-index: 10001;
+  background: var(--primary); color: white; border: none; border-radius: 30px;
+  padding: 12px 24px; font-weight: 700; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+body.zen-active #btn-exit-zen { display: block; }
+html[data-theme="dark"] #btn-exit-zen { background: var(--accent); color: #000; }
 
 @media (max-width: 600px) {
   .controls-top { flex-direction: column-reverse; align-items: flex-start; }
   .mic-wrapper { width: 100%; justify-content: space-between; flex-direction: row-reverse; }
   .app-header { flex-direction: column; align-items: flex-start; }
   .header-actions { align-self: flex-end; margin-top: -45px; }
+  .text-tools { flex-direction: column; align-items: flex-start; }
 }
 </style>
 </head>
@@ -225,10 +241,11 @@ html[data-theme="dark"] .help-code { color: var(--accent); }
       <div class="app-header-icon">🎙️</div>
       <div>
         <h1>Dictaphone & Transcription</h1>
-        <div class="app-header-sub">Saisie vocale intelligente avec ponctuation et export</div>
+        <div class="app-header-sub">Saisie vocale intelligente, posologies, et export</div>
       </div>
     </div>
     <div class="header-actions">
+      <button class="icon-btn" id="btn-zen" title="Mode Zen (Plein écran)">🔲</button>
       <button class="icon-btn" id="btn-help" title="Mode d'emploi et Commandes Vocales">?</button>
       <button class="icon-btn" id="theme-toggle" title="Changer de thème">🌙</button>
     </div>
@@ -258,31 +275,42 @@ html[data-theme="dark"] .help-code { color: var(--accent); }
       </div>
     </div>
 
-    <!-- Outils de zoom texte -->
+    <!-- Outils de texte (Zoom, Audio, Undo) -->
     <div class="text-tools">
-      <button class="btn-zoom" id="btn-zoom-out" title="Diminuer le texte">A-</button>
-      <button class="btn-zoom" id="btn-zoom-in" title="Agrandir le texte">A+</button>
+      <div class="text-tools-left">
+        <button class="btn-tool" id="btn-undo" title="Annuler la dernière phrase" disabled>↩️ Annuler</button>
+        <button class="btn-tool" id="btn-speak" title="Relire le texte à voix haute">🔊 Écouter</button>
+      </div>
+      <div class="text-tools-right">
+        <button class="btn-tool" id="btn-zoom-out" title="Diminuer le texte">A-</button>
+        <button class="btn-tool" id="btn-zoom-in" title="Agrandir le texte">A+</button>
+      </div>
     </div>
 
     <div class="textarea-wrapper">
       <textarea id="transcript-area" placeholder="Appuyez sur le micro pour dicter... Cliquez sur le [ ? ] en haut à droite pour voir les commandes vocales."></textarea>
       <div id="interim-text"></div>
+      <div class="text-counter" id="text-counter">0 mot | 0 caractère</div>
     </div>
 
     <div class="btn-row">
-      <button class="btn btn-primary" id="btn-copy">📋 Copier le texte</button>
-      <button class="btn btn-secondary" id="btn-print">🖨️ Imprimer / PDF</button>
-      <button class="btn btn-secondary" id="btn-download">💾 Sauvegarder (TXT)</button>
+      <button class="btn btn-primary" id="btn-copy">📋 Copier</button>
+      <button class="btn btn-secondary" id="btn-print">🖨️ PDF / Imprimer</button>
+      <button class="btn btn-whatsapp" id="btn-wa">💬 WhatsApp</button>
+      <button class="btn btn-secondary" id="btn-mail">✉️ Email</button>
+      <button class="btn btn-secondary" id="btn-download">💾 TXT</button>
       <button class="btn btn-danger" style="margin-left:auto;" id="btn-clear">🗑️ Effacer</button>
     </div>
 
   </div>
 
   <div class="legal-footer">
-    <strong>Confidentialité & Technologie :</strong> Cet outil utilise l'API <em>Web Speech</em> native. Aucun enregistrement n'est stocké sur un serveur tiers. La ponctuation est gérée automatiquement ("virgule", "point", "à la ligne"). <strong>L'écran ne se mettra pas en veille pendant la dictée.</strong> Veuillez toujours relire les termes médicaux complexes.
+    <strong>Confidentialité & Technologie :</strong> L'API <em>Web Speech</em> ne stocke aucune donnée sur un serveur externe. L'écran est maintenu allumé pendant l'enregistrement. Le mode d'emploi (bouton <strong>?</strong>) détaille les formats de posologie (ex: "un comprimé 3 fois par jour"). Le texte est sauvegardé automatiquement sur votre navigateur.
   </div>
 
 </div>
+
+<button id="btn-exit-zen">❌ Quitter le mode Zen</button>
 
 <!-- FENÊTRE D'AIDE (MODAL) -->
 <div class="modal-overlay" id="help-modal">
@@ -293,33 +321,36 @@ html[data-theme="dark"] .help-code { color: var(--accent); }
     </div>
     <div class="modal-body">
       <h3>🗣️ Ponctuation & Mise en page</h3>
-      <p>Pendant la dictée, prononcez naturellement ces mots-clés (en français) pour formater votre texte :</p>
       <ul>
-        <li>Dites <strong>"virgule"</strong> pour insérer <span class="help-code">,</span></li>
-        <li>Dites <strong>"point"</strong> ou <strong>"point final"</strong> pour insérer <span class="help-code">.</span></li>
-        <li>Dites <strong>"deux points"</strong> pour insérer <span class="help-code">:</span></li>
-        <li>Dites <strong>"point d'interrogation"</strong> pour insérer <span class="help-code">?</span></li>
-        <li>Dites <strong>"à la ligne"</strong> ou <strong>"nouveau paragraphe"</strong> pour passer à la ligne suivante.</li>
+        <li><strong>"virgule"</strong> ➔ <span class="help-code">,</span></li>
+        <li><strong>"point"</strong> ou <strong>"point final"</strong> ➔ <span class="help-code">.</span></li>
+        <li><strong>"deux points"</strong> ➔ <span class="help-code">:</span></li>
+        <li><strong>"à la ligne"</strong> ou <strong>"nouveau paragraphe"</strong> ➔ <em>Saut de ligne</em></li>
       </ul>
-      <p><em>Note : L'outil mettra automatiquement une majuscule après chaque point ou saut de ligne.</em></p>
 
-      <h3>🩺 Lexique Médical Automatique</h3>
-      <p>L'outil reconnaît et convertit automatiquement les acronymes épelés :</p>
+      <h3>💊 Ordonnances & Posologies</h3>
+      <p>L'outil raccourcit automatiquement le langage médical lors de la dictée :</p>
       <ul>
-        <li><strong>"H T A"</strong> s'écrira <span class="help-code">HTA</span></li>
-        <li><strong>"E C G"</strong> s'écrira <span class="help-code">ECG</span></li>
-        <li><strong>"I R M"</strong> s'écrira <span class="help-code">IRM</span></li>
-        <li><strong>"I V G"</strong> s'écrira <span class="help-code">IVG</span></li>
-        <li><strong>"F C V"</strong> s'écrira <span class="help-code">FCV</span></li>
-        <li><strong>"I M C"</strong> s'écrira <span class="help-code">IMC</span></li>
+        <li><strong>"un gramme"</strong> / <strong>"deux grammes"</strong> ➔ <span class="help-code">1g</span> / <span class="help-code">2g</span></li>
+        <li><strong>"milligrammes"</strong> ➔ <span class="help-code">mg</span></li>
+        <li><strong>"un comprimé"</strong> / <strong>"deux comprimés"</strong> ➔ <span class="help-code">1 cp</span> / <span class="help-code">2 cp</span></li>
+        <li><strong>"une gélule"</strong> / <strong>"un sachet"</strong> ➔ <span class="help-code">1 gélule</span> / <span class="help-code">1 sachet</span></li>
+        <li><strong>"trois fois par jour"</strong> ➔ <span class="help-code">3x/j</span> (fonctionne pour 1, 2, 3 et 4)</li>
+        <li><strong>"cuillère à soupe"</strong> / <strong>"cuillère à café"</strong> ➔ <span class="help-code">càs</span> / <span class="help-code">càc</span></li>
+      </ul>
+
+      <h3>🩺 Lexique Acronymes</h3>
+      <ul>
+        <li><strong>"H T A"</strong> ➔ <span class="help-code">HTA</span> | <strong>"E C G"</strong> ➔ <span class="help-code">ECG</span> | <strong>"I R M"</strong> ➔ <span class="help-code">IRM</span></li>
+        <li><strong>"I V G"</strong> ➔ <span class="help-code">IVG</span> | <strong>"F C V"</strong> ➔ <span class="help-code">FCV</span> | <strong>"I M C"</strong> ➔ <span class="help-code">IMC</span></li>
       </ul>
 
       <h3>💡 Astuces de fonctionnement</h3>
       <ul>
-        <li><strong>Microphone "Anti-coupure" :</strong> Le navigateur coupe souvent le micro lors d'un blanc de 5 secondes. Cet outil détecte les blancs et relance le micro automatiquement pour vous ! Pour arrêter vraiment l'écoute, cliquez à nouveau sur le gros bouton rouge.</li>
-        <li><strong>Écran toujours allumé :</strong> Tant que le micro enregistre, l'écran de votre tablette ou smartphone restera allumé (grâce au Wake Lock API).</li>
-        <li><strong>Retouches :</strong> Vous pouvez utiliser votre clavier à tout moment pendant la dictée pour corriger une erreur sans avoir à éteindre le micro.</li>
-        <li><strong>Impression Pro :</strong> Le bouton <em>Imprimer/PDF</em> génère instantanément une page propre avec votre en-tête (Dr KARA-ZAITRI) et la date du jour, prête à être classée.</li>
+        <li><strong>Annuler (↩️) :</strong> Si une phrase a été mal comprise, cliquez sur "Annuler" pour effacer instantanément le dernier bloc dicté.</li>
+        <li><strong>Écouter (🔊) :</strong> L'ordinateur vous relit le texte à voix haute pour vérifier pendant que vous regardez autre chose.</li>
+        <li><strong>Mode Zen (🔲) :</strong> Agrandit la zone de texte sur tout l'écran pour dicter sans distraction.</li>
+        <li><strong>Sauvegarde auto :</strong> Si vous quittez la page par erreur, votre texte sera toujours là à votre retour !</li>
       </ul>
     </div>
   </div>
@@ -335,27 +366,96 @@ document.addEventListener('DOMContentLoaded', function() {
   const interimText = document.getElementById('interim-text');
   const langSelect = document.getElementById('lang-select');
   const unsupportedMsg = document.getElementById('unsupported-msg');
+  const textCounter = document.getElementById('text-counter');
   
   const btnCopy = document.getElementById('btn-copy');
   const btnPrint = document.getElementById('btn-print');
   const btnDownload = document.getElementById('btn-download');
   const btnClear = document.getElementById('btn-clear');
+  const btnWa = document.getElementById('btn-wa');
+  const btnMail = document.getElementById('btn-mail');
+
   const btnZoomIn = document.getElementById('btn-zoom-in');
   const btnZoomOut = document.getElementById('btn-zoom-out');
+  const btnUndo = document.getElementById('btn-undo');
+  const btnSpeak = document.getElementById('btn-speak');
+  
   const themeToggle = document.getElementById('theme-toggle');
+  const btnZen = document.getElementById('btn-zen');
+  const btnExitZen = document.getElementById('btn-exit-zen');
 
-  // Modal Help
   const btnHelp = document.getElementById('btn-help');
   const helpModal = document.getElementById('help-modal');
   const btnCloseHelp = document.getElementById('btn-close-help');
 
+  // --- VARIABLES ET ETAT ---
+  let historyStack = []; // Pour la fonction Annuler (Undo)
+  const STORAGE_KEY = "dictaphone_autosave";
+
+  // --- RESTAURER LE TEXTE SAUVEGARDE ---
+  const savedText = localStorage.getItem(STORAGE_KEY);
+  if(savedText) { transcriptArea.value = savedText; updateCounter(); }
+
+  function saveToLocal() { localStorage.setItem(STORAGE_KEY, transcriptArea.value); }
+
+  // --- COMPTEUR DE MOTS ---
+  function updateCounter() {
+    const text = transcriptArea.value.trim();
+    const chars = text.length;
+    const words = text === '' ? 0 : text.split(/\s+/).length;
+    textCounter.textContent = `${words} mot(s) | ${chars} caractère(s)`;
+    saveToLocal();
+  }
+  transcriptArea.addEventListener('input', updateCounter);
+
+  // --- HISTORIQUE (UNDO) ---
+  function saveHistoryState() {
+    historyStack.push(transcriptArea.value);
+    if(historyStack.length > 50) historyStack.shift(); // Garde les 50 dernières actions
+    btnUndo.disabled = historyStack.length === 0;
+  }
+  btnUndo.addEventListener('click', () => {
+    if(historyStack.length > 0) {
+      transcriptArea.value = historyStack.pop();
+      updateCounter();
+      btnUndo.disabled = historyStack.length === 0;
+    }
+  });
+
+  // --- LECTURE AUDIO (TEXT-TO-SPEECH) ---
+  let isSpeaking = false;
+  btnSpeak.addEventListener('click', () => {
+    if (isSpeaking) {
+      window.speechSynthesis.cancel();
+      isSpeaking = false;
+      btnSpeak.innerHTML = "🔊 Écouter";
+    } else {
+      if (!transcriptArea.value.trim()) return;
+      let utterance = new SpeechSynthesisUtterance(transcriptArea.value);
+      utterance.lang = langSelect.value;
+      utterance.onstart = () => { isSpeaking = true; btnSpeak.innerHTML = "⏹️ Arrêter"; };
+      utterance.onend = () => { isSpeaking = false; btnSpeak.innerHTML = "🔊 Écouter"; };
+      utterance.onerror = () => { isSpeaking = false; btnSpeak.innerHTML = "🔊 Écouter"; };
+      window.speechSynthesis.speak(utterance);
+    }
+  });
+
+  // --- MODE ZEN ---
+  function toggleZen() {
+    document.body.classList.toggle('zen-active');
+    if (document.body.classList.contains('zen-active')) {
+      if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(()=>{});
+    } else {
+      if(document.fullscreenElement) document.exitFullscreen().catch(()=>{});
+    }
+  }
+  btnZen.addEventListener('click', toggleZen);
+  btnExitZen.addEventListener('click', toggleZen);
+
   // --- GESTION DE LA FENETRE D'AIDE ---
   btnHelp.addEventListener('click', () => { helpModal.classList.add('active'); });
   btnCloseHelp.addEventListener('click', () => { helpModal.classList.remove('active'); });
-  helpModal.addEventListener('click', (e) => {
-    // Fermer si on clique en dehors de la boite blanche
-    if(e.target === helpModal) helpModal.classList.remove('active');
-  });
+  helpModal.addEventListener('click', (e) => { if(e.target === helpModal) helpModal.classList.remove('active'); });
 
   // --- GESTION DU THEME SOMBRE ---
   const THEME_KEY = "dictaphone_theme";
@@ -363,15 +463,11 @@ document.addEventListener('DOMContentLoaded', function() {
     if(theme === "dark") { document.documentElement.setAttribute("data-theme", "dark"); themeToggle.textContent = "☀️"; }
     else { document.documentElement.removeAttribute("data-theme"); themeToggle.textContent = "🌙"; }
   }
-  let savedTheme = localStorage.getItem(THEME_KEY);
-  if(savedTheme) { applyTheme(savedTheme); }
-  else { let prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches; applyTheme(prefersDark ? "dark" : "light"); }
-  
+  let currentTheme = localStorage.getItem(THEME_KEY) || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  applyTheme(currentTheme);
   themeToggle.addEventListener('click', function() {
-    let isDark = document.documentElement.getAttribute("data-theme") === "dark";
-    let next = isDark ? "light" : "dark";
-    applyTheme(next);
-    localStorage.setItem(THEME_KEY, next);
+    let next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+    applyTheme(next); localStorage.setItem(THEME_KEY, next);
   });
 
   // --- GESTION DE LA TAILLE DE POLICE ---
@@ -379,24 +475,14 @@ document.addEventListener('DOMContentLoaded', function() {
   btnZoomIn.addEventListener('click', () => { if(currentFontSize < 32) { currentFontSize += 2; transcriptArea.style.fontSize = currentFontSize + 'px'; } });
   btnZoomOut.addEventListener('click', () => { if(currentFontSize > 12) { currentFontSize -= 2; transcriptArea.style.fontSize = currentFontSize + 'px'; } });
 
-  // --- WAKE LOCK API (Empêcher l'écran de s'éteindre) ---
+  // --- WAKE LOCK API (Garder l'écran allumé) ---
   let wakeLock = null;
-  async function requestWakeLock() {
-    if ('wakeLock' in navigator) {
-      try { wakeLock = await navigator.wakeLock.request('screen'); } 
-      catch (err) { console.warn("Wake Lock refusé:", err); }
-    }
-  }
-  function releaseWakeLock() {
-    if (wakeLock !== null) { wakeLock.release().then(() => { wakeLock = null; }); }
-  }
-  document.addEventListener('visibilitychange', async () => {
-    if (wakeLock !== null && document.visibilityState === 'visible' && isRecording) { requestWakeLock(); }
-  });
+  async function requestWakeLock() { if ('wakeLock' in navigator) { try { wakeLock = await navigator.wakeLock.request('screen'); } catch (e) {} } }
+  function releaseWakeLock() { if (wakeLock !== null) { wakeLock.release().then(() => { wakeLock = null; }); } }
+  document.addEventListener('visibilitychange', () => { if (wakeLock !== null && document.visibilityState === 'visible' && isRecording) requestWakeLock(); });
 
   // --- INITIALISATION API WEB SPEECH ---
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  
   if (!SpeechRecognition) {
     unsupportedMsg.style.display = 'block';
     btnMic.disabled = true; btnMic.style.opacity = '0.5'; btnMic.style.cursor = 'not-allowed';
@@ -407,48 +493,30 @@ document.addEventListener('DOMContentLoaded', function() {
   recognition.continuous = true;
   recognition.interimResults = true;
   recognition.lang = langSelect.value;
-
   let isRecording = false;
   let manualStop = false;
 
-  langSelect.addEventListener('change', function() {
-    recognition.lang = this.value;
-    if (isRecording) { stopDictation(); setTimeout(startDictation, 300); }
-  });
+  langSelect.addEventListener('change', function() { recognition.lang = this.value; if (isRecording) { stopDictation(); setTimeout(startDictation, 300); } });
 
   btnMic.addEventListener('click', function() {
-    if (isRecording) { manualStop = true; stopDictation(); } 
-    else { manualStop = false; startDictation(); }
+    if (isRecording) { manualStop = true; stopDictation(); } else { manualStop = false; startDictation(); }
   });
 
-  function startDictation() {
-    try { recognition.start(); requestWakeLock(); } 
-    catch(e) { console.warn("Recognition already started"); }
-  }
-
-  function stopDictation() {
-    recognition.stop();
-    releaseWakeLock();
-    updateUIStopped();
-  }
+  function startDictation() { try { recognition.start(); requestWakeLock(); } catch(e) {} }
+  function stopDictation() { recognition.stop(); releaseWakeLock(); updateUIStopped(); }
 
   function updateUIStarted() {
-    isRecording = true;
-    btnMic.classList.add('recording');
+    isRecording = true; btnMic.classList.add('recording');
     micStatus.textContent = "Écoute en cours (L'écran restera allumé)...";
-    micStatus.style.color = "var(--danger)";
-    interimText.textContent = "";
+    micStatus.style.color = "var(--danger)"; interimText.textContent = "";
   }
-
   function updateUIStopped() {
-    isRecording = false;
-    btnMic.classList.remove('recording');
+    isRecording = false; btnMic.classList.remove('recording');
     micStatus.textContent = "Prêt. Cliquez pour parler.";
-    micStatus.style.color = "var(--text-muted)";
-    interimText.textContent = "";
+    micStatus.style.color = "var(--text-muted)"; interimText.textContent = "";
   }
 
-  // --- FILTRE INTELLIGENT DE PONCTUATION ET TERMES MEDICAUX ---
+  // --- FILTRE INTELLIGENT DE PONCTUATION ET POSOLOGIES ---
   function applySmartPunctuation(text) {
     let t = text;
     // Ponctuation
@@ -459,21 +527,33 @@ document.addEventListener('DOMContentLoaded', function() {
     t = t.replace(/\b(deux points)\b/gi, ':');
     t = t.replace(/\b(à la ligne|nouveau paragraphe|nouvelle ligne)\b/gi, '\n');
     
-    // Acronymes médicaux courants
+    // Posologies et traitements
+    t = t.replace(/\b(un gramme)\b/gi, '1g');
+    t = t.replace(/\b(deux grammes)\b/gi, '2g');
+    t = t.replace(/\b(trois grammes)\b/gi, '3g');
+    t = t.replace(/\b(milligrammes|milligramme)\b/gi, 'mg');
+    t = t.replace(/\b(microgrammes|microgramme)\b/gi, 'µg');
+    t = t.replace(/\b(un comprimé)\b/gi, '1 cp');
+    t = t.replace(/\b(deux comprimés)\b/gi, '2 cp');
+    t = t.replace(/\b(une gélule)\b/gi, '1 gélule');
+    t = t.replace(/\b(un sachet)\b/gi, '1 sachet');
+    t = t.replace(/\b(une fois par jour)\b/gi, '1x/j');
+    t = t.replace(/\b(deux fois par jour)\b/gi, '2x/j');
+    t = t.replace(/\b(trois fois par jour)\b/gi, '3x/j');
+    t = t.replace(/\b(quatre fois par jour)\b/gi, '4x/j');
+    t = t.replace(/\b(cuillère à soupe)\b/gi, 'càs');
+    t = t.replace(/\b(cuillère à café)\b/gi, 'càc');
+
+    // Acronymes
     t = t.replace(/\b(h t a)\b/gi, 'HTA');
     t = t.replace(/\b(e c g)\b/gi, 'ECG');
     t = t.replace(/\b(i r m)\b/gi, 'IRM');
     t = t.replace(/\b(i v g)\b/gi, 'IVG');
     t = t.replace(/\b(f c v)\b/gi, 'FCV');
-    t = t.replace(/\b(b m i)\b/gi, 'BMI');
-    t = t.replace(/\b(i m c)\b/gi, 'IMC');
+    t = t.replace(/\b(b m i|i m c)\b/gi, 'IMC');
 
-    // Nettoyage des espaces avant la ponctuation
-    t = t.replace(/ \./g, '.');
-    t = t.replace(/ ,/g, ',');
-    t = t.replace(/ \?/g, '?');
-    t = t.replace(/ \!/g, '!');
-    
+    // Nettoyage espaces
+    t = t.replace(/ \./g, '.'); t = t.replace(/ ,/g, ','); t = t.replace(/ \?/g, '?'); t = t.replace(/ \!/g, '!');
     return t;
   }
 
@@ -481,65 +561,45 @@ document.addEventListener('DOMContentLoaded', function() {
   recognition.onstart = function() { updateUIStarted(); };
 
   recognition.onresult = function(event) {
-    let finalTranscript = '';
-    let interimTranscriptStr = '';
-
+    let finalTranscript = ''; let interimTranscriptStr = '';
     for (let i = event.resultIndex; i < event.results.length; ++i) {
-      if (event.results[i].isFinal) {
-        finalTranscript += event.results[i][0].transcript;
-      } else {
-        interimTranscriptStr += event.results[i][0].transcript;
-      }
+      if (event.results[i].isFinal) finalTranscript += event.results[i][0].transcript;
+      else interimTranscriptStr += event.results[i][0].transcript;
     }
 
     if (finalTranscript !== '') {
+      saveHistoryState(); // Sauvegarde pour la fonction Undo
       let currentVal = transcriptArea.value;
-      
-      // Appliquer les filtres de ponctuation sur le texte final
       let cleanTranscript = applySmartPunctuation(finalTranscript);
 
-      // Gérer l'espacement avec le texte existant
-      if (currentVal.length > 0 && !currentVal.match(/[\s\n]$/)) {
-        // Ajouter un espace avant seulement si le filtre n'a pas créé un point/virgule direct
-        if (!cleanTranscript.match(/^[.,?!:]/)) {
-          cleanTranscript = ' ' + cleanTranscript;
-        }
+      if (currentVal.length > 0 && !currentVal.match(/[\s\n]$/) && !cleanTranscript.match(/^[.,?!:]/)) {
+        cleanTranscript = ' ' + cleanTranscript;
       }
 
-      // Majuscule auto si début de texte ou après un point/saut de ligne
       if (currentVal.length === 0 || currentVal.match(/[.!?\n]\s*$/)) {
         cleanTranscript = cleanTranscript.replace(/^\s*([a-zà-ÿ])/, function(m) { return m.toUpperCase(); });
       }
 
       transcriptArea.value = currentVal + cleanTranscript;
-      transcriptArea.scrollTop = transcriptArea.scrollHeight; // Auto-scroll
+      transcriptArea.scrollTop = transcriptArea.scrollHeight;
+      updateCounter();
     }
-
     interimText.textContent = interimTranscriptStr;
   };
 
   recognition.onerror = function(event) {
-    console.warn("Speech API Error: " + event.error);
-    if (event.error === 'not-allowed') {
-      alert("L'accès au microphone a été refusé. Veuillez autoriser le microphone.");
-      manualStop = true;
-    }
+    if (event.error === 'not-allowed') { alert("L'accès au microphone a été refusé."); manualStop = true; }
     updateUIStopped();
   };
 
-  recognition.onend = function() {
-    // Relance automatique en cas de silence, sauf si arrêt manuel
-    if (!manualStop && isRecording) { startDictation(); } 
-    else { updateUIStopped(); }
-  };
+  recognition.onend = function() { if (!manualStop && isRecording) startDictation(); else updateUIStopped(); };
 
-  // --- BOUTONS D'ACTION ---
+  // --- BOUTONS D'EXPORT ---
   btnCopy.addEventListener('click', function() {
     if (!transcriptArea.value.trim()) return;
     transcriptArea.select();
     navigator.clipboard.writeText(transcriptArea.value).then(function() {
-      let originalText = btnCopy.innerHTML;
-      btnCopy.innerHTML = "✅ Copié !";
+      let originalText = btnCopy.innerHTML; btnCopy.innerHTML = "✅ Copié !";
       setTimeout(function() { btnCopy.innerHTML = originalText; }, 2000);
     });
   });
@@ -548,64 +608,51 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!transcriptArea.value.trim()) return;
     const blob = new Blob([transcriptArea.value], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    let dateStr = new Date().toISOString().split('T')[0];
-    a.href = url; a.download = "Dictaphone_" + dateStr + ".txt";
+    const a = document.createElement('a'); a.href = url; a.download = "Dictaphone_" + new Date().toISOString().split('T')[0] + ".txt";
     document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
   });
 
-  // Bouton Impression Professionnelle / PDF
+  btnWa.addEventListener('click', function() {
+    if (!transcriptArea.value.trim()) return;
+    window.open('https://wa.me/?text=' + encodeURIComponent(transcriptArea.value), '_blank');
+  });
+
+  btnMail.addEventListener('click', function() {
+    if (!transcriptArea.value.trim()) return;
+    window.open('mailto:?subject=Note de Consultation&body=' + encodeURIComponent(transcriptArea.value), '_self');
+  });
+
   btnPrint.addEventListener('click', function() {
-    if (!transcriptArea.value.trim()) { alert("Il n'y a pas de texte à imprimer."); return; }
-    
-    let contentHTML = transcriptArea.value
-      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') // Sécurisation
-      .replace(/\n/g, '<br>'); // Conserver les sauts de ligne
-      
+    if (!transcriptArea.value.trim()) return;
+    let contentHTML = transcriptArea.value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
     let dateStr = new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-    
     let win = window.open('', '_blank');
     win.document.write(`
-      <!DOCTYPE html>
-      <html lang="fr">
-      <head>
-        <meta charset="UTF-8">
-        <title>Document - Dr KARA-ZAITRI</title>
-        <style>
-          body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 25mm 20mm; line-height: 1.6; color: #111; font-size: 11pt; }
-          .header { border-bottom: 2px solid #1a3a5c; padding-bottom: 12px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: flex-end; }
-          .header-left h1 { color: #1a3a5c; font-size: 18pt; margin: 0 0 4px 0; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
-          .header-left p { margin: 0; color: #555; font-size: 10pt; }
-          .header-right { text-align: right; color: #666; font-size: 10pt; }
-          .content { font-size: 11pt; text-align: justify; }
-          .footer { margin-top: 40px; padding-top: 15px; border-top: 1px solid #ddd; text-align: center; color: #888; font-size: 9pt; }
-          @media print { body { padding: 0; } }
-        </style>
-      </head>
+      <!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Document - Dr KARA-ZAITRI</title>
+      <style>
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 25mm 20mm; line-height: 1.6; color: #111; font-size: 11pt; }
+        .header { border-bottom: 2px solid #1a3a5c; padding-bottom: 12px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: flex-end; }
+        .header-left h1 { color: #1a3a5c; font-size: 18pt; margin: 0 0 4px 0; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+        .header-left p { margin: 0; color: #555; font-size: 10pt; }
+        .header-right { text-align: right; color: #666; font-size: 10pt; }
+        .content { font-size: 11pt; text-align: justify; }
+        .footer { margin-top: 40px; padding-top: 15px; border-top: 1px solid #ddd; text-align: center; color: #888; font-size: 9pt; }
+        @media print { body { padding: 0; } }
+      </style></head>
       <body>
-        <div class="header">
-          <div class="header-left">
-            <h1>Dr KARA-ZAITRI</h1>
-            <p>Compte Rendu / Notes de Consultation</p>
-          </div>
-          <div class="header-right">
-            Édité le ${dateStr}
-          </div>
-        </div>
+        <div class="header"><div class="header-left"><h1>Dr KARA-ZAITRI</h1><p>Compte Rendu / Notes de Consultation</p></div><div class="header-right">Édité le ${dateStr}</div></div>
         <div class="content">${contentHTML}</div>
         <div class="footer">Document généré via l'outil de transcription vocale.</div>
-      </body>
-      </html>
+      </body></html>
     `);
-    win.document.close();
-    win.focus();
-    setTimeout(() => { win.print(); }, 400);
+    win.document.close(); win.focus(); setTimeout(() => { win.print(); }, 400);
   });
 
   btnClear.addEventListener('click', function() {
     if (transcriptArea.value.trim() === '') return;
     if (confirm("Êtes-vous sûr de vouloir effacer tout le texte ?")) {
-      transcriptArea.value = ''; interimText.textContent = ''; transcriptArea.focus();
+      saveHistoryState(); // Permet d'annuler l'effacement si c'était une erreur
+      transcriptArea.value = ''; interimText.textContent = ''; updateCounter(); transcriptArea.focus();
     }
   });
 
