@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dictaphone & Transcription | Dr KARA-ZAITRI</title>
+<!-- PWA -->
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#1a3a5c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Dictaphone">
+<link rel="apple-touch-icon" href="/icon-192.png">
 <style>
 /* ============================================================
    VARIABLES (Light & Dark Mode)
@@ -23,7 +30,6 @@
   --danger-bg:  #ffebee;
   --wa-color:   #25D366;
 }
-
 html[data-theme="dark"] {
   --primary:    #0A1A2E;
   --primary-lt: #1f3b5c;
@@ -38,12 +44,8 @@ html[data-theme="dark"] {
   --danger-bg:  #2e1518;
   --wa-color:   #1DA851;
 }
-
 * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
-html { scrollbar-width: none; }
-body { margin: 0; background: var(--bg); color: var(--text); line-height: 1.5; -ms-overflow-style: none; overflow-y: auto; transition: background 0.3s, color 0.3s; }
-::-webkit-scrollbar { display: none; }
-
+body { margin: 0; background: var(--bg); color: var(--text); line-height: 1.5; transition: background 0.3s, color 0.3s; }
 /* ============================================================
    BANDEAU DE NAVIGATION
    ============================================================ */
@@ -56,12 +58,10 @@ body { margin: 0; background: var(--bg); color: var(--text); line-height: 1.5; -
 .nav-bar a { text-decoration: none; color: var(--primary); font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; transition: opacity 0.2s; }
 html[data-theme="dark"] .nav-bar a { color: var(--accent); }
 .nav-bar a:hover { opacity: 0.7; }
-
 /* ============================================================
    LAYOUT APP
    ============================================================ */
 #app-container { max-width: 900px; margin: 0 auto; padding: 24px 16px 48px; transition: all 0.3s ease; }
-
 /* EN-TÊTE */
 .app-header {
   background: var(--primary); color: #fff; border-radius: var(--radius);
@@ -74,7 +74,6 @@ html[data-theme="dark"] .nav-bar a { color: var(--accent); }
 }
 .app-header h1 { font-size: 1.25rem; font-weight: 700; margin: 0 0 4px 0; }
 .app-header-sub { font-size: 0.8rem; color: rgba(255,255,255,.75); }
-
 /* BOUTONS D'EN-TÊTE (AIDE, THEME, ZEN) */
 .header-actions { display: flex; gap: 8px; }
 .icon-btn {
@@ -83,19 +82,16 @@ html[data-theme="dark"] .nav-bar a { color: var(--accent); }
   transition: background 0.2s; flex-shrink: 0; font-weight: 700;
 }
 .icon-btn:hover { background: rgba(255,255,255,.3); }
-
 /* ERREUR NAVIGATEUR */
 #unsupported-msg {
   display: none; background: var(--danger-bg); color: var(--danger); border-left: 4px solid var(--danger);
   padding: 14px 18px; border-radius: var(--radius); margin-bottom: 20px; font-size: 0.9rem; font-weight: 500;
 }
-
 /* PANNEAU PRINCIPAL */
 .panel {
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
   box-shadow: var(--shadow); padding: 24px; margin-bottom: 20px; transition: background 0.3s, border-color 0.3s;
 }
-
 /* CONTRÔLES HAUT */
 .controls-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 16px; }
 .lang-selector { display: flex; flex-direction: column; gap: 6px; }
@@ -105,7 +101,6 @@ html[data-theme="dark"] .nav-bar a { color: var(--accent); }
   color: var(--text); font-size: 0.9rem; font-weight: 500; outline: none; cursor: pointer; transition: 0.2s;
 }
 .lang-selector select:focus { border-color: var(--accent); }
-
 /* BOUTON MICROPHONE */
 .mic-wrapper { display: flex; align-items: center; gap: 12px; }
 .mic-status { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
@@ -117,13 +112,11 @@ html[data-theme="dark"] .nav-bar a { color: var(--accent); }
 html[data-theme="dark"] .btn-mic { background: var(--accent); color: #0A1A2E; }
 .btn-mic:hover { transform: scale(1.05); }
 .btn-mic.recording { background: var(--danger) !important; color: #fff !important; animation: pulse 1.5s infinite; }
-
 @keyframes pulse {
   0% { box-shadow: 0 0 0 0 rgba(229, 57, 53, 0.7); }
   70% { box-shadow: 0 0 0 15px rgba(229, 57, 53, 0); }
   100% { box-shadow: 0 0 0 0 rgba(229, 57, 53, 0); }
 }
-
 /* OUTILS TEXTE (Zoom, TTS, Undo) */
 .text-tools { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;}
 .text-tools-left { display: flex; gap: 8px; }
@@ -135,7 +128,6 @@ html[data-theme="dark"] .btn-mic { background: var(--accent); color: #0A1A2E; }
 }
 .btn-tool:hover { background: var(--border); }
 .btn-tool:disabled { opacity: 0.5; cursor: not-allowed; }
-
 /* ZONE DE TEXTE */
 .textarea-wrapper { position: relative; margin-bottom: 16px; display: flex; flex-direction: column; }
 #transcript-area {
@@ -146,7 +138,6 @@ html[data-theme="dark"] .btn-mic { background: var(--accent); color: #0A1A2E; }
 #transcript-area:focus { border-color: var(--accent); background: var(--surface); }
 #interim-text { position: absolute; bottom: 35px; left: 16px; right: 16px; color: var(--text-muted); font-style: italic; font-size: 0.95em; pointer-events: none; }
 .text-counter { position: absolute; bottom: 8px; right: 16px; font-size: 0.75rem; color: var(--text-muted); font-weight: 600; pointer-events: none;}
-
 /* BOUTONS D'ACTION / EXPORT */
 .btn-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;}
 .btn {
@@ -161,13 +152,10 @@ html[data-theme="dark"] .btn-primary { background: var(--accent); color: #0A1A2E
 .btn-secondary:hover { background: var(--border); }
 .btn-danger    { background: var(--danger-bg); color: var(--danger); border: 1px solid var(--danger); }
 .btn-danger:hover { background: var(--danger); color: #fff; }
-
 .btn-whatsapp { background: #e8f5e9; color: var(--wa-color); border: 1px solid #c8e6c9; }
 .btn-whatsapp:hover { background: var(--wa-color); color: #fff; }
-
 /* MENTION LÉGALE */
 .legal-footer { margin-top: 10px; font-size: 0.75rem; color: var(--text-muted); line-height: 1.5; text-align: justify; }
-
 /* ============================================================
    FENÊTRE D'AIDE (MODAL)
    ============================================================ */
@@ -190,11 +178,12 @@ html[data-theme="dark"] .modal-header h2 { color: var(--accent); }
 .modal-body { padding: 24px; overflow-y: auto; font-size: 0.95rem; line-height: 1.6; }
 .modal-body h3 { margin: 1.5em 0 0.5em 0; font-size: 1.05rem; color: var(--text); border-bottom: 2px solid var(--border); padding-bottom: 4px;}
 .modal-body h3:first-child { margin-top: 0; }
-.modal-body ul { padding-left: 20px; margin: 0 0 1em 0; }
-.modal-body li { margin-bottom: 6px; }
+.modal-body ul { padding-left: 20px; margin: 0 0 1em 0; list-style: none; }
+.modal-body li { margin-bottom: 6px; position: relative; padding-left: 4px; }
+.modal-body li::before { content: "\2022"; color: var(--accent); font-weight: 700; display: inline-block; width: 14px; margin-left: -16px; }
+.modal-body p { margin: 0 0 0.8em 0; }
 .help-code { background: var(--bg); border: 1px solid var(--border); padding: 2px 6px; border-radius: 4px; font-family: monospace; color: var(--primary); font-weight: 600; font-size: 0.9em; }
 html[data-theme="dark"] .help-code { color: var(--accent); }
-
 /* ============================================================
    MODE ZEN (Plein Écran)
    ============================================================ */
@@ -203,12 +192,10 @@ body.zen-active .app-header,
 body.zen-active .controls-top,
 body.zen-active .legal-footer,
 body.zen-active .btn-row { display: none !important; }
-
 body.zen-active #app-container { padding: 0; max-width: 100%; height: 100vh; }
 body.zen-active .panel { margin: 0; border: none; border-radius: 0; height: 100vh; display: flex; flex-direction: column; padding: 16px; box-shadow: none; }
 body.zen-active .textarea-wrapper { flex-grow: 1; }
 body.zen-active #transcript-area { height: 100%; font-size: 1.3rem; border-color: transparent; box-shadow: inset 0 0 10px rgba(0,0,0,0.05); }
-
 #btn-exit-zen {
   display: none; position: fixed; bottom: 20px; right: 20px; z-index: 10001;
   background: var(--primary); color: white; border: none; border-radius: 30px;
@@ -216,7 +203,16 @@ body.zen-active #transcript-area { height: 100%; font-size: 1.3rem; border-color
 }
 body.zen-active #btn-exit-zen { display: block; }
 html[data-theme="dark"] #btn-exit-zen { background: var(--accent); color: #000; }
-
+/* CORRECTIF : micro flottant accessible en mode Zen */
+#btn-zen-mic {
+  display: none; position: fixed; bottom: 20px; left: 20px; z-index: 10001;
+  width: 58px; height: 58px; border-radius: 50%; border: none;
+  background: var(--primary); color: #fff; font-size: 1.4rem; cursor: pointer;
+  align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+body.zen-active #btn-zen-mic { display: flex; }
+html[data-theme="dark"] #btn-zen-mic { background: var(--accent); color: #0A1A2E; }
+#btn-zen-mic.recording { background: var(--danger) !important; color: #fff !important; animation: pulse 1.5s infinite; }
 @media (max-width: 600px) {
   .controls-top { flex-direction: column-reverse; align-items: flex-start; }
   .mic-wrapper { width: 100%; justify-content: space-between; flex-direction: row-reverse; }
@@ -224,17 +220,20 @@ html[data-theme="dark"] #btn-exit-zen { background: var(--accent); color: #000; 
   .header-actions { align-self: flex-end; margin-top: -45px; }
   .text-tools { flex-direction: column; align-items: flex-start; }
 }
+/* =========================================
+ PRO : Masque l'ascenseur (style App native)
+   ========================================= */
+html { scrollbar-width: none; }               /* Firefox */
+body { -ms-overflow-style: none; overflow-y: auto; } /* IE/Edge */
+::-webkit-scrollbar { display: none; }         /* Chrome, Safari, Opera */
 </style>
 </head>
 <body>
-
 <!-- BANDEAU DE NAVIGATION -->
 <nav class="nav-bar">
-  <a href="https://karazaitri12-cpu.github.io/plateforme-utilitaires/">← Retour aux Utilitaires</a>
+  <a href="https://karazaitri12-cpu.github.io/plateforme-utilitaires/">&larr; Retour aux Utilitaires</a>
 </nav>
-
 <div id="app-container">
-
   <!-- EN-TÊTE -->
   <div class="app-header">
     <div class="app-header-left">
@@ -250,14 +249,12 @@ html[data-theme="dark"] #btn-exit-zen { background: var(--accent); color: #000; 
       <button class="icon-btn" id="theme-toggle" title="Changer de thème">🌙</button>
     </div>
   </div>
-
   <div id="unsupported-msg">
-    ⚠️ Votre navigateur ne supporte pas la reconnaissance vocale web. Veuillez utiliser <b>Google Chrome</b>, <b>Microsoft Edge</b> ou <b>Safari</b>.
+    ⚠️ Votre navigateur ne supporte pas la reconnaissance vocale web. Veuillez utiliser <b>Google Chrome</b>, <b>Microsoft Edge</b> ou <b>Safari</b>. Les fonctions d'édition et d'export restent utilisables.
   </div>
-
   <!-- PANNEAU PRINCIPAL -->
   <div class="panel">
-    
+
     <div class="controls-top">
       <div class="lang-selector">
         <label for="lang-select">Langue de la dictée</label>
@@ -268,13 +265,11 @@ html[data-theme="dark"] #btn-exit-zen { background: var(--accent); color: #000; 
           <option value="en-US">Anglais (États-Unis)</option>
         </select>
       </div>
-
       <div class="mic-wrapper">
         <span class="mic-status" id="mic-status">Prêt. Cliquez pour parler.</span>
         <button class="btn-mic" id="btn-mic" title="Démarrer/Arrêter la dictée">🎤</button>
       </div>
     </div>
-
     <!-- Outils de texte (Zoom, Audio, Undo) -->
     <div class="text-tools">
       <div class="text-tools-left">
@@ -286,13 +281,11 @@ html[data-theme="dark"] #btn-exit-zen { background: var(--accent); color: #000; 
         <button class="btn-tool" id="btn-zoom-in" title="Agrandir le texte">A+</button>
       </div>
     </div>
-
     <div class="textarea-wrapper">
       <textarea id="transcript-area" placeholder="Appuyez sur le micro pour dicter... Cliquez sur le [ ? ] en haut à droite pour voir les commandes vocales."></textarea>
       <div id="interim-text"></div>
       <div class="text-counter" id="text-counter">0 mot | 0 caractère</div>
     </div>
-
     <div class="btn-row">
       <button class="btn btn-primary" id="btn-copy">📋 Copier</button>
       <button class="btn btn-secondary" id="btn-print">🖨️ PDF / Imprimer</button>
@@ -301,17 +294,13 @@ html[data-theme="dark"] #btn-exit-zen { background: var(--accent); color: #000; 
       <button class="btn btn-secondary" id="btn-download">💾 TXT</button>
       <button class="btn btn-danger" style="margin-left:auto;" id="btn-clear">🗑️ Effacer</button>
     </div>
-
   </div>
-
   <div class="legal-footer">
-    <strong>Confidentialité & Technologie :</strong> L'API <em>Web Speech</em> ne stocke aucune donnée sur un serveur externe. L'écran est maintenu allumé pendant l'enregistrement. Le mode d'emploi (bouton <strong>?</strong>) détaille les formats de posologie (ex: "un comprimé 3 fois par jour"). Le texte est sauvegardé automatiquement sur votre navigateur.
+    <strong>Confidentialité & Technologie :</strong> la reconnaissance vocale utilise le service de votre navigateur : sur Chrome et Edge, l'audio est transmis aux serveurs de Google le temps du traitement (aucune donnée n'est stockée par cet outil) ; sur Safari, le traitement peut être effectué localement. Il est recommandé de dicter sans données nominatives identifiantes, ou de les ajouter manuellement ensuite. Le texte est sauvegardé automatiquement dans ce navigateur uniquement — pensez à l'effacer après usage sur un poste partagé. L'écran est maintenu allumé pendant l'enregistrement. Outil d'aide à la saisie : le texte généré doit être relu et validé par le praticien avant tout usage médical.
   </div>
-
 </div>
-
+<button id="btn-zen-mic" title="Démarrer/Arrêter la dictée">🎤</button>
 <button id="btn-exit-zen">❌ Quitter le mode Zen</button>
-
 <!-- FENÊTRE D'AIDE (MODAL) -->
 <div class="modal-overlay" id="help-modal">
   <div class="modal-content">
@@ -322,82 +311,82 @@ html[data-theme="dark"] #btn-exit-zen { background: var(--accent); color: #000; 
     <div class="modal-body">
       <h3>🗣️ Ponctuation & Mise en page</h3>
       <ul>
-        <li><strong>"virgule"</strong> ➔ <span class="help-code">,</span></li>
-        <li><strong>"point"</strong> ou <strong>"point final"</strong> ➔ <span class="help-code">.</span></li>
-        <li><strong>"deux points"</strong> ➔ <span class="help-code">:</span></li>
-        <li><strong>"à la ligne"</strong> ou <strong>"nouveau paragraphe"</strong> ➔ <em>Saut de ligne</em></li>
+        <li><strong>"virgule"</strong> &#10142; <span class="help-code">,</span></li>
+        <li><strong>"point"</strong> ou <strong>"point final"</strong> &#10142; <span class="help-code">.</span></li>
+        <li><strong>"point d'interrogation"</strong> / <strong>"point d'exclamation"</strong> &#10142; <span class="help-code">?</span> / <span class="help-code">!</span></li>
+        <li><strong>"deux points"</strong> &#10142; <span class="help-code">:</span></li>
+        <li><strong>"à la ligne"</strong> ou <strong>"nouveau paragraphe"</strong> &#10142; <em>Saut de ligne</em></li>
       </ul>
-
       <h3>💊 Ordonnances & Posologies</h3>
       <p>L'outil raccourcit automatiquement le langage médical lors de la dictée :</p>
       <ul>
-        <li><strong>"un gramme"</strong> / <strong>"deux grammes"</strong> ➔ <span class="help-code">1g</span> / <span class="help-code">2g</span></li>
-        <li><strong>"milligrammes"</strong> ➔ <span class="help-code">mg</span></li>
-        <li><strong>"un comprimé"</strong> / <strong>"deux comprimés"</strong> ➔ <span class="help-code">1 cp</span> / <span class="help-code">2 cp</span></li>
-        <li><strong>"une gélule"</strong> / <strong>"un sachet"</strong> ➔ <span class="help-code">1 gélule</span> / <span class="help-code">1 sachet</span></li>
-        <li><strong>"trois fois par jour"</strong> ➔ <span class="help-code">3x/j</span> (fonctionne pour 1, 2, 3 et 4)</li>
-        <li><strong>"cuillère à soupe"</strong> / <strong>"cuillère à café"</strong> ➔ <span class="help-code">càs</span> / <span class="help-code">càc</span></li>
+        <li><strong>"un gramme"</strong> / <strong>"deux grammes"</strong> &#10142; <span class="help-code">1g</span> / <span class="help-code">2g</span></li>
+        <li><strong>"milligrammes"</strong> &#10142; <span class="help-code">mg</span></li>
+        <li><strong>"un comprimé"</strong> / <strong>"deux comprimés"</strong> &#10142; <span class="help-code">1 cp</span> / <span class="help-code">2 cp</span></li>
+        <li><strong>"une gélule"</strong> / <strong>"un sachet"</strong> &#10142; <span class="help-code">1 gélule</span> / <span class="help-code">1 sachet</span></li>
+        <li><strong>"trois fois par jour"</strong> &#10142; <span class="help-code">3x/j</span> (fonctionne pour 1, 2, 3 et 4)</li>
+        <li><strong>"cuillère à soupe"</strong> / <strong>"cuillère à café"</strong> &#10142; <span class="help-code">càs</span> / <span class="help-code">càc</span></li>
       </ul>
-
       <h3>🩺 Lexique Acronymes</h3>
       <ul>
-        <li><strong>"H T A"</strong> ➔ <span class="help-code">HTA</span> | <strong>"E C G"</strong> ➔ <span class="help-code">ECG</span> | <strong>"I R M"</strong> ➔ <span class="help-code">IRM</span></li>
-        <li><strong>"I V G"</strong> ➔ <span class="help-code">IVG</span> | <strong>"F C V"</strong> ➔ <span class="help-code">FCV</span> | <strong>"I M C"</strong> ➔ <span class="help-code">IMC</span></li>
+        <li><strong>"H T A"</strong> &#10142; <span class="help-code">HTA</span> | <strong>"E C G"</strong> &#10142; <span class="help-code">ECG</span> | <strong>"I R M"</strong> &#10142; <span class="help-code">IRM</span></li>
+        <li><strong>"I V G"</strong> &#10142; <span class="help-code">IVG</span> | <strong>"F C V"</strong> &#10142; <span class="help-code">FCV</span> | <strong>"I M C"</strong> &#10142; <span class="help-code">IMC</span></li>
       </ul>
-
+      <h3>🔒 Confidentialité</h3>
+      <ul>
+        <li><strong>Traitement de l'audio :</strong> sur Chrome et Edge, l'audio dicté est envoyé au service de reconnaissance vocale de Google le temps de la transcription. Sur Safari récent, le traitement peut être local. Aucun enregistrement n'est conservé par cet outil.</li>
+        <li><strong>Bonne pratique :</strong> dictez le contenu médical sans identité complète du patient (ou anonymisez), puis complétez manuellement.</li>
+        <li><strong>Exports :</strong> WhatsApp et e-mail ne sont pas des canaux agréés pour des données de santé identifiantes — un rappel s'affiche avant l'envoi.</li>
+        <li><strong>Poste partagé :</strong> le texte est sauvegardé dans le navigateur ; utilisez "Effacer" en fin de session.</li>
+      </ul>
       <h3>💡 Astuces de fonctionnement</h3>
       <ul>
         <li><strong>Annuler (↩️) :</strong> Si une phrase a été mal comprise, cliquez sur "Annuler" pour effacer instantanément le dernier bloc dicté.</li>
         <li><strong>Écouter (🔊) :</strong> L'ordinateur vous relit le texte à voix haute pour vérifier pendant que vous regardez autre chose.</li>
-        <li><strong>Mode Zen (🔲) :</strong> Agrandit la zone de texte sur tout l'écran pour dicter sans distraction.</li>
+        <li><strong>Mode Zen (🔲) :</strong> Agrandit la zone de texte sur tout l'écran ; le micro reste accessible en bas à gauche.</li>
         <li><strong>Sauvegarde auto :</strong> Si vous quittez la page par erreur, votre texte sera toujours là à votre retour !</li>
       </ul>
     </div>
   </div>
 </div>
-
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  
+
   // --- ELEMENTS DU DOM ---
   const btnMic = document.getElementById('btn-mic');
+  const btnZenMic = document.getElementById('btn-zen-mic');
   const micStatus = document.getElementById('mic-status');
   const transcriptArea = document.getElementById('transcript-area');
   const interimText = document.getElementById('interim-text');
   const langSelect = document.getElementById('lang-select');
   const unsupportedMsg = document.getElementById('unsupported-msg');
   const textCounter = document.getElementById('text-counter');
-  
+
   const btnCopy = document.getElementById('btn-copy');
   const btnPrint = document.getElementById('btn-print');
   const btnDownload = document.getElementById('btn-download');
   const btnClear = document.getElementById('btn-clear');
   const btnWa = document.getElementById('btn-wa');
   const btnMail = document.getElementById('btn-mail');
-
   const btnZoomIn = document.getElementById('btn-zoom-in');
   const btnZoomOut = document.getElementById('btn-zoom-out');
   const btnUndo = document.getElementById('btn-undo');
   const btnSpeak = document.getElementById('btn-speak');
-  
+
   const themeToggle = document.getElementById('theme-toggle');
   const btnZen = document.getElementById('btn-zen');
   const btnExitZen = document.getElementById('btn-exit-zen');
-
   const btnHelp = document.getElementById('btn-help');
   const helpModal = document.getElementById('help-modal');
   const btnCloseHelp = document.getElementById('btn-close-help');
-
   // --- VARIABLES ET ETAT ---
   let historyStack = []; // Pour la fonction Annuler (Undo)
   const STORAGE_KEY = "dictaphone_autosave";
-
+  const CONFID_MSG = "Rappel confidentialité : ce canal n'est pas agréé pour la transmission de données de santé identifiantes.\nVérifiez que le texte est anonymisé ou que le patient a donné son accord.\n\nContinuer ?";
   // --- RESTAURER LE TEXTE SAUVEGARDE ---
   const savedText = localStorage.getItem(STORAGE_KEY);
-  if(savedText) { transcriptArea.value = savedText; updateCounter(); }
-
+  if(savedText) { transcriptArea.value = savedText; }
   function saveToLocal() { localStorage.setItem(STORAGE_KEY, transcriptArea.value); }
-
   // --- COMPTEUR DE MOTS ---
   function updateCounter() {
     const text = transcriptArea.value.trim();
@@ -406,8 +395,8 @@ document.addEventListener('DOMContentLoaded', function() {
     textCounter.textContent = `${words} mot(s) | ${chars} caractère(s)`;
     saveToLocal();
   }
+  updateCounter();
   transcriptArea.addEventListener('input', updateCounter);
-
   // --- HISTORIQUE (UNDO) ---
   function saveHistoryState() {
     historyStack.push(transcriptArea.value);
@@ -421,7 +410,6 @@ document.addEventListener('DOMContentLoaded', function() {
       btnUndo.disabled = historyStack.length === 0;
     }
   });
-
   // --- LECTURE AUDIO (TEXT-TO-SPEECH) ---
   let isSpeaking = false;
   btnSpeak.addEventListener('click', () => {
@@ -439,7 +427,6 @@ document.addEventListener('DOMContentLoaded', function() {
       window.speechSynthesis.speak(utterance);
     }
   });
-
   // --- MODE ZEN ---
   function toggleZen() {
     document.body.classList.toggle('zen-active');
@@ -451,12 +438,10 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   btnZen.addEventListener('click', toggleZen);
   btnExitZen.addEventListener('click', toggleZen);
-
   // --- GESTION DE LA FENETRE D'AIDE ---
   btnHelp.addEventListener('click', () => { helpModal.classList.add('active'); });
   btnCloseHelp.addEventListener('click', () => { helpModal.classList.remove('active'); });
   helpModal.addEventListener('click', (e) => { if(e.target === helpModal) helpModal.classList.remove('active'); });
-
   // --- GESTION DU THEME SOMBRE ---
   const THEME_KEY = "dictaphone_theme";
   function applyTheme(theme) {
@@ -469,141 +454,26 @@ document.addEventListener('DOMContentLoaded', function() {
     let next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
     applyTheme(next); localStorage.setItem(THEME_KEY, next);
   });
-
   // --- GESTION DE LA TAILLE DE POLICE ---
   let currentFontSize = 16;
   btnZoomIn.addEventListener('click', () => { if(currentFontSize < 32) { currentFontSize += 2; transcriptArea.style.fontSize = currentFontSize + 'px'; } });
   btnZoomOut.addEventListener('click', () => { if(currentFontSize > 12) { currentFontSize -= 2; transcriptArea.style.fontSize = currentFontSize + 'px'; } });
-
   // --- WAKE LOCK API (Garder l'écran allumé) ---
   let wakeLock = null;
   async function requestWakeLock() { if ('wakeLock' in navigator) { try { wakeLock = await navigator.wakeLock.request('screen'); } catch (e) {} } }
   function releaseWakeLock() { if (wakeLock !== null) { wakeLock.release().then(() => { wakeLock = null; }); } }
   document.addEventListener('visibilitychange', () => { if (wakeLock !== null && document.visibilityState === 'visible' && isRecording) requestWakeLock(); });
-
-  // --- INITIALISATION API WEB SPEECH ---
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRecognition) {
-    unsupportedMsg.style.display = 'block';
-    btnMic.disabled = true; btnMic.style.opacity = '0.5'; btnMic.style.cursor = 'not-allowed';
-    return;
-  }
-
-  const recognition = new SpeechRecognition();
-  recognition.continuous = true;
-  recognition.interimResults = true;
-  recognition.lang = langSelect.value;
-  let isRecording = false;
-  let manualStop = false;
-
-  langSelect.addEventListener('change', function() { recognition.lang = this.value; if (isRecording) { stopDictation(); setTimeout(startDictation, 300); } });
-
-  btnMic.addEventListener('click', function() {
-    if (isRecording) { manualStop = true; stopDictation(); } else { manualStop = false; startDictation(); }
-  });
-
-  function startDictation() { try { recognition.start(); requestWakeLock(); } catch(e) {} }
-  function stopDictation() { recognition.stop(); releaseWakeLock(); updateUIStopped(); }
-
-  function updateUIStarted() {
-    isRecording = true; btnMic.classList.add('recording');
-    micStatus.textContent = "Écoute en cours (L'écran restera allumé)...";
-    micStatus.style.color = "var(--danger)"; interimText.textContent = "";
-  }
-  function updateUIStopped() {
-    isRecording = false; btnMic.classList.remove('recording');
-    micStatus.textContent = "Prêt. Cliquez pour parler.";
-    micStatus.style.color = "var(--text-muted)"; interimText.textContent = "";
-  }
-
-  // --- FILTRE INTELLIGENT DE PONCTUATION ET POSOLOGIES ---
-  function applySmartPunctuation(text) {
-    let t = text;
-    // Ponctuation
-    t = t.replace(/\b(point final|point)\b/gi, '.');
-    t = t.replace(/\b(virgule)\b/gi, ',');
-    t = t.replace(/\b(point d'interrogation)\b/gi, '?');
-    t = t.replace(/\b(point d'exclamation)\b/gi, '!');
-    t = t.replace(/\b(deux points)\b/gi, ':');
-    t = t.replace(/\b(à la ligne|nouveau paragraphe|nouvelle ligne)\b/gi, '\n');
-    
-    // Posologies et traitements
-    t = t.replace(/\b(un gramme)\b/gi, '1g');
-    t = t.replace(/\b(deux grammes)\b/gi, '2g');
-    t = t.replace(/\b(trois grammes)\b/gi, '3g');
-    t = t.replace(/\b(milligrammes|milligramme)\b/gi, 'mg');
-    t = t.replace(/\b(microgrammes|microgramme)\b/gi, 'µg');
-    t = t.replace(/\b(un comprimé)\b/gi, '1 cp');
-    t = t.replace(/\b(deux comprimés)\b/gi, '2 cp');
-    t = t.replace(/\b(une gélule)\b/gi, '1 gélule');
-    t = t.replace(/\b(un sachet)\b/gi, '1 sachet');
-    t = t.replace(/\b(une fois par jour)\b/gi, '1x/j');
-    t = t.replace(/\b(deux fois par jour)\b/gi, '2x/j');
-    t = t.replace(/\b(trois fois par jour)\b/gi, '3x/j');
-    t = t.replace(/\b(quatre fois par jour)\b/gi, '4x/j');
-    t = t.replace(/\b(cuillère à soupe)\b/gi, 'càs');
-    t = t.replace(/\b(cuillère à café)\b/gi, 'càc');
-
-    // Acronymes
-    t = t.replace(/\b(h t a)\b/gi, 'HTA');
-    t = t.replace(/\b(e c g)\b/gi, 'ECG');
-    t = t.replace(/\b(i r m)\b/gi, 'IRM');
-    t = t.replace(/\b(i v g)\b/gi, 'IVG');
-    t = t.replace(/\b(f c v)\b/gi, 'FCV');
-    t = t.replace(/\b(b m i|i m c)\b/gi, 'IMC');
-
-    // Nettoyage espaces
-    t = t.replace(/ \./g, '.'); t = t.replace(/ ,/g, ','); t = t.replace(/ \?/g, '?'); t = t.replace(/ \!/g, '!');
-    return t;
-  }
-
-  // --- EVENEMENTS SPEECH RECOGNITION ---
-  recognition.onstart = function() { updateUIStarted(); };
-
-  recognition.onresult = function(event) {
-    let finalTranscript = ''; let interimTranscriptStr = '';
-    for (let i = event.resultIndex; i < event.results.length; ++i) {
-      if (event.results[i].isFinal) finalTranscript += event.results[i][0].transcript;
-      else interimTranscriptStr += event.results[i][0].transcript;
-    }
-
-    if (finalTranscript !== '') {
-      saveHistoryState(); // Sauvegarde pour la fonction Undo
-      let currentVal = transcriptArea.value;
-      let cleanTranscript = applySmartPunctuation(finalTranscript);
-
-      if (currentVal.length > 0 && !currentVal.match(/[\s\n]$/) && !cleanTranscript.match(/^[.,?!:]/)) {
-        cleanTranscript = ' ' + cleanTranscript;
-      }
-
-      if (currentVal.length === 0 || currentVal.match(/[.!?\n]\s*$/)) {
-        cleanTranscript = cleanTranscript.replace(/^\s*([a-zà-ÿ])/, function(m) { return m.toUpperCase(); });
-      }
-
-      transcriptArea.value = currentVal + cleanTranscript;
-      transcriptArea.scrollTop = transcriptArea.scrollHeight;
-      updateCounter();
-    }
-    interimText.textContent = interimTranscriptStr;
-  };
-
-  recognition.onerror = function(event) {
-    if (event.error === 'not-allowed') { alert("L'accès au microphone a été refusé."); manualStop = true; }
-    updateUIStopped();
-  };
-
-  recognition.onend = function() { if (!manualStop && isRecording) startDictation(); else updateUIStopped(); };
-
-  // --- BOUTONS D'EXPORT ---
+  // --- BOUTONS D'EXPORT (fonctionnels même sans reconnaissance vocale) ---
   btnCopy.addEventListener('click', function() {
     if (!transcriptArea.value.trim()) return;
-    transcriptArea.select();
-    navigator.clipboard.writeText(transcriptArea.value).then(function() {
+    const done = function() {
       let originalText = btnCopy.innerHTML; btnCopy.innerHTML = "✅ Copié !";
       setTimeout(function() { btnCopy.innerHTML = originalText; }, 2000);
+    };
+    navigator.clipboard.writeText(transcriptArea.value).then(done).catch(function() {
+      transcriptArea.select(); document.execCommand('copy'); done();
     });
   });
-
   btnDownload.addEventListener('click', function() {
     if (!transcriptArea.value.trim()) return;
     const blob = new Blob([transcriptArea.value], { type: "text/plain;charset=utf-8" });
@@ -611,22 +481,23 @@ document.addEventListener('DOMContentLoaded', function() {
     const a = document.createElement('a'); a.href = url; a.download = "Dictaphone_" + new Date().toISOString().split('T')[0] + ".txt";
     document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
   });
-
   btnWa.addEventListener('click', function() {
     if (!transcriptArea.value.trim()) return;
-    window.open('https://wa.me/?text=' + encodeURIComponent(transcriptArea.value), '_blank');
+    if (!confirm(CONFID_MSG)) return;
+    const w = window.open('https://wa.me/?text=' + encodeURIComponent(transcriptArea.value), '_blank');
+    if (!w) alert("Veuillez autoriser les fenêtres pop-up pour ce site.");
   });
-
   btnMail.addEventListener('click', function() {
     if (!transcriptArea.value.trim()) return;
-    window.open('mailto:?subject=Note de Consultation&body=' + encodeURIComponent(transcriptArea.value), '_self');
+    if (!confirm(CONFID_MSG)) return;
+    window.location.href = 'mailto:?subject=Note de Consultation&body=' + encodeURIComponent(transcriptArea.value);
   });
-
   btnPrint.addEventListener('click', function() {
     if (!transcriptArea.value.trim()) return;
     let contentHTML = transcriptArea.value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
     let dateStr = new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     let win = window.open('', '_blank');
+    if (!win) { alert("Veuillez autoriser les fenêtres pop-up pour ce site afin d'imprimer."); return; }
     win.document.write(`
       <!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Document - Dr KARA-ZAITRI</title>
       <style>
@@ -647,7 +518,6 @@ document.addEventListener('DOMContentLoaded', function() {
     `);
     win.document.close(); win.focus(); setTimeout(() => { win.print(); }, 400);
   });
-
   btnClear.addEventListener('click', function() {
     if (transcriptArea.value.trim() === '') return;
     if (confirm("Êtes-vous sûr de vouloir effacer tout le texte ?")) {
@@ -655,12 +525,142 @@ document.addEventListener('DOMContentLoaded', function() {
       transcriptArea.value = ''; interimText.textContent = ''; updateCounter(); transcriptArea.focus();
     }
   });
+  // --- FILTRE INTELLIGENT DE PONCTUATION ET POSOLOGIES ---
+  // CORRECTIF : \b échoue en JS après une lettre accentuée (é, à...) :
+  // "un comprimé" ou "cuillère à café" ne matchaient jamais. On utilise
+  // des frontières explicites (début/espace avant, fin/espace/ponctuation après).
+  function rep(t, phrase, out) {
+    const rx = new RegExp("(^|[\\s(«])(?:" + phrase + ")(?=$|[\\s.,;:!?)»\\n])", "gim");
+    return t.replace(rx, '$1' + out);
+  }
+  function applySmartPunctuation(text) {
+    let t = text;
+    // Ponctuation — CORRECTIF : expressions longues traitées AVANT "point"
+    t = rep(t, "point d[’']interrogation", '?');
+    t = rep(t, "point d[’']exclamation", '!');
+    t = rep(t, 'point final', '.');
+    t = rep(t, 'deux points', ':');
+    t = rep(t, 'point', '.');
+    t = rep(t, 'virgule', ',');
+    t = rep(t, 'à la ligne|nouveau paragraphe|nouvelle ligne', '\n');
 
+    // Posologies et traitements
+    t = rep(t, 'un gramme', '1g');
+    t = rep(t, 'deux grammes', '2g');
+    t = rep(t, 'trois grammes', '3g');
+    t = rep(t, 'milligrammes|milligramme', 'mg');
+    t = rep(t, 'microgrammes|microgramme', 'µg');
+    t = rep(t, 'un comprimé', '1 cp');
+    t = rep(t, 'deux comprimés', '2 cp');
+    t = rep(t, 'une gélule', '1 gélule');
+    t = rep(t, 'un sachet', '1 sachet');
+    t = rep(t, 'une fois par jour', '1x/j');
+    t = rep(t, 'deux fois par jour', '2x/j');
+    t = rep(t, 'trois fois par jour', '3x/j');
+    t = rep(t, 'quatre fois par jour', '4x/j');
+    t = rep(t, 'cuillère à soupe', 'càs');
+    t = rep(t, 'cuillère à café', 'càc');
+    // Acronymes
+    t = rep(t, 'h t a', 'HTA');
+    t = rep(t, 'e c g', 'ECG');
+    t = rep(t, 'i r m', 'IRM');
+    t = rep(t, 'i v g', 'IVG');
+    t = rep(t, 'f c v', 'FCV');
+    t = rep(t, 'b m i|i m c', 'IMC');
+    // Nettoyage espaces avant ponctuation et sauts de ligne
+    t = t.replace(/ +([.,?!:])/g, '$1');
+    t = t.replace(/ +\n/g, '\n');
+    return t;
+  }
+  // --- INITIALISATION API WEB SPEECH ---
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let isRecording = false;
+  if (!SpeechRecognition) {
+    unsupportedMsg.style.display = 'block';
+    btnMic.disabled = true; btnMic.style.opacity = '0.5'; btnMic.style.cursor = 'not-allowed';
+    btnZenMic.disabled = true; btnZenMic.style.opacity = '0.5';
+  } else {
+  const recognition = new SpeechRecognition();
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.lang = langSelect.value;
+  let manualStop = false;
+  let lastRestart = 0, restartCount = 0; // garde-fou anti-boucle (erreurs réseau)
+  langSelect.addEventListener('change', function() { recognition.lang = this.value; if (isRecording) { stopDictation(); setTimeout(startDictation, 300); } });
+  function toggleMic() {
+    if (isRecording) { manualStop = true; stopDictation(); } else { manualStop = false; startDictation(); }
+  }
+  btnMic.addEventListener('click', toggleMic);
+  btnZenMic.addEventListener('click', toggleMic); // CORRECTIF : micro accessible en mode Zen
+  function startDictation() { try { recognition.start(); requestWakeLock(); } catch(e) {} }
+  function stopDictation() { recognition.stop(); releaseWakeLock(); updateUIStopped(); }
+  function updateUIStarted() {
+    isRecording = true;
+    btnMic.classList.add('recording'); btnZenMic.classList.add('recording');
+    micStatus.textContent = "Écoute en cours (L'écran restera allumé)...";
+    micStatus.style.color = "var(--danger)"; interimText.textContent = "";
+  }
+  function updateUIStopped() {
+    isRecording = false;
+    btnMic.classList.remove('recording'); btnZenMic.classList.remove('recording');
+    micStatus.textContent = "Prêt. Cliquez pour parler.";
+    micStatus.style.color = "var(--text-muted)"; interimText.textContent = "";
+  }
+  // --- EVENEMENTS SPEECH RECOGNITION ---
+  recognition.onstart = function() { updateUIStarted(); };
+  recognition.onresult = function(event) {
+    let finalTranscript = ''; let interimTranscriptStr = '';
+    for (let i = event.resultIndex; i < event.results.length; ++i) {
+      if (event.results[i].isFinal) finalTranscript += event.results[i][0].transcript;
+      else interimTranscriptStr += event.results[i][0].transcript;
+    }
+    if (finalTranscript !== '') {
+      saveHistoryState(); // Sauvegarde pour la fonction Undo
+      let currentVal = transcriptArea.value;
+      let cleanTranscript = applySmartPunctuation(finalTranscript);
+      if (currentVal.length > 0 && !currentVal.match(/[\s\n]$/) && !cleanTranscript.match(/^[.,?!:]/)) {
+        cleanTranscript = ' ' + cleanTranscript;
+      }
+      if (currentVal.length === 0 || currentVal.match(/[.!?\n]\s*$/)) {
+        cleanTranscript = cleanTranscript.replace(/^\s*([a-zà-ÿ])/, function(m) { return m.toUpperCase(); });
+      }
+      transcriptArea.value = currentVal + cleanTranscript;
+      transcriptArea.scrollTop = transcriptArea.scrollHeight;
+      updateCounter();
+    }
+    interimText.textContent = interimTranscriptStr;
+  };
+  // CORRECTIF : seules les erreurs fatales arrêtent la dictée.
+  // 'no-speech' (silence ~8s), 'aborted' et 'network' laissent onend relancer.
+  recognition.onerror = function(event) {
+    if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+      alert("L'accès au microphone a été refusé. Vérifiez les autorisations du navigateur.");
+      manualStop = true; updateUIStopped();
+    } else if (event.error === 'audio-capture') {
+      alert("Aucun microphone détecté.");
+      manualStop = true; updateUIStopped();
+    }
+  };
+  recognition.onend = function() {
+    if (!manualStop && isRecording) {
+      // Garde-fou : si le service échoue en boucle (>5 relances en <1s), on s'arrête proprement
+      const now = Date.now();
+      if (now - lastRestart < 1000) restartCount++; else restartCount = 0;
+      lastRestart = now;
+      if (restartCount > 5) { updateUIStopped(); micStatus.textContent = "Service vocal indisponible. Réessayez."; return; }
+      startDictation();
+    } else {
+      updateUIStopped();
+    }
+  };
+  } // fin if(SpeechRecognition)
+  // --- PWA : enregistrement du service worker (fichiers globaux à la racine) ---
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').catch(function(){});
+  }
 });
 </script>
-
-<!-- TRACKING UMAMI -->
+<!-- TRACKING UMAMI (RGPD compliant, no cookies) -->
 <script defer src="https://cloud.umami.is/script.js" data-website-id="b182aba6-225e-47ac-b6be-892e033a6013"></script>
-
 </body>
 </html>
