@@ -275,6 +275,7 @@ body { -ms-overflow-style: none; overflow-y: auto; } /* IE/Edge */
       <div class="text-tools-left">
         <button class="btn-tool" id="btn-undo" title="Annuler la dernière phrase" disabled>↩️ Annuler</button>
         <button class="btn-tool" id="btn-speak" title="Relire le texte à voix haute">🔊 Écouter</button>
+        <button class="btn-tool" id="btn-case" title="Basculer Majuscule / minuscule">🔠 Aa</button>
       </div>
       <div class="text-tools-right">
         <button class="btn-tool" id="btn-zoom-out" title="Diminuer le texte">A-</button>
@@ -288,9 +289,6 @@ body { -ms-overflow-style: none; overflow-y: auto; } /* IE/Edge */
     </div>
     <div class="btn-row">
       <button class="btn btn-primary" id="btn-copy">📋 Copier</button>
-      <button class="btn btn-secondary" id="btn-print">🖨️ PDF / Imprimer</button>
-      <button class="btn btn-whatsapp" id="btn-wa">💬 WhatsApp</button>
-      <button class="btn btn-secondary" id="btn-mail">✉️ Email</button>
       <button class="btn btn-secondary" id="btn-download">💾 TXT</button>
       <button class="btn btn-danger" style="margin-left:auto;" id="btn-clear">🗑️ Effacer</button>
     </div>
@@ -336,13 +334,13 @@ body { -ms-overflow-style: none; overflow-y: auto; } /* IE/Edge */
       <ul>
         <li><strong>Traitement de l'audio :</strong> sur Chrome et Edge, l'audio dicté est envoyé au service de reconnaissance vocale de Google le temps de la transcription. Sur Safari récent, le traitement peut être local. Aucun enregistrement n'est conservé par cet outil.</li>
         <li><strong>Bonne pratique :</strong> dictez le contenu médical sans identité complète du patient (ou anonymisez), puis complétez manuellement.</li>
-        <li><strong>Exports :</strong> WhatsApp et e-mail ne sont pas des canaux agréés pour des données de santé identifiantes — un rappel s'affiche avant l'envoi.</li>
         <li><strong>Poste partagé :</strong> le texte est sauvegardé dans le navigateur ; utilisez "Effacer" en fin de session.</li>
       </ul>
       <h3>💡 Astuces de fonctionnement</h3>
       <ul>
         <li><strong>Annuler (↩️) :</strong> Si une phrase a été mal comprise, cliquez sur "Annuler" pour effacer instantanément le dernier bloc dicté.</li>
         <li><strong>Écouter (🔊) :</strong> L'ordinateur vous relit le texte à voix haute pour vérifier pendant que vous regardez autre chose.</li>
+        <li><strong>Aa :</strong> Bascule tout le texte entre MAJUSCULES et minuscules.</li>
         <li><strong>Mode Zen (🔲) :</strong> Agrandit la zone de texte sur tout l'écran ; le micro reste accessible en bas à gauche.</li>
         <li><strong>Sauvegarde auto :</strong> Si vous quittez la page par erreur, votre texte sera toujours là à votre retour !</li>
       </ul>
@@ -363,15 +361,13 @@ document.addEventListener('DOMContentLoaded', function() {
   const textCounter = document.getElementById('text-counter');
 
   const btnCopy = document.getElementById('btn-copy');
-  const btnPrint = document.getElementById('btn-print');
   const btnDownload = document.getElementById('btn-download');
   const btnClear = document.getElementById('btn-clear');
-  const btnWa = document.getElementById('btn-wa');
-  const btnMail = document.getElementById('btn-mail');
   const btnZoomIn = document.getElementById('btn-zoom-in');
   const btnZoomOut = document.getElementById('btn-zoom-out');
   const btnUndo = document.getElementById('btn-undo');
   const btnSpeak = document.getElementById('btn-speak');
+  const btnCase = document.getElementById('btn-case');
 
   const themeToggle = document.getElementById('theme-toggle');
   const btnZen = document.getElementById('btn-zen');
@@ -382,7 +378,6 @@ document.addEventListener('DOMContentLoaded', function() {
   // --- VARIABLES ET ETAT ---
   let historyStack = []; // Pour la fonction Annuler (Undo)
   const STORAGE_KEY = "dictaphone_autosave";
-  const CONFID_MSG = "Rappel confidentialité : ce canal n'est pas agréé pour la transmission de données de santé identifiantes.\nVérifiez que le texte est anonymisé ou que le patient a donné son accord.\n\nContinuer ?";
   // --- RESTAURER LE TEXTE SAUVEGARDE ---
   const savedText = localStorage.getItem(STORAGE_KEY);
   if(savedText) { transcriptArea.value = savedText; }
@@ -426,6 +421,15 @@ document.addEventListener('DOMContentLoaded', function() {
       utterance.onerror = () => { isSpeaking = false; btnSpeak.innerHTML = "🔊 Écouter"; };
       window.speechSynthesis.speak(utterance);
     }
+  });
+  // --- BASCULE MAJUSCULE / MINUSCULE ---
+  let isUpperCase = false;
+  btnCase.addEventListener('click', () => {
+    if (!transcriptArea.value.trim()) return;
+    saveHistoryState();
+    transcriptArea.value = isUpperCase ? transcriptArea.value.toLowerCase() : transcriptArea.value.toUpperCase();
+    isUpperCase = !isUpperCase;
+    updateCounter();
   });
   // --- MODE ZEN ---
   function toggleZen() {
@@ -480,43 +484,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a'); a.href = url; a.download = "Dictaphone_" + new Date().toISOString().split('T')[0] + ".txt";
     document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-  });
-  btnWa.addEventListener('click', function() {
-    if (!transcriptArea.value.trim()) return;
-    if (!confirm(CONFID_MSG)) return;
-    const w = window.open('https://wa.me/?text=' + encodeURIComponent(transcriptArea.value), '_blank');
-    if (!w) alert("Veuillez autoriser les fenêtres pop-up pour ce site.");
-  });
-  btnMail.addEventListener('click', function() {
-    if (!transcriptArea.value.trim()) return;
-    if (!confirm(CONFID_MSG)) return;
-    window.location.href = 'mailto:?subject=Note de Consultation&body=' + encodeURIComponent(transcriptArea.value);
-  });
-  btnPrint.addEventListener('click', function() {
-    if (!transcriptArea.value.trim()) return;
-    let contentHTML = transcriptArea.value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
-    let dateStr = new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-    let win = window.open('', '_blank');
-    if (!win) { alert("Veuillez autoriser les fenêtres pop-up pour ce site afin d'imprimer."); return; }
-    win.document.write(`
-      <!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Document - Dr KARA-ZAITRI</title>
-      <style>
-        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 25mm 20mm; line-height: 1.6; color: #111; font-size: 11pt; }
-        .header { border-bottom: 2px solid #1a3a5c; padding-bottom: 12px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: flex-end; }
-        .header-left h1 { color: #1a3a5c; font-size: 18pt; margin: 0 0 4px 0; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
-        .header-left p { margin: 0; color: #555; font-size: 10pt; }
-        .header-right { text-align: right; color: #666; font-size: 10pt; }
-        .content { font-size: 11pt; text-align: justify; }
-        .footer { margin-top: 40px; padding-top: 15px; border-top: 1px solid #ddd; text-align: center; color: #888; font-size: 9pt; }
-        @media print { body { padding: 0; } }
-      </style></head>
-      <body>
-        <div class="header"><div class="header-left"><h1>Dr KARA-ZAITRI</h1><p>Compte Rendu / Notes de Consultation</p></div><div class="header-right">Édité le ${dateStr}</div></div>
-        <div class="content">${contentHTML}</div>
-        <div class="footer">Document généré via l'outil de transcription vocale.</div>
-      </body></html>
-    `);
-    win.document.close(); win.focus(); setTimeout(() => { win.print(); }, 400);
   });
   btnClear.addEventListener('click', function() {
     if (transcriptArea.value.trim() === '') return;
