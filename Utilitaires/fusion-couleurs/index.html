@@ -13,7 +13,29 @@
             --text-color: #f3f3f3;
             --text-muted: #888;
             --primary-accent: #3b82f6;
+            --control-bg: #2a2a2a;
+            --control-hover: #333;
+            --overlay-bg: rgba(255,255,255,0.03);
+            --overlay-hover: rgba(255,255,255,0.1);
+            --card-border: rgba(255,255,255,0.1);
             --circle-size: 180px;
+        }
+
+        /* =========================================
+           THÈME CLAIR — activé via body.theme-light
+           (bascule utilisateur, choix mémorisé en localStorage)
+           ========================================= */
+        body.theme-light {
+            --bg-color: #f4f7f9;
+            --panel-bg: #ffffff;
+            --border-color: #cfd8dc;
+            --text-color: #263248;
+            --text-muted: #607d8b;
+            --control-bg: #eef1f4;
+            --control-hover: #e2e6ea;
+            --overlay-bg: rgba(0,0,0,0.03);
+            --overlay-hover: rgba(0,0,0,0.06);
+            --card-border: rgba(0,0,0,0.08);
         }
 
         body {
@@ -25,12 +47,51 @@
             background-color: var(--bg-color);
             font-family: 'Inter', sans-serif;
             color: var(--text-color);
-            padding: 20px;
+            padding: 0 20px 20px;
             box-sizing: border-box;
             overflow-x: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         * { box-sizing: border-box; }
+
+        /* ✅ BANDEAU DE NAVIGATION (modèle standard de la plateforme) */
+        .nav-bar {
+            width: 100%;
+            position: sticky;
+            top: 0;
+            z-index: 9999;
+            background: #fff;
+            border-bottom: 1px solid #cfd8dc;
+            padding: 12px 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin: 0 -20px 20px;
+            width: calc(100% + 40px);
+        }
+        .nav-bar a {
+            text-decoration: none;
+            color: #1a3a5c;
+            font-weight: 600;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s;
+        }
+        .nav-bar a:hover { color: #345a7a; }
+
+        .nav-theme-toggle {
+            width: 34px; height: 34px; border-radius: 50%;
+            border: 1px solid #cfd8dc; background: #f4f7f9; color: #1a3a5c;
+            font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: 0.2s; flex-shrink: 0;
+        }
+        .nav-theme-toggle:hover { background: #e3f2fd; }
 
         h1 {
             font-size: clamp(1.5rem, 3.5vw, 2.2rem);
@@ -80,7 +141,7 @@
         }
 
         select, button, input[type="range"] {
-            background: #2a2a2a;
+            background: var(--control-bg);
             color: var(--text-color);
             border: 1px solid var(--border-color);
             padding: 8px 12px;
@@ -91,11 +152,11 @@
             transition: 0.2s;
         }
 
-        select:hover, button:hover { background: #333; }
+        select:hover, button:hover { background: var(--control-hover); }
         button:active { transform: scale(0.95); }
         
         .btn-icon { padding: 8px; font-size: 1.1rem; }
-        .btn-primary { background: var(--primary-accent); border-color: var(--primary-accent); font-weight: 600; }
+        .btn-primary { background: var(--primary-accent); border-color: var(--primary-accent); font-weight: 600; color: #fff; }
         .btn-primary:hover { background: #2563eb; }
 
         /* --- ZONE DE DESSIN --- */
@@ -197,7 +258,7 @@
         .color-inputs { display: flex; flex-direction: column; gap: 12px; }
         .input-group {
             display: flex; align-items: center; justify-content: space-between;
-            background: rgba(255,255,255,0.03); padding: 8px 15px; border-radius: 8px;
+            background: var(--overlay-bg); padding: 8px 15px; border-radius: 8px;
         }
         .input-group label { font-weight: 600; display: flex; align-items: center; gap: 10px; }
         input[type="color"] {
@@ -213,7 +274,7 @@
             flex-grow: 1;
         }
         .result-item {
-            background: rgba(255,255,255,0.03); padding: 10px; border-radius: 8px;
+            background: var(--overlay-bg); padding: 10px; border-radius: 8px;
             display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center;
         }
         .result-label { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; }
@@ -221,8 +282,8 @@
             font-family: monospace; font-size: 1rem; font-weight: 800;
             cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: background 0.2s;
         }
-        .result-hex:hover { background: rgba(255,255,255,0.1); }
-        .color-preview { width: 100%; height: 25px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.1); }
+        .result-hex:hover { background: var(--overlay-hover); }
+        .color-preview { width: 100%; height: 25px; border-radius: 4px; border: 1px solid var(--card-border); }
 
         .export-btn-container { margin-top: 15px; }
         .export-btn { width: 100%; justify-content: center; padding: 12px; }
@@ -235,12 +296,12 @@
 </head>
 <body>
 
-<!-- EN-TÊTE -->
-    <header class="main-header">
-        <h1>Plateforme Utilitaires Techniques</h1>
-        <p class="subtitle">Outils bureautiques et productivité | Site FemCare Hub sur <a href="https://www.dr-karazaitri-ma.net">www.dr-karazaitri-ma.net</a></p>
-    </header>
-    
+    <!-- ✅ BANDEAU DE NAVIGATION -->
+    <nav class="nav-bar">
+        <a href="https://karazaitri12-cpu.github.io/plateforme-utilitaires/">← Retour aux Utilitaires</a>
+        <button class="nav-theme-toggle" id="themeToggle" title="Changer de thème" aria-label="Changer de thème">🌙</button>
+    </nav>
+
     <h1>Fusion de Couleurs PRO</h1>
     <div class="subtitle">Espace pour générer un schéma : testez vos mélanges !</div>
 
@@ -273,15 +334,15 @@
 
     <!-- ZONE DE DESSIN -->
     <div class="workspace" id="workspace">
-        <div class="circle" id="circle1">
+        <div class="circle" id="circle1" title="Cliquer pour copier · glisser pour déplacer">
             <span class="color-number">1</span>
             <span class="hex-code">#FF3333</span>
         </div>
-        <div class="circle" id="circle2">
+        <div class="circle" id="circle2" title="Cliquer pour copier · glisser pour déplacer">
             <span class="color-number">2</span>
             <span class="hex-code">#33FF33</span>
         </div>
-        <div class="circle" id="circle3">
+        <div class="circle" id="circle3" title="Cliquer pour copier · glisser pour déplacer">
             <span class="color-number">3</span>
             <span class="hex-code">#3333FF</span>
         </div>
@@ -293,15 +354,15 @@
             <h2>Couleurs de base</h2>
             <div class="color-inputs">
                 <div class="input-group">
-                    <label>Cercle 1 <span id="label-val-1" style="font-family: monospace; font-size: 0.9em; color:#888;"></span></label>
+                    <label>Cercle 1 <span id="label-val-1" style="font-family: monospace; font-size: 0.9em; color:var(--text-muted);"></span></label>
                     <input type="color" id="color1">
                 </div>
                 <div class="input-group">
-                    <label>Cercle 2 <span id="label-val-2" style="font-family: monospace; font-size: 0.9em; color:#888;"></span></label>
+                    <label>Cercle 2 <span id="label-val-2" style="font-family: monospace; font-size: 0.9em; color:var(--text-muted);"></span></label>
                     <input type="color" id="color2">
                 </div>
                 <div class="input-group">
-                    <label>Cercle 3 <span id="label-val-3" style="font-family: monospace; font-size: 0.9em; color:#888;"></span></label>
+                    <label>Cercle 3 <span id="label-val-3" style="font-family: monospace; font-size: 0.9em; color:var(--text-muted);"></span></label>
                     <input type="color" id="color3">
                 </div>
             </div>
@@ -338,6 +399,26 @@
     </div>
 
 <script>
+    /* =========================================
+       0. THÈME CLAIR / SOMBRE
+    ========================================= */
+    const themeToggle = document.getElementById('themeToggle');
+    function applyTheme(theme) {
+        if (theme === 'light') {
+            document.body.classList.add('theme-light');
+            themeToggle.textContent = '☀️';
+        } else {
+            document.body.classList.remove('theme-light');
+            themeToggle.textContent = '🌙';
+        }
+    }
+    applyTheme(localStorage.getItem('fusionTheme') || 'dark');
+    themeToggle.addEventListener('click', () => {
+        const next = document.body.classList.contains('theme-light') ? 'dark' : 'light';
+        applyTheme(next);
+        localStorage.setItem('fusionTheme', next);
+    });
+
     /* =========================================
        1. VARIABLES ET ÉLÉMENTS DOM
     ========================================= */
@@ -469,13 +550,18 @@
             document.getElementById(`val-${u.id}`).textContent = formatColor(u.hex, format);
         });
 
-        // Met à jour l'URL (Partageable)
-        const url = new URL(window.location);
-        url.searchParams.set('c1', colors[0].replace('#',''));
-        url.searchParams.set('c2', colors[1].replace('#',''));
-        url.searchParams.set('c3', colors[2].replace('#',''));
-        url.searchParams.set('mode', ui.mode.value);
-        window.history.replaceState({}, '', url);
+        // Met à jour l'URL (Partageable) — protégé : certains contextes d'affichage
+        // (iframe en mode "srcdoc", aperçu sandboxé) interdisent replaceState et lèvent une SecurityError.
+        try {
+            const url = new URL(window.location);
+            url.searchParams.set('c1', colors[0].replace('#',''));
+            url.searchParams.set('c2', colors[1].replace('#',''));
+            url.searchParams.set('c3', colors[2].replace('#',''));
+            url.searchParams.set('mode', ui.mode.value);
+            window.history.replaceState({}, '', url);
+        } catch (err) {
+            // Contexte où l'URL ne peut pas être modifiée (ex: iframe srcdoc) : on ignore silencieusement.
+        }
     }
 
     /* =========================================
@@ -484,10 +570,13 @@
     let isDragging = false;
     let currentCircle = null;
     let offsetX, offsetY;
+    let dragMoved = false;
+    let dragStartClientX, dragStartClientY;
 
     function startDrag(e) {
         if (e.type === 'touchstart' && e.touches.length > 1) return;
         isDragging = true;
+        dragMoved = false;
         currentCircle = e.target.closest('.circle');
         
         circles.forEach(c => c.style.zIndex = 1);
@@ -495,6 +584,8 @@
         currentCircle.style.transform = 'scale(1.05)';
 
         const event = e.type === 'mousedown' ? e : e.touches[0];
+        dragStartClientX = event.clientX;
+        dragStartClientY = event.clientY;
         const rect = currentCircle.getBoundingClientRect();
         offsetX = event.clientX - rect.left;
         offsetY = event.clientY - rect.top;
@@ -504,6 +595,13 @@
         if (!isDragging || !currentCircle) return;
         
         const event = e.type === 'mousemove' ? e : e.touches[0];
+
+        if (!dragMoved) {
+            const dx = event.clientX - dragStartClientX;
+            const dy = event.clientY - dragStartClientY;
+            if (Math.sqrt(dx * dx + dy * dy) > 5) dragMoved = true;
+        }
+
         const workspaceRect = workspace.getBoundingClientRect();
 
         let newX = event.clientX - workspaceRect.left - offsetX;
@@ -522,8 +620,22 @@
         isDragging = false;
         if(currentCircle) {
             currentCircle.style.transform = 'scale(1)';
+            if (!dragMoved) {
+                copyCircleColor(currentCircle);
+            }
             currentCircle = null;
         }
+        dragMoved = false;
+    }
+
+    function copyCircleColor(circle) {
+        const hexSpan = circle.querySelector('.hex-code');
+        const text = hexSpan.textContent;
+        if (text === 'Copié !') return;
+        navigator.clipboard.writeText(text).then(() => {
+            hexSpan.textContent = 'Copié !';
+            setTimeout(() => { hexSpan.textContent = text; }, 1000);
+        }).catch(() => {});
     }
 
     circles.forEach(circle => {
