@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test de Connexion | Dr KARA-ZAITRI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#1A3A5C">
+<style>
+/* =========================================
+   DESIGN INSTITUTIONNEL COMPLET
+   ========================================= */
+:root {
+    --primary: #1a3a5c;
+    --primary-light: #345a7a;
+    --primary-dark: #0d2538;
+    --text: #37474f;
+    --text-light: #607d8b;
+    --border: #cfd8dc;
+    --bg-page: #f4f7f9;
+    --bg-card: #ffffff;
+    --bg-input: #f8f9fa;
+    --success: #2e7d32;
+    --warning: #ed6c02;
+    --error: #c62828;
+    --premium: #C9A961;
+    --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+* { box-sizing: border-box; font-family: var(--font-ui); }
+
+body {
+    margin: 0;
+    background: var(--bg-page);
+    color: var(--text);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* MASQUE ASCENSEUR */
+html { scrollbar-width: none; }
+body { -ms-overflow-style: none; overflow-y: auto; }
+::-webkit-scrollbar { display: none; }
+
+/* =========================================
+   BANDEAU DE NAVIGATION
+   ========================================= */
+.nav-bar {
+    position: sticky;
+    top: 0;
+    z-index: 9999;
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    padding: 12px 20px;
+    width: 100%;
+    max-width: 720px;
+    margin: 0 auto;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+.nav-bar a {
+    text-decoration: none;
+    color: var(--primary);
+    font-weight: 600;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.2s;
+}
+.nav-bar a:hover { color: var(--primary-light); }
+
+.nav-theme-toggle {
+    width: 34px; height: 34px; border-radius: 50%;
+    border: 1px solid var(--border); background: var(--bg-input); color: var(--primary);
+    font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: 0.2s; flex-shrink: 0; padding: 0;
+}
+.nav-theme-toggle:hover { background: #e3f2fd; }
+
+/* =========================================
+   LAYOUT APP
+   ========================================= */
+#app-container {
+    flex: 1;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 16px 40px;
+    width: 100%;
+}
+
+/* EN-TÊTE */
+.app-header {
+    background: var(--primary);
+    color: #fff;
+    border-radius: 12px;
+    padding: 20px 24px 18px;
+    margin-bottom: 20px;
+    text-align: center;
+    position: relative;
+}
+.app-header h1 {
+    margin: 0 0 4px;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+.app-header .subtitle {
+    margin: 0;
+    color: rgba(255,255,255,0.75);
+    font-size: 0.9rem;
+}
+
+/* BADGE PREMIUM */
+.premium-badge {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    color: var(--premium);
+    font-size: 24px;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+/* AVERTISSEMENT */
+#unsupported-msg {
+    display: none;
+    background: #fff3cd;
+    color: #856404;
+    border-left: 4px solid #ffc107;
+    padding: 14px 18px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* PANNEAU PRINCIPAL */
+.panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    padding: 20px;
+    margin-bottom: 16px;
+}
+
+/* JAUGE */
+.gauge-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 24px;
+}
+.gauge-wrap {
+    position: relative;
+    width: 240px;
+    height: 240px;
+    margin-bottom: 16px;
+}
+.gauge-svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+.gauge-track {
+    fill: none;
+    stroke: var(--border);
+    stroke-width: 12;
+    stroke-linecap: round;
+}
+.gauge-fill {
+    fill: none;
+    stroke: url(#tcGaugeGradient);
+    stroke-width: 12;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.35s ease;
+}
+.gauge-tick {
+    stroke: var(--border);
+    stroke-width: 2;
+}
+.gauge-tick-label {
+    font-family: var(--font-ui);
+    font-size: 9px;
+    font-weight: 600;
+    fill: var(--text-light);
+}
+.gauge-needle {
+    stroke: var(--primary);
+    stroke-width: 3;
+    stroke-linecap: round;
+}
+.gauge-hub {
+    fill: var(--primary);
+}
+.gauge-value-text {
+    font-family: var(--font-ui);
+    font-size: 32px;
+    font-weight: 300;
+    fill: var(--text);
+    text-anchor: middle;
+    font-variant-numeric: tabular-nums;
+}
+.gauge-unit-text {
+    font-family: var(--font-ui);
+    font-size: 11px;
+    font-weight: 500;
+    fill: var(--text-light);
+    text-anchor: middle;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.gauge-phase {
+    font-size: 0.8rem;
+    color: var(--primary);
+    margin-top: 4px;
+    font-weight: 600;
+    text-align: center;
+    padding: 0 10px;
+}
+
+/* BOUTON DÉMARRER */
+.btn-go {
+    background: var(--primary);
+    color: #fff;
+    padding: 14px 34px;
+    border: none;
+    border-radius: 999px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+}
+.btn-go:hover:not(:disabled) {
+    background: var(--primary-light);
+    transform: translateY(-2px);
+}
+.btn-go:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+/* PRÉCISION */
+.precision-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+    font-size: 12.5px;
+    color: var(--text-light);
+    cursor: pointer;
+    user-select: none;
+}
+.precision-toggle input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--primary);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+/* RÉSULTATS */
+.results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 22px;
+}
+.result-card {
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 12px;
+    text-align: center;
+}
+.result-icon {
+    font-size: 20px;
+    margin-bottom: 6px;
+}
+.result-label {
+    font-size: 11.5px;
+    color: var(--text-light);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 6px;
+}
+.result-value {
+    font-size: 1.4rem;
+    font-weight: 300;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.3px;
+}
+
+/* INFO CONNEXION */
+.info-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.info-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 13.5px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+}
+.info-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+.info-k {
+    color: var(--text-light);
+}
+.info-v {
+    color: var(--text);
+    font-weight: 500;
+    text-align: right;
+}
+
+/* BOUTONS */
+.btn-ghost.btn-sm {
+    background: var(--bg-input);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.btn-ghost.btn-sm:hover {
+    background: var(--border);
+}
+
+/* HISTORIQUE */
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.history-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg-input);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 12.5px;
+}
+.history-date {
+    color: var(--text-light);
+    min-width: 100px;
+}
+.history-metric {
+    color: var(--text);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+}
+.empty-hint {
+    color: var(--text-light);
+    font-size: 13px;
+    font-style: italic;
+}
+
+/* DISCLAIMER */
+.disclaimer {
+    font-size: 11.5px;
+    color: var(--text-light);
+    line-height: 1.5;
+    text-align: center;
+    margin: 4px 0 0;
+}
+
+/* FOOTER GLOBAL */
+.footer {
+    text-align: center;
+    padding: 16px 20px;
+    font-size: 11px;
+    color: var(--text-light);
+    margin-top: auto;
+    border-top: 1px solid var(--border);
+}
+.footer-disclaimer {
+    background: #fff3cd;
+    color: #856404;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ffeeba;
+    margin-top: 12px;
+    font-size: 10px;
+    line-height: 1.4;
+}
+
+/* RESPONSIVE */
+@media (max-width: 640px) {
+    .nav-bar { padding: 10px 14px; max-width: 100%; }
+    .nav-bar a { font-size: 13px; }
+    .nav-theme-toggle { width: 32px; height: 32px; font-size: 14px; }
+
+    #app-container { padding: 0 12px 40px; }
+    .app-header { padding: 16px; border-radius: 12px; }
+    .app-header h1 { font-size: 1.25rem; }
+    .app-header .subtitle { font-size: 0.85rem; }
+
+    .gauge-wrap { width: 190px; height: 190px; margin-bottom: 12px; }
+    .btn-go { padding: 12px 26px; font-size: 14px; width: 100%; }
+
+    .results-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .result-card { padding: 12px 8px; }
+    .result-value { font-size: 1.05rem; }
+
+    .panel { padding: 16px; }
+    .info-item { font-size: 12.5px; }
+    .history-row { font-size: 11.5px; gap: 6px 10px; }
+    .history-date { min-width: 80px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ✅ BANDEAU DE NAVIGATION -->
+<nav class="nav-bar">
+    <a href="https://karazaitri12-cpu.github.io/plateforme-utilitaires/">← Retour aux Utilitaires</a>
+    <button class="nav-theme-toggle" id="themeToggle" title="Changer de thème" aria-label="Changer de thème">🌙</button>
+</nav>
+
+<div id="app-container">
+
+    <!-- EN-TÊTE -->
+    <div class="app-header">
+        <span class="premium-badge">★</span>
+        <h1>📶 Testeur de Connexion</h1>
+        <p class="subtitle">Mesurez votre latence, débit descendant et montant depuis votre navigateur</p>
+    </div>
+
+    <!-- AVERTISSEMENT COMPATIBILITÉ -->
+    <div id="unsupported-msg">
+        ⚠️ Votre navigateur ne supporte pas certaines API requises. Veuillez utiliser <b>Google Chrome</b>, <b>Microsoft Edge</b> ou <b>Safari</b>.
+    </div>
+
+    <!-- JAUGE + CONTRÔLES -->
+    <div class="panel gauge-panel">
+        <div class="gauge-wrap">
+            <svg viewBox="0 0 200 200" class="gauge-svg" id="gaugeSvg">
+                <defs>
+                    <linearGradient id="tcGaugeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="var(--primary)"/>
+                        <stop offset="100%" stop-color="var(--primary-light)"/>
+                    </linearGradient>
+                </defs>
+                <path class="gauge-track" d="M 39.9 160.1 A 85 85 0 1 1 160.1 160.1" pathLength="1"></path>
+                <path class="gauge-fill" id="gaugeFill" d="M 39.9 160.1 A 85 85 0 1 1 160.1 160.1"
+                    pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"></path>
+                <g id="gaugeTicks"></g>
+                <line id="gaugeNeedle" class="gauge-needle" x1="100" y1="100" x2="59" y2="141"></line>
+                <circle cx="100" cy="100" r="5" class="gauge-hub"></circle>
+                <text x="100" y="148" class="gauge-value-text" id="gaugeValueText">0.0</text>
+                <text x="100" y="166" class="gauge-unit-text" id="gaugeUnitText">Mbps</text>
+            </svg>
+        </div>
+        <div class="gauge-phase" id="gaugePhase">Prêt à démarrer</div>
+        <button class="btn-go" id="goBtn" onclick="startTest()">▶ Démarrer le test</button>
+        <label class="precision-toggle">
+            <input type="checkbox" id="precisionToggle">
+            <span>Mode précision — moyenne sur 3 mesures (plus long, plus fiable)</span>
+        </label>
+    </div>
+
+    <!-- RÉSULTATS -->
+    <div class="results-grid">
+        <div class="result-card">
+            <div class="result-icon">📡</div>
+            <div class="result-label">Latence</div>
+            <div class="result-value" id="pingValue">—</div>
+        </div>
+        <div class="result-card">
+            <div class="result-icon">〰️</div>
+            <div class="result-label">Gigue</div>
+            <div class="result-value" id="jitterValue">—</div>
+        </div>
+        <div class="result-card">
+            <div class="result-icon">⬇️</div>
+            <div class="result-label">Débit descendant</div>
+            <div class="result-value" id="downValue">—</div>
+        </div>
+        <div class="result-card">
+            <div class="result-icon">⬆️</div>
+            <div class="result-label">Débit montant</div>
+            <div class="result-value" id="upValue">—</div>
+        </div>
+    </div>
+
+    <!-- INFO CONNEXION -->
+    <div class="panel">
+        <h3 style="margin:0 0 14px;font-size:14px;font-weight:700;color:var(--primary);">🌐 Votre connexion</h3>
+        <div class="info-grid">
+            <div class="info-item"><span class="info-k">Adresse IP publique</span><span class="info-v" id="infoIp">—</span></div>
+            <div class="info-item"><span class="info-k">Fournisseur (FAI)</span><span class="info-v" id="infoIsp">—</span></div>
+            <div class="info-item"><span class="info-k">Localisation estimée</span><span class="info-v" id="infoLoc">—</span></div>
+            <div class="info-item"><span class="info-k">Serveur de test</span><span class="info-v" id="infoColo">—</span></div>
+            <div class="info-item"><span class="info-k">Type de réseau</span><span class="info-v" id="infoNetType">—</span></div>
+        </div>
+    </div>
+
+    <!-- HISTORIQUE -->
+    <div class="panel">
+        <h3 style="margin:0 0 14px;font-size:14px;font-weight:700;color:var(--primary);display:flex;align-items:center;justify-content:space-between;">
+            🕓 Historique
+            <button class="btn-ghost btn-sm" onclick="clearHistory()">Effacer</button>
+        </h3>
+        <div id="historyList" class="history-list"></div>
+    </div>
+
+    <p class="disclaimer">Ce test mesure le débit entre votre appareil et le point de présence Cloudflare le plus proche. Les résultats peuvent varier selon votre Wi‑Fi, la charge du réseau local ou celle du serveur, et ne remplacent pas un test filaire dédié.</p>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <span>Dr KARA-ZAITRI M.A © 2026</span>
+        <div class="footer-disclaimer">
+            ⚠️ <strong>Usage informatif</strong> : Test de connexion local via API Cloudflare. Aucune donnée personnelle n'est stockée sur nos serveurs.
+        </div>
+    </footer>
+
+</div>
+
+<script>
+/* ---- Thème clair / sombre ---- */
+const themeToggle = document.getElementById('themeToggle');
+const widgetRoot = document.getElementById('app-container').closest('body');
+function applyTheme(theme) {
+    if (theme === 'light') {
+        document.documentElement.style.setProperty('--bg-page', '#f4f7f9');
+        document.documentElement.style.setProperty('--text', '#37474f');
+        themeToggle.textContent = '☀️';
+    } else {
+        document.documentElement.style.setProperty('--bg-page', '#0f1020');
+        document.documentElement.style.setProperty('--text', '#eef1f8');
+        themeToggle.textContent = '🌙';
+    }
+}
+applyTheme(localStorage.getItem('tcTheme') || 'dark');
+themeToggle.addEventListener('click', () => {
+    const next = localStorage.getItem('tcTheme') === 'light' ? 'dark' : 'light';
+    applyTheme(next);
+    localStorage.setItem('tcTheme', next);
+});
+
+/* ---- Jauge type compteur ---- */
+const GAUGE_SWEEP = 270;
+const GAUGE_START_ANGLE = 135;
+const GAUGE_MAX_MBPS = 300;
+const GAUGE_TICKS = [0, 10, 25, 50, 100, 200, 300];
+
+function fractionForMbps(mbps) {
+    return Math.max(0, Math.min(1, Math.sqrt(Math.max(0, mbps) / GAUGE_MAX_MBPS)));
+}
+function renderGaugeTicks() {
+    const svgNS = 'http://www.w3.org/2000/svg';
+    const group = document.getElementById('gaugeTicks');
+    GAUGE_TICKS.forEach(v => {
+        const angleDeg = GAUGE_START_ANGLE + fractionForMbps(v) * GAUGE_SWEEP;
+        const rad = angleDeg * Math.PI / 180;
+        const rOuter = 85, rInner = 77, rLabel = 66;
+        const x1 = 100 + rOuter * Math.cos(rad), y1 = 100 + rOuter * Math.sin(rad);
+        const x2 = 100 + rInner * Math.cos(rad), y2 = 100 + rInner * Math.sin(rad);
+        const xl = 100 + rLabel * Math.cos(rad), yl = 100 + rLabel * Math.sin(rad);
+
+        const tick = document.createElementNS(svgNS, 'line');
+        tick.setAttribute('x1', x1.toFixed(2)); tick.setAttribute('y1', y1.toFixed(2));
+        tick.setAttribute('x2', x2.toFixed(2)); tick.setAttribute('y2', y2.toFixed(2));
+        tick.setAttribute('class', 'gauge-tick');
+        group.appendChild(tick);
+
+        const label = document.createElementNS(svgNS, 'text');
+        label.setAttribute('x', xl.toFixed(2)); label.setAttribute('y', yl.toFixed(2));
+        label.setAttribute('class', 'gauge-tick-label');
+        label.setAttribute('text-anchor', 'middle');
+        label.setAttribute('dominant-baseline', 'middle');
+        label.textContent = v;
+        group.appendChild(label);
+    });
+}
+function updateGauge(mbps) {
+    const safe = Math.max(0, mbps || 0);
+    const frac = fractionForMbps(safe);
+    document.getElementById('gaugeFill').style.strokeDashoffset = (1 - frac).toFixed(4);
+    document.getElementById('gaugeNeedle').setAttribute('transform', 'rotate(' + (frac * GAUGE_SWEEP).toFixed(2) + ' 100 100)');
+    if (safe >= 1000) {
+        document.getElementById('gaugeValueText').textContent = (safe / 1000).toFixed(2);
+        document.getElementById('gaugeUnitText').textContent = 'Gbps';
+    } else {
+        document.getElementById('gaugeValueText').textContent = safe.toFixed(1);
+        document.getElementById('gaugeUnitText').textContent = 'Mbps';
+    }
+}
+function setGaugePhase(text) {
+    document.getElementById('gaugePhase').textContent = text;
+}
+function formatMbps(v) {
+    if (v === null || v === undefined || isNaN(v)) return '—';
+    return v >= 1000 ? (v / 1000).toFixed(2) + ' Gbps' : v.toFixed(1) + ' Mbps';
+}
+
+/* ---- Latence (ping HTTP) ---- */
+async function pingTest(rounds) {
+    rounds = rounds || 12;
+    try {
+        await fetch(`https://speed.cloudflare.com/__down?bytes=0&r=${Math.random()}`, { cache: 'no-store', mode: 'cors' });
+    } catch (e) { /* préchauffage */ }
+    const times = [];
+    for (let i = 0; i < rounds; i++) {
+        const start = performance.now();
+        await fetch(`https://speed.cloudflare.com/__down?bytes=0&r=${Math.random()}`, { cache: 'no-store', mode: 'cors' });
+        times.push(performance.now() - start);
+    }
+    times.sort((a, b) => a - b);
+    const median = times[Math.floor(times.length / 2)];
+    let jitterSum = 0;
+    for (let i = 1; i < times.length; i++) jitterSum += Math.abs(times[i] - times[i - 1]);
+    const jitter = times.length > 1 ? jitterSum / (times.length - 1) : 0;
+    return { ping: median, jitter };
+}
+
+/* ---- Débit descendant / montant ---- */
+function xhrDownload(bytes, onProgress) {
+    return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        const url = `https://speed.cloudflare.com/__down?bytes=${bytes}&r=${Math.random()}`;
+        const start = performance.now();
+        xhr.open('GET', url, true);
+        xhr.responseType = 'arraybuffer';
+        xhr.onprogress = (e) => {
+            const elapsed = (performance.now() - start) / 1000;
+            if (elapsed > 0 && e.loaded > 0) onProgress(e.loaded, elapsed);
+        };
+        xhr.onload = () => {
+            if (xhr.status < 200 || xhr.status >= 300) { reject(new Error('HTTP ' + xhr.status)); return; }
+            const elapsed = (performance.now() - start) / 1000;
+            const size = xhr.response ? xhr.response.byteLength : bytes;
+            resolve({ bytes: size, elapsed, mbps: elapsed > 0 ? (size * 8) / elapsed / 1e6 : 0 });
+        };
+        xhr.onerror = () => reject(new Error('Échec de la requête'));
+        xhr.send();
+    });
+}
+function fillRandom(buf) {
+    const CHUNK = 65536;
+    for (let i = 0; i < buf.length; i += CHUNK) {
+        crypto.getRandomValues(buf.subarray(i, Math.min(i + CHUNK, buf.length)));
+    }
+}
+function xhrUpload(bytes, onProgress) {
+    return new Promise((resolve, reject) => {
+        const data = new Uint8Array(bytes);
+        try { fillRandom(data); } catch (e) { /* fallback */ }
+        const blob = new Blob([data]);
+        const xhr = new XMLHttpRequest();
+        const start = performance.now();
+        xhr.open('POST', 'https://speed.cloudflare.com/__up', true);
+        xhr.upload.onprogress = (e) => {
+            const elapsed = (performance.now() - start) / 1000;
+            if (elapsed > 0 && e.loaded > 0) onProgress(e.loaded, elapsed);
+        };
+        xhr.onload = () => {
+            if (xhr.status < 200 || xhr.status >= 300) { reject(new Error('HTTP ' + xhr.status)); return; }
+            const elapsed = (performance.now() - start) / 1000;
+            resolve({ bytes, elapsed, mbps: elapsed > 0 ? (bytes * 8) / elapsed / 1e6 : 0 });
+        };
+        xhr.onerror = () => reject(new Error('Échec de la requête'));
+        xhr.send(blob);
+    });
+}
+
+async function runDownloadTest(onLive, streamCount) {
+    streamCount = streamCount || 4;
+    const warm = await xhrDownload(1500000, () => {});
+    let target = Math.round((warm.mbps * 1e6 / 8) * 5);
+    target = Math.min(Math.max(target, 4000000), 120000000);
+    const perStream = Math.round(target / streamCount);
+    const loaded = new Array(streamCount).fill(0);
+    const t0 = performance.now();
+    function tick() {
+        const elapsed = (performance.now() - t0) / 1000;
+        if (elapsed > 0.05) onLive((loaded.reduce((a, b) => a + b, 0) * 8) / elapsed / 1e6);
+    }
+    const results = await Promise.all(
+        Array.from({ length: streamCount }, (_, i) =>
+            xhrDownload(perStream, (loadedBytes) => { loaded[i] = loadedBytes; tick(); })
+        )
+    );
+    const elapsed = (performance.now() - t0) / 1000;
+    const totalBytes = results.reduce((a, r) => a + r.bytes, 0);
+    return { mbps: elapsed > 0 ? (totalBytes * 8) / elapsed / 1e6 : 0, bytes: totalBytes, elapsed };
+}
+async function runUploadTest(onLive, streamCount) {
+    streamCount = streamCount || 4;
+    const warm = await xhrUpload(500000, () => {});
+    let target = Math.round((warm.mbps * 1e6 / 8) * 4);
+    target = Math.min(Math.max(target, 2000000), 80000000);
+    const perStream = Math.round(target / streamCount);
+    const loaded = new Array(streamCount).fill(0);
+    const t0 = performance.now();
+    function tick() {
+        const elapsed = (performance.now() - t0) / 1000;
+        if (elapsed > 0.05) onLive((loaded.reduce((a, b) => a + b, 0) * 8) / elapsed / 1e6);
+    }
+    const results = await Promise.all(
+        Array.from({ length: streamCount }, (_, i) =>
+            xhrUpload(perStream, (loadedBytes) => { loaded[i] = loadedBytes; tick(); })
+        )
+    );
+    const elapsed = (performance.now() - t0) / 1000;
+    const totalBytes = results.reduce((a, r) => a + r.bytes, 0);
+    return { mbps: elapsed > 0 ? (totalBytes * 8) / elapsed / 1e6 : 0, bytes: totalBytes, elapsed };
+}
+
+/* ---- Informations de connexion ---- */
+async function fetchMetaInfo() {
+    try {
+        const res = await fetch('https://speed.cloudflare.com/meta', { cache: 'no-store' });
+        const data = await res.json();
+        document.getElementById('infoIp').textContent = data.clientIp || '—';
+        document.getElementById('infoIsp').textContent = data.asOrganization || (data.asn ? ('AS' + data.asn) : '—');
+        const locParts = [data.city, data.region, data.country].filter(Boolean);
+        document.getElementById('infoLoc').textContent = locParts.length ? locParts.join(', ') : '—';
+        document.getElementById('infoColo').textContent = data.colo || '—';
+    } catch (e) {
+        document.getElementById('infoIp').textContent = 'Indisponible';
+        document.getElementById('infoIsp').textContent = '—';
+        document.getElementById('infoLoc').textContent = '—';
+        document.getElementById('infoColo').textContent = '—';
+    }
+}
+function updateNetworkTypeInfo() {
+    const el = document.getElementById('infoNetType');
+    const c = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    if (c) {
+        const type = c.effectiveType ? c.effectiveType.toUpperCase() : (c.type || 'inconnu');
+        el.textContent = type + (c.downlink ? ` (≈${c.downlink} Mbps)` : '');
+    } else {
+        el.textContent = 'Non fourni';
+    }
+}
+
+/* ---- Historique ---- */
+function loadHistory() { try { return JSON.parse(localStorage.getItem('tcHistory') || '[]'); } catch (e) { return []; } }
+function saveHistoryEntry(entry) {
+    const h = loadHistory();
+    h.unshift(entry);
+    while (h.length > 8) h.pop();
+    localStorage.setItem('tcHistory', JSON.stringify(h));
+}
+function clearHistory() {
+    localStorage.removeItem('tcHistory');
+    renderHistory();
+}
+function renderHistory() {
+    const list = document.getElementById('historyList');
+    const h = loadHistory();
+    if (h.length === 0) {
+        list.innerHTML = "<span class='empty-hint'>Aucun test effectué pour l'instant.</span>";
+        return;
+    }
+    list.innerHTML = h.map(e => {
+        const d = new Date(e.date);
+        const dateStr = d.toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+        const pingStr = (e.ping !== null && e.ping !== undefined) ? e.ping.toFixed(0) + ' ms' : '—';
+        const precisionTag = e.precision ? ' · moy. 3×' : '';
+        return `<div class="history-row">
+            <span class="history-date">${dateStr}${precisionTag}</span>
+            <span class="history-metric">📡 ${pingStr}</span>
+            <span class="history-metric">⬇️ ${formatMbps(e.down)}</span>
+            <span class="history-metric">⬆️ ${formatMbps(e.up)}</span>
+        </div>`;
+    }).join('');
+}
+
+/* ---- Orchestration ---- */
+function resetCards() {
+    ['pingValue', 'jitterValue', 'downValue', 'upValue'].forEach(id => { document.getElementById(id).textContent = '…'; });
+    updateGauge(0);
+    setGaugePhase('Préparation…');
+}
+function setCards(r) {
+    document.getElementById('pingValue').textContent = (r.ping !== null && r.ping !== undefined) ? r.ping.toFixed(0) + ' ms' : 'Échec';
+    document.getElementById('jitterValue').textContent = (r.jitter !== null && r.jitter !== undefined) ? r.jitter.toFixed(1) + ' ms' : '—';
+    document.getElementById('downValue').textContent = formatMbps(r.down);
+    document.getElementById('upValue').textContent = formatMbps(r.up);
+}
+function avgOrNull(arr) {
+    const v = arr.filter(x => x !== null && x !== undefined && !isNaN(x));
+    return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null;
+}
+
+async function runSinglePass(labelPrefix, onLive) {
+    let pingMs = null, jitterMs = null, downMbps = null, upMbps = null;
+
+    setGaugePhase(labelPrefix + 'Mesure de la latence…');
+    try {
+        const p = await pingTest(12);
+        pingMs = p.ping; jitterMs = p.jitter;
+    } catch (e) { /* échec silencieux */ }
+
+    setGaugePhase(labelPrefix + 'Débit descendant…');
+    updateGauge(0);
+    try {
+        const d = await runDownloadTest(onLive, 4);
+        downMbps = d.mbps;
+    } catch (e) { /* échec silencieux */ }
+    updateGauge(downMbps || 0);
+
+    setGaugePhase(labelPrefix + 'Débit montant…');
+    updateGauge(0);
+    try {
+        const u = await runUploadTest(onLive, 4);
+        upMbps = u.mbps;
+    } catch (e) { /* échec silencieux */ }
+    updateGauge(upMbps || 0);
+
+    return { ping: pingMs, jitter: jitterMs, down: downMbps, up: upMbps };
+}
+
+async function startTest() {
+    const goBtn = document.getElementById('goBtn');
+    const precision = document.getElementById('precisionToggle').checked;
+    goBtn.disabled = true;
+    goBtn.textContent = 'Test en cours…';
+    resetCards();
+
+    fetchMetaInfo();
+
+    let result;
+    if (precision) {
+        const passes = [];
+        for (let i = 0; i < 3; i++) {
+            const r = await runSinglePass(`Mesure ${i + 1}/3 — `, mbps => updateGauge(mbps));
+            passes.push(r);
+        }
+        result = {
+            ping: avgOrNull(passes.map(p => p.ping)),
+            jitter: avgOrNull(passes.map(p => p.jitter)),
+            down: avgOrNull(passes.map(p => p.down)),
+            up: avgOrNull(passes.map(p => p.up))
+        };
+    } else {
+        result = await runSinglePass('', mbps => updateGauge(mbps));
+    }
+
+    setCards(result);
+    setGaugePhase(precision ? 'Terminé — moyenne de 3 mesures ✅' : 'Terminé ✅');
+    updateGauge(result.down || 0);
+
+    saveHistoryEntry({
+        date: new Date().toISOString(),
+        ping: result.ping, jitter: result.jitter, down: result.down, up: result.up,
+        precision: precision
+    });
+    renderHistory();
+
+    goBtn.disabled = false;
+    goBtn.textContent = '🔄 Refaire le test';
+}
+
+/* ---- Initialisation ---- */
+renderGaugeTicks();
+updateGauge(0);
+updateNetworkTypeInfo();
+renderHistory();
+</script>
+
+<!-- TRACKING UMAMI (RGPD compliant, no cookies) -->
+<script defer src="https://cloud.umami.is/script.js" data-website-id="b182aba6-225e-47ac-b6be-892e033a6013"></script>
+
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js').catch(() => {});
+        });
+    }
+</script>
+</body>
+</html>
