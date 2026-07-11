@@ -137,15 +137,12 @@
     #peintre-melangeur.theme-light .mode-btn { color: #555 !important; }
     #peintre-melangeur.theme-light .mode-btn.active { color: #1a1206 !important; }
 
-    /* Marqueur "peinture de départ" (mode Transformer) */
-    #peintre-melangeur .base-tag {
-        font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: 999px; cursor: pointer;
-        background: rgba(255,255,255,0.08); color: rgba(238,241,248,0.55); white-space: nowrap;
+    /* Transition visuelle "Départ → Cible" (mode Transformer) */
+    #peintre-melangeur .transform-arrow {
+        font-size: 11.5px; color: rgba(238,241,248,0.45); text-align: center;
+        margin: 14px 0 16px; line-height: 1.4;
     }
-    #peintre-melangeur .palette-chip.is-base { border-color: var(--pm-primary); background: rgba(200,161,101,0.14); }
-    #peintre-melangeur .palette-chip.is-base .base-tag { background: var(--pm-primary); color: #1a1206; }
-    #peintre-melangeur.theme-light .base-tag { background: #eee; color: #777; }
-    #peintre-melangeur.theme-light .palette-chip.is-base { background: rgba(200,161,101,0.2); border-color: var(--pm-primary); }
+    #peintre-melangeur.theme-light .transform-arrow { color: #888; }
 
     #peintre-melangeur .min-base-row { margin-top: 14px; }
     #peintre-melangeur .min-base-row input[type="range"] { width: 100%; margin-top: 6px; }
@@ -407,18 +404,29 @@
                 <input type="text" id="customColorName" placeholder="Nom de la teinte (ex: Terre de Sienne)">
                 <button class="btn" onclick="addCustomPaint()">+ Ajouter</button>
             </div>
-            <p class="hint">Cliquez un préréglage ou ajoutez votre propre teinte.</p>
-            <p class="hint" id="baseHint" style="display:none;">Cliquez « Départ ? » sur la peinture que vous possédez déjà pour la définir comme point de départ.</p>
+            <p class="hint" id="paletteHint">Cliquez un préréglage ou ajoutez votre propre teinte.</p>
             <div class="palette-list" id="paletteList"></div>
-            <div class="min-base-row" id="minBaseRow" style="display:none;">
-                <label class="hint" for="minBaseSlider" style="margin:0;">Conserver au minimum <b id="minBaseVal">50</b>% de la peinture de départ</label>
-                <input type="range" id="minBaseSlider" min="0" max="90" value="50" step="5" oninput="onMinBaseChange()">
-            </div>
         </div>
 
-        <!-- Panneau Cible -->
+        <!-- Panneau Cible / Transformation -->
         <div class="panel">
-            <h3>🎯 Teinte cible</h3>
+            <h3 id="targetPanelTitle">🎯 Teinte cible</h3>
+
+            <div id="startRow" style="display:none;">
+                <div class="target-row">
+                    <div class="target-preview" id="startPreview"></div>
+                    <div>
+                        <div class="target-name" id="startName">Départ</div>
+                        <input type="color" id="startColorPicker" value="#c8a165">
+                    </div>
+                </div>
+                <div class="min-base-row" id="minBaseRow">
+                    <label class="hint" for="minBaseSlider" style="margin:0;">Conserver au minimum <b id="minBaseVal">50</b>% de la couleur de départ</label>
+                    <input type="range" id="minBaseSlider" min="0" max="90" value="50" step="5" oninput="onMinBaseChange()">
+                </div>
+                <div class="transform-arrow">↓ mélangée avec vos peintures ci-dessus, pour obtenir ↓</div>
+            </div>
+
             <div class="target-row">
                 <div class="target-preview" id="targetPreview"></div>
                 <div>
@@ -699,28 +707,28 @@
 
     // ---- Mode : "compose" (composer un mélange) ou "transform" (partir d'une couleur) ----
     let mode = 'compose';
-    let baseIndex = null;
+    // En mode Transformer, la liste de peintures effectivement utilisée pour le calcul
+    // est [couleur de départ, ...palette] — currentPaints garde une trace de cette liste
+    // pour que les curseurs d'ajustement manuel restent cohérents avec le dernier calcul.
+    let currentPaints = [];
     function setMode(newMode) {
         mode = newMode;
         document.getElementById('modeComposeBtn').classList.toggle('active', mode === 'compose');
         document.getElementById('modeTransformBtn').classList.toggle('active', mode === 'transform');
-        document.getElementById('minBaseRow').style.display = mode === 'transform' ? 'block' : 'none';
-        document.getElementById('baseHint').style.display = mode === 'transform' ? 'block' : 'none';
-        document.getElementById('mainSolveBtn').textContent = mode === 'transform' ? '🔍 Trouver comment y arriver' : '🔍 Trouver le mélange';
-        if (mode === 'transform' && baseIndex === null && palette.length > 0) baseIndex = 0;
-        renderPaletteList();
+        document.getElementById('startRow').style.display = mode === 'transform' ? 'block' : 'none';
+        document.getElementById('targetPanelTitle').textContent = mode === 'transform' ? '🔄 Départ → Cible' : '🎯 Teinte cible';
+        document.getElementById('paletteHint').textContent = mode === 'transform'
+            ? 'Ces peintures viendront s\'ajouter à votre couleur de départ.'
+            : 'Cliquez un préréglage ou ajoutez votre propre teinte.';
+        document.getElementById('mainSolveBtn').textContent = mode === 'transform' ? '🔍 Trouver le mélange' : '🔍 Trouver le mélange';
         document.getElementById('resultPanel').style.display = 'none';
         document.getElementById('manualPanel').style.display = 'none';
-    }
-    function setBaseIndex(i) {
-        baseIndex = i;
-        renderPaletteList();
     }
     function onMinBaseChange() {
         document.getElementById('minBaseVal').textContent = document.getElementById('minBaseSlider').value;
     }
 
-    // ---- Palette utilisateur (persistée) ----
+    // ---- Palette utilisateur (persistée) — peintures qu'on ajoute à la couleur de départ ----
     let palette = JSON.parse(localStorage.getItem('pmPalette') || 'null') || [
         { name: "Blanc", hex: rgbArrToHex(rybToRgb(0,0,0)), ink: [0,0,0] },
         { name: "Noir", hex: rgbArrToHex(rybToRgb(1,1,1)), ink: [1,1,1] },
@@ -749,8 +757,8 @@
         palette.push({ name, hex, ink });
         savePalette();
         renderPaletteList();
-        renderManualSliders();
         document.getElementById('resultPanel').style.display = 'none';
+        document.getElementById('manualPanel').style.display = 'none';
     }
     function addCustomPaint() {
         const hex = document.getElementById('customColorPicker').value;
@@ -762,15 +770,10 @@
     }
     function removePaint(index) {
         palette.splice(index, 1);
-        if (baseIndex !== null) {
-            if (baseIndex === index) baseIndex = palette.length > 0 ? 0 : null;
-            else if (baseIndex > index) baseIndex -= 1;
-        }
         savePalette();
         renderPaletteList();
-        renderManualSliders();
         document.getElementById('resultPanel').style.display = 'none';
-        if (palette.length === 0) document.getElementById('manualPanel').style.display = 'none';
+        document.getElementById('manualPanel').style.display = 'none';
     }
     function renderPaletteList() {
         const list = document.getElementById('paletteList');
@@ -781,15 +784,21 @@
         }
         palette.forEach((p, i) => {
             const chip = document.createElement('div');
-            const isBase = mode === 'transform' && i === baseIndex;
-            chip.className = 'palette-chip' + (isBase ? ' is-base' : '');
-            const baseTag = mode === 'transform'
-                ? `<span class="base-tag" onclick="setBaseIndex(${i})" title="Définir comme peinture de départ">${isBase ? '★ Départ' : 'Départ ?'}</span>`
-                : '';
-            chip.innerHTML = `<span class="palette-swatch" style="background:${p.hex}"></span>${p.name}${baseTag}<button class="palette-remove" onclick="removePaint(${i})" title="Retirer">✕</button>`;
+            chip.className = 'palette-chip';
+            chip.innerHTML = `<span class="palette-swatch" style="background:${p.hex}"></span>${p.name}<button class="palette-remove" onclick="removePaint(${i})" title="Retirer">✕</button>`;
             list.appendChild(chip);
         });
     }
+
+    // ---- Couleur de départ (mode Transformer) ----
+    function updateStartDisplay() {
+        const hex = document.getElementById('startColorPicker').value;
+        document.getElementById('startPreview').style.backgroundColor = hex;
+        document.getElementById('startName').textContent = closestName(hexToRgbArr(hex));
+        document.getElementById('resultPanel').style.display = 'none';
+        document.getElementById('manualPanel').style.display = 'none';
+    }
+    document.getElementById('startColorPicker').addEventListener('input', updateStartDisplay);
 
     // ---- Cible ----
     const targetQuickDefs = [
@@ -816,27 +825,29 @@
         const hex = document.getElementById('targetColorPicker').value;
         document.getElementById('targetPreview').style.backgroundColor = hex;
         document.getElementById('targetName').textContent = closestName(hexToRgbArr(hex));
+        document.getElementById('resultPanel').style.display = 'none';
+        document.getElementById('manualPanel').style.display = 'none';
     }
     document.getElementById('targetColorPicker').addEventListener('input', updateTargetDisplay);
 
     // ---- Résolution automatique + affichage recette ----
     let lastSolve = null;
     function runSolve() {
-        if (palette.length === 0) {
-            showToast("⚠️ Ajoutez d'abord des peintures à votre palette");
-            return;
-        }
         const targetHex = document.getElementById('targetColorPicker').value;
         const targetRgb = hexToRgbArr(targetHex);
         let solved;
         if (mode === 'transform') {
-            if (baseIndex === null || baseIndex >= palette.length) {
-                showToast("⚠️ Choisissez d'abord votre peinture de départ (bouton « Départ ? »)");
+            const startHex = document.getElementById('startColorPicker').value;
+            const startPaint = { name: "Départ", hex: startHex, ink: rgbToRyb(hexToRgbArr(startHex)) };
+            currentPaints = [startPaint, ...palette];
+            const minBaseFraction = parseInt(document.getElementById('minBaseSlider').value, 10) / 100;
+            solved = solveMixFromBase(0, currentPaints, targetRgb, minBaseFraction);
+        } else {
+            if (palette.length === 0) {
+                showToast("⚠️ Ajoutez d'abord des peintures à votre palette");
                 return;
             }
-            const minBaseFraction = parseInt(document.getElementById('minBaseSlider').value, 10) / 100;
-            solved = solveMixFromBase(baseIndex, palette, targetRgb, minBaseFraction);
-        } else {
+            currentPaints = palette;
             solved = solveMix(palette, targetRgb);
         }
         lastSolve = solved;
@@ -857,22 +868,22 @@
         if (mode === 'transform' && quality < 60) {
             warning.style.display = 'flex';
             document.getElementById('lowMatchText').textContent =
-                "Cette teinte de départ ne permet pas d'atteindre précisément la cible : en mélange soustractif, on ne peut pas \"redonner\" une couleur que le pigment de base absorbe déjà. Le résultat ci-dessous est le meilleur compromis possible — envisagez une autre peinture de départ si la précision compte.";
+                "Cette teinte de départ ne permet pas d'atteindre précisément la cible : en mélange soustractif, on ne peut pas \"redonner\" une couleur que le pigment de base absorbe déjà. Le résultat ci-dessous est le meilleur compromis possible — envisagez une autre couleur de départ si la précision compte.";
         } else {
             warning.style.display = 'none';
         }
 
         const ratioBox = document.getElementById('ratioList');
-        if (mode === 'transform' && baseIndex !== null && baseIndex < palette.length) {
-            const wB = solved.weights[baseIndex];
-            let html = `<span class="ratio-title">Pour 1 part de ${palette[baseIndex].name} (votre peinture de départ), ajoutez :</span>`;
+        if (mode === 'transform') {
+            const wB = solved.weights[0];
+            let html = `<span class="ratio-title">Pour 1 part de votre couleur de départ, ajoutez :</span>`;
             let anyAdd = false;
-            palette.forEach((p, i) => {
-                if (i === baseIndex) return;
+            currentPaints.forEach((p, i) => {
+                if (i === 0) return;
                 const ratio = wB > 0 ? solved.weights[i] / wB : 0;
                 if (ratio > 0.005) { html += `<div>• ${p.name} : ${ratio.toFixed(2)} part</div>`; anyAdd = true; }
             });
-            if (!anyAdd) html += `<div>Aucun ajout nécessaire — votre peinture de départ est déjà proche de la cible.</div>`;
+            if (!anyAdd) html += `<div>Aucun ajout nécessaire — votre couleur de départ est déjà proche de la cible.</div>`;
             ratioBox.innerHTML = html;
             ratioBox.style.display = 'block';
         } else {
@@ -883,7 +894,7 @@
         const bar = document.getElementById('recipeBar');
         const list = document.getElementById('recipeList');
         bar.innerHTML = ''; list.innerHTML = '';
-        const items = palette.map((p, i) => ({ p, w: weights[i], i })).sort((a,b) => b.w - a.w).filter(it => it.w > 0.005);
+        const items = currentPaints.map((p, i) => ({ p, w: weights[i], i })).sort((a,b) => b.w - a.w).filter(it => it.w > 0.005);
         items.forEach(it => {
             const seg = document.createElement('div');
             seg.className = 'recipe-segment';
@@ -893,7 +904,7 @@
 
             const row = document.createElement('div');
             row.className = 'recipe-row';
-            const tag = (mode === 'transform' && it.i === baseIndex) ? ' (départ)' : '';
+            const tag = (mode === 'transform' && it.i === 0) ? ' (départ)' : '';
             row.innerHTML = `<span class="recipe-dot" style="background:${it.p.hex}"></span><span class="recipe-name">${it.p.name}${tag}</span><span class="recipe-pct">${(it.w*100).toFixed(0)}%</span><span class="recipe-qty" data-w="${it.w}"></span>`;
             list.appendChild(row);
         });
@@ -908,20 +919,21 @@
     }
 
     // ---- Ajustement manuel (sliders en "parts" relatives, normalisées à l'affichage) ----
+    // Opère toujours sur currentPaints (= palette en mode Composer, [départ, ...palette] en mode Transformer)
     function renderManualSliders(initialWeights) {
         const container = document.getElementById('manualSliders');
         container.innerHTML = '';
-        if (palette.length === 0) return;
-        const weights = initialWeights || palette.map(() => 1 / palette.length);
-        // Affichage trié du plus grand % au plus petit (l'ordre réel de la palette est conservé via data-index)
-        const order = palette.map((p, i) => i).sort((a, b) => weights[b] - weights[a]);
+        if (currentPaints.length === 0) return;
+        const weights = initialWeights || currentPaints.map(() => 1 / currentPaints.length);
+        // Affichage trié du plus grand % au plus petit (l'ordre réel est conservé via data-index)
+        const order = currentPaints.map((p, i) => i).sort((a, b) => weights[b] - weights[a]);
         order.forEach(i => {
-            const p = palette[i];
+            const p = currentPaints[i];
             const row = document.createElement('div');
             row.className = 'slider-row';
             row.dataset.index = i;
             const pct = Math.round(weights[i] * 100);
-            const tag = (mode === 'transform' && i === baseIndex) ? ' (départ)' : '';
+            const tag = (mode === 'transform' && i === 0) ? ' (départ)' : '';
             row.innerHTML = `
                 <span class="slider-swatch" style="background:${p.hex}"></span>
                 <span class="slider-name">${p.name}${tag}</span>
@@ -934,13 +946,13 @@
         const rows = Array.from(document.querySelectorAll('#manualSliders .slider-row'));
         const raw = rows.map(r => parseFloat(r.querySelector('input[type="range"]').value));
         const sum = raw.reduce((a,b) => a+b, 0) || 1;
-        const weights = new Array(palette.length).fill(0);
+        const weights = new Array(currentPaints.length).fill(0);
         rows.forEach((r, domIdx) => {
             const pIdx = parseInt(r.dataset.index, 10);
             weights[pIdx] = raw[domIdx] / sum;
             r.querySelector('.slider-pct').textContent = Math.round(weights[pIdx] * 100) + '%';
         });
-        const ink = mixInks(palette, weights);
+        const ink = mixInks(currentPaints, weights);
         const predicted = rybToRgb(ink[0], ink[1], ink[2]);
         document.getElementById('predictedSwatchBig').style.backgroundColor = rgbArrToHex(predicted);
         const targetRgb = hexToRgbArr(document.getElementById('targetColorPicker').value);
@@ -956,6 +968,7 @@
     renderPresetRow();
     renderPaletteList();
     renderTargetQuick();
+    updateStartDisplay();
     updateTargetDisplay();
     renderManualSliders();
 </script>
