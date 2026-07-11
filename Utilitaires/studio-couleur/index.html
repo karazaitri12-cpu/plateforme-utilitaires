@@ -33,21 +33,29 @@
         #studio-couleur-pro *, #studio-couleur-pro *::before, #studio-couleur-pro *::after {
             box-sizing: border-box;
         }
-        #studio-couleur-pro .back-bar {
-            max-width: 640px; margin: 0 auto 14px;
+        /* ✅ BANDEAU DE NAVIGATION (modèle standard de la plateforme) */
+        .nav-bar {
+            width: 100%;
+            position: sticky;
+            top: 0;
+            z-index: 9999;
+            background: #fff;
+            border-bottom: 1px solid #cfd8dc;
+            padding: 12px 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
-        #studio-couleur-pro .back-link {
-            display: inline-flex; align-items: center; gap: 6px;
-            color: rgba(238,241,248,0.75); text-decoration: none; font-size: 14px; font-weight: 600;
-            padding: 9px 16px; border-radius: 10px;
-            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
-            transition: 0.2s;
+        .nav-bar a {
+            text-decoration: none;
+            color: #1a3a5c;
+            font-weight: 600;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s;
         }
-        #studio-couleur-pro .back-link:hover { background: rgba(255,255,255,0.1); color: #fff; }
-        #studio-couleur-pro.theme-light .back-link {
-            color: #333; background: #e9ecef; border-color: transparent;
-        }
-        #studio-couleur-pro.theme-light .back-link:hover { background: #dfe3e7; }
+        .nav-bar a:hover { color: #345a7a; }
 
         #studio-couleur-pro .container {
             position: relative;
@@ -221,8 +229,8 @@
            ========================================= */
         @media (max-width: 640px) {
             #studio-couleur-pro { padding: 18px 10px; }
-            #studio-couleur-pro .back-bar { margin-bottom: 10px; }
-            #studio-couleur-pro .back-link { padding: 7px 12px; font-size: 13px; }
+            .nav-bar { padding: 10px 14px; }
+            .nav-bar a { font-size: 13px; }
             #studio-couleur-pro .container { padding: 20px 16px; border-radius: 18px; }
             #studio-couleur-pro h1 { font-size: 1.5rem; padding-right: 46px; }
             #studio-couleur-pro .subtitle { font-size: 0.85rem; margin-bottom: 16px; }
@@ -253,10 +261,13 @@
     </style>
 </head>
 <body>
+
+    <!-- ✅ BANDEAU DE NAVIGATION -->
+    <nav class="nav-bar">
+        <a href="https://karazaitri12-cpu.github.io/plateforme-utilitaires/">← Retour aux Utilitaires</a>
+    </nav>
+
 <div id="studio-couleur-pro">
-<div class="back-bar">
-    <a href="../index.html" class="back-link">&larr; Retour aux utilitaires</a>
-</div>
 <div class="container">
     <button class="theme-toggle" id="themeToggle" title="Changer de thème" aria-label="Changer de thème">🌙</button>
     <h1>Studio Couleur Pro 🎨</h1>
