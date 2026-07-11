@@ -21,6 +21,10 @@
         box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
         box-sizing: border-box;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
     }
     .nav-bar a {
         text-decoration: none;
@@ -33,6 +37,14 @@
         transition: color 0.2s;
     }
     .nav-bar a:hover { color: #0F2C4D; }
+
+    .nav-theme-toggle {
+        width: 34px; height: 34px; border-radius: 50%;
+        border: 1px solid #DDE3EA; background: #f4f7f9; color: #1A3A5C;
+        font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+        transition: 0.2s; flex-shrink: 0; padding: 0;
+    }
+    .nav-theme-toggle:hover { background: #e3f2fd; }
 
     /* =========================================
        CSS ISOLÉ — tout est scopé sous #peintre-melangeur
@@ -71,15 +83,6 @@
         padding: 32px !important; border-radius: 24px !important;
         box-shadow: 0 20px 60px rgba(0,0,0,0.45) !important;
     }
-    #peintre-melangeur .theme-toggle {
-        position: absolute !important; top: 18px !important; right: 18px !important;
-        width: 42px !important; height: 42px !important; border-radius: 50% !important;
-        border: 1px solid rgba(255,255,255,0.15) !important; background: rgba(255,255,255,0.06) !important; color: #eef1f8 !important;
-        font-size: 18px !important; cursor: pointer !important; display: flex !important; align-items: center !important; justify-content: center !important;
-        line-height: 1 !important; padding: 0 !important; z-index: 5;
-        transition: 0.2s;
-    }
-    #peintre-melangeur .theme-toggle:hover { background: rgba(255,255,255,0.14) !important; transform: translateY(-2px); }
 
     #peintre-melangeur h1 {
         margin: 0 0 4px; font-size: 2.1rem; font-weight: 800; letter-spacing: -0.5px;
@@ -231,24 +234,25 @@
     #peintre-melangeur .recipe-segment { transition: width 0.4s ease; }
 
     #peintre-melangeur .recipe-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
-    #peintre-melangeur .recipe-row { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+    #peintre-melangeur .recipe-row { display: flex; align-items: center; gap: 10px; font-size: 14px; flex-wrap: wrap; }
     #peintre-melangeur .recipe-dot { width: 14px; height: 14px; border-radius: 4px; flex-shrink: 0; }
-    #peintre-melangeur .recipe-name { flex: 1; color: rgba(238,241,248,0.9); }
+    #peintre-melangeur .recipe-name { flex: 1; color: rgba(238,241,248,0.9); min-width: 80px; }
     #peintre-melangeur .recipe-pct { font-weight: 700; color: #fff; min-width: 46px; text-align: right; }
     #peintre-melangeur .recipe-qty { color: rgba(238,241,248,0.55); min-width: 90px; text-align: right; font-family: monospace; font-size: 13px; }
 
-    #peintre-melangeur .qty-row { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+    #peintre-melangeur .qty-row { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
     #peintre-melangeur input[type="number"] {
         width: 90px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
         border-radius: 8px; padding: 8px 10px; color: #eef1f8; font-size: 14px; outline: none;
     }
 
-    #peintre-melangeur .manual-panel .slider-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+    #peintre-melangeur .manual-panel .slider-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
     #peintre-melangeur .slider-swatch { width: 22px; height: 22px; border-radius: 5px; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.25); }
     #peintre-melangeur .slider-name { min-width: 110px; font-size: 13px; color: rgba(238,241,248,0.8); }
     #peintre-melangeur input[type="range"] {
-        -webkit-appearance: none; appearance: none; flex: 1; height: 6px; border-radius: 3px;
+        -webkit-appearance: none; appearance: none; flex: 1; height: 6px; border-radius: 3px; min-width: 80px;
         background: linear-gradient(90deg, var(--pm-primary), var(--pm-primary-light)); outline: none;
+        touch-action: none;
     }
     #peintre-melangeur input[type="range"]::-webkit-slider-thumb {
         -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%;
@@ -262,7 +266,7 @@
     #peintre-melangeur .hint { color: rgba(238,241,248,0.5); font-size: 13px; margin: 0 0 4px; }
 
     #peintre-melangeur #toast {
-        visibility: hidden; min-width: 170px; background: rgba(20,20,30,0.95); backdrop-filter: blur(10px);
+        visibility: hidden; min-width: 170px; max-width: 90vw; background: rgba(20,20,30,0.95); backdrop-filter: blur(10px);
         color: #fff; text-align: center; border-radius: 12px; padding: 14px 18px; position: fixed; z-index: 1000;
         left: 50%; bottom: 30px; transform: translateX(-50%) translateY(10px); font-size: 15px; opacity: 0;
         border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 10px 30px rgba(0,0,0,0.4);
@@ -274,7 +278,6 @@
        THÈME CLAIR
        ========================================= */
     #peintre-melangeur.theme-light { background: #f4f4f9 !important; color: #333; }
-    #peintre-melangeur.theme-light .theme-toggle { border-color: #ccc !important; background: #e9ecef !important; color: #333 !important; }
     #peintre-melangeur.theme-light .container { background: #ffffff !important; backdrop-filter: none; -webkit-backdrop-filter: none; border: none !important; box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important; }
     #peintre-melangeur.theme-light h1 { background: none; -webkit-background-clip: initial; background-clip: initial; color: #222; }
     #peintre-melangeur.theme-light .subtitle,
@@ -304,17 +307,87 @@
        PRO : Masque l'ascenseur (style App native)
        ========================================= */
     html { scrollbar-width: none; }
-    body { -ms-overflow-style: none; overflow-y: auto; }
+    body { -ms-overflow-style: none; overflow-y: auto; margin: 0; }
     ::-webkit-scrollbar { display: none; }
+
+    /* =========================================
+       RESPONSIVE — mobile / tablette
+       ========================================= */
+    @media (max-width: 640px) {
+        .nav-bar { padding: 10px 14px; }
+        .nav-bar a { font-size: 13px; }
+        .nav-theme-toggle { width: 32px; height: 32px; font-size: 14px; }
+
+        #peintre-melangeur { padding: 16px 10px; }
+        #peintre-melangeur .container { padding: 18px 14px !important; border-radius: 16px !important; }
+        #peintre-melangeur h1 { font-size: 1.5rem; }
+        #peintre-melangeur .subtitle { font-size: 0.85rem; margin-bottom: 16px; }
+
+        #peintre-melangeur .mode-toggle { flex-direction: column; gap: 6px; padding: 5px; }
+        #peintre-melangeur .mode-btn { padding: 10px !important; font-size: 12.5px !important; }
+
+        #peintre-melangeur .dashboard { grid-template-columns: 1fr; gap: 14px; margin-bottom: 16px; }
+        #peintre-melangeur .panel { padding: 16px !important; }
+        #peintre-melangeur .panel h3 { font-size: 0.95rem; margin-bottom: 12px; }
+        #peintre-melangeur .info-note,
+        #peintre-melangeur .warning-note { font-size: 12px; padding: 9px 10px; }
+
+        #peintre-melangeur .preset-row { gap: 6px; margin-bottom: 12px; }
+        #peintre-melangeur .preset-chip { font-size: 12px; padding: 5px 10px 5px 5px; }
+
+        #peintre-melangeur .add-custom { flex-direction: column; align-items: stretch; gap: 8px; margin-bottom: 14px; }
+        #peintre-melangeur .add-custom input[type="text"] { min-width: 0; width: 100%; }
+        #peintre-melangeur .add-custom input[type="color"] { width: 100%; height: 40px; }
+        #peintre-melangeur .add-custom .btn { width: 100%; }
+
+        #peintre-melangeur .palette-list { gap: 8px; }
+        #peintre-melangeur .palette-chip { font-size: 12px; padding: 5px 8px 5px 5px; }
+
+        #peintre-melangeur .min-base-row { margin-top: 12px; }
+
+        #peintre-melangeur .target-row { gap: 10px; margin-bottom: 12px; }
+        #peintre-melangeur .target-preview { width: 46px; height: 46px; border-radius: 10px; }
+        #peintre-melangeur .target-name { font-size: 14px; }
+        #peintre-melangeur .target-quick { gap: 6px; margin-bottom: 14px; }
+        #peintre-melangeur .quick-btn { font-size: 11px; padding: 5px 10px; }
+        #peintre-melangeur .btn.btn-lg { padding: 12px 20px !important; font-size: 14px !important; }
+
+        #peintre-melangeur .result-hero { gap: 14px; margin-bottom: 14px; }
+        #peintre-melangeur .swatch-big { width: 60px; height: 60px; border-radius: 12px; }
+        #peintre-melangeur .match-quality { min-width: 0; width: 100%; }
+
+        #peintre-melangeur .recipe-bar { height: 26px; margin-bottom: 12px; }
+        #peintre-melangeur .recipe-row { font-size: 12.5px; gap: 8px; }
+        #peintre-melangeur .recipe-name { min-width: 60px; }
+        #peintre-melangeur .recipe-pct { min-width: 34px; }
+        #peintre-melangeur .recipe-qty { min-width: 0; font-size: 11.5px; }
+
+        #peintre-melangeur .qty-row { gap: 8px; margin-bottom: 14px; }
+        #peintre-melangeur input[type="number"] { width: 64px; padding: 7px 8px; }
+
+        #peintre-melangeur .manual-panel .slider-row { gap: 8px; margin-bottom: 10px; }
+        #peintre-melangeur .slider-swatch { width: 18px; height: 18px; }
+        #peintre-melangeur .slider-name { min-width: 0; width: 100%; order: 0; font-size: 12px; }
+        #peintre-melangeur input[type="range"] { flex: 1 1 auto; min-width: 0; order: 1; }
+        #peintre-melangeur .slider-pct { min-width: 36px; order: 2; font-size: 12px; }
+
+        #peintre-melangeur #toast { min-width: 0; max-width: 85vw; font-size: 13px; padding: 10px 14px; bottom: 16px; }
+    }
+
+    @media (max-width: 380px) {
+        #peintre-melangeur h1 { font-size: 1.3rem; }
+        #peintre-melangeur .swatch-big { width: 52px; height: 52px; }
+        #peintre-melangeur .recipe-qty { display: none; } /* trop étroit pour être lisible, la quantité reste consultable via le champ "quantité totale" */
+    }
 </style>
 </head>
 <body>
 <nav class="nav-bar">
     <a href="https://karazaitri12-cpu.github.io/plateforme-utilitaires/">← Retour aux Utilitaires</a>
+    <button class="nav-theme-toggle" id="themeToggle" title="Changer de thème" aria-label="Changer de thème">🌙</button>
 </nav>
 <div id="peintre-melangeur">
 <div class="container">
-    <button class="theme-toggle" id="themeToggle" title="Changer de thème" aria-label="Changer de thème">🌙</button>
     <h1>Mélangeur de Peintures 🖌️</h1>
     <p class="subtitle">Composez votre palette, choisissez une teinte cible, et obtenez les proportions de mélange à réaliser.</p>
 
