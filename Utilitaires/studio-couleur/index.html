@@ -33,6 +33,22 @@
         #studio-couleur-pro *, #studio-couleur-pro *::before, #studio-couleur-pro *::after {
             box-sizing: border-box;
         }
+        #studio-couleur-pro .back-bar {
+            max-width: 640px; margin: 0 auto 14px;
+        }
+        #studio-couleur-pro .back-link {
+            display: inline-flex; align-items: center; gap: 6px;
+            color: rgba(238,241,248,0.75); text-decoration: none; font-size: 14px; font-weight: 600;
+            padding: 9px 16px; border-radius: 10px;
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+            transition: 0.2s;
+        }
+        #studio-couleur-pro .back-link:hover { background: rgba(255,255,255,0.1); color: #fff; }
+        #studio-couleur-pro.theme-light .back-link {
+            color: #333; background: #e9ecef; border-color: transparent;
+        }
+        #studio-couleur-pro.theme-light .back-link:hover { background: #dfe3e7; }
+
         #studio-couleur-pro .container {
             position: relative;
             max-width: 640px; margin: 0 auto;
@@ -76,6 +92,7 @@
         #studio-couleur-pro input[type="range"] {
             -webkit-appearance: none; appearance: none; width: 140px; height: 6px; border-radius: 3px;
             background: linear-gradient(90deg, var(--scp-primary), var(--scp-primary-light)); outline: none;
+            touch-action: none; /* évite que le geste de défilement de la page "capture" le curseur au toucher */
         }
         #studio-couleur-pro input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%;
@@ -111,8 +128,10 @@
         #studio-couleur-pro .color-box {
             width: 92px; height: 92px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.15);
             box-shadow: 0 8px 24px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;
-            font-weight: 800; font-size: 14px; text-align: center; flex-shrink: 0; transition: background 0.35s ease;
+            font-weight: 800; font-size: 14px; text-align: center; flex-shrink: 0; transition: background 0.35s ease, transform 0.15s ease;
+            cursor: pointer; -webkit-tap-highlight-color: transparent;
         }
+        #studio-couleur-pro .color-box:active { transform: scale(0.94); }
 
         /* Textes cliquables */
         #studio-couleur-pro .copyable {
@@ -202,6 +221,8 @@
            ========================================= */
         @media (max-width: 640px) {
             #studio-couleur-pro { padding: 18px 10px; }
+            #studio-couleur-pro .back-bar { margin-bottom: 10px; }
+            #studio-couleur-pro .back-link { padding: 7px 12px; font-size: 13px; }
             #studio-couleur-pro .container { padding: 20px 16px; border-radius: 18px; }
             #studio-couleur-pro h1 { font-size: 1.5rem; padding-right: 46px; }
             #studio-couleur-pro .subtitle { font-size: 0.85rem; margin-bottom: 16px; }
@@ -212,10 +233,11 @@
             #studio-couleur-pro input[type="range"] { flex: 1; width: auto; min-width: 0; }
             #studio-couleur-pro .hint { font-size: 12px; margin-bottom: 14px; }
             #studio-couleur-pro .panel { padding: 16px; margin-bottom: 16px; }
-            #studio-couleur-pro .main-color-display { gap: 14px; margin-bottom: 12px; }
+            /* Loupe + carré restent toujours côte à côte : il y a largement la place */
+            #studio-couleur-pro .main-color-display { flex-wrap: nowrap; gap: 12px; margin-bottom: 12px; }
             #studio-couleur-pro .loupe-container,
-            #studio-couleur-pro .color-box { width: 74px; height: 74px; }
-            #studio-couleur-pro .color-box { font-size: 12px; border-radius: 12px; }
+            #studio-couleur-pro .color-box { width: 68px; height: 68px; }
+            #studio-couleur-pro .color-box { font-size: 11px; border-radius: 12px; }
             #studio-couleur-pro .copyable { font-size: 13.5px; padding: 4px 8px; }
             #studio-couleur-pro .canvas-container { max-height: 45vh; }
             #studio-couleur-pro .empty-state { padding: 40px 14px; }
@@ -223,13 +245,18 @@
             #studio-couleur-pro .history-panel { margin-top: 20px; padding-top: 16px; }
             #studio-couleur-pro .history-swatch { width: 40px; height: 40px; }
         }
-        @media (max-width: 380px) {
-            #studio-couleur-pro .main-color-display { flex-direction: column; align-items: flex-start; }
+        @media (max-width: 340px) {
+            #studio-couleur-pro .loupe-container,
+            #studio-couleur-pro .color-box { width: 58px; height: 58px; }
+            #studio-couleur-pro .color-box { font-size: 10px; }
         }
     </style>
 </head>
 <body>
 <div id="studio-couleur-pro">
+<div class="back-bar">
+    <a href="../index.html" class="back-link">&larr; Retour aux utilitaires</a>
+</div>
 <div class="container">
     <button class="theme-toggle" id="themeToggle" title="Changer de thème" aria-label="Changer de thème">🌙</button>
     <h1>Studio Couleur Pro 🎨</h1>
@@ -251,7 +278,7 @@
         <div class="main-color-display">
             <div class="loupe-container"><canvas id="loupeCanvas" width="90" height="90"></canvas></div>
             <!-- Le texte s'adapte automatiquement (Noir ou Blanc) -->
-            <div class="color-box" id="colorBox">—</div>
+            <div class="color-box" id="colorBox" onclick="copyText('hexValue')" title="Toucher pour copier le code HEX">—</div>
         </div>
         <div>
             <strong>Nom : </strong> <span id="nameValue" class="name-value">Blanc</span><br>
