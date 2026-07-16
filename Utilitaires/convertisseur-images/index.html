@@ -22,13 +22,14 @@
             --badge-jpeg: #1976d2;
             --badge-png: #7b1fa2;
             --badge-webp: #d32f2f;
+            --badge-pdf: #8a6d1f;
         }
 
         /* ==========================================
            STRUCTURE GLOBALE
            ========================================== */
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
             background: var(--bg-page);
@@ -106,6 +107,7 @@
             padding: 20px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.04);
         }
+        .converter.full-width { grid-column: 1 / -1; }
 
         /* ZONES DE DÉPÔT */
         .dropZone {
@@ -124,6 +126,21 @@
         .dropZone.webp:hover { background: #ffcdd2; }
         .dropZone.png { border-color: var(--badge-png); background: #f3e5f5; }
         .dropZone.png:hover { background: #e1bee7; }
+        .dropZone.pdf { border-color: var(--badge-pdf); background: #fbf6e9; }
+        .dropZone.pdf:hover { background: #f5eac8; }
+
+        /* OPTIONS (select) */
+        .converter select {
+            width: 100%;
+            margin-top: 10px;
+            padding: 8px 10px;
+            font-size: 13px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: #fff;
+            color: var(--text);
+            font-family: inherit;
+        }
 
         /* BOUTONS DE CONVERSION */
         .convertBtn {
@@ -154,6 +171,8 @@
         .convertBtn.png-to-webp:hover { background: #4a148c; }
         .convertBtn.webp-to-png { background: var(--warning); }
         .convertBtn.webp-to-png:hover { background: #ef6c00; }
+        .convertBtn.images-to-pdf { background: var(--badge-pdf); }
+        .convertBtn.images-to-pdf:hover { background: #6b5417; }
 
         /* BADGES DE FORMAT */
         .format-badge {
@@ -167,6 +186,7 @@
         .badge-jpeg { background: var(--badge-jpeg); }
         .badge-png { background: var(--badge-png); }
         .badge-webp { background: var(--badge-webp); }
+        .badge-pdf { background: var(--badge-pdf); }
 
         /* LISTE DES FICHIERS */
         .fileList {
@@ -201,6 +221,23 @@
         }
         .compression-info { font-size: 11px; margin: 4px 0; }
         .metadata { font-size: 11px; color: var(--text-light); font-style: italic; }
+
+        /* RESULTAT / TELECHARGEMENT */
+        .result-box {
+            display: none;
+            margin-top: 12px;
+            padding: 10px 12px;
+            background: #e8f5e9;
+            border-left: 4px solid var(--success);
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .result-box.show { display: block; }
+        .result-box a {
+            color: var(--primary);
+            font-weight: 700;
+            text-decoration: underline;
+        }
 
         /* BOUTON RESET */
         .reset-icon {
@@ -252,9 +289,26 @@
 
     <!-- CONVERTISSEUR D'IMAGES -->
     <div id="img-converter-pro">
-        <h2>Convertisseur d'Images : JPEG/PNG ⇄ WebP</h2>
-        
+        <h2>Convertisseur d'Images : JPEG/PNG ⇄ WebP ⇄ PDF</h2>
+
         <div class="converter-grid">
+            <!-- Images -> PDF (pleine largeur) -->
+            <div class="converter full-width">
+                <h3>Images vers PDF <span class="format-badge badge-webp">WebP</span> → <span class="format-badge badge-pdf">PDF</span></h3>
+                <div id="imagesToPdfDropZone" class="dropZone pdf">
+                    <p>Glissez-déposez ou cliquez pour sélectionner des fichiers WebP</p>
+                    <input type="file" id="imagesToPdfInput" multiple accept=".webp" style="display: none;">
+                </div>
+                <select id="imagesToPdfMode">
+                    <option value="fit">Ajustée à une page A4</option>
+                    <option value="native">Taille réelle de l'image</option>
+                </select>
+                <div id="imagesToPdfFileList" class="fileList"></div>
+                <button id="imagesToPdfConvertBtn" class="convertBtn images-to-pdf" disabled>Convertir en PDF</button>
+                <span id="imagesToPdfResetBtn" class="reset-icon" title="Réinitialiser">✕</span>
+                <div id="imagesToPdfResultBox" class="result-box"></div>
+            </div>
+
             <!-- JPEG → WebP -->
             <div class="converter">
                 <h3>JPEG vers WebP <span class="format-badge badge-jpeg">JPEG</span> → <span class="format-badge badge-webp">WebP</span></h3>
@@ -265,6 +319,7 @@
                 <div id="jpegToWebpFileList" class="fileList"></div>
                 <button id="jpegToWebpConvertBtn" class="convertBtn" disabled>Convertir en WebP</button>
                 <span id="jpegToWebpResetBtn" class="reset-icon" title="Réinitialiser">✕</span>
+                <div id="jpegToWebpResultBox" class="result-box"></div>
             </div>
 
             <!-- WebP → JPEG -->
@@ -277,6 +332,7 @@
                 <div id="webpToJpegFileList" class="fileList"></div>
                 <button id="webpToJpegConvertBtn" class="convertBtn webp-to-jpeg" disabled>Convertir en JPEG</button>
                 <span id="webpToJpegResetBtn" class="reset-icon" title="Réinitialiser">✕</span>
+                <div id="webpToJpegResultBox" class="result-box"></div>
             </div>
 
             <!-- PNG → WebP -->
@@ -289,6 +345,7 @@
                 <div id="pngToWebpFileList" class="fileList"></div>
                 <button id="pngToWebpConvertBtn" class="convertBtn png-to-webp" disabled>Convertir en WebP</button>
                 <span id="pngToWebpResetBtn" class="reset-icon" title="Réinitialiser">✕</span>
+                <div id="pngToWebpResultBox" class="result-box"></div>
             </div>
 
             <!-- WebP → PNG -->
@@ -301,40 +358,112 @@
                 <div id="webpToPngFileList" class="fileList"></div>
                 <button id="webpToPngConvertBtn" class="convertBtn webp-to-png" disabled>Convertir en PNG</button>
                 <span id="webpToPngResetBtn" class="reset-icon" title="Réinitialiser">✕</span>
+                <div id="webpToPngResultBox" class="result-box"></div>
             </div>
         </div>
 
         <div class="tool-footer">
             <span>Dr. Anouar Karazaitri © 2026</span>
             <div class="disclaimer">
-                ⚠️ <strong>Usage bureautique</strong> : Cet outil traite les images localement dans votre navigateur. Aucun fichier n'est envoyé sur un serveur.
+                ⚠️ <strong>Usage bureautique</strong> : Cet outil traite les images localement dans votre navigateur. Aucun fichier n'est envoyé sur un serveur. Au-delà d'un fichier converti, le téléchargement se fait sous forme d'archive ZIP (générée elle aussi localement, sans bibliothèque externe).
             </div>
         </div>
     </div>
 
-    <!-- BIBLIOTHÈQUES EXTERNES (nécessaires) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/exif-js/2.3.0/exif.min.js"></script>
-    
     <script>
-        // === LOGIQUE DU CONVERTISSEUR (Préservée) ===
-        function setupConverter(dropZoneId, fileInputId, fileListId, convertBtnId, resetBtnId, acceptedType, targetType, targetExtension) {
+        // === UTILITAIRES COMMUNS ===
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Octets';
+            const k = 1024;
+            const sizes = ['Octets', 'Ko', 'Mo', 'Go'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function chargerImage(url) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = () => reject(new Error("Impossible de décoder l'image (format non supporté par ce navigateur ?)"));
+                img.src = url;
+            });
+        }
+
+        // === GÉNÉRATEUR ZIP MAISON (méthode "stockée", sans compression, sans dépendance externe) ===
+        const crcTable = (function () {
+            const table = [];
+            for (let n = 0; n < 256; n++) {
+                let c = n;
+                for (let k = 0; k < 8; k++) { c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1); }
+                table[n] = c >>> 0;
+            }
+            return table;
+        })();
+        function crc32(bytes) {
+            let crc = 0xFFFFFFFF;
+            for (let i = 0; i < bytes.length; i++) { crc = crcTable[(crc ^ bytes[i]) & 0xFF] ^ (crc >>> 8); }
+            return (crc ^ 0xFFFFFFFF) >>> 0;
+        }
+        function u16(n) { return new Uint8Array([n & 0xFF, (n >>> 8) & 0xFF]); }
+        function u32(n) { return new Uint8Array([n & 0xFF, (n >>> 8) & 0xFF, (n >>> 16) & 0xFF, (n >>> 24) & 0xFF]); }
+        function dosDateTime(date) {
+            const time = ((date.getHours() & 0x1F) << 11) | ((date.getMinutes() & 0x3F) << 5) | (Math.floor(date.getSeconds() / 2) & 0x1F);
+            const d = (((date.getFullYear() - 1980) & 0x7F) << 9) | (((date.getMonth() + 1) & 0xF) << 5) | (date.getDate() & 0x1F);
+            return { time: time & 0xFFFF, date: d & 0xFFFF };
+        }
+        function creerZip(fichiers) {
+            const enc = new TextEncoder();
+            const chunks = []; let offset = 0;
+            function push(b) { chunks.push(b); offset += b.length; }
+            const centralDir = []; const dt = dosDateTime(new Date());
+
+            fichiers.forEach(f => {
+                const nameBytes = enc.encode(f.nom);
+                const data = f.data;
+                const crc = crc32(data);
+                const localOffset = offset;
+                push(u32(0x04034b50)); push(u16(20)); push(u16(0)); push(u16(0));
+                push(u16(dt.time)); push(u16(dt.date));
+                push(u32(crc)); push(u32(data.length)); push(u32(data.length));
+                push(u16(nameBytes.length)); push(u16(0));
+                push(nameBytes); push(data);
+                centralDir.push({ nameBytes, crc, size: data.length, offset: localOffset, time: dt.time, date: dt.date });
+            });
+
+            const centralStart = offset;
+            centralDir.forEach(e => {
+                push(u32(0x02014b50)); push(u16(20)); push(u16(20)); push(u16(0)); push(u16(0));
+                push(u16(e.time)); push(u16(e.date));
+                push(u32(e.crc)); push(u32(e.size)); push(u32(e.size));
+                push(u16(e.nameBytes.length)); push(u16(0)); push(u16(0));
+                push(u16(0)); push(u16(0)); push(u32(0)); push(u32(e.offset));
+                push(e.nameBytes);
+            });
+            const centralSize = offset - centralStart;
+
+            push(u32(0x06054b50)); push(u16(0)); push(u16(0));
+            push(u16(centralDir.length)); push(u16(centralDir.length));
+            push(u32(centralSize)); push(u32(centralStart)); push(u16(0));
+
+            let total = 0; chunks.forEach(c => total += c.length);
+            const result = new Uint8Array(total); let pos = 0;
+            chunks.forEach(c => { result.set(c, pos); pos += c.length; });
+            return result;
+        }
+
+        // === CONVERTISSEUR GÉNÉRIQUE IMAGE -> IMAGE (JPEG/PNG/WebP) ===
+        function setupConverter(dropZoneId, fileInputId, fileListId, convertBtnId, resetBtnId, resultBoxId, acceptedType, targetType, targetMime, quality, sourceExtRegex) {
             const dropZone = document.getElementById(dropZoneId);
             const fileInput = document.getElementById(fileInputId);
             const fileList = document.getElementById(fileListId);
             const convertBtn = document.getElementById(convertBtnId);
             const resetBtn = document.getElementById(resetBtnId);
+            const resultBox = document.getElementById(resultBoxId);
             let files = [];
 
             dropZone.addEventListener('click', () => fileInput.click());
-            
-            dropZone.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                dropZone.style.backgroundColor = '#e3f2fd';
-            });
-            dropZone.addEventListener('dragleave', () => {
-                dropZone.style.backgroundColor = '';
-            });
+            dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.style.backgroundColor = '#e3f2fd'; });
+            dropZone.addEventListener('dragleave', () => { dropZone.style.backgroundColor = ''; });
             dropZone.addEventListener('drop', handleFiles);
             fileInput.addEventListener('change', handleFiles);
             resetBtn.addEventListener('click', resetSelection);
@@ -343,75 +472,29 @@
                 e.preventDefault();
                 dropZone.style.backgroundColor = '';
                 const newFiles = e.target.files || e.dataTransfer.files;
-                
-                const filteredFiles = Array.from(newFiles).filter(file => {
-                    if (acceptedType === 'image/jpeg') return file.type === 'image/jpeg' || file.type === 'image/jpg';
-                    if (acceptedType === 'image/webp') return file.type === 'image/webp';
-                    if (acceptedType === 'image/png') return file.type === 'image/png';
-                    return false;
-                });
-                
-                files = [...files, ...filteredFiles];
+                const filtered = Array.from(newFiles).filter(file => file.type === acceptedType);
+                files = [...files, ...filtered];
                 updateFileList();
-            }
-
-            function formatFileSize(bytes) {
-                if (bytes === 0) return '0 Octets';
-                const k = 1024;
-                const sizes = ['Octets', 'Ko', 'Mo', 'Go'];
-                const i = Math.floor(Math.log(bytes) / Math.log(k));
-                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
             }
 
             function updateFileList() {
                 fileList.innerHTML = '';
                 files.forEach((file, index) => {
-                    const fileItem = document.createElement('div');
-                    fileItem.className = 'file-item';
-                    fileItem.innerHTML = `
+                    const item = document.createElement('div');
+                    item.className = 'file-item';
+                    item.innerHTML = `
                         <div>
                             <strong>${file.name}</strong>
                             <div class="file-info">Taille : ${formatFileSize(file.size)}</div>
                             <div class="progress-bar"><span class="progress" id="${dropZoneId}-progress-${index}"></span></div>
                             <div class="compression-info" id="${dropZoneId}-compression-${index}"></div>
-                            <div class="metadata" id="${dropZoneId}-metadata-${index}">Chargement...</div>
                         </div>
                     `;
-                    fileList.appendChild(fileItem);
-                    loadMetadata(file, index, dropZoneId);
+                    fileList.appendChild(item);
                 });
                 convertBtn.disabled = files.length === 0;
                 resetBtn.style.display = files.length > 0 ? 'inline' : 'none';
-            }
-
-            function loadMetadata(file, index, prefix) {
-                const metadataDisplay = document.getElementById(`${prefix}-metadata-${index}`);
-                
-                if (file.type === 'image/webp') {
-                    metadataDisplay.textContent = 'Format WebP - Compression moderne';
-                    return;
-                }
-                if (file.type === 'image/png') {
-                    metadataDisplay.textContent = 'Format PNG - Transparence supportée';
-                    return;
-                }
-
-                if (typeof EXIF !== 'undefined') {
-                    EXIF.getData(file, function() {
-                        const metadata = EXIF.getAllTags(this);
-                        if (Object.keys(metadata).length > 0) {
-                            let info = '';
-                            if (metadata.Make) info += `Marque: ${metadata.Make} `;
-                            if (metadata.Model) info += `Modèle: ${metadata.Model} `;
-                            if (metadata.DateTimeOriginal) info += `Date: ${metadata.DateTimeOriginal}`;
-                            metadataDisplay.textContent = info || 'Métadonnées disponibles';
-                        } else {
-                            metadataDisplay.textContent = 'Aucune métadonnée';
-                        }
-                    });
-                } else {
-                    metadataDisplay.textContent = 'Métadonnées non disponibles';
-                }
+                resultBox.classList.remove('show');
             }
 
             function resetSelection() {
@@ -420,68 +503,66 @@
                 fileList.innerHTML = '';
                 convertBtn.disabled = true;
                 resetBtn.style.display = 'none';
+                resultBox.classList.remove('show');
             }
 
             convertBtn.addEventListener('click', async () => {
                 convertBtn.disabled = true;
-                const zip = new JSZip();
+                const convertis = [];
 
                 for (let i = 0; i < files.length; i++) {
                     const file = files[i];
                     try {
-                        const img = await createImageBitmap(file);
+                        const img = await chargerImage(URL.createObjectURL(file));
                         const canvas = document.createElement('canvas');
-                        canvas.width = img.width;
-                        canvas.height = img.height;
+                        canvas.width = img.naturalWidth;
+                        canvas.height = img.naturalHeight;
                         const ctx = canvas.getContext('2d');
-                        
-                        if (file.type === 'image/png' && targetType === 'webp') {
-                            ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        if (targetType === 'jpeg') {
+                            ctx.fillStyle = '#FFFFFF';
+                            ctx.fillRect(0, 0, canvas.width, canvas.height);
                         }
                         ctx.drawImage(img, 0, 0);
-                        
-                        let convertedBlob, convertedFileName, quality;
-                        
-                        if (targetType === 'webp') {
-                            quality = 0.9;
-                            convertedBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/webp', quality));
-                            convertedFileName = file.name.replace(/\.(jpe?g|png)$/i, '.webp');
-                        } else if (targetType === 'jpeg') {
-                            quality = 0.85;
-                            convertedBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', quality));
-                            convertedFileName = file.name.replace(/\.webp$/i, '.jpg');
-                        } else if (targetType === 'png') {
-                            convertedBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-                            convertedFileName = file.name.replace(/\.webp$/i, '.png');
-                        }
-                        
-                        zip.file(convertedFileName, convertedBlob);
+
+                        const blob = await new Promise(resolve => canvas.toBlob(resolve, targetMime, quality));
+                        const buf = await blob.arrayBuffer();
+                        const data = new Uint8Array(buf);
+                        const nomConverti = file.name.replace(sourceExtRegex, '') + '.' + targetType.replace('jpeg', 'jpg');
+
+                        convertis.push({ nom: nomConverti, data });
                         updateProgress(dropZoneId, i, 100);
 
-                        const originalSize = formatFileSize(file.size);
-                        const convertedSize = formatFileSize(convertedBlob.size);
-                        const diff = ((file.size - convertedBlob.size) / file.size * 100).toFixed(1);
+                        const diff = ((file.size - data.length) / file.size * 100).toFixed(1);
                         const compressionInfo = document.getElementById(`${dropZoneId}-compression-${i}`);
-                        
-                        if (diff > 0) {
-                            compressionInfo.innerHTML = `Converti: ${convertedSize} <span style="color:#2e7d32">(-${diff}%)</span>`;
+                        if (diff >= 0) {
+                            compressionInfo.innerHTML = `Converti: ${formatFileSize(data.length)} <span style="color:#2e7d32">(-${diff}%)</span>`;
                         } else {
-                            compressionInfo.innerHTML = `Converti: ${convertedSize} <span style="color:#ed6c02">(+${Math.abs(diff)}%)</span>`;
+                            compressionInfo.innerHTML = `Converti: ${formatFileSize(data.length)} <span style="color:#ed6c02">(+${Math.abs(diff)}%)</span>`;
                         }
                     } catch (error) {
                         console.error('Erreur conversion:', error);
                         const info = document.getElementById(`${dropZoneId}-compression-${i}`);
-                        info.textContent = 'Erreur de conversion';
-                        info.style.color = '#c62828';
+                        if (info) { info.textContent = 'Erreur de conversion'; info.style.color = '#c62828'; }
                     }
                 }
 
-                const zipBlob = await zip.generateAsync({type: 'blob'});
-                const downloadLink = document.createElement('a');
-                downloadLink.href = URL.createObjectURL(zipBlob);
-                downloadLink.download = `images_converted_${targetType}.zip`;
-                downloadLink.click();
-                
+                try {
+                    if (convertis.length === 1) {
+                        const blob = new Blob([convertis[0].data], { type: targetMime });
+                        const url = URL.createObjectURL(blob);
+                        resultBox.innerHTML = `1 fichier converti (${formatFileSize(convertis[0].data.length)}) — <a href="${url}" download="${convertis[0].nom}">Télécharger</a>`;
+                    } else if (convertis.length > 1) {
+                        const zipBytes = creerZip(convertis);
+                        const zipBlob = new Blob([zipBytes], { type: 'application/zip' });
+                        const url = URL.createObjectURL(zipBlob);
+                        resultBox.innerHTML = `${convertis.length} fichiers convertis (archive ZIP, ${formatFileSize(zipBytes.length)}) — <a href="${url}" download="images_converties_${targetType}.zip">Télécharger le ZIP</a>`;
+                    }
+                    resultBox.classList.add('show');
+                } catch (e) {
+                    resultBox.innerHTML = 'Erreur lors de la génération du fichier final : ' + e.message;
+                    resultBox.classList.add('show');
+                }
+
                 convertBtn.disabled = false;
             });
         }
@@ -491,12 +572,193 @@
             if (bar) bar.style.width = `${percent}%`;
         }
 
-        // Initialisation des 4 convertisseurs
+        // === CONVERTISSEUR IMAGES -> PDF (construction manuelle du PDF, sans dépendance externe) ===
+        function pdfConstruire(pages) {
+            const enc = new TextEncoder();
+            const chunks = []; let offset = 0; const xref = [];
+            function ecrireStr(s) { const b = enc.encode(s); chunks.push(b); offset += b.length; }
+            function ecrireBytes(b) { chunks.push(b); offset += b.length; }
+            function nouvelObjet(num) { xref[num] = offset; ecrireStr(num + ' 0 obj\n'); }
+            function pad10(n) { return String(n).padStart(10, '0'); }
+
+            ecrireStr('%PDF-1.4\n');
+            ecrireBytes(new Uint8Array([0x25, 0xE2, 0xE3, 0xCF, 0xD3, 0x0A]));
+
+            const totalObjets = 2 + pages.length * 3;
+            const numerosPage = [];
+            for (let i = 0; i < pages.length; i++) numerosPage.push(3 + i * 3);
+
+            nouvelObjet(1);
+            ecrireStr('<< /Type /Catalog /Pages 2 0 R >>\nendobj\n');
+            nouvelObjet(2);
+            const kids = numerosPage.map(n => n + ' 0 R').join(' ');
+            ecrireStr('<< /Type /Pages /Kids [' + kids + '] /Count ' + pages.length + ' >>\nendobj\n');
+
+            for (let p = 0; p < pages.length; p++) {
+                const page = pages[p];
+                const numPage = 3 + p * 3, numContenu = 4 + p * 3, numImage = 5 + p * 3;
+
+                nouvelObjet(numPage);
+                ecrireStr('<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ' + page.pageW.toFixed(2) + ' ' + page.pageH.toFixed(2) +
+                    '] /Resources << /XObject << /Im0 ' + numImage + ' 0 R >> >> /Contents ' + numContenu + ' 0 R >>\nendobj\n');
+
+                const contenu = 'q\n' + page.drawW.toFixed(2) + ' 0 0 ' + page.drawH.toFixed(2) + ' ' +
+                    page.x.toFixed(2) + ' ' + page.y.toFixed(2) + ' cm\n/Im0 Do\nQ';
+                const contenuBytes = enc.encode(contenu);
+                nouvelObjet(numContenu);
+                ecrireStr('<< /Length ' + contenuBytes.length + ' >>\nstream\n');
+                ecrireBytes(contenuBytes);
+                ecrireStr('\nendstream\nendobj\n');
+
+                nouvelObjet(numImage);
+                ecrireStr('<< /Type /XObject /Subtype /Image /Width ' + page.largeurPx + ' /Height ' + page.hauteurPx +
+                    ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ' + page.jpegBytes.length + ' >>\nstream\n');
+                ecrireBytes(page.jpegBytes);
+                ecrireStr('\nendstream\nendobj\n');
+            }
+
+            const xrefOffset = offset;
+            ecrireStr('xref\n0 ' + (totalObjets + 1) + '\n');
+            ecrireStr('0000000000 65535 f\r\n');
+            for (let n = 1; n <= totalObjets; n++) { ecrireStr(pad10(xref[n]) + ' 00000 n\r\n'); }
+            ecrireStr('trailer\n<< /Size ' + (totalObjets + 1) + ' /Root 1 0 R >>\nstartxref\n' + xrefOffset + '\n%%EOF');
+
+            let totalLen = 0; chunks.forEach(c => totalLen += c.length);
+            const resultat = new Uint8Array(totalLen); let pos = 0;
+            chunks.forEach(c => { resultat.set(c, pos); pos += c.length; });
+            return resultat;
+        }
+
+        function pdfImageVersJpegBytes(img, qualite) {
+            const MAX_DIM = 2800;
+            const w = img.naturalWidth, h = img.naturalHeight;
+            const scale = Math.min(1, MAX_DIM / Math.max(w, h));
+            const cw = Math.round(w * scale), ch = Math.round(h * scale);
+            const canvas = document.createElement('canvas');
+            canvas.width = cw; canvas.height = ch;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, cw, ch);
+            ctx.drawImage(img, 0, 0, cw, ch);
+            const dataUrl = canvas.toDataURL('image/jpeg', qualite);
+            const base64 = dataUrl.split(',')[1];
+            const binaire = atob(base64);
+            const bytes = new Uint8Array(binaire.length);
+            for (let i = 0; i < binaire.length; i++) bytes[i] = binaire.charCodeAt(i);
+            return { bytes, largeurPx: cw, hauteurPx: ch };
+        }
+
+        function pdfCalculerMiseEnPage(largeurPx, hauteurPx, mode) {
+            const PX_TO_PT = 0.75;
+            if (mode === 'native') {
+                const pageW = largeurPx * PX_TO_PT, pageH = hauteurPx * PX_TO_PT;
+                return { pageW, pageH, drawW: pageW, drawH: pageH, x: 0, y: 0 };
+            }
+            const A4_PORTRAIT = [595.28, 841.89], A4_LANDSCAPE = [841.89, 595.28];
+            const paysage = largeurPx > hauteurPx;
+            const page = paysage ? A4_LANDSCAPE : A4_PORTRAIT;
+            const marge = 28;
+            const dispoW = page[0] - marge * 2, dispoH = page[1] - marge * 2;
+            const ratioImg = largeurPx / hauteurPx, ratioBox = dispoW / dispoH;
+            let drawW, drawH;
+            if (ratioImg > ratioBox) { drawW = dispoW; drawH = dispoW / ratioImg; }
+            else { drawH = dispoH; drawW = dispoH * ratioImg; }
+            const x = marge + (dispoW - drawW) / 2, y = marge + (dispoH - drawH) / 2;
+            return { pageW: page[0], pageH: page[1], drawW, drawH, x, y };
+        }
+
+        function setupPdfConverter() {
+            const dropZone = document.getElementById('imagesToPdfDropZone');
+            const fileInput = document.getElementById('imagesToPdfInput');
+            const fileList = document.getElementById('imagesToPdfFileList');
+            const convertBtn = document.getElementById('imagesToPdfConvertBtn');
+            const resetBtn = document.getElementById('imagesToPdfResetBtn');
+            const resultBox = document.getElementById('imagesToPdfResultBox');
+            const modeSelect = document.getElementById('imagesToPdfMode');
+            let files = [];
+
+            dropZone.addEventListener('click', () => fileInput.click());
+            dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.style.backgroundColor = '#f5eac8'; });
+            dropZone.addEventListener('dragleave', () => { dropZone.style.backgroundColor = ''; });
+            dropZone.addEventListener('drop', handleFiles);
+            fileInput.addEventListener('change', handleFiles);
+            resetBtn.addEventListener('click', resetSelection);
+
+            function handleFiles(e) {
+                e.preventDefault();
+                dropZone.style.backgroundColor = '';
+                const newFiles = e.target.files || e.dataTransfer.files;
+                const filtered = Array.from(newFiles).filter(file => file.type === 'image/webp');
+                files = [...files, ...filtered];
+                updateFileList();
+            }
+
+            function updateFileList() {
+                fileList.innerHTML = '';
+                files.forEach((file, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'file-item';
+                    item.innerHTML = `<div><strong>${file.name}</strong><div class="file-info">Taille : ${formatFileSize(file.size)}</div></div>`;
+                    fileList.appendChild(item);
+                });
+                convertBtn.disabled = files.length === 0;
+                resetBtn.style.display = files.length > 0 ? 'inline' : 'none';
+                resultBox.classList.remove('show');
+            }
+
+            function resetSelection() {
+                files = [];
+                fileInput.value = '';
+                fileList.innerHTML = '';
+                convertBtn.disabled = true;
+                resetBtn.style.display = 'none';
+                resultBox.classList.remove('show');
+            }
+
+            convertBtn.addEventListener('click', async () => {
+                if (files.length === 0) return;
+                convertBtn.disabled = true;
+                const mode = modeSelect.value;
+                const qualite = 0.5;
+                const pages = [];
+
+                for (let i = 0; i < files.length; i++) {
+                    try {
+                        const img = await chargerImage(URL.createObjectURL(files[i]));
+                        const jpeg = pdfImageVersJpegBytes(img, qualite);
+                        const mise = pdfCalculerMiseEnPage(jpeg.largeurPx, jpeg.hauteurPx, mode);
+                        pages.push({
+                            jpegBytes: jpeg.bytes, largeurPx: jpeg.largeurPx, hauteurPx: jpeg.hauteurPx,
+                            pageW: mise.pageW, pageH: mise.pageH, drawW: mise.drawW, drawH: mise.drawH, x: mise.x, y: mise.y
+                        });
+                    } catch (e) {
+                        console.error('Erreur PDF:', e);
+                    }
+                }
+
+                try {
+                    const pdfBytes = pdfConstruire(pages);
+                    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+                    const url = URL.createObjectURL(blob);
+                    const nomFichier = files.length === 1 ? files[0].name.replace(/\.webp$/i, '') + '.pdf' : 'images-converties.pdf';
+                    resultBox.innerHTML = `${pages.length} page(s), ${formatFileSize(pdfBytes.length)} — <a href="${url}" download="${nomFichier}">Télécharger le PDF</a>`;
+                    resultBox.classList.add('show');
+                } catch (e) {
+                    resultBox.innerHTML = 'Erreur lors de la génération du PDF : ' + e.message;
+                    resultBox.classList.add('show');
+                }
+
+                convertBtn.disabled = false;
+            });
+        }
+
+        // Initialisation
         document.addEventListener('DOMContentLoaded', () => {
-            setupConverter('jpegToWebpDropZone', 'jpegToWebpInput', 'jpegToWebpFileList', 'jpegToWebpConvertBtn', 'jpegToWebpResetBtn', 'image/jpeg', 'webp', '.webp');
-            setupConverter('webpToJpegDropZone', 'webpToJpegInput', 'webpToJpegFileList', 'webpToJpegConvertBtn', 'webpToJpegResetBtn', 'image/webp', 'jpeg', '.jpg');
-            setupConverter('pngToWebpDropZone', 'pngToWebpInput', 'pngToWebpFileList', 'pngToWebpConvertBtn', 'pngToWebpResetBtn', 'image/png', 'webp', '.webp');
-            setupConverter('webpToPngDropZone', 'webpToPngInput', 'webpToPngFileList', 'webpToPngConvertBtn', 'webpToPngResetBtn', 'image/webp', 'png', '.png');
+            setupConverter('jpegToWebpDropZone', 'jpegToWebpInput', 'jpegToWebpFileList', 'jpegToWebpConvertBtn', 'jpegToWebpResetBtn', 'jpegToWebpResultBox', 'image/jpeg', 'webp', 'image/webp', 0.9, /\.jpe?g$/i);
+            setupConverter('webpToJpegDropZone', 'webpToJpegInput', 'webpToJpegFileList', 'webpToJpegConvertBtn', 'webpToJpegResetBtn', 'webpToJpegResultBox', 'image/webp', 'jpeg', 'image/jpeg', 0.85, /\.webp$/i);
+            setupConverter('pngToWebpDropZone', 'pngToWebpInput', 'pngToWebpFileList', 'pngToWebpConvertBtn', 'pngToWebpResetBtn', 'pngToWebpResultBox', 'image/png', 'webp', 'image/webp', 0.9, /\.png$/i);
+            setupConverter('webpToPngDropZone', 'webpToPngInput', 'webpToPngFileList', 'webpToPngConvertBtn', 'webpToPngResetBtn', 'webpToPngResultBox', 'image/webp', 'png', 'image/png', 1, /\.webp$/i);
+            setupPdfConverter();
         });
     </script>
 </body>
