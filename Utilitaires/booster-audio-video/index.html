@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Booster Audio Vidéo</title>
+<style>
+  #vbTool, #vbTool * { box-sizing: border-box; }
+  #vbTool {
+    font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 24px 16px 48px;
+    color: #1e293b;
+    background: #f8fafc;
+  }
+  #vbTool .vb-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  }
+  #vbTool h1 {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0 0 4px;
+    color: #0f172a;
+  }
+  #vbTool .vb-subtitle {
+    font-size: 14px;
+    color: #64748b;
+    margin: 0 0 20px;
+  }
+  #vbTool h2 {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0 0 12px;
+    color: #0f172a;
+  }
+  #vbTool .vb-dropzone {
+    border: 2px dashed #cbd5e1;
+    border-radius: 10px;
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .15s ease, background .15s ease;
+  }
+  #vbTool .vb-dropzone:hover,
+  #vbTool .vb-dropzone.vb-drag {
+    border-color: #2563eb;
+    background: #eff6ff;
+  }
+  #vbTool .vb-dropzone p {
+    margin: 0 0 4px;
+    font-size: 14px;
+    color: #475569;
+  }
+  #vbTool .vb-dropzone strong {
+    color: #2563eb;
+  }
+  #vbTool .vb-dropzone small {
+    color: #94a3b8;
+    font-size: 12px;
+  }
+  #vbTool input[type="file"] { display: none; }
+
+  #vbTool video {
+    width: 100%;
+    border-radius: 8px;
+    background: #000;
+    display: block;
+  }
+
+  #vbTool .vb-transport {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 12px;
+  }
+  #vbTool .vb-btn {
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 14px;
+    cursor: pointer;
+    color: #1e293b;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  #vbTool .vb-btn:hover { background: #f1f5f9; }
+  #vbTool .vb-btn:disabled { opacity: .5; cursor: not-allowed; }
+  #vbTool .vb-btn.vb-primary {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #fff;
+  }
+  #vbTool .vb-btn.vb-primary:hover { background: #1d4ed8; }
+  #vbTool .vb-btn.vb-danger {
+    background: #fff;
+    border-color: #fca5a5;
+    color: #b91c1c;
+  }
+
+  #vbTool input[type="range"] {
+    -webkit-appearance: none;
+    flex: 1;
+    height: 4px;
+    background: #e2e8f0;
+    border-radius: 2px;
+    outline: none;
+  }
+  #vbTool input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #2563eb;
+    cursor: pointer;
+    border: none;
+  }
+  #vbTool input[type="range"]::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #2563eb;
+    cursor: pointer;
+    border: none;
+  }
+
+  #vbTool .vb-time {
+    font-variant-numeric: tabular-nums;
+    font-size: 13px;
+    color: #64748b;
+    min-width: 92px;
+    text-align: right;
+  }
+
+  #vbTool .vb-gain-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 6px;
+  }
+  #vbTool .vb-gain-value {
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    font-size: 15px;
+    min-width: 52px;
+    text-align: right;
+    color: #2563eb;
+  }
+  #vbTool .vb-gain-value.vb-warn { color: #d97706; }
+  #vbTool .vb-gain-value.vb-danger { color: #dc2626; }
+
+  #vbTool .vb-meter {
+    display: flex;
+    gap: 2px;
+    height: 14px;
+    margin-top: 10px;
+    align-items: flex-end;
+  }
+  #vbTool .vb-meter-seg {
+    flex: 1;
+    height: 100%;
+    background: #e2e8f0;
+    border-radius: 1px;
+    transition: background .05s linear;
+  }
+
+  #vbTool .vb-checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+    font-size: 13.5px;
+    color: #334155;
+  }
+  #vbTool .vb-checkbox-row input { width: 16px; height: 16px; }
+
+  #vbTool .vb-hint {
+    font-size: 12.5px;
+    color: #94a3b8;
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+
+  #vbTool .vb-export-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin-top: 4px;
+  }
+
+  #vbTool .vb-quality-row {
+    margin-bottom: 14px;
+  }
+  #vbTool .vb-quality-row label {
+    display: block;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 6px;
+  }
+  #vbTool select {
+    width: 100%;
+    font-family: inherit;
+    font-size: 14px;
+    color: #1e293b;
+    background: #fff;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 9px 10px;
+    outline: none;
+  }
+  #vbTool select:focus { border-color: #2563eb; }
+  #vbTool .vb-quality-estimate {
+    font-size: 12.5px;
+    color: #64748b;
+    margin-top: 6px;
+  }
+
+  #vbTool .vb-progress-wrap {
+    margin-top: 14px;
+    display: none;
+  }
+  #vbTool .vb-progress-wrap.vb-active { display: block; }
+  #vbTool .vb-progress-bar {
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  #vbTool .vb-progress-fill {
+    height: 100%;
+    width: 0%;
+    background: #2563eb;
+    transition: width .15s linear;
+  }
+  #vbTool .vb-progress-label {
+    font-size: 12.5px;
+    color: #64748b;
+    margin-top: 6px;
+  }
+
+  #vbTool .vb-notice {
+    font-size: 13px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-left: 3px solid #2563eb;
+    border-radius: 6px;
+    padding: 10px 12px;
+    color: #475569;
+    line-height: 1.5;
+  }
+  #vbTool .vb-notice.vb-error {
+    border-left-color: #dc2626;
+    color: #7f1d1d;
+    background: #fef2f2;
+  }
+
+  #vbTool .vb-footer-note {
+    text-align: center;
+    font-size: 11.5px;
+    color: #94a3b8;
+    margin-top: 8px;
+  }
+
+  #vbTool [hidden] { display: none !important; }
+
+  @media (max-width: 480px) {
+    #vbTool .vb-card { padding: 16px; }
+    #vbTool .vb-transport { flex-wrap: wrap; }
+    #vbTool .vb-time { min-width: unset; }
+  }
+</style>
+</head>
+<body>
+
+<div id="vbTool">
+
+  <div class="vb-card">
+    <h1>Booster Audio Vidéo</h1>
+    <p class="vb-subtitle">Amplifiez le son d'une vidéo directement dans votre navigateur, sans envoi sur un serveur.</p>
+
+    <div class="vb-dropzone" id="vbDropzone">
+      <p><strong>Cliquez pour choisir un fichier</strong> ou glissez-déposez une vidéo ici</p>
+      <small>Formats courants : MP4, WebM, MOV, etc. Traitement 100% local.</small>
+      <input type="file" id="vbFileInput" accept="video/*">
+    </div>
+  </div>
+
+  <div class="vb-card" id="vbPlayerCard" hidden>
+    <h2>Lecture</h2>
+
+    <video id="vbVideo" playsinline></video>
+
+    <div class="vb-transport">
+      <button type="button" class="vb-btn vb-primary" id="vbPlayBtn">▶ Lecture</button>
+      <input type="range" id="vbSeek" min="0" max="1000" value="0" step="1">
+      <span class="vb-time" id="vbTime">00:00 / 00:00</span>
+    </div>
+
+    <h2 style="margin-top:22px;">Boost du volume</h2>
+    <div class="vb-gain-row">
+      <input type="range" id="vbGain" min="100" max="300" value="150" step="5">
+      <span class="vb-gain-value" id="vbGainValue">150%</span>
+    </div>
+
+    <div class="vb-meter" id="vbMeter"></div>
+
+    <div class="vb-checkbox-row">
+      <input type="checkbox" id="vbLimiter" checked>
+      <label for="vbLimiter">Limiteur anti-saturation (recommandé au-delà de 150%)</label>
+    </div>
+
+    <p class="vb-hint">Le curseur natif de la vidéo n'a pas d'effet : le volume réel est contrôlé uniquement par le boost ci-dessus. Si le repère devient rouge de façon continue, réduisez le boost ou laissez le limiteur activé.</p>
+
+    <h2 style="margin-top:22px;">Choisir un autre fichier</h2>
+    <div class="vb-export-row">
+      <button type="button" class="vb-btn" id="vbNewFileBtn">Charger une autre vidéo</button>
+    </div>
+  </div>
+
+  <div class="vb-card" id="vbExportCard" hidden>
+    <h2>Exporter la vidéo avec l'audio boosté</h2>
+    <p class="vb-hint" style="margin-top:0;">
+      L'export rejoue la vidéo en temps réel avec le boost et le limiteur actuellement réglés, puis génère un fichier téléchargeable au format WebM (VP9/Opus, ou VP8/Opus selon le navigateur). La durée de l'export correspond à la durée de la vidéo.
+    </p>
+
+    <div id="vbExportUnsupported" class="vb-notice vb-error" hidden>
+      Votre navigateur ne prend pas en charge l'export (captureStream / MediaRecorder indisponible). La lecture avec boost reste utilisable ; essayez Chrome ou Edge pour l'export.
+    </div>
+
+    <div class="vb-quality-row">
+      <label for="vbQuality">Qualité d'export</label>
+      <select id="vbQuality">
+        <option value="auto">Automatique — fichier le plus léger, qualité variable</option>
+        <option value="2500000" selected>Standard (2,5 Mbps) — bon compromis</option>
+        <option value="5000000">Haute (5 Mbps) — quasi sans perte visible</option>
+        <option value="8000000">Très haute (8 Mbps) — proche de la qualité source</option>
+      </select>
+      <p class="vb-quality-estimate" id="vbQualityEstimate">Chargez une vidéo pour voir une estimation de taille.</p>
+    </div>
+
+    <div class="vb-export-row">
+      <button type="button" class="vb-btn vb-primary" id="vbExportBtn">Exporter (WebM)</button>
+      <button type="button" class="vb-btn vb-danger" id="vbCancelExportBtn" hidden>Annuler l'export</button>
+    </div>
+
+    <div class="vb-progress-wrap" id="vbProgressWrap">
+      <div class="vb-progress-bar"><div class="vb-progress-fill" id="vbProgressFill"></div></div>
+      <p class="vb-progress-label" id="vbProgressLabel">Export en cours…</p>
+    </div>
+  </div>
+
+  <p class="vb-footer-note">Aucune vidéo n'est transmise à un serveur : tout le traitement (lecture, boost, export) s'exécute localement dans votre navigateur.</p>
+
+</div>
+
+<script>
+(function () {
+  var wrap = document.getElementById('vbTool');
+  var dropzone = document.getElementById('vbDropzone');
+  var fileInput = document.getElementById('vbFileInput');
+  var newFileBtn = document.getElementById('vbNewFileBtn');
+
+  var playerCard = document.getElementById('vbPlayerCard');
+  var exportCard = document.getElementById('vbExportCard');
+
+  var video = document.getElementById('vbVideo');
+  var playBtn = document.getElementById('vbPlayBtn');
+  var seek = document.getElementById('vbSeek');
+  var timeLabel = document.getElementById('vbTime');
+
+  var gainSlider = document.getElementById('vbGain');
+  var gainValueLabel = document.getElementById('vbGainValue');
+  var limiterToggle = document.getElementById('vbLimiter');
+  var meter = document.getElementById('vbMeter');
+
+  var exportBtn = document.getElementById('vbExportBtn');
+  var cancelExportBtn = document.getElementById('vbCancelExportBtn');
+  var progressWrap = document.getElementById('vbProgressWrap');
+  var progressFill = document.getElementById('vbProgressFill');
+  var progressLabel = document.getElementById('vbProgressLabel');
+  var exportUnsupportedNotice = document.getElementById('vbExportUnsupported');
+  var qualitySelect = document.getElementById('vbQuality');
+  var qualityEstimate = document.getElementById('vbQualityEstimate');
+
+  var ESTIMATED_AUDIO_KBPS = 128;
+  var ESTIMATED_AUTO_VIDEO_KBPS = 560;
+
+  var METER_SEGMENTS = 24;
+  for (var i = 0; i < METER_SEGMENTS; i++) {
+    var seg = document.createElement('div');
+    seg.className = 'vb-meter-seg';
+    meter.appendChild(seg);
+  }
+  var meterSegs = meter.querySelectorAll('.vb-meter-seg');
+
+  var audioCtx = null;
+  var sourceNode = null;
+  var gainNode = null;
+  var compressorNode = null;
+  var analyserNode = null;
+  var streamDest = null;
+  var audioGraphReady = false;
+  var limiterEnabled = true;
+
+  var isSeeking = false;
+  var meterRAF = null;
+  var isExporting = false;
+  var exportCancelled = false;
+  var currentObjectUrl = null;
+
+  function formatTime(sec) {
+    if (!isFinite(sec) || sec < 0) sec = 0;
+    var m = Math.floor(sec / 60);
+    var s = Math.floor(sec % 60);
+    return (m < 10 ? '0' + m : m) + ':' + (s < 10 ? '0' + s : s);
+  }
+
+  function loadFile(file) {
+    if (!file || file.type.indexOf('video') === -1) return;
+    if (currentObjectUrl) URL.revokeObjectURL(currentObjectUrl);
+    currentObjectUrl = URL.createObjectURL(file);
+    video.src = currentObjectUrl;
+    video.load();
+    playerCard.hidden = false;
+    exportCard.hidden = false;
+    resetMeter();
+    checkExportSupport();
+  }
+
+  function formatBytes(bytes) {
+    if (bytes >= 1e9) return (bytes / 1e9).toFixed(2) + ' Go';
+    return (bytes / 1e6).toFixed(0) + ' Mo';
+  }
+
+  function updateQualityEstimate() {
+    if (!video.duration || !isFinite(video.duration)) {
+      qualityEstimate.textContent = 'Chargez une vidéo pour voir une estimation de taille.';
+      return;
+    }
+    var val = qualitySelect.value;
+    if (val === 'auto') {
+      var autoBytes = ((ESTIMATED_AUTO_VIDEO_KBPS + ESTIMATED_AUDIO_KBPS) * 1000 * video.duration) / 8;
+      qualityEstimate.textContent = 'Taille estimée : ~' + formatBytes(autoBytes) + ' (variable selon le contenu de la vidéo).';
+    } else {
+      var videoKbps = parseInt(val, 10) / 1000;
+      var bytes = ((videoKbps + ESTIMATED_AUDIO_KBPS) * 1000 * video.duration) / 8;
+      qualityEstimate.textContent = 'Taille estimée : ~' + formatBytes(bytes) + '.';
+    }
+  }
+
+  qualitySelect.addEventListener('change', updateQualityEstimate);
+
+  dropzone.addEventListener('click', function () { fileInput.click(); });
+  fileInput.addEventListener('change', function () {
+    if (fileInput.files && fileInput.files[0]) loadFile(fileInput.files[0]);
+  });
+  newFileBtn.addEventListener('click', function () { fileInput.click(); });
+
+  ['dragover', 'dragenter'].forEach(function (evt) {
+    dropzone.addEventListener(evt, function (e) {
+      e.preventDefault();
+      dropzone.classList.add('vb-drag');
+    });
+  });
+  ['dragleave', 'dragend', 'drop'].forEach(function (evt) {
+    dropzone.addEventListener(evt, function (e) {
+      dropzone.classList.remove('vb-drag');
+    });
+  });
+  dropzone.addEventListener('drop', function (e) {
+    e.preventDefault();
+    var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f) loadFile(f);
+  });
+
+  function initAudioGraph() {
+    if (audioGraphReady) return;
+    var AC = window.AudioContext || window.webkitAudioContext;
+    audioCtx = new AC();
+    sourceNode = audioCtx.createMediaElementSource(video);
+    gainNode = audioCtx.createGain();
+    gainNode.gain.value = gainSlider.value / 100;
+    compressorNode = audioCtx.createDynamicsCompressor();
+    compressorNode.threshold.value = -18;
+    compressorNode.knee.value = 24;
+    compressorNode.ratio.value = 8;
+    compressorNode.attack.value = 0.003;
+    compressorNode.release.value = 0.25;
+    analyserNode = audioCtx.createAnalyser();
+    analyserNode.fftSize = 512;
+    streamDest = audioCtx.createMediaStreamDestination();
+
+    sourceNode.connect(gainNode);
+    connectChain();
+    audioGraphReady = true;
+  }
+
+  function connectChain() {
+    gainNode.disconnect();
+    compressorNode.disconnect();
+    analyserNode.disconnect();
+    if (limiterEnabled) {
+      gainNode.connect(compressorNode);
+      compressorNode.connect(analyserNode);
+    } else {
+      gainNode.connect(analyserNode);
+    }
+    analyserNode.connect(audioCtx.destination);
+    analyserNode.connect(streamDest);
+  }
+
+  video.addEventListener('loadedmetadata', function () {
+    initAudioGraph();
+    seek.value = 0;
+    timeLabel.textContent = '00:00 / ' + formatTime(video.duration);
+    updateQualityEstimate();
+  });
+
+  playBtn.addEventListener('click', function () {
+    if (!audioGraphReady) initAudioGraph();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    if (video.paused) { video.play(); } else { video.pause(); }
+  });
+  video.addEventListener('play', function () {
+    playBtn.textContent = '❚❚ Pause';
+    startMeterLoop();
+  });
+  video.addEventListener('pause', function () {
+    playBtn.textContent = '▶ Lecture';
+  });
+  video.addEventListener('ended', function () {
+    playBtn.textContent = '▶ Lecture';
+  });
+
+  video.addEventListener('timeupdate', function () {
+    if (isSeeking || !video.duration) return;
+    seek.value = Math.round((video.currentTime / video.duration) * 1000);
+    timeLabel.textContent = formatTime(video.currentTime) + ' / ' + formatTime(video.duration);
+    if (isExporting) updateExportProgress();
+  });
+
+  seek.addEventListener('input', function () {
+    if (isExporting) return;
+    isSeeking = true;
+    if (video.duration) {
+      video.currentTime = (seek.value / 1000) * video.duration;
+    }
+  });
+  seek.addEventListener('change', function () { isSeeking = false; });
+
+  gainSlider.addEventListener('input', function () {
+    var val = parseInt(gainSlider.value, 10);
+    gainValueLabel.textContent = val + '%';
+    gainValueLabel.classList.remove('vb-warn', 'vb-danger');
+    if (val >= 250) gainValueLabel.classList.add('vb-danger');
+    else if (val >= 180) gainValueLabel.classList.add('vb-warn');
+    if (audioGraphReady) gainNode.gain.value = val / 100;
+  });
+
+  limiterToggle.addEventListener('change', function () {
+    limiterEnabled = limiterToggle.checked;
+    if (audioGraphReady) connectChain();
+  });
+
+  function resetMeter() {
+    for (var i = 0; i < meterSegs.length; i++) meterSegs[i].style.background = '#e2e8f0';
+  }
+
+  function startMeterLoop() {
+    if (meterRAF) return;
+    var data = new Uint8Array(analyserNode ? analyserNode.fftSize : 512);
+    function tick() {
+      if (video.paused && !isExporting) { meterRAF = null; resetMeter(); return; }
+      if (analyserNode) {
+        analyserNode.getByteTimeDomainData(data);
+        var peak = 0;
+        for (var i = 0; i < data.length; i++) {
+          var v = Math.abs(data[i] - 128) / 128;
+          if (v > peak) peak = v;
+        }
+        var litCount = Math.round(peak * meterSegs.length);
+        for (var s = 0; s < meterSegs.length; s++) {
+          if (s < litCount) {
+            var ratio = s / meterSegs.length;
+            meterSegs[s].style.background = ratio > 0.88 ? '#dc2626' : (ratio > 0.65 ? '#d97706' : '#16a34a');
+          } else {
+            meterSegs[s].style.background = '#e2e8f0';
+          }
+        }
+      }
+      meterRAF = requestAnimationFrame(tick);
+    }
+    meterRAF = requestAnimationFrame(tick);
+  }
+
+  function checkExportSupport() {
+    var supported = !!(video.captureStream || video.mozCaptureStream) && !!window.MediaRecorder;
+    exportBtn.disabled = !supported;
+    exportUnsupportedNotice.hidden = supported;
+  }
+
+  function pickMimeType() {
+    var candidates = [
+      'video/webm;codecs=vp9,opus',
+      'video/webm;codecs=vp8,opus',
+      'video/webm'
+    ];
+    for (var i = 0; i < candidates.length; i++) {
+      if (window.MediaRecorder && MediaRecorder.isTypeSupported(candidates[i])) return candidates[i];
+    }
+    return 'video/webm';
+  }
+
+  function updateExportProgress() {
+    if (!video.duration) return;
+    var pct = Math.min(100, (video.currentTime / video.duration) * 100);
+    progressFill.style.width = pct + '%';
+    progressLabel.textContent = 'Export en cours… ' + formatTime(video.currentTime) + ' / ' + formatTime(video.duration);
+  }
+
+  exportBtn.addEventListener('click', function () {
+    if (isExporting) return;
+    if (!audioGraphReady) initAudioGraph();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+
+    isExporting = true;
+    exportCancelled = false;
+    exportBtn.disabled = true;
+    cancelExportBtn.hidden = false;
+    newFileBtn.disabled = true;
+    playBtn.disabled = true;
+    seek.disabled = true;
+    qualitySelect.disabled = true;
+    progressWrap.classList.add('vb-active');
+    progressFill.style.width = '0%';
+    progressLabel.textContent = 'Préparation de l\'export…';
+
+    video.pause();
+    video.currentTime = 0;
+
+    var canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth || 640;
+    canvas.height = video.videoHeight || 360;
+    var ctx2d = canvas.getContext('2d');
+
+    var canvasStream = (canvas.captureStream || canvas.mozCaptureStream).call(canvas, 30);
+    var audioTracks = streamDest.stream.getAudioTracks();
+    var combined = new MediaStream(canvasStream.getVideoTracks().concat(audioTracks));
+
+    var mimeType = pickMimeType();
+    var recorderOptions = { mimeType: mimeType };
+    if (qualitySelect.value !== 'auto') {
+      recorderOptions.videoBitsPerSecond = parseInt(qualitySelect.value, 10);
+    }
+    var recorder;
+    try {
+      recorder = new MediaRecorder(combined, recorderOptions);
+    } catch (err) {
+      finishExport(null, mimeType);
+      progressLabel.textContent = 'Export impossible sur ce navigateur.';
+      return;
+    }
+    var chunks = [];
+    recorder.ondataavailable = function (e) { if (e.data && e.data.size > 0) chunks.push(e.data); };
+    recorder.onstop = function () {
+      drawing = false;
+      if (!exportCancelled) {
+        var blob = new Blob(chunks, { type: mimeType });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'video-boostee.webm';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(function () { URL.revokeObjectURL(url); }, 15000);
+        progressLabel.textContent = 'Export terminé : téléchargement lancé.';
+        progressFill.style.width = '100%';
+      } else {
+        progressLabel.textContent = 'Export annulé.';
+      }
+      finishExport();
+    };
+
+    var drawing = true;
+    function drawFrame() {
+      if (!drawing) return;
+      try { ctx2d.drawImage(video, 0, 0, canvas.width, canvas.height); } catch (e) {}
+      requestAnimationFrame(drawFrame);
+    }
+
+    function onEnded() {
+      video.removeEventListener('ended', onEnded);
+      if (recorder.state !== 'inactive') recorder.stop();
+    }
+    video.addEventListener('ended', onEnded);
+
+    cancelExportBtn.onclick = function () {
+      exportCancelled = true;
+      video.removeEventListener('ended', onEnded);
+      video.pause();
+      if (recorder.state !== 'inactive') recorder.stop();
+    };
+
+    recorder.start();
+    drawFrame();
+    startMeterLoop();
+    video.play();
+  });
+
+  function finishExport() {
+    isExporting = false;
+    exportBtn.disabled = false;
+    cancelExportBtn.hidden = true;
+    newFileBtn.disabled = false;
+    playBtn.disabled = false;
+    seek.disabled = false;
+    qualitySelect.disabled = false;
+    setTimeout(function () {
+      progressWrap.classList.remove('vb-active');
+    }, 2500);
+  }
+})();
+</script>
+
+</body>
+</html>
