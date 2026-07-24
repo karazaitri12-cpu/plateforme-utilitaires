@@ -334,9 +334,9 @@
   </div>
 
   <div class="vb-card" id="vbExportCard" hidden>
-    <h2>Exporter la vidéo avec l'audio boosté</h2>
+    <h2>Exporter / compresser la vidéo</h2>
     <p class="vb-hint" style="margin-top:0;">
-      L'export rejoue la vidéo en temps réel avec le boost et le limiteur actuellement réglés, puis génère un fichier téléchargeable au format WebM (VP9/Opus, ou VP8/Opus selon le navigateur). La durée de l'export correspond à la durée de la vidéo.
+      L'export rejoue la vidéo en temps réel puis génère un fichier téléchargeable au format WebM (VP9/Opus, ou VP8/Opus selon le navigateur). La durée de l'export correspond à la durée de la vidéo. Vous pouvez l'utiliser pour booster le son, pour réduire simplement le poids du fichier (compression), ou les deux à la fois.
     </p>
 
     <div id="vbExportUnsupported" class="vb-notice vb-error" hidden>
@@ -345,14 +345,14 @@
 
     <p class="vb-hint" id="vbOriginalSize" style="margin-top:0;"></p>
 
+    <div class="vb-checkbox-row" style="margin-top:0;">
+      <input type="checkbox" id="vbNoBoostExport">
+      <label for="vbNoBoostExport">Compression uniquement : conserver le volume d'origine (pas de boost, pas de limiteur)</label>
+    </div>
+    <p class="vb-hint" style="margin-top:2px;">Utile si le son est déjà bon et que vous voulez seulement réduire la taille du fichier. Le son est retranscodé en Opus mais ni amplifié ni compressé dynamiquement.</p>
+
     <div class="vb-quality-row">
-      <label for="vbQuality">Qualité d'export</label>
-      <select id="vbQuality">
-        <option value="auto">Automatique — fichier le plus léger, qualité variable</option>
-        <option value="2500000" selected>Standard (2,5 Mbps) — bon compromis</option>
-        <option value="5000000">Haute (5 Mbps) — quasi sans perte visible</option>
-        <option value="8000000">Très haute (8 Mbps) — proche de la qualité source</option>
-      </select>
+      <p class="vb-hint" style="margin-top:0;">Qualité d'export fixée sur le meilleur compromis qualité/poids : <strong>Très haute (8 Mbps)</strong>, proche de la qualité source.</p>
       <p class="vb-quality-estimate" id="vbQualityEstimate">Chargez une vidéo pour voir une estimation de taille.</p>
     </div>
 
@@ -400,6 +400,7 @@
   var gainValueLabel = document.getElementById('vbGainValue');
   var limiterToggle = document.getElementById('vbLimiter');
   var meter = document.getElementById('vbMeter');
+  var noBoostExportToggle = document.getElementById('vbNoBoostExport');
 
   var exportBtn = document.getElementById('vbExportBtn');
   var cancelExportBtn = document.getElementById('vbCancelExportBtn');
@@ -407,7 +408,6 @@
   var progressFill = document.getElementById('vbProgressFill');
   var progressLabel = document.getElementById('vbProgressLabel');
   var exportUnsupportedNotice = document.getElementById('vbExportUnsupported');
-  var qualitySelect = document.getElementById('vbQuality');
   var qualityEstimate = document.getElementById('vbQualityEstimate');
 
   var resultCard = document.getElementById('vbResultCard');
@@ -419,7 +419,7 @@
   var currentFileSize = null;
 
   var ESTIMATED_AUDIO_KBPS = 128;
-  var ESTIMATED_AUTO_VIDEO_KBPS = 560;
+  var EXPORT_VIDEO_BITRATE = 8000000;
 
   var METER_SEGMENTS = 24;
   for (var i = 0; i < METER_SEGMENTS; i++) {
@@ -437,6 +437,8 @@
   var streamDest = null;
   var audioGraphReady = false;
   var limiterEnabled = true;
+  var savedGainValue = null;
+  var savedLimiterEnabled = null;
 
   var isSeeking = false;
   var meterRAF = null;
@@ -480,18 +482,10 @@
       qualityEstimate.textContent = 'Chargez une vidéo pour voir une estimation de taille.';
       return;
     }
-    var val = qualitySelect.value;
-    if (val === 'auto') {
-      var autoBytes = ((ESTIMATED_AUTO_VIDEO_KBPS + ESTIMATED_AUDIO_KBPS) * 1000 * video.duration) / 8;
-      qualityEstimate.textContent = 'Taille estimée : ~' + formatBytes(autoBytes) + ' (variable selon le contenu de la vidéo).';
-    } else {
-      var videoKbps = parseInt(val, 10) / 1000;
-      var bytes = ((videoKbps + ESTIMATED_AUDIO_KBPS) * 1000 * video.duration) / 8;
-      qualityEstimate.textContent = 'Taille estimée : ~' + formatBytes(bytes) + '.';
-    }
+    var videoKbps = EXPORT_VIDEO_BITRATE / 1000;
+    var bytes = ((videoKbps + ESTIMATED_AUDIO_KBPS) * 1000 * video.duration) / 8;
+    qualityEstimate.textContent = 'Taille maximale plausible : ~' + formatBytes(bytes) + '. Ce chiffre est un plafond théorique (bitrate cible) : le fichier réel est très souvent plus léger, l\'encodeur n\'utilisant que les débits nécessaires selon le mouvement et le détail de l\'image.';
   }
-
-  qualitySelect.addEventListener('change', updateQualityEstimate);
 
   dropzone.addEventListener('click', function () { fileInput.click(); });
   fileInput.addEventListener('change', function () {
@@ -673,10 +667,20 @@
     newFileBtn.disabled = true;
     playBtn.disabled = true;
     seek.disabled = true;
-    qualitySelect.disabled = true;
+    gainSlider.disabled = true;
+    limiterToggle.disabled = true;
+    noBoostExportToggle.disabled = true;
     progressWrap.classList.add('vb-active');
     progressFill.style.width = '0%';
     progressLabel.textContent = 'Préparation de l\'export…';
+
+    savedGainValue = gainNode.gain.value;
+    savedLimiterEnabled = limiterEnabled;
+    if (noBoostExportToggle.checked) {
+      gainNode.gain.value = 1;
+      limiterEnabled = false;
+      connectChain();
+    }
 
     video.pause();
     video.currentTime = 0;
@@ -691,10 +695,7 @@
     var combined = new MediaStream(canvasStream.getVideoTracks().concat(audioTracks));
 
     var mimeType = pickMimeType();
-    var recorderOptions = { mimeType: mimeType };
-    if (qualitySelect.value !== 'auto') {
-      recorderOptions.videoBitsPerSecond = parseInt(qualitySelect.value, 10);
-    }
+    var recorderOptions = { mimeType: mimeType, videoBitsPerSecond: EXPORT_VIDEO_BITRATE };
     var recorder;
     try {
       recorder = new MediaRecorder(combined, recorderOptions);
@@ -767,7 +768,18 @@
     newFileBtn.disabled = false;
     playBtn.disabled = false;
     seek.disabled = false;
-    qualitySelect.disabled = false;
+    gainSlider.disabled = false;
+    limiterToggle.disabled = false;
+    noBoostExportToggle.disabled = false;
+
+    if (audioGraphReady && savedGainValue !== null) {
+      gainNode.gain.value = savedGainValue;
+      limiterEnabled = savedLimiterEnabled;
+      connectChain();
+    }
+    savedGainValue = null;
+    savedLimiterEnabled = null;
+
     setTimeout(function () {
       progressWrap.classList.remove('vb-active');
     }, 2500);
