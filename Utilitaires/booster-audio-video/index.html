@@ -343,6 +343,8 @@
       Votre navigateur ne prend pas en charge l'export (captureStream / MediaRecorder indisponible). La lecture avec boost reste utilisable ; essayez Chrome ou Edge pour l'export.
     </div>
 
+    <p class="vb-hint" id="vbOriginalSize" style="margin-top:0;"></p>
+
     <div class="vb-quality-row">
       <label for="vbQuality">Qualité d'export</label>
       <select id="vbQuality">
@@ -412,7 +414,9 @@
   var resultVideo = document.getElementById('vbResultVideo');
   var downloadLink = document.getElementById('vbDownloadLink');
   var resultInfo = document.getElementById('vbResultInfo');
+  var originalSizeLabel = document.getElementById('vbOriginalSize');
   var currentResultUrl = null;
+  var currentFileSize = null;
 
   var ESTIMATED_AUDIO_KBPS = 128;
   var ESTIMATED_AUTO_VIDEO_KBPS = 560;
@@ -451,12 +455,14 @@
     if (!file || file.type.indexOf('video') === -1) return;
     if (currentObjectUrl) URL.revokeObjectURL(currentObjectUrl);
     currentObjectUrl = URL.createObjectURL(file);
+    currentFileSize = file.size;
     video.src = currentObjectUrl;
     video.load();
     playerCard.hidden = false;
     exportCard.hidden = false;
     resetMeter();
     checkExportSupport();
+    originalSizeLabel.textContent = 'Fichier importé : ' + formatBytes(currentFileSize) + '.';
 
     if (currentResultUrl) { URL.revokeObjectURL(currentResultUrl); currentResultUrl = null; }
     resultCard.hidden = true;
@@ -708,7 +714,15 @@
 
         resultVideo.src = currentResultUrl;
         downloadLink.href = currentResultUrl;
-        resultInfo.textContent = 'Taille réelle : ' + formatBytes(blob.size) + '.';
+        if (currentFileSize) {
+          var pct = (blob.size / currentFileSize) * 100;
+          var factor = currentFileSize / blob.size;
+          resultInfo.textContent = 'Fichier d\'origine : ' + formatBytes(currentFileSize) +
+            ' → Fichier généré : ' + formatBytes(blob.size) +
+            ' (' + pct.toFixed(1) + '% de la taille d\'origine, soit ' + factor.toFixed(1) + 'x plus léger).';
+        } else {
+          resultInfo.textContent = 'Taille du fichier généré : ' + formatBytes(blob.size) + '.';
+        }
         resultCard.hidden = false;
         resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
