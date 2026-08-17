@@ -255,6 +255,7 @@ body{ margin:0; }
       <button class="se-tool" data-tool="rect" title="Rectangle (R)">▭</button>
       <button class="se-tool" data-tool="ellipse" title="Ellipse (E) — le point de départ est le centre">◯</button>
       <button class="se-tool" data-tool="line" title="Ligne (L)">╱</button>
+      <button class="se-tool" data-tool="arrow" title="Flèche (F)">→</button>
       <button class="se-tool" data-tool="text" title="Texte (T)">T</button>
       <button class="se-tool" data-tool="pen" title="Crayon libre (P)">✎</button>
     </aside>
@@ -262,6 +263,11 @@ body{ margin:0; }
     <div class="se-canvas-area" id="seCanvasArea">
       <div class="se-canvas-wrap" id="seCanvasWrap">
         <svg id="seCanvas" xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600" class="se-tool-select">
+          <defs>
+            <marker id="seArrowHead" markerWidth="8" markerHeight="8" refX="6.2" refY="4" orient="auto-start-reverse" markerUnits="strokeWidth">
+              <path d="M0,0 L8,4 L0,8 L2.3,4 Z" fill="context-stroke"></path>
+            </marker>
+          </defs>
           <rect id="seBgRect" x="0" y="0" width="800" height="600" fill="#ffffff"></rect>
           <g id="seShapesLayer"></g>
           <g id="seSelectionLayer"></g>
@@ -543,6 +549,16 @@ body{ margin:0; }
     newEl.setAttribute('stroke-linecap','round');
     shapesLayer.appendChild(newEl);
   }
+  function createArrow(p){
+    newEl = document.createElementNS(svgNS,'line');
+    newEl.setAttribute('x1', p.x); newEl.setAttribute('y1', p.y);
+    newEl.setAttribute('x2', p.x); newEl.setAttribute('y2', p.y);
+    baseStyle(newEl, false);
+    newEl.setAttribute('stroke-linecap','round');
+    newEl.setAttribute('marker-end', 'url(#seArrowHead)');
+    newEl.dataset.arrow = '1';
+    shapesLayer.appendChild(newEl);
+  }
   function createPathStart(p){
     newEl = document.createElementNS(svgNS,'path');
     freehandPoints = [p];
@@ -712,6 +728,7 @@ body{ margin:0; }
     if(currentTool === 'rect') createRect(p);
     else if(currentTool === 'ellipse') createEllipse(p);
     else if(currentTool === 'line') createLine(p);
+    else if(currentTool === 'arrow') createArrow(p);
     else if(currentTool === 'pen') createPathStart(p);
     else if(currentTool === 'text'){
       isDrawing = false;
@@ -725,7 +742,7 @@ body{ margin:0; }
     if(isDrawing && newEl){
       if(currentTool === 'rect') updateRect(startPt, p);
       else if(currentTool === 'ellipse') updateEllipse(startPt, p);
-      else if(currentTool === 'line'){ newEl.setAttribute('x2', p.x); newEl.setAttribute('y2', p.y); }
+      else if(currentTool === 'line' || currentTool === 'arrow'){ newEl.setAttribute('x2', p.x); newEl.setAttribute('y2', p.y); }
       else if(currentTool === 'pen') updatePath(p);
     } else if(isDragging && selectedEl){
       var dx = p.x - startPt.x, dy = p.y - startPt.y;
@@ -817,6 +834,9 @@ body{ margin:0; }
         field('X2', '<input type="number" id="pfX2" value="'+round(selectedEl.getAttribute('x2'))+'">') +
         field('Y2', '<input type="number" id="pfY2" value="'+round(selectedEl.getAttribute('y2'))+'">') +
       '</div>';
+      if(selectedEl.dataset.arrow === '1'){
+        html += field('Pointes', '<label class="se-checkrow"><input type="checkbox" id="pfArrowStart" '+(selectedEl.getAttribute('marker-start')?'checked':'')+'> Départ</label> &nbsp; <label class="se-checkrow"><input type="checkbox" id="pfArrowEnd" '+(selectedEl.getAttribute('marker-end')?'checked':'')+'> Arrivée</label>');
+      }
     }
 
     if(tag !== 'line'){
@@ -874,6 +894,16 @@ body{ margin:0; }
     on('pfX2','input', function(){ selectedEl.setAttribute('x2', this.value); updateSelectionOverlay(); });
     on('pfY2','input', function(){ selectedEl.setAttribute('y2', this.value); updateSelectionOverlay(); });
     ['pfX1','pfY1','pfX2','pfY2'].forEach(function(id){ on(id,'change', commit); });
+    on('pfArrowStart','change', function(){
+      if(this.checked) selectedEl.setAttribute('marker-start', 'url(#seArrowHead)');
+      else selectedEl.removeAttribute('marker-start');
+      commit();
+    });
+    on('pfArrowEnd','change', function(){
+      if(this.checked) selectedEl.setAttribute('marker-end', 'url(#seArrowHead)');
+      else selectedEl.removeAttribute('marker-end');
+      commit();
+    });
 
     on('pfFill','input', function(){ selectedEl.setAttribute('fill', this.value); document.getElementById('pfNoFill').checked=false; });
     on('pfFill','change', commit);
@@ -902,10 +932,12 @@ body{ margin:0; }
     for(var i = shapes.length - 1; i >= 0; i--){
       var el = shapes[i];
       var tag = el.tagName;
-      var label = tag === 'text' ? ('Texte : ' + el.textContent.slice(0,18)) : names[tag];
+      var isArrow = tag === 'line' && el.dataset.arrow === '1';
+      var label = tag === 'text' ? ('Texte : ' + el.textContent.slice(0,18)) : (isArrow ? 'Flèche' : names[tag]);
+      var icon = isArrow ? '→' : icons[tag];
       var hidden = el.style.display === 'none';
       html += '<div class="se-layer'+(selectedEl===el?' active':'')+'" data-id="'+el.dataset.id+'">' +
-        '<span class="se-layer-icon">'+icons[tag]+'</span>' +
+        '<span class="se-layer-icon">'+icon+'</span>' +
         '<span class="se-layer-name">'+esc(label)+'</span>' +
         '<button data-act="up" title="Monter">↑</button>' +
         '<button data-act="down" title="Descendre">↓</button>' +
@@ -994,6 +1026,7 @@ body{ margin:0; }
     else if(e.key === 'r') setTool('rect');
     else if(e.key === 'e') setTool('ellipse');
     else if(e.key === 'l') setTool('line');
+    else if(e.key === 'f') setTool('arrow');
     else if(e.key === 't') setTool('text');
     else if(e.key === 'p') setTool('pen');
   });
@@ -1090,6 +1123,11 @@ body{ margin:0; }
         }
         imported.classList.add('se-shape');
         imported.dataset.id = uid();
+        if(imported.tagName === 'line' && (imported.getAttribute('marker-end') || imported.getAttribute('marker-start'))){
+          imported.dataset.arrow = '1';
+          if(imported.getAttribute('marker-end')) imported.setAttribute('marker-end', 'url(#seArrowHead)');
+          if(imported.getAttribute('marker-start')) imported.setAttribute('marker-start', 'url(#seArrowHead)');
+        }
         shapesLayer.appendChild(imported);
       });
       setDocSize(w, h);
@@ -1116,7 +1154,11 @@ body{ margin:0; }
     clone.querySelectorAll('.se-shape').forEach(function(el){ el.removeAttribute('class'); el.removeAttribute('data-id'); });
     var bg = bgRect.cloneNode(true);
     bg.removeAttribute('id');
+    var hasArrow = shapesLayer.querySelector('[data-arrow="1"]') !== null;
     var out = '<svg xmlns="http://www.w3.org/2000/svg" width="'+docW+'" height="'+docH+'" viewBox="0 0 '+docW+' '+docH+'">\n';
+    if(hasArrow){
+      out += '  <defs><marker id="seArrowHead" markerWidth="8" markerHeight="8" refX="6.2" refY="4" orient="auto-start-reverse" markerUnits="strokeWidth"><path d="M0,0 L8,4 L0,8 L2.3,4 Z" fill="context-stroke"/></marker></defs>\n';
+    }
     out += '  ' + bg.outerHTML + '\n';
     Array.prototype.forEach.call(clone.children, function(el){ out += '  ' + el.outerHTML + '\n'; });
     out += '</svg>';
