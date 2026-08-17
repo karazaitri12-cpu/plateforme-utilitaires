@@ -23,6 +23,7 @@
             --badge-png: #7b1fa2;
             --badge-webp: #d32f2f;
             --badge-pdf: #8a6d1f;
+            --badge-svg: #00897b;
         }
 
         /* ==========================================
@@ -128,6 +129,8 @@
         .dropZone.png:hover { background: #e1bee7; }
         .dropZone.pdf { border-color: var(--badge-pdf); background: #fbf6e9; }
         .dropZone.pdf:hover { background: #f5eac8; }
+        .dropZone.svg { border-color: var(--badge-svg); background: #e0f2f1; }
+        .dropZone.svg:hover { background: #b2dfdb; }
 
         /* OPTIONS (select) */
         .converter select {
@@ -179,6 +182,10 @@
         .convertBtn.png-to-jpeg:hover { background: #4a148c; }
         .convertBtn.pdf-to-webp { background: var(--badge-pdf); }
         .convertBtn.pdf-to-webp:hover { background: #6b5417; }
+        .convertBtn.raster-to-svg { background: var(--badge-svg); }
+        .convertBtn.raster-to-svg:hover { background: #00695c; }
+        .convertBtn.svg-to-raster { background: var(--badge-svg); }
+        .convertBtn.svg-to-raster:hover { background: #00695c; }
 
         /* BADGES DE FORMAT */
         .format-badge {
@@ -193,6 +200,7 @@
         .badge-png { background: var(--badge-png); }
         .badge-webp { background: var(--badge-webp); }
         .badge-pdf { background: var(--badge-pdf); }
+        .badge-svg { background: var(--badge-svg); }
 
         /* LISTE DES FICHIERS */
         .fileList {
@@ -295,7 +303,7 @@
 
     <!-- CONVERTISSEUR D'IMAGES -->
     <div id="img-converter-pro">
-        <h2>Convertisseur d'Images : JPEG/PNG ⇄ WebP ⇄ PDF</h2>
+        <h2>Convertisseur d'Images : JPEG/PNG ⇄ WebP ⇄ PDF ⇄ SVG</h2>
 
         <div class="converter-grid">
             <!-- Images -> PDF -->
@@ -410,6 +418,49 @@
                 <button id="pngToJpegConvertBtn" class="convertBtn png-to-jpeg" disabled>Convertir en JPEG</button>
                 <span id="pngToJpegResetBtn" class="reset-icon" title="Réinitialiser">✕</span>
                 <div id="pngToJpegResultBox" class="result-box"></div>
+            </div>
+
+            <!-- Image → SVG (vectorisation) -->
+            <div class="converter">
+                <h3>Image vers SVG <span class="format-badge badge-jpeg">JPEG/PNG/WebP</span> → <span class="format-badge badge-svg">SVG</span></h3>
+                <div id="rasterToSvgDropZone" class="dropZone svg">
+                    <p>Glissez-déposez ou cliquez pour sélectionner des images (JPEG, PNG, WebP)</p>
+                    <input type="file" id="rasterToSvgInput" multiple accept=".jpg,.jpeg,.png,.webp" style="display: none;">
+                </div>
+                <select id="rasterToSvgPreset">
+                    <option value="default">Préréglage standard</option>
+                    <option value="posterized2" selected>Simplifié (schémas, logos, diagrammes)</option>
+                    <option value="detailed">Détaillé</option>
+                    <option value="grayscale">Noir et blanc</option>
+                </select>
+                <div id="rasterToSvgFileList" class="fileList"></div>
+                <button id="rasterToSvgConvertBtn" class="convertBtn raster-to-svg" disabled>Convertir en SVG</button>
+                <span id="rasterToSvgResetBtn" class="reset-icon" title="Réinitialiser">✕</span>
+                <div id="rasterToSvgResultBox" class="result-box"></div>
+                <div class="metadata" style="margin-top: 8px;">Vectorisation réelle (bibliothèque ImageTracer.js, chargée depuis un CDN uniquement pour ce module). Résultat net sur schémas/logos/diagrammes ; moins adapté aux photos.</div>
+            </div>
+
+            <!-- SVG → Image -->
+            <div class="converter">
+                <h3>SVG vers Image <span class="format-badge badge-svg">SVG</span> → <span class="format-badge badge-jpeg">Image</span></h3>
+                <div id="svgToRasterDropZone" class="dropZone">
+                    <p>Glissez-déposez ou cliquez pour sélectionner des fichiers SVG</p>
+                    <input type="file" id="svgToRasterInput" multiple accept=".svg" style="display: none;">
+                </div>
+                <select id="svgToRasterFormat">
+                    <option value="webp" selected>Format de sortie : WebP</option>
+                    <option value="png">Format de sortie : PNG</option>
+                    <option value="jpeg">Format de sortie : JPEG</option>
+                </select>
+                <select id="svgToRasterScale">
+                    <option value="1">Taille détectée (x1)</option>
+                    <option value="2" selected>Haute résolution (x2)</option>
+                    <option value="3">Très haute résolution (x3)</option>
+                </select>
+                <div id="svgToRasterFileList" class="fileList"></div>
+                <button id="svgToRasterConvertBtn" class="convertBtn svg-to-raster" disabled>Convertir</button>
+                <span id="svgToRasterResetBtn" class="reset-icon" title="Réinitialiser">✕</span>
+                <div id="svgToRasterResultBox" class="result-box"></div>
             </div>
         </div>
 
@@ -941,6 +992,252 @@
             });
         }
 
+        // === CONVERTISSEUR Image -> SVG (vectorisation via ImageTracer.js, chargé à la demande) ===
+        let imageTracerLoadPromise = null;
+        function chargerImageTracer() {
+            if (imageTracerLoadPromise) return imageTracerLoadPromise;
+            imageTracerLoadPromise = new Promise((resolve, reject) => {
+                if (window.ImageTracer) { resolve(window.ImageTracer); return; }
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/imagetracerjs@1.2.6/imagetracer_v1.2.6.min.js';
+                script.onload = () => resolve(window.ImageTracer);
+                script.onerror = () => reject(new Error("Impossible de charger le moteur de vectorisation. Vérifiez votre connexion internet."));
+                document.head.appendChild(script);
+            });
+            return imageTracerLoadPromise;
+        }
+
+        function tracerVersSVG(ImageTracer, url, preset) {
+            return new Promise((resolve, reject) => {
+                try {
+                    ImageTracer.imageToSVG(url, (svgstr) => resolve(svgstr), preset);
+                } catch (e) { reject(e); }
+            });
+        }
+
+        function setupRasterToSvgConverter() {
+            const dropZone = document.getElementById('rasterToSvgDropZone');
+            const fileInput = document.getElementById('rasterToSvgInput');
+            const fileList = document.getElementById('rasterToSvgFileList');
+            const convertBtn = document.getElementById('rasterToSvgConvertBtn');
+            const resetBtn = document.getElementById('rasterToSvgResetBtn');
+            const resultBox = document.getElementById('rasterToSvgResultBox');
+            const presetSelect = document.getElementById('rasterToSvgPreset');
+            const formatsAcceptes = ['image/jpeg', 'image/png', 'image/webp'];
+            let files = [];
+
+            dropZone.addEventListener('click', () => fileInput.click());
+            dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.style.backgroundColor = '#b2dfdb'; });
+            dropZone.addEventListener('dragleave', () => { dropZone.style.backgroundColor = ''; });
+            dropZone.addEventListener('drop', handleFiles);
+            fileInput.addEventListener('change', handleFiles);
+            resetBtn.addEventListener('click', resetSelection);
+
+            function handleFiles(e) {
+                e.preventDefault();
+                dropZone.style.backgroundColor = '';
+                const newFiles = e.target.files || e.dataTransfer.files;
+                const filtered = Array.from(newFiles).filter(file => formatsAcceptes.includes(file.type));
+                files = [...files, ...filtered];
+                updateFileList();
+            }
+
+            function updateFileList() {
+                fileList.innerHTML = '';
+                files.forEach((file, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'file-item';
+                    item.innerHTML = `
+                        <div>
+                            <strong>${file.name}</strong>
+                            <div class="file-info">Taille : ${formatFileSize(file.size)}</div>
+                            <div class="compression-info" id="rasterToSvg-status-${index}"></div>
+                        </div>
+                    `;
+                    fileList.appendChild(item);
+                });
+                convertBtn.disabled = files.length === 0;
+                resetBtn.style.display = files.length > 0 ? 'inline' : 'none';
+                resultBox.classList.remove('show');
+            }
+
+            function resetSelection() {
+                files = [];
+                fileInput.value = '';
+                fileList.innerHTML = '';
+                convertBtn.disabled = true;
+                resetBtn.style.display = 'none';
+                resultBox.classList.remove('show');
+            }
+
+            convertBtn.addEventListener('click', async () => {
+                if (files.length === 0) return;
+                convertBtn.disabled = true;
+                resultBox.classList.remove('show');
+                const preset = presetSelect.value;
+                const convertis = [];
+
+                try {
+                    const ImageTracer = await chargerImageTracer();
+                    const enc = new TextEncoder();
+
+                    for (let i = 0; i < files.length; i++) {
+                        const file = files[i];
+                        const statusEl = document.getElementById(`rasterToSvg-status-${i}`);
+                        try {
+                            if (statusEl) statusEl.textContent = 'Vectorisation en cours...';
+                            const url = URL.createObjectURL(file);
+                            const svgstr = await tracerVersSVG(ImageTracer, url, preset);
+                            const data = enc.encode(svgstr);
+                            const nomSvg = file.name.replace(/\.(jpe?g|png|webp)$/i, '') + '.svg';
+                            convertis.push({ nom: nomSvg, data });
+                            if (statusEl) statusEl.innerHTML = `<span style="color:#2e7d32">Converti : ${formatFileSize(data.length)}</span>`;
+                        } catch (err) {
+                            console.error('Erreur vectorisation:', err);
+                            if (statusEl) { statusEl.textContent = 'Erreur : ' + err.message; statusEl.style.color = '#c62828'; }
+                        }
+                    }
+
+                    if (convertis.length === 1) {
+                        const blob = new Blob([convertis[0].data], { type: 'image/svg+xml' });
+                        const url = URL.createObjectURL(blob);
+                        resultBox.innerHTML = `1 fichier SVG généré (${formatFileSize(convertis[0].data.length)}) — <a href="${url}" download="${convertis[0].nom}">Télécharger</a>`;
+                        resultBox.classList.add('show');
+                    } else if (convertis.length > 1) {
+                        const zipBytes = creerZip(convertis);
+                        const zipBlob = new Blob([zipBytes], { type: 'application/zip' });
+                        const url = URL.createObjectURL(zipBlob);
+                        resultBox.innerHTML = `${convertis.length} fichiers SVG générés (archive ZIP, ${formatFileSize(zipBytes.length)}) — <a href="${url}" download="images_vectorisees.zip">Télécharger le ZIP</a>`;
+                        resultBox.classList.add('show');
+                    } else {
+                        resultBox.innerHTML = "Aucun fichier n'a pu être vectorisé.";
+                        resultBox.classList.add('show');
+                    }
+                } catch (e) {
+                    resultBox.innerHTML = 'Erreur : ' + e.message;
+                    resultBox.classList.add('show');
+                }
+
+                convertBtn.disabled = false;
+            });
+        }
+
+        // === CONVERTISSEUR SVG -> Image (rendu natif du navigateur, sans dépendance) ===
+        function setupSvgToRasterConverter() {
+            const dropZone = document.getElementById('svgToRasterDropZone');
+            const fileInput = document.getElementById('svgToRasterInput');
+            const fileList = document.getElementById('svgToRasterFileList');
+            const convertBtn = document.getElementById('svgToRasterConvertBtn');
+            const resetBtn = document.getElementById('svgToRasterResetBtn');
+            const resultBox = document.getElementById('svgToRasterResultBox');
+            const formatSelect = document.getElementById('svgToRasterFormat');
+            const scaleSelect = document.getElementById('svgToRasterScale');
+            let files = [];
+
+            dropZone.addEventListener('click', () => fileInput.click());
+            dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.style.backgroundColor = '#e3f2fd'; });
+            dropZone.addEventListener('dragleave', () => { dropZone.style.backgroundColor = ''; });
+            dropZone.addEventListener('drop', handleFiles);
+            fileInput.addEventListener('change', handleFiles);
+            resetBtn.addEventListener('click', resetSelection);
+
+            function handleFiles(e) {
+                e.preventDefault();
+                dropZone.style.backgroundColor = '';
+                const newFiles = e.target.files || e.dataTransfer.files;
+                const filtered = Array.from(newFiles).filter(file => file.type === 'image/svg+xml' || /\.svg$/i.test(file.name));
+                files = [...files, ...filtered];
+                updateFileList();
+            }
+
+            function updateFileList() {
+                fileList.innerHTML = '';
+                files.forEach((file, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'file-item';
+                    item.innerHTML = `
+                        <div>
+                            <strong>${file.name}</strong>
+                            <div class="file-info">Taille : ${formatFileSize(file.size)}</div>
+                            <div class="compression-info" id="svgToRaster-status-${index}"></div>
+                        </div>
+                    `;
+                    fileList.appendChild(item);
+                });
+                convertBtn.disabled = files.length === 0;
+                resetBtn.style.display = files.length > 0 ? 'inline' : 'none';
+                resultBox.classList.remove('show');
+            }
+
+            function resetSelection() {
+                files = [];
+                fileInput.value = '';
+                fileList.innerHTML = '';
+                convertBtn.disabled = true;
+                resetBtn.style.display = 'none';
+                resultBox.classList.remove('show');
+            }
+
+            convertBtn.addEventListener('click', async () => {
+                if (files.length === 0) return;
+                convertBtn.disabled = true;
+                resultBox.classList.remove('show');
+                const format = formatSelect.value;
+                const mime = format === 'jpeg' ? 'image/jpeg' : (format === 'png' ? 'image/png' : 'image/webp');
+                const ext = format === 'jpeg' ? 'jpg' : format;
+                const scale = parseFloat(scaleSelect.value);
+                const quality = format === 'png' ? undefined : 0.92;
+                const convertis = [];
+
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    const statusEl = document.getElementById(`svgToRaster-status-${i}`);
+                    try {
+                        const url = URL.createObjectURL(file);
+                        const img = await chargerImage(url);
+                        const largeurBase = img.naturalWidth || img.width || 800;
+                        const hauteurBase = img.naturalHeight || img.height || 600;
+                        const canvas = document.createElement('canvas');
+                        canvas.width = Math.round(largeurBase * scale);
+                        canvas.height = Math.round(hauteurBase * scale);
+                        const ctx = canvas.getContext('2d');
+                        if (format === 'jpeg') {
+                            ctx.fillStyle = '#FFFFFF';
+                            ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        }
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                        const blob = await new Promise(resolve => canvas.toBlob(resolve, mime, quality));
+                        const data = new Uint8Array(await blob.arrayBuffer());
+                        const nomFichier = file.name.replace(/\.svg$/i, '') + '.' + ext;
+                        convertis.push({ nom: nomFichier, data });
+                        if (statusEl) statusEl.innerHTML = `<span style="color:#2e7d32">Converti : ${formatFileSize(data.length)}</span>`;
+                    } catch (err) {
+                        console.error('Erreur SVG vers image:', err);
+                        if (statusEl) { statusEl.textContent = 'Erreur : ' + err.message; statusEl.style.color = '#c62828'; }
+                    }
+                }
+
+                if (convertis.length === 1) {
+                    const blob = new Blob([convertis[0].data], { type: mime });
+                    const url = URL.createObjectURL(blob);
+                    resultBox.innerHTML = `1 fichier converti (${formatFileSize(convertis[0].data.length)}) — <a href="${url}" download="${convertis[0].nom}">Télécharger</a>`;
+                    resultBox.classList.add('show');
+                } else if (convertis.length > 1) {
+                    const zipBytes = creerZip(convertis);
+                    const zipBlob = new Blob([zipBytes], { type: 'application/zip' });
+                    const url = URL.createObjectURL(zipBlob);
+                    resultBox.innerHTML = `${convertis.length} fichiers convertis (archive ZIP, ${formatFileSize(zipBytes.length)}) — <a href="${url}" download="svg_convertis.zip">Télécharger le ZIP</a>`;
+                    resultBox.classList.add('show');
+                } else {
+                    resultBox.innerHTML = "Aucun fichier n'a pu être converti.";
+                    resultBox.classList.add('show');
+                }
+
+                convertBtn.disabled = false;
+            });
+        }
+
         // Initialisation
         document.addEventListener('DOMContentLoaded', () => {
             setupConverter('jpegToWebpDropZone', 'jpegToWebpInput', 'jpegToWebpFileList', 'jpegToWebpConvertBtn', 'jpegToWebpResetBtn', 'jpegToWebpResultBox', 'image/jpeg', 'webp', 'image/webp', 0.9, /\.jpe?g$/i);
@@ -951,6 +1248,8 @@
             setupConverter('pngToJpegDropZone', 'pngToJpegInput', 'pngToJpegFileList', 'pngToJpegConvertBtn', 'pngToJpegResetBtn', 'pngToJpegResultBox', 'image/png', 'jpeg', 'image/jpeg', 0.9, /\.png$/i);
             setupPdfConverter();
             setupPdfToWebpConverter();
+            setupRasterToSvgConverter();
+            setupSvgToRasterConverter();
         });
     </script>
 </body>
