@@ -177,6 +177,8 @@
         .convertBtn.jpeg-to-png:hover { background: #0d47a1; }
         .convertBtn.png-to-jpeg { background: var(--badge-png); }
         .convertBtn.png-to-jpeg:hover { background: #4a148c; }
+        .convertBtn.pdf-to-webp { background: var(--badge-pdf); }
+        .convertBtn.pdf-to-webp:hover { background: #6b5417; }
 
         /* BADGES DE FORMAT */
         .format-badge {
@@ -296,8 +298,8 @@
         <h2>Convertisseur d'Images : JPEG/PNG ⇄ WebP ⇄ PDF</h2>
 
         <div class="converter-grid">
-            <!-- Images -> PDF (pleine largeur) -->
-            <div class="converter full-width">
+            <!-- Images -> PDF -->
+            <div class="converter">
                 <h3>Images vers PDF <span class="format-badge badge-webp">WebP</span> → <span class="format-badge badge-pdf">PDF</span></h3>
                 <div id="imagesToPdfDropZone" class="dropZone pdf">
                     <p>Glissez-déposez ou cliquez pour sélectionner des fichiers WebP</p>
@@ -311,6 +313,25 @@
                 <button id="imagesToPdfConvertBtn" class="convertBtn images-to-pdf" disabled>Convertir en PDF</button>
                 <span id="imagesToPdfResetBtn" class="reset-icon" title="Réinitialiser">✕</span>
                 <div id="imagesToPdfResultBox" class="result-box"></div>
+            </div>
+
+            <!-- PDF → WebP -->
+            <div class="converter">
+                <h3>PDF vers WebP <span class="format-badge badge-pdf">PDF</span> → <span class="format-badge badge-webp">WebP</span></h3>
+                <div id="pdfToWebpDropZone" class="dropZone pdf">
+                    <p>Glissez-déposez ou cliquez pour sélectionner des fichiers PDF</p>
+                    <input type="file" id="pdfToWebpInput" multiple accept=".pdf" style="display: none;">
+                </div>
+                <select id="pdfToWebpResolution">
+                    <option value="1.5">Résolution standard (~110 DPI)</option>
+                    <option value="2" selected>Résolution haute (~150 DPI)</option>
+                    <option value="3">Résolution très haute (~220 DPI)</option>
+                </select>
+                <div id="pdfToWebpFileList" class="fileList"></div>
+                <button id="pdfToWebpConvertBtn" class="convertBtn pdf-to-webp" disabled>Convertir en WebP</button>
+                <span id="pdfToWebpResetBtn" class="reset-icon" title="Réinitialiser">✕</span>
+                <div id="pdfToWebpResultBox" class="result-box"></div>
+                <div class="metadata" style="margin-top: 8px;">Ce module s'appuie sur la bibliothèque PDF.js (chargée depuis un CDN, uniquement pour cette conversion) afin de restituer fidèlement les pages du PDF.</div>
             </div>
 
             <!-- JPEG → WebP -->
@@ -782,6 +803,144 @@
             });
         }
 
+        // === CONVERTISSEUR PDF -> WebP (rendu via PDF.js, chargé à la demande depuis un CDN) ===
+        let pdfJsLoadPromise = null;
+        function chargerPdfJs() {
+            if (pdfJsLoadPromise) return pdfJsLoadPromise;
+            pdfJsLoadPromise = new Promise((resolve, reject) => {
+                if (window.pdfjsLib) { resolve(window.pdfjsLib); return; }
+                const script = document.createElement('script');
+                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+                script.onload = () => {
+                    try {
+                        window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+                        resolve(window.pdfjsLib);
+                    } catch (e) { reject(e); }
+                };
+                script.onerror = () => reject(new Error("Impossible de charger le moteur de rendu PDF. Vérifiez votre connexion internet."));
+                document.head.appendChild(script);
+            });
+            return pdfJsLoadPromise;
+        }
+
+        function setupPdfToWebpConverter() {
+            const dropZone = document.getElementById('pdfToWebpDropZone');
+            const fileInput = document.getElementById('pdfToWebpInput');
+            const fileList = document.getElementById('pdfToWebpFileList');
+            const convertBtn = document.getElementById('pdfToWebpConvertBtn');
+            const resetBtn = document.getElementById('pdfToWebpResetBtn');
+            const resultBox = document.getElementById('pdfToWebpResultBox');
+            const resolutionSelect = document.getElementById('pdfToWebpResolution');
+            let files = [];
+
+            dropZone.addEventListener('click', () => fileInput.click());
+            dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.style.backgroundColor = '#f5eac8'; });
+            dropZone.addEventListener('dragleave', () => { dropZone.style.backgroundColor = ''; });
+            dropZone.addEventListener('drop', handleFiles);
+            fileInput.addEventListener('change', handleFiles);
+            resetBtn.addEventListener('click', resetSelection);
+
+            function handleFiles(e) {
+                e.preventDefault();
+                dropZone.style.backgroundColor = '';
+                const newFiles = e.target.files || e.dataTransfer.files;
+                const filtered = Array.from(newFiles).filter(file => file.type === 'application/pdf' || /\.pdf$/i.test(file.name));
+                files = [...files, ...filtered];
+                updateFileList();
+            }
+
+            function updateFileList() {
+                fileList.innerHTML = '';
+                files.forEach((file, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'file-item';
+                    item.innerHTML = `
+                        <div>
+                            <strong>${file.name}</strong>
+                            <div class="file-info">Taille : ${formatFileSize(file.size)}</div>
+                            <div class="compression-info" id="pdfToWebp-status-${index}"></div>
+                        </div>
+                    `;
+                    fileList.appendChild(item);
+                });
+                convertBtn.disabled = files.length === 0;
+                resetBtn.style.display = files.length > 0 ? 'inline' : 'none';
+                resultBox.classList.remove('show');
+            }
+
+            function resetSelection() {
+                files = [];
+                fileInput.value = '';
+                fileList.innerHTML = '';
+                convertBtn.disabled = true;
+                resetBtn.style.display = 'none';
+                resultBox.classList.remove('show');
+            }
+
+            convertBtn.addEventListener('click', async () => {
+                if (files.length === 0) return;
+                convertBtn.disabled = true;
+                resultBox.classList.remove('show');
+                const scale = parseFloat(resolutionSelect.value);
+                const convertis = [];
+
+                try {
+                    const pdfjsLib = await chargerPdfJs();
+
+                    for (let i = 0; i < files.length; i++) {
+                        const file = files[i];
+                        const statusEl = document.getElementById(`pdfToWebp-status-${i}`);
+                        try {
+                            const buf = await file.arrayBuffer();
+                            const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+                            const baseNom = file.name.replace(/\.pdf$/i, '');
+
+                            for (let p = 1; p <= pdf.numPages; p++) {
+                                if (statusEl) statusEl.textContent = `Rendu page ${p} / ${pdf.numPages}...`;
+                                const page = await pdf.getPage(p);
+                                const viewport = page.getViewport({ scale });
+                                const canvas = document.createElement('canvas');
+                                canvas.width = Math.round(viewport.width);
+                                canvas.height = Math.round(viewport.height);
+                                const ctx = canvas.getContext('2d');
+                                await page.render({ canvasContext: ctx, viewport }).promise;
+
+                                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/webp', 0.9));
+                                const arr = new Uint8Array(await blob.arrayBuffer());
+                                const nomPage = pdf.numPages > 1 ? `${baseNom}_page${String(p).padStart(2, '0')}.webp` : `${baseNom}.webp`;
+                                convertis.push({ nom: nomPage, data: arr });
+                            }
+                            if (statusEl) statusEl.innerHTML = `<span style="color:#2e7d32">${pdf.numPages} page(s) converties</span>`;
+                        } catch (err) {
+                            console.error('Erreur PDF vers WebP:', err);
+                            if (statusEl) { statusEl.textContent = 'Erreur : ' + err.message; statusEl.style.color = '#c62828'; }
+                        }
+                    }
+
+                    if (convertis.length === 1) {
+                        const blob = new Blob([convertis[0].data], { type: 'image/webp' });
+                        const url = URL.createObjectURL(blob);
+                        resultBox.innerHTML = `1 image générée (${formatFileSize(convertis[0].data.length)}) — <a href="${url}" download="${convertis[0].nom}">Télécharger</a>`;
+                        resultBox.classList.add('show');
+                    } else if (convertis.length > 1) {
+                        const zipBytes = creerZip(convertis);
+                        const zipBlob = new Blob([zipBytes], { type: 'application/zip' });
+                        const url = URL.createObjectURL(zipBlob);
+                        resultBox.innerHTML = `${convertis.length} image(s) générées (archive ZIP, ${formatFileSize(zipBytes.length)}) — <a href="${url}" download="pdf_vers_webp.zip">Télécharger le ZIP</a>`;
+                        resultBox.classList.add('show');
+                    } else {
+                        resultBox.innerHTML = "Aucune image n'a pu être générée.";
+                        resultBox.classList.add('show');
+                    }
+                } catch (e) {
+                    resultBox.innerHTML = 'Erreur : ' + e.message;
+                    resultBox.classList.add('show');
+                }
+
+                convertBtn.disabled = false;
+            });
+        }
+
         // Initialisation
         document.addEventListener('DOMContentLoaded', () => {
             setupConverter('jpegToWebpDropZone', 'jpegToWebpInput', 'jpegToWebpFileList', 'jpegToWebpConvertBtn', 'jpegToWebpResetBtn', 'jpegToWebpResultBox', 'image/jpeg', 'webp', 'image/webp', 0.9, /\.jpe?g$/i);
@@ -791,6 +950,7 @@
             setupConverter('jpegToPngDropZone', 'jpegToPngInput', 'jpegToPngFileList', 'jpegToPngConvertBtn', 'jpegToPngResetBtn', 'jpegToPngResultBox', 'image/jpeg', 'png', 'image/png', 1, /\.jpe?g$/i);
             setupConverter('pngToJpegDropZone', 'pngToJpegInput', 'pngToJpegFileList', 'pngToJpegConvertBtn', 'pngToJpegResetBtn', 'pngToJpegResultBox', 'image/png', 'jpeg', 'image/jpeg', 0.9, /\.png$/i);
             setupPdfConverter();
+            setupPdfToWebpConverter();
         });
     </script>
 </body>
