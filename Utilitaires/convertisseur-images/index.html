@@ -323,20 +323,25 @@
                 <div id="imagesToPdfResultBox" class="result-box"></div>
             </div>
 
-            <!-- PDF → WebP -->
+            <!-- PDF → Image -->
             <div class="converter">
-                <h3>PDF vers WebP <span class="format-badge badge-pdf">PDF</span> → <span class="format-badge badge-webp">WebP</span></h3>
+                <h3>PDF vers Image <span class="format-badge badge-pdf">PDF</span> → <span class="format-badge badge-jpeg">Image</span></h3>
                 <div id="pdfToWebpDropZone" class="dropZone pdf">
                     <p>Glissez-déposez ou cliquez pour sélectionner des fichiers PDF</p>
                     <input type="file" id="pdfToWebpInput" multiple accept=".pdf" style="display: none;">
                 </div>
+                <select id="pdfToWebpFormat">
+                    <option value="webp" selected>Format de sortie : WebP</option>
+                    <option value="png">Format de sortie : PNG</option>
+                    <option value="jpeg">Format de sortie : JPEG</option>
+                </select>
                 <select id="pdfToWebpResolution">
                     <option value="1.5">Résolution standard (~110 DPI)</option>
                     <option value="2" selected>Résolution haute (~150 DPI)</option>
                     <option value="3">Résolution très haute (~220 DPI)</option>
                 </select>
                 <div id="pdfToWebpFileList" class="fileList"></div>
-                <button id="pdfToWebpConvertBtn" class="convertBtn pdf-to-webp" disabled>Convertir en WebP</button>
+                <button id="pdfToWebpConvertBtn" class="convertBtn pdf-to-webp" disabled>Convertir</button>
                 <span id="pdfToWebpResetBtn" class="reset-icon" title="Réinitialiser">✕</span>
                 <div id="pdfToWebpResultBox" class="result-box"></div>
                 <div class="metadata" style="margin-top: 8px;">Ce module s'appuie sur la bibliothèque PDF.js (chargée depuis un CDN, uniquement pour cette conversion) afin de restituer fidèlement les pages du PDF.</div>
@@ -883,6 +888,7 @@
             const resetBtn = document.getElementById('pdfToWebpResetBtn');
             const resultBox = document.getElementById('pdfToWebpResultBox');
             const resolutionSelect = document.getElementById('pdfToWebpResolution');
+            const formatSelect = document.getElementById('pdfToWebpFormat');
             let files = [];
 
             dropZone.addEventListener('click', () => fileInput.click());
@@ -934,6 +940,10 @@
                 convertBtn.disabled = true;
                 resultBox.classList.remove('show');
                 const scale = parseFloat(resolutionSelect.value);
+                const format = formatSelect.value;
+                const mime = format === 'jpeg' ? 'image/jpeg' : (format === 'png' ? 'image/png' : 'image/webp');
+                const ext = format === 'jpeg' ? 'jpg' : format;
+                const qualite = format === 'png' ? undefined : 0.9;
                 const convertis = [];
 
                 try {
@@ -955,11 +965,15 @@
                                 canvas.width = Math.round(viewport.width);
                                 canvas.height = Math.round(viewport.height);
                                 const ctx = canvas.getContext('2d');
+                                if (format === 'jpeg') {
+                                    ctx.fillStyle = '#FFFFFF';
+                                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                                }
                                 await page.render({ canvasContext: ctx, viewport }).promise;
 
-                                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/webp', 0.9));
+                                const blob = await new Promise(resolve => canvas.toBlob(resolve, mime, qualite));
                                 const arr = new Uint8Array(await blob.arrayBuffer());
-                                const nomPage = pdf.numPages > 1 ? `${baseNom}_page${String(p).padStart(2, '0')}.webp` : `${baseNom}.webp`;
+                                const nomPage = pdf.numPages > 1 ? `${baseNom}_page${String(p).padStart(2, '0')}.${ext}` : `${baseNom}.${ext}`;
                                 convertis.push({ nom: nomPage, data: arr });
                             }
                             if (statusEl) statusEl.innerHTML = `<span style="color:#2e7d32">${pdf.numPages} page(s) converties</span>`;
@@ -970,7 +984,7 @@
                     }
 
                     if (convertis.length === 1) {
-                        const blob = new Blob([convertis[0].data], { type: 'image/webp' });
+                        const blob = new Blob([convertis[0].data], { type: mime });
                         const url = URL.createObjectURL(blob);
                         resultBox.innerHTML = `1 image générée (${formatFileSize(convertis[0].data.length)}) — <a href="${url}" download="${convertis[0].nom}">Télécharger</a>`;
                         resultBox.classList.add('show');
@@ -978,7 +992,7 @@
                         const zipBytes = creerZip(convertis);
                         const zipBlob = new Blob([zipBytes], { type: 'application/zip' });
                         const url = URL.createObjectURL(zipBlob);
-                        resultBox.innerHTML = `${convertis.length} image(s) générées (archive ZIP, ${formatFileSize(zipBytes.length)}) — <a href="${url}" download="pdf_vers_webp.zip">Télécharger le ZIP</a>`;
+                        resultBox.innerHTML = `${convertis.length} image(s) générées (archive ZIP, ${formatFileSize(zipBytes.length)}) — <a href="${url}" download="pdf_converti.zip">Télécharger le ZIP</a>`;
                         resultBox.classList.add('show');
                     } else {
                         resultBox.innerHTML = "Aucune image n'a pu être générée.";
