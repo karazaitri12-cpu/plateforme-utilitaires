@@ -173,6 +173,10 @@
         .convertBtn.webp-to-png:hover { background: #ef6c00; }
         .convertBtn.images-to-pdf { background: var(--badge-pdf); }
         .convertBtn.images-to-pdf:hover { background: #6b5417; }
+        .convertBtn.jpeg-to-png { background: var(--badge-jpeg); }
+        .convertBtn.jpeg-to-png:hover { background: #0d47a1; }
+        .convertBtn.png-to-jpeg { background: var(--badge-png); }
+        .convertBtn.png-to-jpeg:hover { background: #4a148c; }
 
         /* BADGES DE FORMAT */
         .format-badge {
@@ -359,6 +363,32 @@
                 <button id="webpToPngConvertBtn" class="convertBtn webp-to-png" disabled>Convertir en PNG</button>
                 <span id="webpToPngResetBtn" class="reset-icon" title="Réinitialiser">✕</span>
                 <div id="webpToPngResultBox" class="result-box"></div>
+            </div>
+
+            <!-- JPEG → PNG -->
+            <div class="converter">
+                <h3>JPEG vers PNG <span class="format-badge badge-jpeg">JPEG</span> → <span class="format-badge badge-png">PNG</span></h3>
+                <div id="jpegToPngDropZone" class="dropZone">
+                    <p>Glissez-déposez ou cliquez pour sélectionner des fichiers JPEG</p>
+                    <input type="file" id="jpegToPngInput" multiple accept=".jpg,.jpeg" style="display: none;">
+                </div>
+                <div id="jpegToPngFileList" class="fileList"></div>
+                <button id="jpegToPngConvertBtn" class="convertBtn jpeg-to-png" disabled>Convertir en PNG</button>
+                <span id="jpegToPngResetBtn" class="reset-icon" title="Réinitialiser">✕</span>
+                <div id="jpegToPngResultBox" class="result-box"></div>
+            </div>
+
+            <!-- PNG → JPEG -->
+            <div class="converter">
+                <h3>PNG vers JPEG <span class="format-badge badge-png">PNG</span> → <span class="format-badge badge-jpeg">JPEG</span></h3>
+                <div id="pngToJpegDropZone" class="dropZone png">
+                    <p>Glissez-déposez ou cliquez pour sélectionner des fichiers PNG</p>
+                    <input type="file" id="pngToJpegInput" multiple accept=".png" style="display: none;">
+                </div>
+                <div id="pngToJpegFileList" class="fileList"></div>
+                <button id="pngToJpegConvertBtn" class="convertBtn png-to-jpeg" disabled>Convertir en JPEG</button>
+                <span id="pngToJpegResetBtn" class="reset-icon" title="Réinitialiser">✕</span>
+                <div id="pngToJpegResultBox" class="result-box"></div>
             </div>
         </div>
 
@@ -758,6 +788,8 @@
             setupConverter('webpToJpegDropZone', 'webpToJpegInput', 'webpToJpegFileList', 'webpToJpegConvertBtn', 'webpToJpegResetBtn', 'webpToJpegResultBox', 'image/webp', 'jpeg', 'image/jpeg', 0.85, /\.webp$/i);
             setupConverter('pngToWebpDropZone', 'pngToWebpInput', 'pngToWebpFileList', 'pngToWebpConvertBtn', 'pngToWebpResetBtn', 'pngToWebpResultBox', 'image/png', 'webp', 'image/webp', 0.9, /\.png$/i);
             setupConverter('webpToPngDropZone', 'webpToPngInput', 'webpToPngFileList', 'webpToPngConvertBtn', 'webpToPngResetBtn', 'webpToPngResultBox', 'image/webp', 'png', 'image/png', 1, /\.webp$/i);
+            setupConverter('jpegToPngDropZone', 'jpegToPngInput', 'jpegToPngFileList', 'jpegToPngConvertBtn', 'jpegToPngResetBtn', 'jpegToPngResultBox', 'image/jpeg', 'png', 'image/png', 1, /\.jpe?g$/i);
+            setupConverter('pngToJpegDropZone', 'pngToJpegInput', 'pngToJpegFileList', 'pngToJpegConvertBtn', 'pngToJpegResetBtn', 'pngToJpegResultBox', 'image/png', 'jpeg', 'image/jpeg', 0.9, /\.png$/i);
             setupPdfConverter();
         });
     </script>
