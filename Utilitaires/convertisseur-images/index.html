@@ -308,10 +308,10 @@
         <div class="converter-grid">
             <!-- Images -> PDF -->
             <div class="converter">
-                <h3>Images vers PDF <span class="format-badge badge-webp">WebP</span> → <span class="format-badge badge-pdf">PDF</span></h3>
+                <h3>Images vers PDF <span class="format-badge badge-jpeg">JPEG/PNG/WebP</span> → <span class="format-badge badge-pdf">PDF</span></h3>
                 <div id="imagesToPdfDropZone" class="dropZone pdf">
-                    <p>Glissez-déposez ou cliquez pour sélectionner des fichiers WebP</p>
-                    <input type="file" id="imagesToPdfInput" multiple accept=".webp" style="display: none;">
+                    <p>Glissez-déposez ou cliquez pour sélectionner des images (JPEG, PNG, WebP)</p>
+                    <input type="file" id="imagesToPdfInput" multiple accept=".jpg,.jpeg,.png,.webp" style="display: none;">
                 </div>
                 <select id="imagesToPdfMode">
                     <option value="fit">Ajustée à une page A4</option>
@@ -790,7 +790,8 @@
                 e.preventDefault();
                 dropZone.style.backgroundColor = '';
                 const newFiles = e.target.files || e.dataTransfer.files;
-                const filtered = Array.from(newFiles).filter(file => file.type === 'image/webp');
+                const formatsAcceptes = ['image/jpeg', 'image/png', 'image/webp'];
+                const filtered = Array.from(newFiles).filter(file => formatsAcceptes.includes(file.type));
                 files = [...files, ...filtered];
                 updateFileList();
             }
@@ -842,7 +843,7 @@
                     const pdfBytes = pdfConstruire(pages);
                     const blob = new Blob([pdfBytes], { type: 'application/pdf' });
                     const url = URL.createObjectURL(blob);
-                    const nomFichier = files.length === 1 ? files[0].name.replace(/\.webp$/i, '') + '.pdf' : 'images-converties.pdf';
+                    const nomFichier = files.length === 1 ? files[0].name.replace(/\.(jpe?g|png|webp)$/i, '') + '.pdf' : 'images-converties.pdf';
                     resultBox.innerHTML = `${pages.length} page(s), ${formatFileSize(pdfBytes.length)} — <a href="${url}" download="${nomFichier}">Télécharger le PDF</a>`;
                     resultBox.classList.add('show');
                 } catch (e) {
