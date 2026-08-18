@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Convertisseur DOCX vers PDF</title>
+<meta name="description" content="Convertisseur de fichiers Word (DOCX) vers PDF, entièrement dans le navigateur.">
+
+<!-- PWA -->
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<meta name="theme-color" content="#1A3A5C">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Convertisseur DOCX/PDF">
+
+<style>
+/* ===== Reset scope ===== */
+#kzConverter, #kzConverter * { box-sizing: border-box; margin: 0; padding: 0; }
+
+#kzConverter {
+  --kz-navy: #1A3A5C;
+  --kz-navy-light: #345a7a;
+  --kz-red: #C8102E;
+  --kz-bg: #F7F9FB;
+  --kz-card: #FFFFFF;
+  --kz-border: #E1E7EE;
+  --kz-text: #24313E;
+  --kz-text-muted: #607D8B;
+  --kz-success: #166534;
+  --kz-success-bg: #E8F5E9;
+  --kz-warn: #B45309;
+  --kz-warn-bg: #FFFBEB;
+
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  background: var(--kz-bg);
+  color: var(--kz-text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+#kzConverter.kz-dark {
+  --kz-bg: #10161D;
+  --kz-card: #1A222C;
+  --kz-border: #2A3644;
+  --kz-text: #E4E9EE;
+  --kz-text-muted: #8AA0B0;
+  --kz-success-bg: #123321;
+  --kz-warn-bg: #2E2312;
+}
+
+/* ===== Nav bar ===== */
+#kzConverter .kz-nav {
+  position: sticky; top: 0; z-index: 9999;
+  background: var(--kz-card);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 20px;
+}
+#kzConverter .kz-back {
+  color: var(--kz-navy); text-decoration: none; font-weight: 600; font-size: 14px;
+  display: inline-flex; align-items: center; gap: 6px;
+  transition: color .2s ease;
+}
+#kzConverter .kz-back:hover { color: var(--kz-navy-light); }
+#kzConverter .kz-theme-toggle {
+  background: var(--kz-bg); border: 1px solid var(--kz-border);
+  border-radius: 20px; width: 40px; height: 24px; position: relative;
+  cursor: pointer; flex-shrink: 0;
+}
+#kzConverter .kz-theme-toggle::after {
+  content: ''; position: absolute; top: 2px; left: 2px;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--kz-navy); transition: transform .2s ease;
+}
+#kzConverter.kz-dark .kz-theme-toggle::after { transform: translateX(16px); }
+
+/* ===== Layout ===== */
+#kzConverter .kz-main {
+  max-width: 720px; margin: 0 auto; padding: 28px 18px 60px;
+}
+#kzConverter .kz-header { text-align: center; margin-bottom: 28px; }
+#kzConverter .kz-header h1 {
+  font-size: 22px; font-weight: 700; color: var(--kz-navy); margin-bottom: 6px;
+}
+#kzConverter.kz-dark .kz-header h1 { color: #7FA8CC; }
+#kzConverter .kz-header p { color: var(--kz-text-muted); font-size: 14px; }
+
+/* ===== Card ===== */
+#kzConverter .kz-card {
+  background: var(--kz-card); border: 1px solid var(--kz-border);
+  border-radius: 12px; padding: 22px; margin-bottom: 18px;
+}
+#kzConverter .kz-panel { display: none; }
+#kzConverter .kz-panel.active { display: block; }
+
+/* ===== Dropzone ===== */
+#kzConverter .kz-drop {
+  border: 2px dashed var(--kz-border); border-radius: 10px;
+  padding: 34px 16px; text-align: center; cursor: pointer;
+  transition: border-color .15s ease, background .15s ease;
+}
+#kzConverter .kz-drop:hover, #kzConverter .kz-drop.kz-drag {
+  border-color: var(--kz-navy); background: var(--kz-bg);
+}
+#kzConverter .kz-drop-icon { font-size: 34px; margin-bottom: 10px; }
+#kzConverter .kz-drop p { font-size: 14px; color: var(--kz-text-muted); }
+#kzConverter .kz-drop strong { color: var(--kz-navy); }
+#kzConverter .kz-drop input { display: none; }
+
+#kzConverter .kz-file-info {
+  display: none; align-items: center; justify-content: space-between;
+  background: var(--kz-bg); border: 1px solid var(--kz-border);
+  border-radius: 8px; padding: 12px 14px; margin-top: 14px; font-size: 13.5px;
+}
+#kzConverter .kz-file-info.active { display: flex; }
+#kzConverter .kz-file-name { font-weight: 600; word-break: break-all; padding-right: 10px; }
+#kzConverter .kz-file-remove {
+  color: var(--kz-red); background: none; border: none; cursor: pointer;
+  font-size: 13px; font-weight: 600; font-family: inherit; flex-shrink: 0;
+}
+
+/* ===== Button ===== */
+#kzConverter .kz-btn {
+  width: 100%; margin-top: 16px; padding: 13px; border: none; border-radius: 8px;
+  background: linear-gradient(135deg, var(--kz-navy), var(--kz-navy-light));
+  color: #fff; font-size: 14.5px; font-weight: 700; cursor: pointer; font-family: inherit;
+}
+#kzConverter .kz-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ===== Progress ===== */
+#kzConverter .kz-progress-wrap { display: none; margin-top: 16px; }
+#kzConverter .kz-progress-wrap.active { display: block; }
+#kzConverter .kz-progress-label {
+  font-size: 12.5px; color: var(--kz-text-muted); margin-bottom: 6px;
+}
+#kzConverter .kz-progress-bar { height: 6px; background: var(--kz-bg); border-radius: 4px; overflow: hidden; }
+#kzConverter .kz-progress-fill {
+  height: 100%; width: 0%; background: var(--kz-navy); transition: width .2s ease;
+}
+
+/* ===== Result ===== */
+#kzConverter .kz-result {
+  display: none; margin-top: 16px; padding: 14px; border-radius: 8px;
+  background: var(--kz-success-bg); border-left: 4px solid var(--kz-success);
+  font-size: 13.5px;
+}
+#kzConverter .kz-result.active { display: block; }
+#kzConverter .kz-result a {
+  display: inline-block; margin-top: 8px; color: var(--kz-navy); font-weight: 700;
+  text-decoration: none; font-size: 13.5px;
+}
+#kzConverter.kz-dark .kz-result a { color: #7FA8CC; }
+
+#kzConverter .kz-error {
+  display: none; margin-top: 16px; padding: 14px; border-radius: 8px;
+  background: #FEF2F2; border-left: 4px solid var(--kz-red); font-size: 13.5px; color: #7A1424;
+}
+#kzConverter .kz-error.active { display: block; }
+
+/* ===== Disclaimer ===== */
+#kzConverter .kz-notice {
+  background: var(--kz-warn-bg); border-left: 4px solid var(--kz-warn);
+  border-radius: 8px; padding: 14px 16px; font-size: 12.5px; line-height: 1.6;
+  color: var(--kz-text);
+}
+#kzConverter .kz-notice strong { display: block; margin-bottom: 4px; color: var(--kz-warn); }
+
+#kzConverter .kz-footer-note {
+  text-align: center; font-size: 11.5px; color: var(--kz-text-muted); margin-top: 22px;
+}
+
+/* Off-screen render buffer used for DOCX->PDF rendering */
+#kzConverter .kz-render-buffer {
+  position: fixed; left: -9999px; top: 0; width: 700px;
+  background: #fff; color: #1a1a1a; padding: 10px;
+  font-family: Arial, sans-serif; font-size: 12pt; line-height: 1.5;
+}
+#kzConverter .kz-render-buffer img { max-width: 100%; }
+#kzConverter .kz-render-buffer table { border-collapse: collapse; width: 100%; }
+#kzConverter .kz-render-buffer td, #kzConverter .kz-render-buffer th {
+  border: 1px solid #ccc; padding: 4px 6px;
+}
+</style>
+</head>
+<body>
+
+<div id="kzConverter">
+
+  <nav class="kz-nav">
+    <a class="kz-back" href="../">&larr; Retours aux utilitaires</a>
+    <button class="kz-theme-toggle" id="kzThemeToggle" aria-label="Basculer thème sombre/clair"></button>
+  </nav>
+
+  <main class="kz-main">
+    <div class="kz-header">
+      <h1>Convertisseur DOCX vers PDF</h1>
+      <p>Conversion locale dans votre navigateur — aucun fichier envoyé sur un serveur.</p>
+    </div>
+
+    <!-- DOCX -> PDF -->
+    <div class="kz-panel active" id="panel-docx2pdf">
+      <div class="kz-card">
+        <div class="kz-drop" id="drop-docx">
+          <div class="kz-drop-icon">📄</div>
+          <p><strong>Cliquez</strong> ou glissez un fichier <strong>.docx</strong> ici</p>
+          <input type="file" id="input-docx" accept=".docx">
+        </div>
+        <div class="kz-file-info" id="fileinfo-docx">
+          <span class="kz-file-name" id="filename-docx"></span>
+          <button class="kz-file-remove" data-target="docx">Retirer</button>
+        </div>
+        <button class="kz-btn" id="btn-docx2pdf" disabled>Convertir en PDF</button>
+        <div class="kz-progress-wrap" id="progress-docx2pdf">
+          <div class="kz-progress-label" id="progress-label-docx2pdf">Conversion en cours…</div>
+          <div class="kz-progress-bar"><div class="kz-progress-fill" id="progress-fill-docx2pdf"></div></div>
+        </div>
+        <div class="kz-result" id="result-docx2pdf"></div>
+        <div class="kz-error" id="error-docx2pdf"></div>
+      </div>
+      <div class="kz-notice">
+        <strong>À savoir</strong>
+        Le texte généré reste sélectionnable et cherchable dans le PDF (pas une image). Les titres, listes et images sont conservés. Les tableaux sont simplifiés en lignes séparées par des barres verticales, et les mises en page très complexes (colonnes, zones de texte flottantes) sont réduites à un flux linéaire.
+      </div>
+    </div>
+
+    <p class="kz-footer-note">Fichiers traités localement — rien n'est stocké ni transmis.</p>
+  </main>
+</div>
+
+<!-- Librairies (CDN) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>
+(function(){
+  const root = document.getElementById('kzConverter');
+
+  /* ---------- Thème ---------- */
+  const themeToggle = document.getElementById('kzThemeToggle');
+  function applyTheme(dark){
+    root.classList.toggle('kz-dark', dark);
+    try { localStorage.setItem('kz_conv_theme', dark ? 'dark' : 'light'); } catch(e){}
+  }
+  try {
+    applyTheme(localStorage.getItem('kz_conv_theme') === 'dark');
+  } catch(e){}
+  themeToggle.addEventListener('click', () => applyTheme(!root.classList.contains('kz-dark')));
+
+  /* ---------- Helpers UI génériques dropzone ---------- */
+  function setupDropzone(kind, accept, onFile){
+    const drop = document.getElementById('drop-' + kind);
+    const input = document.getElementById('input-' + kind);
+    const fileInfo = document.getElementById('fileinfo-' + kind);
+    const fileName = document.getElementById('filename-' + kind);
+    const btn = document.getElementById('btn-docx2pdf');
+    let currentFile = null;
+
+    function accept_(file){
+      currentFile = file;
+      fileName.textContent = file.name + ' (' + formatBytes(file.size) + ')';
+      fileInfo.classList.add('active');
+      drop.style.display = 'none';
+      btn.disabled = false;
+      onFile(file);
+    }
+    function clear_(){
+      currentFile = null;
+      input.value = '';
+      fileInfo.classList.remove('active');
+      drop.style.display = 'block';
+      btn.disabled = true;
+      onFile(null);
+    }
+
+    drop.addEventListener('click', () => input.click());
+    input.addEventListener('change', e => { if (e.target.files[0]) accept_(e.target.files[0]); });
+    drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('kz-drag'); });
+    drop.addEventListener('dragleave', () => drop.classList.remove('kz-drag'));
+    drop.addEventListener('drop', e => {
+      e.preventDefault(); drop.classList.remove('kz-drag');
+      const f = e.dataTransfer.files[0];
+      if (f) accept_(f);
+    });
+    document.querySelector('.kz-file-remove[data-target="' + kind + '"]').addEventListener('click', clear_);
+
+    return { get file(){ return currentFile; } };
+  }
+
+  const docxState = setupDropzone('docx', '.docx', () => resetPanel('docx2pdf'));
+
+  function formatBytes(bytes){
+    if (bytes < 1024) return bytes + ' o';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' Ko';
+    return (bytes / (1024 * 1024)).toFixed(2) + ' Mo';
+  }
+
+  function resetPanel(id){
+    document.getElementById('result-' + id).classList.remove('active');
+    document.getElementById('error-' + id).classList.remove('active');
+    document.getElementById('progress-' + id).classList.remove('active');
+  }
+  function showError(id, msg){
+    const el = document.getElementById('error-' + id);
+    el.textContent = msg;
+    el.classList.add('active');
+  }
+  function showProgress(id, pct, label){
+    document.getElementById('progress-' + id).classList.add('active');
+    document.getElementById('progress-fill-' + id).style.width = pct + '%';
+    if (label) document.getElementById('progress-label-' + id).textContent = label;
+  }
+  function hideProgress(id){
+    document.getElementById('progress-' + id).classList.remove('active');
+  }
+  function showResult(id, filename, blob, inputSize){
+    const el = document.getElementById('result-' + id);
+    const url = URL.createObjectURL(blob);
+    const outputSize = blob.size;
+    const ratio = inputSize ? Math.round((outputSize / inputSize) * 100) : null;
+    let sizeLine = 'Entrée : ' + formatBytes(inputSize) + ' &rarr; Sortie : ' + formatBytes(outputSize);
+    if (ratio !== null) sizeLine += ' (' + ratio + '% de la taille d\'origine)';
+    el.innerHTML = 'Conversion terminée.<br>' +
+      '<span style="font-size:12.5px;color:var(--kz-text-muted);">' + sizeLine + '</span><br>' +
+      '<a href="' + url + '" download="' + filename + '">&darr; Télécharger ' + filename + '</a>';
+    el.classList.add('active');
+  }
+
+  /* ---------- Rendu texte natif HTML -> PDF (pas de rasterisation) ---------- */
+  function renderHtmlToPdf(doc, container){
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 15;
+    const maxWidth = pageWidth - margin * 2;
+    let y = margin;
+
+    function ensureSpace(lineHeight){
+      if (y + lineHeight > pageHeight - margin) {
+        doc.addPage();
+        y = margin;
+      }
+    }
+
+    function addText(text, opts){
+      opts = opts || {};
+      const size = opts.size || 11;
+      const style = opts.style || 'normal';
+      const color = opts.color || [40, 40, 40];
+      const indent = opts.indent || 0;
+      const spacingAfter = opts.spacingAfter != null ? opts.spacingAfter : 4;
+
+      doc.setFont('helvetica', style);
+      doc.setFontSize(size);
+      doc.setTextColor(color[0], color[1], color[2]);
+      const lineHeight = size * 0.42;
+      const lines = doc.splitTextToSize(text, maxWidth - indent);
+      lines.forEach(line => {
+        ensureSpace(lineHeight);
+        doc.text(line, margin + indent, y);
+        y += lineHeight;
+      });
+      y += spacingAfter;
+    }
+
+    function walk(node){
+      Array.from(node.children).forEach(child => {
+        const tag = child.tagName.toLowerCase();
+        const text = child.textContent.trim();
+
+        switch (tag) {
+          case 'h1':
+            if (text) addText(text, { size: 16, style: 'bold', color: [26, 58, 92], spacingAfter: 6 });
+            break;
+          case 'h2':
+            if (text) addText(text, { size: 14, style: 'bold', color: [26, 58, 92], spacingAfter: 5 });
+            break;
+          case 'h3':
+          case 'h4':
+            if (text) addText(text, { size: 12, style: 'bold', color: [26, 58, 92], spacingAfter: 4 });
+            break;
+          case 'p':
+            if (text) addText(text, { size: 11, style: 'normal', spacingAfter: 5 });
+            break;
+          case 'ul':
+          case 'ol':
+            Array.from(child.children).forEach((li, idx) => {
+              const prefix = tag === 'ol' ? (idx + 1) + '. ' : '\u2022 ';
+              const t = li.textContent.trim();
+              if (t) addText(prefix + t, { size: 11, indent: 5, spacingAfter: 3 });
+            });
+            break;
+          case 'img':
+            try {
+              const src = child.getAttribute('src');
+              if (src && src.indexOf('data:image') === 0) {
+                const props = doc.getImageProperties(src);
+                const w = maxWidth;
+                const h = (props.height * w) / props.width;
+                ensureSpace(h);
+                doc.addImage(src, props.fileType, margin, y, w, h);
+                y += h + 6;
+              }
+            } catch (e) { /* image ignorée si illisible */ }
+            break;
+          case 'table':
+            Array.from(child.querySelectorAll('tr')).forEach(tr => {
+              const cells = Array.from(tr.querySelectorAll('td,th')).map(td => td.textContent.trim());
+              if (cells.length) addText(cells.join('   |   '), { size: 10, spacingAfter: 2 });
+            });
+            y += 4;
+            break;
+          default:
+            if (child.children.length) walk(child);
+            else if (text) addText(text, { size: 11, spacingAfter: 4 });
+        }
+      });
+    }
+
+    walk(container);
+  }
+
+  /* ---------- DOCX -> PDF ---------- */
+  document.getElementById('btn-docx2pdf').addEventListener('click', async () => {
+    const file = docxState.file;
+    if (!file) return;
+    resetPanel('docx2pdf');
+    const btn = document.getElementById('btn-docx2pdf');
+    btn.disabled = true;
+    showProgress('docx2pdf', 15, 'Lecture du document…');
+
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      showProgress('docx2pdf', 35, 'Extraction du contenu…');
+      const result = await mammoth.convertToHtml({ arrayBuffer });
+
+      const buffer = document.createElement('div');
+      buffer.className = 'kz-render-buffer';
+      buffer.innerHTML = result.value;
+      document.body.appendChild(buffer);
+
+      showProgress('docx2pdf', 55, 'Mise en page PDF…');
+      const outName = file.name.replace(/\.docx$/i, '') + '.pdf';
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+      renderHtmlToPdf(doc, buffer);
+      const pdfBlob = doc.output('blob');
+
+      document.body.removeChild(buffer);
+      showProgress('docx2pdf', 100, 'Terminé');
+      setTimeout(() => hideProgress('docx2pdf'), 500);
+      showResult('docx2pdf', outName, pdfBlob, file.size);
+    } catch (err) {
+      hideProgress('docx2pdf');
+      showError('docx2pdf', 'Échec de la conversion : ' + (err && err.message ? err.message : 'erreur inconnue') + '. Vérifiez que le fichier est un .docx valide.');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+})();
+</script>
+
+<!-- TRACKING UMAMI (RGPD compliant, no cookies) -->
+<script defer src="https://cloud.umami.is/script.js" data-website-id="b182aba6-225e-47ac-b6be-892e033a6013"></script>
+
+<!-- Service Worker (PWA) -->
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
+</script>
+
+</body>
+</html>
